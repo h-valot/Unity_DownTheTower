@@ -224,7 +224,7 @@ namespace EnhancedHierarchy {
                                 GUI.DrawTexture(Utility.FlipRectHorizontally(rect), Styles.fadeTexture, ScaleMode.StretchToFill);
                                 break;
                             case TintMode.GradientRightToLeft:
-                                GUI.DrawTexture(rect, Styles.fadeTexture, ScaleMode.StretchToFill);
+                                // GUI.DrawTexture(rect, Styles.fadeTexture, ScaleMode.StretchToFill);
                                 break;
                         }
                     }
