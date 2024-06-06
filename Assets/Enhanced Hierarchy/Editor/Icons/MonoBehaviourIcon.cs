@@ -55,7 +55,7 @@ namespace EnhancedHierarchy.Icons {
             rect.yMax -= 1f;
             rect.xMin += 1f;
 
-            GUI.DrawTexture(rect, Styles.monobehaviourIconTexture, ScaleMode.ScaleToFit);
+            // GUI.DrawTexture(rect, Styles.monobehaviourIconTexture, ScaleMode.ScaleToFit);
             EditorGUI.LabelField(rect, tempTooltipContent);
         }
 
