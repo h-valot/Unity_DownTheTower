@@ -16,10 +16,6 @@ public class PlayerConfig : ScriptableObject
 	[Tooltip("Acceleration and deceleration")]
 	public float speedChangeRate = 10.0f;
 
-	public AudioClip landingAudioClip;
-
-	[Range(0, 1)] public float footstepAudioVolume = 0.5f;
-	public AudioClip[] footstepAudioClips;
 
 	[Space(10)]
 	[Tooltip("The height the player can jump")]
@@ -28,17 +24,17 @@ public class PlayerConfig : ScriptableObject
 	[Tooltip("The character uses its own gravity value. The engine default is -9.81f")]
 	public float gravity = -15.0f;
 
+
 	[Space(10)]
 	[Tooltip("Time required to pass before being able to jump again. Set to 0f to instantly jump again")]
-	public float jumpTimeout = 0.50f;
+	public float jumpDelay = 0.50f;
 
 	[Tooltip("Time required to pass before entering the fall state. Useful for walking down stairs")]
-	public float fallTimeout = 0.15f;
+	public float fallDelay = 0.15f;
+
+
 
 	[Header("Player Grounded")]
-	[Tooltip("If the character is grounded or not. Not part of the CharacterController built in grounded check")]
-	public bool grounded = true;
-
 	[Tooltip("Useful for rough ground")]
 	public float groundedOffset = -0.14f;
 
@@ -47,6 +43,8 @@ public class PlayerConfig : ScriptableObject
 
 	[Tooltip("What layers the character uses as ground")]
 	public LayerMask groundLayers;
+
+
 
 	[Header("Cinemachine")]
 	[Tooltip("How far in degrees can you move the camera up")]
@@ -60,4 +58,11 @@ public class PlayerConfig : ScriptableObject
 
 	[Tooltip("For locking the camera position on all axis")]
 	public bool lockCameraPosition = false;
+
+
+
+	[Header("Audio")]
+	[Range(0, 1)] public float audioVolume = 0.5f;
+	public AudioClip landingAudioClip;
+	public AudioClip[] footstepAudioClips;
 }

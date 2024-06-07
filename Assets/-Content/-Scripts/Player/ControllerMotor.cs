@@ -1,176 +1,142 @@
 ﻿using UnityEngine;
-using UnityEngine.InputSystem;
 using NaughtyAttributes;
 
 public class ControllerMotor : MonoBehaviour
 {
-	[Header("External references")]
-	[SerializeField] [Required] private PlayerConfig _playerConfig;
-
 	[Header("Internal references")]
-	[SerializeField] [Required] private PlayerInput _playerInput;
-	[SerializeField] [Required] private Animator _animator;
-	[SerializeField] [Required] private CharacterController _controller;
-	[SerializeField] [Required] private InputManager _input;
-	[SerializeField] [Required] private GameObject _cinemachineCameraTarget;
+	[SerializeField] private CharacterController _controller;
+	[SerializeField] private Animator _animator;
+	[SerializeField] private GameObject _cinemachineCameraTarget;
+
+	[Header("External references")]
+	[SerializeField] private PlayerConfig _playerConfig;
+	[SerializeField] private RSE_Move _rseMove;
+	[SerializeField] private RSE_Look _rseLook;
+	[SerializeField] private RSE_Jump _rseJump;
+	[SerializeField] private RSE_Sprint _rseSprint;
+	[SerializeField] private RSO_ControlScheme _rsoControlScheme;
 
 	// cinemachine
-	private float _cinemachineTargetYaw;
-	private float _cinemachineTargetPitch;
+	[ShowNonSerializedField] private float _cinemachineTargetYaw;
+	[ShowNonSerializedField] private float _cinemachineTargetPitch;
 
 	// player
-	private float _speed;
-	private float _animationBlend;
-	private float _targetRotation = 0.0f;
-	private float _rotationVelocity;
-	private float _verticalVelocity;
-	private float _terminalVelocity = 53.0f;
+	[ShowNonSerializedField] private Vector2 _moveInput;
+	[ShowNonSerializedField] private bool _isGrounded;
+	[ShowNonSerializedField] private bool _isSprinting;
+	[ShowNonSerializedField] private float _speed;
+	[ShowNonSerializedField] private float _targetSpeed;
+	[ShowNonSerializedField] private float _animationBlend;
+	[ShowNonSerializedField] private float _targetRotation = 0.0f;
+	[ShowNonSerializedField] private float _rotationVelocity;
+	[ShowNonSerializedField] private float _verticalVelocity;
+	private const float _TERMINAL_VELOCITY = 53.0f;
+	private const float _LOOK_THRESHOLD = 0.01f;
 
-	// timeout deltatime
-	private float _jumpTimeoutDelta;
-	private float _fallTimeoutDelta;
+	// delay timer
+	[ShowNonSerializedField] private float _fallDelayTimer;
+	[ShowNonSerializedField] private float _jumpDelayTimer;
 
-	// animation IDs
-	private int _animIDSpeed;
-	private int _animIDGrounded;
-	private int _animIDJump;
-	private int _animIDFreeFall;
-	private int _animIDMotionSpeed;
+	// animations params
+	private int _animSpeed;
+	private int _animGrounded;
+	private int _animJump;
+	private int _animFreeFall;
+	private int _animMotionSpeed;
 
+	// private references
 	private GameObject _mainCamera;
-	private const float _THRESHOLD = 0.01f;
-	private bool _hasAnimator;
-	private bool IsCurrentDeviceMouse { get { return _playerInput.currentControlScheme == "KeyboardMouse"; } }
 
 
 	private void Awake()
 	{
-		// get a reference to our main camera
-		if (_mainCamera == null)
-		{
-			_mainCamera = GameObject.FindGameObjectWithTag("MainCamera");
-		}
+		// get a reference to our main camera if null
+		_mainCamera ??= GameObject.FindGameObjectWithTag("MainCamera");
 	}
 
 	private void Start()
 	{
 		_cinemachineTargetYaw = _cinemachineCameraTarget.transform.rotation.eulerAngles.y;
 		
-		_hasAnimator = TryGetComponent(out _animator);
-		_controller = GetComponent<CharacterController>();
-		_input = GetComponent<InputManager>();
-		_playerInput = GetComponent<PlayerInput>();
-
-		AssignAnimationIDs();
+		// assign animations params
+		_animSpeed = Animator.StringToHash("Speed");
+		_animJump = Animator.StringToHash("Jump");
+		_animGrounded = Animator.StringToHash("Grounded");
+		_animFreeFall = Animator.StringToHash("FreeFall");
+		_animMotionSpeed = Animator.StringToHash("MotionSpeed");
 
 		// reset our timeouts on start
-		_jumpTimeoutDelta = _playerConfig.jumpTimeout;
-		_fallTimeoutDelta = _playerConfig.fallTimeout;
+		_fallDelayTimer = _playerConfig.fallDelay;
+		_jumpDelayTimer = _playerConfig.jumpDelay;
 	}
 
 	private void Update()
 	{
-		_hasAnimator = TryGetComponent(out _animator);
-
-		JumpAndGravity();
-		GroundedCheck();
-		Move();
+		CheckGrounded();
+		HandleMove();
+		ApplyGravity();
 	}
 
 	private void LateUpdate()
 	{
-		CameraRotation();
+		HandleCamera();
 	}
 
-	private void AssignAnimationIDs()
-	{
-		_animIDSpeed = Animator.StringToHash("Speed");
-		_animIDGrounded = Animator.StringToHash("Grounded");
-		_animIDJump = Animator.StringToHash("Jump");
-		_animIDFreeFall = Animator.StringToHash("FreeFall");
-		_animIDMotionSpeed = Animator.StringToHash("MotionSpeed");
-	}
-
-	private void GroundedCheck()
+	private void CheckGrounded()
 	{
 		// set sphere position, with offset
 		Vector3 spherePosition = new Vector3(transform.position.x, transform.position.y - _playerConfig.groundedOffset, transform.position.z);
-		_playerConfig.grounded = Physics.CheckSphere(spherePosition, _playerConfig.groundedRadius, _playerConfig.groundLayers, QueryTriggerInteraction.Ignore);
+		_isGrounded = Physics.CheckSphere(spherePosition, _playerConfig.groundedRadius, _playerConfig.groundLayers, QueryTriggerInteraction.Ignore);
 
-		// update animator if using character
-		if (_hasAnimator)
-		{
-			_animator.SetBool(_animIDGrounded, _playerConfig.grounded);
-		}
+		// update animator
+		_animator.SetBool(_animGrounded, _isGrounded);
 	}
 
-	private void CameraRotation()
+	private void HandleMove()
 	{
-		// if there is an input and camera position is not fixed
-		if (_input.look.sqrMagnitude >= _THRESHOLD && !_playerConfig.lockCameraPosition)
-		{
-			// don't multiply mouse input by Time.deltaTime;
-			float deltaTimeMultiplier = IsCurrentDeviceMouse ? 1.0f : Time.deltaTime;
-
-			_cinemachineTargetYaw += _input.look.x * deltaTimeMultiplier;
-			_cinemachineTargetPitch += _input.look.y * deltaTimeMultiplier;
-		}
-
-		// clamp our rotations so our values are limited 360 degrees
-		_cinemachineTargetYaw = ClampAngle(_cinemachineTargetYaw, float.MinValue, float.MaxValue);
-		_cinemachineTargetPitch = ClampAngle(_cinemachineTargetPitch, _playerConfig.bottomClamp, _playerConfig.topClamp);
-
-		// cinemachine will follow this target
-		_cinemachineCameraTarget.transform.rotation = Quaternion.Euler(_cinemachineTargetPitch + _playerConfig.cameraAngleOverride, _cinemachineTargetYaw, 0.0f);
-	}
-
-	private void Move()
-	{
-		// set target speed based on move speed, sprint speed and if sprint is pressed
-		float targetSpeed = _input.sprint ? _playerConfig.sprintSpeed : _playerConfig.moveSpeed;
-
 		// a simplistic acceleration and deceleration designed to be easy to remove, replace, or iterate upon
 
-		// note: Vector2's == operator uses approximation so is not floating point error prone, and is cheaper than magnitude
+		// set target speed based on move speed, sprint speed and if sprint is pressed
+		_targetSpeed = _isSprinting ? _playerConfig.sprintSpeed : _playerConfig.moveSpeed;
+
 		// if there is no input, set the target speed to 0
-		if (_input.move == Vector2.zero) 
+		// Vector2's == operator uses approximation so is not floating point error prone, and is cheaper than magnitude
+		if (_moveInput == Vector2.zero) 
 		{
-			targetSpeed = 0.0f;
+			_targetSpeed = 0.0f;
 		}
 
 		// a reference to the players current horizontal velocity
-		float currentHorizontalSpeed = new Vector3(_controller.velocity.x, 0.0f, _controller.velocity.z).magnitude;
+		float currentSpeed = new Vector3(_controller.velocity.x, 0.0f, _controller.velocity.z).magnitude;
 
 		float speedOffset = 0.1f;
-
-		// get the precise magnitude for controller inputs
-		float inputMagnitude = _input.analogMovement ? _input.move.magnitude : 1f;
+		float inputMagnitude = 1f;
 
 		// accelerate or decelerate to target speed
-		if (currentHorizontalSpeed < targetSpeed - speedOffset
-		|| currentHorizontalSpeed > targetSpeed + speedOffset)
+		if (currentSpeed < _targetSpeed - speedOffset
+		|| currentSpeed > _targetSpeed + speedOffset)
 		{
 			// creates curved result rather than a linear one giving a more organic speed change
-			// note T in Lerp is clamped, so we don't need to clamp our speed
-			_speed = Mathf.Lerp(currentHorizontalSpeed, targetSpeed * inputMagnitude, Time.deltaTime * _playerConfig.speedChangeRate);
+			// T in Lerp is clamped, so we don't need to clamp our speed
+			_speed = Mathf.Lerp(currentSpeed, _targetSpeed * inputMagnitude, Time.deltaTime * _playerConfig.speedChangeRate);
 
 			// round speed to 3 decimal places
 			_speed = Mathf.Round(_speed * 1000f) / 1000f;
 		}
 		else
 		{
-			_speed = targetSpeed;
+			_speed = _targetSpeed;
 		}
 
-		_animationBlend = Mathf.Lerp(_animationBlend, targetSpeed, Time.deltaTime * _playerConfig.speedChangeRate);
+		_animationBlend = Mathf.Lerp(_animationBlend, _targetSpeed, Time.deltaTime * _playerConfig.speedChangeRate);
 		if (_animationBlend < 0.01f) _animationBlend = 0f;
 
 		// normalise input direction
-		Vector3 inputDirection = new Vector3(_input.move.x, 0.0f, _input.move.y).normalized;
+		Vector3 inputDirection = new Vector3(_moveInput.x, 0.0f, _moveInput.y).normalized;
 
-		// note: Vector2's != operator uses approximation so is not floating point error prone, and is cheaper than magnitude
 		// if there is a move input rotate player when the player is moving
-		if (_input.move != Vector2.zero)
+		// Vector2's != operator uses approximation so is not floating point error prone, and is cheaper than magnitude
+		if (_moveInput != Vector2.zero)
 		{
 			_targetRotation = Mathf.Atan2(inputDirection.x, inputDirection.z) * Mathf.Rad2Deg + _mainCamera.transform.eulerAngles.y;
 			float rotation = Mathf.SmoothDampAngle(transform.eulerAngles.y, _targetRotation, ref _rotationVelocity, _playerConfig.rotationSmoothTime);
@@ -179,33 +145,29 @@ public class ControllerMotor : MonoBehaviour
 			transform.rotation = Quaternion.Euler(0.0f, rotation, 0.0f);
 		}
 
-
 		Vector3 targetDirection = Quaternion.Euler(0.0f, _targetRotation, 0.0f) * Vector3.forward;
 
 		// move the player
 		_controller.Move(targetDirection.normalized * (_speed * Time.deltaTime) + new Vector3(0.0f, _verticalVelocity, 0.0f) * Time.deltaTime);
 
 		// update animator if using character
-		if (_hasAnimator)
-		{
-			_animator.SetFloat(_animIDSpeed, _animationBlend);
-			_animator.SetFloat(_animIDMotionSpeed, inputMagnitude);
-		}
+		_animator.SetFloat(_animSpeed, _animationBlend);
+		_animator.SetFloat(_animMotionSpeed, inputMagnitude);
 	}
 
-	private void JumpAndGravity()
+	private void ApplyGravity()
 	{
-		if (_playerConfig.grounded)
+		if (_isGrounded)
 		{
-			// reset the fall timeout timer
-			_fallTimeoutDelta = _playerConfig.fallTimeout;
+			// reset the fall delay timer
+			_fallDelayTimer = _playerConfig.fallDelay;
 
-			// update animator if using character
-			if (_hasAnimator)
-			{
-				_animator.SetBool(_animIDJump, false);
-				_animator.SetBool(_animIDFreeFall, false);
-			}
+			_animator.SetBool(_animFreeFall, false);
+
+			// the jump function can be called at any moment
+			// to prevent the following line to cancel the jump animation
+			// it is commented and the animation param bool have been switch to a trigger
+			// _animator.SetBool(_animJump, false);
 
 			// stop our velocity dropping infinitely when grounded
 			if (_verticalVelocity < 0.0f)
@@ -213,75 +175,104 @@ public class ControllerMotor : MonoBehaviour
 				_verticalVelocity = -2f;
 			}
 
-			// Jump
-			if (_input.jump && _jumpTimeoutDelta <= 0.0f)
+			// jump delay
+			if (_jumpDelayTimer >= 0.0f)
 			{
-				// the square root of H * -2 * G = how much velocity needed to reach desired height
-				_verticalVelocity = Mathf.Sqrt(_playerConfig.jumpHeight * -2f * _playerConfig.gravity);
-
-				// update animator if using character
-				if (_hasAnimator)
-				{
-					_animator.SetBool(_animIDJump, true);
-				}
-			}
-
-			// jump timeout
-			if (_jumpTimeoutDelta >= 0.0f)
-			{
-				_jumpTimeoutDelta -= Time.deltaTime;
+				_jumpDelayTimer -= Time.deltaTime;
 			}
 		}
 		else
 		{
-			// reset the jump timeout timer
-			_jumpTimeoutDelta = _playerConfig.jumpTimeout;
+			// reset the jump delay timer
+			_jumpDelayTimer = _playerConfig.jumpDelay;
 
-			// fall timeout
-			if (_fallTimeoutDelta >= 0.0f)
+			// fall delay
+			if (_fallDelayTimer >= 0.0f)
 			{
-				_fallTimeoutDelta -= Time.deltaTime;
+				_fallDelayTimer -= Time.deltaTime;
 			}
 			else
 			{
-				// update animator if using character
-				if (_hasAnimator)
-				{
-					_animator.SetBool(_animIDFreeFall, true);
-				}
+				_animator.SetBool(_animFreeFall, true);
 			}
-
-			// if we are not grounded, do not jump
-			_input.jump = false;
 		}
 
 		// apply gravity over time if under terminal (multiply by delta time twice to linearly speed up over time)
-		if (_verticalVelocity < _terminalVelocity)
+		if (_verticalVelocity < _TERMINAL_VELOCITY)
 		{
 			_verticalVelocity += _playerConfig.gravity * Time.deltaTime;
 		}
 	}
 
-	private static float ClampAngle(float lfAngle, float lfMin, float lfMax)
+	private void HandleCamera()
 	{
-		if (lfAngle < -360f) lfAngle += 360f;
-		if (lfAngle > 360f) lfAngle -= 360f;
-		return Mathf.Clamp(lfAngle, lfMin, lfMax);
+		// clamp our rotations so our values are limited 360 degrees
+		_cinemachineTargetYaw = Matha.ClampAngle(_cinemachineTargetYaw, float.MinValue, float.MaxValue);
+		_cinemachineTargetPitch = Matha.ClampAngle(_cinemachineTargetPitch, _playerConfig.bottomClamp, _playerConfig.topClamp);
+
+		// cinemachine will follow this target
+		_cinemachineCameraTarget.transform.rotation = Quaternion.Euler(_cinemachineTargetPitch + _playerConfig.cameraAngleOverride, _cinemachineTargetYaw, 0.0f);
 	}
 
-	private void OnDrawGizmosSelected()
+	private void OnEnable()
 	{
-		Color transparentGreen = new Color(0.0f, 1.0f, 0.0f, 0.35f);
-		Color transparentRed = new Color(1.0f, 0.0f, 0.0f, 0.35f);
+		_rseMove.action += Move;
+		_rseLook.action += Look;
+		_rseJump.action += Jump;
+		_rseSprint.action += Sprint;
+	}
 
-		if (_playerConfig.grounded) Gizmos.color = transparentGreen;
-		else Gizmos.color = transparentRed;
+	private void OnDisable()
+	{
+		_rseMove.action -= Move;
+		_rseLook.action -= Look;
+		_rseJump.action -= Jump;
+		_rseSprint.action -= Sprint;
+	}
 
-		// when selected, draw a gizmo in the position of, and matching radius of, the grounded collider
-		Gizmos.DrawSphere(
-			new Vector3(transform.position.x, transform.position.y - _playerConfig.groundedOffset, transform.position.z),
-			_playerConfig.groundedRadius
-		);
+	private void Move(Vector2 input)
+	{
+		_moveInput = input;
+	}
+
+	private void Look(Vector2 input)
+	{
+		// exit, if there is no inputs
+		if (input.sqrMagnitude < _LOOK_THRESHOLD)
+		{
+			return;
+		}
+		
+		// don't multiply mouse input by Time.deltaTime;
+		float deltaTimeMultiplier = _rsoControlScheme.value == "KeyboardMouse" ? 1.0f : Time.deltaTime;
+
+		_cinemachineTargetYaw += input.x * deltaTimeMultiplier;
+		_cinemachineTargetPitch += input.y * deltaTimeMultiplier;
+	}
+
+	private void Jump()
+	{
+		if (!_isGrounded)
+		{
+			return;
+		}
+
+		if (_jumpDelayTimer >= 0)
+		{
+			return;
+		}
+
+		// the square root of H * -2 * G = how much velocity needed to reach desired height
+		_verticalVelocity = Mathf.Sqrt(_playerConfig.jumpHeight * -2f * _playerConfig.gravity);
+
+		// this function can be called at any moment
+		// to prevent the jump animation to be cancelled, the animation param bool have been switch to a trigger
+		_animator.SetTrigger(_animJump);
+	}
+
+	private void Sprint(bool isSprinting)
+	{
+		_isSprinting = isSprinting;
 	}
 
 	private void OnFootstep(AnimationEvent animationEvent)
@@ -291,7 +282,7 @@ public class ControllerMotor : MonoBehaviour
 			if (_playerConfig.footstepAudioClips.Length > 0)
 			{
 				var index = Random.Range(0, _playerConfig.footstepAudioClips.Length);
-				AudioSource.PlayClipAtPoint(_playerConfig.footstepAudioClips[index], transform.TransformPoint(_controller.center), _playerConfig.footstepAudioVolume);
+				AudioSource.PlayClipAtPoint(_playerConfig.footstepAudioClips[index], transform.TransformPoint(_controller.center), _playerConfig.audioVolume);
 			}
 		}
 	}
@@ -300,7 +291,7 @@ public class ControllerMotor : MonoBehaviour
 	{
 		if (animationEvent.animatorClipInfo.weight > 0.5f)
 		{
-			AudioSource.PlayClipAtPoint(_playerConfig.landingAudioClip, transform.TransformPoint(_controller.center), _playerConfig.footstepAudioVolume);
+			AudioSource.PlayClipAtPoint(_playerConfig.landingAudioClip, transform.TransformPoint(_controller.center), _playerConfig.audioVolume);
 		}
 	}
 }
