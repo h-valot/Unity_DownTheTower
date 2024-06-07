@@ -160,7 +160,7 @@ namespace EnhancedHierarchy {
             using(ProfilerSample.Get())
             try {
                 var bytes = Convert.FromBase64String(base64);
-                var texture = new Texture2D(0, 0, TextureFormat.ARGB32, false, false);
+                var texture = new Texture2D(1, 1, TextureFormat.ARGB32, false, false);
 
                 texture.name = name;
                 texture.hideFlags = HideFlags.HideAndDontSave;
