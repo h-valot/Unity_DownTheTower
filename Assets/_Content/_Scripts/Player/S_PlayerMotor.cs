@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using NaughtyAttributes;
 
-public class ControllerMotor : MonoBehaviour
+public class PlayerMotor : MonoBehaviour
 {
 	[Header("Internal references")]
 	[SerializeField] private CharacterController _controller;

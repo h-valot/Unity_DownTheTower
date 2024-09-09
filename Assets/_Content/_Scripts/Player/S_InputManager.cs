@@ -31,6 +31,11 @@ public class InputManager : MonoBehaviour
 
 	private void Update()
 	{
+		UpdateControlScheme();
+	}
+
+	private void UpdateControlScheme()
+	{
 		// check if the control scheme has changed every _CONTROL_SCHEME_CHECK_DELAY seconds
 		_controlSchemeCheckTimer += Time.deltaTime;
 		if (_controlSchemeCheckTimer >= _CONTROL_SCHEME_CHECK_DELAY)
