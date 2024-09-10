@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using NaughtyAttributes;
 
-public class InputManager : MonoBehaviour
+public class CharacterInput : MonoBehaviour
 {
 	[Header("Internal references")]
 	[SerializeField] private PlayerInput _playerInput;

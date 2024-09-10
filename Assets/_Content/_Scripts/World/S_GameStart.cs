@@ -15,6 +15,11 @@ public class GameStart : MonoBehaviour
 		Debug.Log($"GAME_START: player instantiated");
 	}
 
+	private void Update()
+	{
+		if (Input.GetKey(KeyCode.Space)) Debug.Log($"GAME_START: test");
+	}
+
 	public void OnDrawGizmos()
 	{
 		// display the game start gizmos in editor

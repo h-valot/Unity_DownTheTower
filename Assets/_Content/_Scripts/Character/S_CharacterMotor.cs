@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using NaughtyAttributes;
 
-public class PlayerMotor : MonoBehaviour
+public class CharacterMotor : MonoBehaviour
 {
 	[Header("Internal references")]
 	[SerializeField] private CharacterController _controller;
@@ -9,7 +9,7 @@ public class PlayerMotor : MonoBehaviour
 	[SerializeField] private GameObject _cinemachineCameraTarget;
 
 	[Header("External references")]
-	[SerializeField] private PlayerConfig _playerConfig;
+	[SerializeField] private CharacterConfig _characterConfig;
 	[SerializeField] private RSE_Move _rseMove;
 	[SerializeField] private RSE_Look _rseLook;
 	[SerializeField] private RSE_Jump _rseJump;
@@ -20,7 +20,7 @@ public class PlayerMotor : MonoBehaviour
 	[ShowNonSerializedField] private float _cinemachineTargetYaw;
 	[ShowNonSerializedField] private float _cinemachineTargetPitch;
 
-	// player
+	// character
 	[ShowNonSerializedField] private Vector2 _moveInput;
 	[ShowNonSerializedField] private bool _isGrounded;
 	[ShowNonSerializedField] private bool _isSprinting;
@@ -57,7 +57,7 @@ public class PlayerMotor : MonoBehaviour
 	private void Start()
 	{
 		_cinemachineTargetYaw = _cinemachineCameraTarget.transform.rotation.eulerAngles.y;
-		
+
 		// assign animations params
 		_animSpeed = Animator.StringToHash("Speed");
 		_animJump = Animator.StringToHash("Jump");
@@ -66,8 +66,8 @@ public class PlayerMotor : MonoBehaviour
 		_animMotionSpeed = Animator.StringToHash("MotionSpeed");
 
 		// reset our timeouts on start
-		_fallDelayTimer = _playerConfig.fallDelay;
-		_jumpDelayTimer = _playerConfig.jumpDelay;
+		_fallDelayTimer = _characterConfig.fallDelay;
+		_jumpDelayTimer = _characterConfig.jumpDelay;
 	}
 
 	private void Update()
@@ -85,8 +85,8 @@ public class PlayerMotor : MonoBehaviour
 	private void CheckGrounded()
 	{
 		// set sphere position, with offset
-		Vector3 spherePosition = new Vector3(transform.position.x, transform.position.y - _playerConfig.groundedOffset, transform.position.z);
-		_isGrounded = Physics.CheckSphere(spherePosition, _playerConfig.groundedRadius, _playerConfig.groundLayers, QueryTriggerInteraction.Ignore);
+		Vector3 spherePosition = new Vector3(transform.position.x, transform.position.y - _characterConfig.groundedOffset, transform.position.z);
+		_isGrounded = Physics.CheckSphere(spherePosition, _characterConfig.groundedRadius, _characterConfig.groundLayers, QueryTriggerInteraction.Ignore);
 
 		// update animator
 		_animator.SetBool(_animGrounded, _isGrounded);
@@ -97,11 +97,11 @@ public class PlayerMotor : MonoBehaviour
 		// a simplistic acceleration and deceleration designed to be easy to remove, replace, or iterate upon
 
 		// set target speed based on move speed, sprint speed and if sprint is pressed
-		_targetSpeed = _isSprinting ? _playerConfig.sprintSpeed : _playerConfig.moveSpeed;
+		_targetSpeed = _isSprinting ? _characterConfig.sprintSpeed : _characterConfig.moveSpeed;
 
 		// if there is no input, set the target speed to 0
 		// Vector2's == operator uses approximation so is not floating point error prone, and is cheaper than magnitude
-		if (_moveInput == Vector2.zero) 
+		if (_moveInput == Vector2.zero)
 		{
 			_targetSpeed = 0.0f;
 		}
@@ -118,7 +118,7 @@ public class PlayerMotor : MonoBehaviour
 		{
 			// creates curved result rather than a linear one giving a more organic speed change
 			// T in Lerp is clamped, so we don't need to clamp our speed
-			_speed = Mathf.Lerp(currentSpeed, _targetSpeed * inputMagnitude, Time.deltaTime * _playerConfig.speedChangeRate);
+			_speed = Mathf.Lerp(currentSpeed, _targetSpeed * inputMagnitude, Time.deltaTime * _characterConfig.speedChangeRate);
 
 			// round speed to 3 decimal places
 			_speed = Mathf.Round(_speed * 1000f) / 1000f;
@@ -128,7 +128,7 @@ public class PlayerMotor : MonoBehaviour
 			_speed = _targetSpeed;
 		}
 
-		_animationBlend = Mathf.Lerp(_animationBlend, _targetSpeed, Time.deltaTime * _playerConfig.speedChangeRate);
+		_animationBlend = Mathf.Lerp(_animationBlend, _targetSpeed, Time.deltaTime * _characterConfig.speedChangeRate);
 		if (_animationBlend < 0.01f) _animationBlend = 0f;
 
 		// normalise input direction
@@ -139,7 +139,7 @@ public class PlayerMotor : MonoBehaviour
 		if (_moveInput != Vector2.zero)
 		{
 			_targetRotation = Mathf.Atan2(inputDirection.x, inputDirection.z) * Mathf.Rad2Deg + _mainCamera.transform.eulerAngles.y;
-			float rotation = Mathf.SmoothDampAngle(transform.eulerAngles.y, _targetRotation, ref _rotationVelocity, _playerConfig.rotationSmoothTime);
+			float rotation = Mathf.SmoothDampAngle(transform.eulerAngles.y, _targetRotation, ref _rotationVelocity, _characterConfig.rotationSmoothTime);
 
 			// rotate to face input direction relative to camera position
 			transform.rotation = Quaternion.Euler(0.0f, rotation, 0.0f);
@@ -160,7 +160,7 @@ public class PlayerMotor : MonoBehaviour
 		if (_isGrounded)
 		{
 			// reset the fall delay timer
-			_fallDelayTimer = _playerConfig.fallDelay;
+			_fallDelayTimer = _characterConfig.fallDelay;
 
 			_animator.SetBool(_animFreeFall, false);
 
@@ -184,7 +184,7 @@ public class PlayerMotor : MonoBehaviour
 		else
 		{
 			// reset the jump delay timer
-			_jumpDelayTimer = _playerConfig.jumpDelay;
+			_jumpDelayTimer = _characterConfig.jumpDelay;
 
 			// fall delay
 			if (_fallDelayTimer >= 0.0f)
@@ -200,7 +200,7 @@ public class PlayerMotor : MonoBehaviour
 		// apply gravity over time if under terminal (multiply by delta time twice to linearly speed up over time)
 		if (_verticalVelocity < _TERMINAL_VELOCITY)
 		{
-			_verticalVelocity += _playerConfig.gravity * Time.deltaTime;
+			_verticalVelocity += _characterConfig.gravity * Time.deltaTime;
 		}
 	}
 
@@ -208,10 +208,10 @@ public class PlayerMotor : MonoBehaviour
 	{
 		// clamp our rotations so our values are limited 360 degrees
 		_cinemachineTargetYaw = Matha.ClampAngle(_cinemachineTargetYaw, float.MinValue, float.MaxValue);
-		_cinemachineTargetPitch = Matha.ClampAngle(_cinemachineTargetPitch, _playerConfig.bottomClamp, _playerConfig.topClamp);
+		_cinemachineTargetPitch = Matha.ClampAngle(_cinemachineTargetPitch, _characterConfig.bottomClamp, _characterConfig.topClamp);
 
 		// cinemachine will follow this target
-		_cinemachineCameraTarget.transform.rotation = Quaternion.Euler(_cinemachineTargetPitch + _playerConfig.cameraAngleOverride, _cinemachineTargetYaw, 0.0f);
+		_cinemachineCameraTarget.transform.rotation = Quaternion.Euler(_cinemachineTargetPitch + _characterConfig.cameraAngleOverride, _cinemachineTargetYaw, 0.0f);
 	}
 
 	private void OnEnable()
@@ -242,7 +242,7 @@ public class PlayerMotor : MonoBehaviour
 		{
 			return;
 		}
-		
+
 		// don't multiply mouse input by Time.deltaTime;
 		float deltaTimeMultiplier = _rsoControlScheme.value == "KeyboardMouse" ? 1.0f : Time.deltaTime;
 
@@ -263,7 +263,7 @@ public class PlayerMotor : MonoBehaviour
 		}
 
 		// the square root of H * -2 * G = how much velocity needed to reach desired height
-		_verticalVelocity = Mathf.Sqrt(_playerConfig.jumpHeight * -2f * _playerConfig.gravity);
+		_verticalVelocity = Mathf.Sqrt(_characterConfig.jumpHeight * -2f * _characterConfig.gravity);
 
 		// this function can be called at any moment
 		// to prevent the jump animation to be cancelled, the animation param bool have been switch to a trigger
@@ -279,10 +279,10 @@ public class PlayerMotor : MonoBehaviour
 	{
 		if (animationEvent.animatorClipInfo.weight > 0.5f)
 		{
-			if (_playerConfig.footstepAudioClips.Length > 0)
+			if (_characterConfig.footstepAudioClips.Length > 0)
 			{
-				var index = Random.Range(0, _playerConfig.footstepAudioClips.Length);
-				AudioSource.PlayClipAtPoint(_playerConfig.footstepAudioClips[index], transform.TransformPoint(_controller.center), _playerConfig.audioVolume);
+				var index = Random.Range(0, _characterConfig.footstepAudioClips.Length);
+				AudioSource.PlayClipAtPoint(_characterConfig.footstepAudioClips[index], transform.TransformPoint(_controller.center), _characterConfig.audioVolume);
 			}
 		}
 	}
@@ -291,7 +291,7 @@ public class PlayerMotor : MonoBehaviour
 	{
 		if (animationEvent.animatorClipInfo.weight > 0.5f)
 		{
-			AudioSource.PlayClipAtPoint(_playerConfig.landingAudioClip, transform.TransformPoint(_controller.center), _playerConfig.audioVolume);
+			AudioSource.PlayClipAtPoint(_characterConfig.landingAudioClip, transform.TransformPoint(_controller.center), _characterConfig.audioVolume);
 		}
 	}
 }

@@ -1,7 +1,7 @@
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "PlayerConfig", menuName = "Configs/Player")]
-public class PlayerConfig : ScriptableObject
+[CreateAssetMenu(fileName = "CharacterConfig", menuName = "Configs/Character")]
+public class CharacterConfig : ScriptableObject
 {
 	[Header("Player")]
 	[Tooltip("Move speed of the character in m/s")]
