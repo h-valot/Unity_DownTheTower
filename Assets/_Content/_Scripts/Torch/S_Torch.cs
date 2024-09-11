@@ -15,7 +15,7 @@ public class S_Torch : MonoBehaviour
 
     void ChangeLightState()
     {
-        if (torchLight.GetComponent<Light>().enabled = true)
+        if (torchLight.GetComponent<Light>().enabled == true)
         {
             torchLight.GetComponent<Light>().enabled = false;
         }  
@@ -28,7 +28,7 @@ public class S_Torch : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKey("e"))
+        if (Input.GetKeyDown("e"))
         {
             ChangeLightState();
         }
