@@ -41,6 +41,9 @@ public class Console : MonoBehaviour
 	private void Update()
 	{
 		HandleShortcut();
+
+		// debug
+		// if (Input.GetKey(KeyCode.Space)) Debug.Log($"GAME_START: debug");
 	}
 
 	private void HandleShortcut()
