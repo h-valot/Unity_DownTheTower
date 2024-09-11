@@ -8,7 +8,10 @@ public class CharacterConfig : ScriptableObject
 	public float moveSpeed = 3.0f;
 
 	[Tooltip("Sprint speed of the character in m/s")]
-	public float sprintSpeed = 6f;
+	public float sprintSpeed = 6.0f;
+
+	[Tooltip("Speed of the character in air is m/s")]
+	[Range(0f, 1f)] public float airSpeed = 0.6f;
 
 	[Tooltip("How fast the character turns to face movement direction")]
 	[Range(0.0f, 0.3f)] public float rotationSmoothTime = 0.12f;
