@@ -1,5 +1,5 @@
-﻿using UnityEngine;
-using NaughtyAttributes;
+﻿using NaughtyAttributes;
+using UnityEngine;
 
 public class CharacterMotor : MonoBehaviour
 {
@@ -16,35 +16,41 @@ public class CharacterMotor : MonoBehaviour
 	[SerializeField] private RSE_Sprint _rseSprint;
 	[SerializeField] private RSO_ControlScheme _rsoControlScheme;
 
-	// cinemachine
+	// ----- CINEMACHINE -----
 	[ShowNonSerializedField] private float _cinemachineTargetYaw;
 	[ShowNonSerializedField] private float _cinemachineTargetPitch;
 
-	// character
-	[ShowNonSerializedField] private Vector2 _moveInput;
-	[ShowNonSerializedField] private bool _isGrounded;
+	// ----- CHARACTER -----
+	// speed
 	[ShowNonSerializedField] private bool _isSprinting;
-	[ShowNonSerializedField] private float _speed;
+	[ShowNonSerializedField] private Vector2 _moveInput;
+	[ShowNonSerializedField] private float _speed;	
 	[ShowNonSerializedField] private float _targetSpeed;
 	[ShowNonSerializedField] private float _animationBlend;
+	// falling
+	[ShowNonSerializedField] private bool _isGrounded;
+	[ShowNonSerializedField] private Vector3 _lastGroundedDirection;
+	[ShowNonSerializedField] private float _lastGroundedSpeed;
+	// rotation
 	[ShowNonSerializedField] private float _targetRotation = 0.0f;
 	[ShowNonSerializedField] private float _rotationVelocity;
 	[ShowNonSerializedField] private float _verticalVelocity;
+	// const
 	private const float _TERMINAL_VELOCITY = 53.0f;
 	private const float _LOOK_THRESHOLD = 0.01f;
 
-	// delay timer
+	// ----- DELAY TIMER -----
 	[ShowNonSerializedField] private float _fallDelayTimer;
 	[ShowNonSerializedField] private float _jumpDelayTimer;
 
-	// animations params
+	// ----- ANIMATIONS PARAMS -----
 	private int _animSpeed;
 	private int _animGrounded;
 	private int _animJump;
 	private int _animFreeFall;
 	private int _animMotionSpeed;
 
-	// private references
+	// ----- PRIVATE REFERENCES -----
 	private GameObject _mainCamera;
 
 
@@ -73,7 +79,8 @@ public class CharacterMotor : MonoBehaviour
 	private void Update()
 	{
 		CheckGrounded();
-		HandleMove();
+		Accelerate();
+		Move();
 		ApplyGravity();
 	}
 
@@ -82,6 +89,7 @@ public class CharacterMotor : MonoBehaviour
 		HandleCamera();
 	}
 
+	private bool _groundedCheckLocked;
 	private void CheckGrounded()
 	{
 		// set sphere position, with offset
@@ -90,9 +98,25 @@ public class CharacterMotor : MonoBehaviour
 
 		// update animator
 		_animator.SetBool(_animGrounded, _isGrounded);
+
+		if (!_isGrounded
+			&& !_groundedCheckLocked)
+		{
+			// save last grounded momentum
+			_lastGroundedSpeed = _speed;
+			_lastGroundedDirection = transform.forward;
+
+			_groundedCheckLocked = true;
+		}
+
+		if (_isGrounded 
+			&& _groundedCheckLocked)
+		{
+			_groundedCheckLocked = false;
+		}
 	}
 
-	private void HandleMove()
+	private void Accelerate()
 	{
 		// a simplistic acceleration and deceleration designed to be easy to remove, replace, or iterate upon
 
@@ -131,6 +155,13 @@ public class CharacterMotor : MonoBehaviour
 		_animationBlend = Mathf.Lerp(_animationBlend, _targetSpeed, Time.deltaTime * _characterConfig.speedChangeRate);
 		if (_animationBlend < 0.01f) _animationBlend = 0f;
 
+		// update animator if using character
+		_animator.SetFloat(_animSpeed, _animationBlend);
+		_animator.SetFloat(_animMotionSpeed, inputMagnitude);
+	}
+
+	private void Move()
+	{
 		// normalise input direction
 		Vector3 inputDirection = new Vector3(_moveInput.x, 0.0f, _moveInput.y).normalized;
 
@@ -146,13 +177,16 @@ public class CharacterMotor : MonoBehaviour
 		}
 
 		Vector3 targetDirection = Quaternion.Euler(0.0f, _targetRotation, 0.0f) * Vector3.forward;
+		float currentSpeed = _speed;
+
+		if (!_isGrounded) 
+		{
+			targetDirection = _lastGroundedDirection + (targetDirection * _characterConfig.airSpeed);
+			currentSpeed = _lastGroundedSpeed;
+		}
 
 		// move the player
-		_controller.Move(targetDirection.normalized * (_speed * Time.deltaTime) + new Vector3(0.0f, _verticalVelocity, 0.0f) * Time.deltaTime);
-
-		// update animator if using character
-		_animator.SetFloat(_animSpeed, _animationBlend);
-		_animator.SetFloat(_animMotionSpeed, inputMagnitude);
+		_controller.Move(targetDirection.normalized * (currentSpeed * Time.deltaTime) + new Vector3(0.0f, _verticalVelocity, 0.0f) * Time.deltaTime);
 	}
 
 	private void ApplyGravity()
