@@ -7,7 +7,7 @@ public class DebuggerSingleton : MonoBehaviour
 		// prevent debugger dupe
 		if (Resources.FindObjectsOfTypeAll<DebuggerSingleton>().Length - 1 > 1)
 		{
-			Debug.Log($"DEBUGGER_SINGLETON: found {Resources.FindObjectsOfTypeAll<DebuggerSingleton>().Length - 1} dupe(s)", false);
+			Debug.LogWarning($"DEBUGGER_SINGLETON: found {Resources.FindObjectsOfTypeAll<DebuggerSingleton>().Length - 1} dupe(s). deleting the new one.", false);
 			Destroy(gameObject);
 		}
 	}

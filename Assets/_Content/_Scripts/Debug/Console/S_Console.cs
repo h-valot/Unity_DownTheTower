@@ -20,21 +20,21 @@ public class Console : MonoBehaviour
 		Hide();
 	}
 
-	public void Log(string input, Style style = Style.REGULAR)
+	public void Log(string input)
 	{
-		var sentence = new Sentence(input, style, _colorCodeBase);
+		var sentence = new Sentence(input, _colorCodeBase);
 		_output.text += $"\n[{System.DateTime.UtcNow.ToString("HH:mm:ss")}] {sentence.GetStylizedSentence()}";
 	}
 
-	public void LogWarning(string input, Style style = Style.REGULAR)
+	public void LogWarning(string input)
 	{
-		var sentence = new Sentence(input, style, _colorCodeWarning);
+		var sentence = new Sentence(input, _colorCodeWarning);
 		_output.text += $"\n[{System.DateTime.UtcNow.ToString("HH:mm:ss")}] {sentence.GetStylizedSentence()}";
 	}
 
-	public void LogError(string input, Style style = Style.REGULAR)
+	public void LogError(string input)
 	{
-		var sentence = new Sentence(input, style, _colorCodeError);
+		var sentence = new Sentence(input, _colorCodeError);
 		_output.text += $"\n[{System.DateTime.UtcNow.ToString("HH:mm:ss")}] {sentence.GetStylizedSentence()}";
 	}
 
@@ -88,11 +88,4 @@ public class Console : MonoBehaviour
 		_graphicsParent.SetActive(true);
 		_isEnabled = true;
 	}
-}
-
-public enum Style
-{
-	REGULAR,
-	BOLD,
-	ITALIC
 }
