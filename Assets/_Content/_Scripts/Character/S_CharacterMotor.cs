@@ -27,6 +27,7 @@ public class CharacterMotor : MonoBehaviour
 	[ShowNonSerializedField] private float _speed;	
 	[ShowNonSerializedField] private float _targetSpeed;
 	[ShowNonSerializedField] private float _animationBlend;
+	[ShowNonSerializedField] private float _slopePercentage;
 	// falling
 	[ShowNonSerializedField] private bool _isGrounded;
 	[ShowNonSerializedField] private Vector3 _lastGroundedDirection;
@@ -50,8 +51,9 @@ public class CharacterMotor : MonoBehaviour
 	private int _animFreeFall;
 	private int _animMotionSpeed;
 
-	// ----- PRIVATE REFERENCES -----
+	// ----- PRIVATE VARIABLES -----
 	private GameObject _mainCamera;
+	private bool _groundedCheckLocked;
 
 
 	private void Awake()
@@ -89,12 +91,58 @@ public class CharacterMotor : MonoBehaviour
 		HandleCamera();
 	}
 
-	private bool _groundedCheckLocked;
+	private void OnDrawGizmos()
+	{
+		// debug line
+		Gizmos.color = Color.red;
+		Gizmos.DrawLine(
+			new Vector3(transform.position.x, transform.position.y - _characterConfig.groundedOffset, transform.position.z), 
+			transform.position + (transform.TransformDirection(Vector3.down).normalized * _characterConfig.groundedRadius)
+		);
+
+		if (_result.collider != null)
+		{
+			Gizmos.color = Color.blue;
+			Gizmos.DrawLine(
+				_result.point,
+				_result.point + (_result.normal.normalized * 1)
+			);
+		}
+	}
+
+	private RaycastHit _result;
+
 	private void CheckGrounded()
 	{
 		// set sphere position, with offset
-		Vector3 spherePosition = new Vector3(transform.position.x, transform.position.y - _characterConfig.groundedOffset, transform.position.z);
-		_isGrounded = Physics.CheckSphere(spherePosition, _characterConfig.groundedRadius, _characterConfig.groundLayers, QueryTriggerInteraction.Ignore);
+		Vector3 rayPosition = new Vector3(transform.position.x, transform.position.y - _characterConfig.groundedOffset, transform.position.z);
+		Vector3 downVector = transform.TransformDirection(Vector3.down);
+		Vector3 forwardVector = transform.TransformDirection(Vector3.forward);
+		_isGrounded = false;
+
+		if (Physics.Raycast(new Ray(rayPosition, downVector), out var result, _characterConfig.groundedRadius, _characterConfig.groundLayers, QueryTriggerInteraction.Ignore))
+		{
+			_isGrounded = true;
+
+			// slope deceleration
+			Vector3 groundNormal = result.normal;
+			_result = result;
+
+			// for normalized vectors dot returns 
+			// • -1 if they point in completely opposite directions
+			// • 0 if the vectors are perpendicular which means a angle of 90 degrees
+			// • 1 if they point in exactly the same direction which means a angle of 0 degrees
+			// so, 0.5 means a angle of 45 degrees
+			float groundDotValue = 1 - Vector3.Dot(groundNormal, -downVector);
+
+			// cross product to get the delta 
+			// clamp it to avoid negative dot values and they are not needed
+			int slopeAngle = (int)Mathf.Clamp(groundDotValue * 90f, 0, _controller.slopeLimit);
+
+			float directionDotValue = 1 - Vector3.Dot(groundNormal, forwardVector);
+			
+			_slopePercentage = (float)slopeAngle / (float)_controller.slopeLimit;
+		}
 
 		// update animator
 		_animator.SetBool(_animGrounded, _isGrounded);
@@ -183,6 +231,11 @@ public class CharacterMotor : MonoBehaviour
 		{
 			targetDirection = _lastGroundedDirection + (targetDirection * _characterConfig.airSpeed);
 			currentSpeed = _lastGroundedSpeed;
+		}
+
+		if (_slopePercentage > 0)
+		{
+			currentSpeed *= 1 - _characterConfig.uphillDeceleration.Evaluate(_slopePercentage);
 		}
 
 		// move the player
@@ -315,7 +368,7 @@ public class CharacterMotor : MonoBehaviour
 		{
 			if (_characterConfig.footstepAudioClips.Length > 0)
 			{
-				var index = Random.Range(0, _characterConfig.footstepAudioClips.Length);
+				var index = UnityEngine.Random.Range(0, _characterConfig.footstepAudioClips.Length);
 				AudioSource.PlayClipAtPoint(_characterConfig.footstepAudioClips[index], transform.TransformPoint(_controller.center), _characterConfig.audioVolume);
 			}
 		}
