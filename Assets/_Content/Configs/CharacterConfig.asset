@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveSpeed: 3
   sprintSpeed: 5
+  airSpeed: 0.6
   rotationSmoothTime: 0.12
   speedChangeRate: 10
   jumpHeight: 1.2
@@ -24,7 +25,7 @@ MonoBehaviour:
   groundedRadius: 0.28
   groundLayers:
     serializedVersion: 2
-    m_Bits: 1
+    m_Bits: 65
   topClamp: 70
   bottomClamp: -60
   cameraAngleOverride: 0
