@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using NaughtyAttributes;
+using DG.Tweening;
 
 public class CharacterInput : MonoBehaviour
 {
@@ -14,12 +15,18 @@ public class CharacterInput : MonoBehaviour
 	[SerializeField] private RSE_Sprint _rseSprint;
 	[SerializeField] private RSO_ControlScheme _rsoControlScheme;
 
-	[Header("Debugging")]
+
+    [Header("Temp")]
+	[SerializeField] private RSO_PlayerTransform _rsoPlayerTransform;
+    [SerializeField] private Ladder _pfLadder;
+    [SerializeField] private float _ladder_spawn_dist = 1f;
+
+    [Header("Debugging")]
 	[ReadOnly] public Vector2 move;
 	[ReadOnly] public Vector2 look;
 	[ReadOnly] public bool sprint;
 
-	private const float _CONTROL_SCHEME_CHECK_DELAY = 1f;
+    private const float _CONTROL_SCHEME_CHECK_DELAY = 1f;
 	private float _controlSchemeCheckTimer;
 
 	private void Start()
@@ -32,6 +39,12 @@ public class CharacterInput : MonoBehaviour
 	private void Update()
 	{
 		UpdateControlScheme();
+		// temp
+		if (Input.GetKeyDown(KeyCode.R))
+		{
+			Vector3 ladderPos = _rsoPlayerTransform.value.position + _rsoPlayerTransform.value.forward * _ladder_spawn_dist;
+            Instantiate(_pfLadder, ladderPos, _rsoPlayerTransform.value.rotation);
+		}
 	}
 
 	private void UpdateControlScheme()

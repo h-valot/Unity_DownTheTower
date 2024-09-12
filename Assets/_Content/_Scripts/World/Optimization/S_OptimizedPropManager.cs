@@ -6,7 +6,7 @@ using UnityEngine;
 public class OptimizedPropManager : MonoBehaviour
 {
 	[Header("External references")]
-	[SerializeField] private RSO_PlayerPosition _rsoPlayerPosition;
+	[SerializeField] private RSO_PlayerTransform _rsoPlayerTransform;
 	[SerializeField] private WorldConfig _worldConfig;
 
 	private List<OptimizedProp> props;
@@ -35,7 +35,7 @@ public class OptimizedPropManager : MonoBehaviour
 
 			foreach (var prop in props)
 			{
-				prop.gameObject.SetActive(Vector3.Distance(_rsoPlayerPosition.value, prop.transform.position) < _worldConfig.optimizedPropRenderDistance);
+				prop.gameObject.SetActive(Vector3.Distance(_rsoPlayerTransform.value.position, prop.transform.position) < _worldConfig.optimizedPropRenderDistance);
 			}
 		}
 	}

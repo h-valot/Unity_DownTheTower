@@ -15,6 +15,7 @@ public class CharacterMotor : MonoBehaviour
 	[SerializeField] private RSE_Jump _rseJump;
 	[SerializeField] private RSE_Sprint _rseSprint;
 	[SerializeField] private RSO_ControlScheme _rsoControlScheme;
+	[SerializeField] private RSO_PlayerTransform _rsoPlayerTranform;
 
 	// ----- CINEMACHINE -----
 	[ShowNonSerializedField] private float _cinemachineTargetYaw;
@@ -187,7 +188,10 @@ public class CharacterMotor : MonoBehaviour
 
 		// move the player
 		_controller.Move(targetDirection.normalized * (currentSpeed * Time.deltaTime) + new Vector3(0.0f, _verticalVelocity, 0.0f) * Time.deltaTime);
-	}
+
+        _rsoPlayerTranform.value = transform;
+
+    }
 
 	private void ApplyGravity()
 	{
