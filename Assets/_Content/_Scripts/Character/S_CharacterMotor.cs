@@ -1,4 +1,5 @@
-﻿using NaughtyAttributes;
+﻿using System;
+using NaughtyAttributes;
 using UnityEngine;
 
 public class CharacterMotor : MonoBehaviour
@@ -15,6 +16,7 @@ public class CharacterMotor : MonoBehaviour
 	[SerializeField] private RSE_Jump _rseJump;
 	[SerializeField] private RSE_Sprint _rseSprint;
 	[SerializeField] private RSO_ControlScheme _rsoControlScheme;
+	[SerializeField] private RSE_PlayerDeath _rsePlayerDeath;
 
 	// ----- CINEMACHINE -----
 	[ShowNonSerializedField] private float _cinemachineTargetYaw;
@@ -30,8 +32,14 @@ public class CharacterMotor : MonoBehaviour
 	[ShowNonSerializedField] private float _slopePercentage;
 	// falling
 	[ShowNonSerializedField] private bool _isGrounded;
-	[ShowNonSerializedField] private Vector3 _lastGroundedDirection;
 	[ShowNonSerializedField] private float _lastGroundedSpeed;
+	[ShowNonSerializedField] private Vector3 _lastGroundedPosition;
+	[ShowNonSerializedField] private Vector3 _lastGroundedDirection;
+	[ShowNonSerializedField] private bool _isStunned;
+	[ShowNonSerializedField] private float _stunTimer;
+	[ShowNonSerializedField] private bool _isSlowed;
+	[ShowNonSerializedField] private float _slowTimer;
+	[ShowNonSerializedField] private float _slowModifier;
 	// rotation
 	[ShowNonSerializedField] private float _targetRotation = 0.0f;
 	[ShowNonSerializedField] private float _rotationVelocity;
@@ -76,10 +84,16 @@ public class CharacterMotor : MonoBehaviour
 		// reset our timeouts on start
 		_fallDelayTimer = _characterConfig.fallDelay;
 		_jumpDelayTimer = _characterConfig.jumpDelay;
+
+		// update last grounded position to avoid instant death on spawn
+		_lastGroundedPosition = transform.position;
 	}
 
 	private void Update()
 	{
+		HandleStun();
+		HandleSlow();
+
 		CheckGrounded();
 		Accelerate();
 		Move();
@@ -101,8 +115,32 @@ public class CharacterMotor : MonoBehaviour
 		);
 	}
 
-	private RaycastHit _result;
+	private void HandleStun()
+	{
+		if (!_isStunned) return;
 
+		_stunTimer -= Time.deltaTime;
+		if (_stunTimer <= 0)
+		{
+			_isStunned = false;
+
+			// slows the character using the stun and lethal height
+			_isSlowed = true;
+			float slowMitigedValue = (_lastDistanceTravelled - _characterConfig.stunHeight) / (_characterConfig.lethalHeight - _characterConfig.stunHeight);
+			_slowTimer = _characterConfig.slowDuration.Evaluate(slowMitigedValue);
+			_slowModifier = _characterConfig.slowPercentage.Evaluate(slowMitigedValue);
+		}
+	}
+
+	private void HandleSlow()
+	{
+		if (!_isSlowed) return;
+
+		_slowTimer -= Time.deltaTime;
+		_isSlowed = _slowTimer > 0;
+	}
+
+	private float _lastDistanceTravelled;
 	private void CheckGrounded()
 	{
 		// set ray with offset
@@ -113,7 +151,42 @@ public class CharacterMotor : MonoBehaviour
 
 		if (Physics.Raycast(new Ray(rayPosition, downVector), out var result, _characterConfig.groundedRadius, _characterConfig.groundLayers, QueryTriggerInteraction.Ignore))
 		{
+			// first time the character touches the ground after being falling
+			if (!_isGrounded)
+			{
+				_lastDistanceTravelled = Math.Abs(transform.position.y - _lastGroundedPosition.y);
+
+				if (_lastDistanceTravelled >= _characterConfig.lethalHeight)
+				{
+					// handle character's death
+					_rsePlayerDeath.Call();
+					Debug.Log("CHARACTER_MOTOR: dead");
+				}
+				else if (_lastDistanceTravelled >= _characterConfig.stunHeight)
+				{
+					// stun the character for x secondes
+					_isStunned = true;
+
+					// cross product to get the stun mitiged value on a 0-1 scale
+					float stunMitigedValue = (_lastDistanceTravelled - _characterConfig.stunHeight) / (_characterConfig.lethalHeight - _characterConfig.stunHeight);
+					_stunTimer = _characterConfig.stunDuration.Evaluate(stunMitigedValue);
+					Debug.Log("CHARACTER_MOTOR: stunned");
+				}
+				else if (_lastDistanceTravelled >= _characterConfig.slowHeight)
+				{
+					// slow the character for x secondes by y percent
+					_isSlowed = true;
+
+					// cross product to get the slow mitiged value on a 0-1 scale
+					float slowMitigedValue = (_lastDistanceTravelled - _characterConfig.slowHeight) / (_characterConfig.stunHeight - _characterConfig.slowHeight);
+					_slowTimer = _characterConfig.slowDuration.Evaluate(slowMitigedValue);
+					_slowModifier = _characterConfig.slowPercentage.Evaluate(slowMitigedValue);
+					Debug.Log("CHARACTER_MOTOR: slowed");
+				}
+			}
+
 			_isGrounded = true;
+			_lastGroundedPosition = transform.position;
 
 			// slope acceleration and deceleration
 			Vector3 groundNormal = result.normal;
@@ -135,7 +208,6 @@ public class CharacterMotor : MonoBehaviour
 			{
 				_slopePercentage *= -1;
 			}
-			
 		}
 
 		// update animator
@@ -147,6 +219,7 @@ public class CharacterMotor : MonoBehaviour
 			// save last grounded momentum
 			_lastGroundedSpeed = _speed;
 			_lastGroundedDirection = transform.forward;
+			_lastGroundedPosition = transform.position;
 
 			_groundedCheckLocked = true;
 		}
@@ -173,6 +246,16 @@ public class CharacterMotor : MonoBehaviour
 		else if (_slopePercentage < 0)
 		{
 			_targetSpeed *= 1 + _characterConfig.downhillAcceleration.Evaluate(-_slopePercentage);
+		}
+
+		if (_isSlowed)
+		{
+			_targetSpeed *= 1 - _slowModifier;
+		}
+
+		if (_isStunned)
+		{
+			_targetSpeed = 0;
 		}
 
 		// if there is no input, set the target speed to 0
