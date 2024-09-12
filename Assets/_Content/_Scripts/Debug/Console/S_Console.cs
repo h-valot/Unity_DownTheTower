@@ -1,3 +1,4 @@
+using System.Text;
 using TMPro;
 using UnityEngine;
 
@@ -12,30 +13,47 @@ public class Console : MonoBehaviour
 	[SerializeField] private GameObject _graphicsParent;
 	[SerializeField] private TextMeshProUGUI _output;
 
+	[Header("External references")]
+	[SerializeField] private GameConfig _gameConfig;
+	
+	private StringBuilder logBuilder;
 	private bool _isPressed;
 	private bool _isEnabled;
 
 	private void Start()
 	{
+		logBuilder = new StringBuilder();
 		Hide();
 	}
 
 	public void Log(string input)
 	{
+		// slow-down framerate by overload a string 
+		if (!_gameConfig.enableConsoleLogging) return;
+	
 		var sentence = new Sentence(input, _colorCodeBase);
-		_output.text += $"\n[{System.DateTime.UtcNow.ToString("HH:mm:ss")}] {sentence.GetStylizedSentence()}";
+		logBuilder.Append($"\n[{System.DateTime.UtcNow.ToString("HH:mm:ss")}] {sentence.GetStylizedSentence()}");
+		_output.text = logBuilder.ToString();
 	}
 
 	public void LogWarning(string input)
 	{
+		// slow-down framerate by overload a string 
+		if (!_gameConfig.enableConsoleLogging) return;
+
 		var sentence = new Sentence(input, _colorCodeWarning);
-		_output.text += $"\n[{System.DateTime.UtcNow.ToString("HH:mm:ss")}] {sentence.GetStylizedSentence()}";
+		logBuilder.Append($"\n[{System.DateTime.UtcNow.ToString("HH:mm:ss")}] {sentence.GetStylizedSentence()}");
+		_output.text = logBuilder.ToString();
 	}
 
 	public void LogError(string input)
 	{
+		// slow-down framerate by overload a string 
+		if (!_gameConfig.enableConsoleLogging) return;
+
 		var sentence = new Sentence(input, _colorCodeError);
-		_output.text += $"\n[{System.DateTime.UtcNow.ToString("HH:mm:ss")}] {sentence.GetStylizedSentence()}";
+		logBuilder.Append($"\n[{System.DateTime.UtcNow.ToString("HH:mm:ss")}] {sentence.GetStylizedSentence()}");
+		_output.text = logBuilder.ToString();
 	}
 
 	private void Update()
