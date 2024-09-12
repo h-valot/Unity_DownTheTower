@@ -1,4 +1,5 @@
-﻿using NaughtyAttributes;
+using System;
+using NaughtyAttributes;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -8,6 +9,7 @@ public class CharacterMotor : MonoBehaviour
 	[SerializeField] private CharacterController _controller;
 	[SerializeField] private Animator _animator;
 	[SerializeField] private GameObject _cinemachineCameraTarget;
+	[SerializeField] private GameObject _lockedCameraTarget;
 
 	[Header("External references")]
 	[SerializeField] private CharacterConfig _characterConfig;
@@ -23,32 +25,39 @@ public class CharacterMotor : MonoBehaviour
 	[SerializeField] private GameObject _torchPrefab;
 	[SerializeField] private GameObject _torchSpawner;
 	[SerializeField] private RSO_PlayerTransform _rsoPlayerTranform;
+	[SerializeField] private RSO_PlayerDeath _rsoPlayerDeath;
 
-	// ----- CINEMACHINE -----
+	// ----- DEBUG -----
+	[Header("Cinemachine")]
 	[ShowNonSerializedField] private float _cinemachineTargetYaw;
 	[ShowNonSerializedField] private float _cinemachineTargetPitch;
 
-	// ----- CHARACTER -----
-	// speed
+	[Header("Speed")]
 	[ShowNonSerializedField] private bool _isSprinting;
 	[ShowNonSerializedField] private Vector2 _moveInput;
 	[ShowNonSerializedField] private float _speed;
 	[ShowNonSerializedField] private float _targetSpeed;
 	[ShowNonSerializedField] private float _animationBlend;
 	[ShowNonSerializedField] private float _slopePercentage;
-	// falling
+
+	[Header("Falling")]
 	[ShowNonSerializedField] private bool _isGrounded;
-	[ShowNonSerializedField] private Vector3 _lastGroundedDirection;
 	[ShowNonSerializedField] private float _lastGroundedSpeed;
-	// rotation
+	[ShowNonSerializedField] private Vector3 _lastGroundedPosition;
+	[ShowNonSerializedField] private Vector3 _lastGroundedDirection;
+	[ShowNonSerializedField] private float _lastDistanceTravelled;
+	[ShowNonSerializedField] private bool _isStunned;
+	[ShowNonSerializedField] private float _stunTimer;
+	[ShowNonSerializedField] private bool _isSlowed;
+	[ShowNonSerializedField] private float _slowTimer;
+	[ShowNonSerializedField] private float _slowModifier;
+
+	[Header("Rotation")]
 	[ShowNonSerializedField] private float _targetRotation = 0.0f;
 	[ShowNonSerializedField] private float _rotationVelocity;
 	[ShowNonSerializedField] private float _verticalVelocity;
-	// const
-	private const float _TERMINAL_VELOCITY = 53.0f;
-	private const float _LOOK_THRESHOLD = 0.01f;
 
-	// ----- DELAY TIMER -----
+	[Header("Delay timer")]
 	[ShowNonSerializedField] private float _fallDelayTimer;
 	[ShowNonSerializedField] private float _jumpDelayTimer;
 
@@ -60,13 +69,14 @@ public class CharacterMotor : MonoBehaviour
 	private int _animMotionSpeed;
 
     // ----- PUBLIC VARIABLES -----
-
 	public bool torchInHand;
 
-    // ----- PRIVATE VARIABLES -----
+	// ----- PRIVATE VARIABLES -----
+	private bool _groundedCheckLocked;
 
-    private bool _groundedCheckLocked;
-
+	// ----- CONSTS -----
+	private const float _TERMINAL_VELOCITY = 53.0f;
+	private const float _LOOK_THRESHOLD = 0.01f;
 
 	private void Start()
 	{
@@ -82,10 +92,16 @@ public class CharacterMotor : MonoBehaviour
 		// reset our timeouts on start
 		_fallDelayTimer = _characterConfig.fallDelay;
 		_jumpDelayTimer = _characterConfig.jumpDelay;
+
+		// update last grounded position to avoid instant death on spawn
+		_lastGroundedPosition = transform.position;
 	}
 
 	private void Update()
 	{
+		HandleStun();
+		HandleSlow();
+
 		CheckGrounded();
 		Accelerate();
 		Move();
@@ -97,17 +113,36 @@ public class CharacterMotor : MonoBehaviour
 		HandleCamera();
 	}
 
-	private void OnDrawGizmos()
+	private void HandleStun()
 	{
-		// down vector
-		Gizmos.color = Color.red;
-		Gizmos.DrawLine(
-			new Vector3(transform.position.x, transform.position.y - _characterConfig.groundedOffset, transform.position.z),
-			transform.position + (transform.TransformDirection(Vector3.down).normalized * _characterConfig.groundedRadius)
-		);
+		if (!_isStunned) return;
+
+		_stunTimer -= Time.deltaTime;
+		if (_stunTimer <= 0)
+		{
+			_isStunned = false;
+
+			// slows the character using the stun and lethal height
+			_isSlowed = true;
+			float slowMitigedValue = (_lastDistanceTravelled - _characterConfig.stunHeight) / (_characterConfig.lethalHeight - _characterConfig.stunHeight);
+			_slowTimer = _characterConfig.slowDuration.Evaluate(slowMitigedValue);
+			_slowModifier = _characterConfig.slowPercentage.Evaluate(slowMitigedValue);
+		}
 	}
 
-	private RaycastHit _result;
+	private void HandleSlow()
+	{
+		if (!_isSlowed) return;
+
+		_slowTimer -= Time.deltaTime;
+		_isSlowed = _slowTimer > 0;
+	}
+
+	private void HandleDeath()
+	{
+		Destroy(gameObject);
+		_rsoPlayerDeath.value = true;
+	}
 
 	private void CheckGrounded()
 	{
@@ -117,9 +152,46 @@ public class CharacterMotor : MonoBehaviour
 		Vector3 forwardVector = transform.TransformDirection(Vector3.forward);
 		_isGrounded = false;
 
+		// check lethal death
+		_lastDistanceTravelled = Math.Abs(transform.position.y - _lastGroundedPosition.y);
+		if (_lastDistanceTravelled >= _characterConfig.lethalHeight)
+		{
+			// stops camera movements
+			_cinemachineCameraTarget.transform.SetParent(_lockedCameraTarget.transform);
+		}
+
 		if (Physics.Raycast(new Ray(rayPosition, downVector), out var result, _characterConfig.groundedRadius, _characterConfig.groundLayers, QueryTriggerInteraction.Ignore))
 		{
+			// first time the character touches the ground after being falling
+			if (!_isGrounded)
+			{
+				if (_lastDistanceTravelled >= _characterConfig.lethalHeight)
+				{
+					HandleDeath();
+				}
+				else if (_lastDistanceTravelled >= _characterConfig.stunHeight)
+				{
+					// stun the character for x secondes
+					_isStunned = true;
+
+					// cross product to get the stun mitiged value on a 0-1 scale
+					float stunMitigedValue = (_lastDistanceTravelled - _characterConfig.stunHeight) / (_characterConfig.lethalHeight - _characterConfig.stunHeight);
+					_stunTimer = _characterConfig.stunDuration.Evaluate(stunMitigedValue);
+				}
+				else if (_lastDistanceTravelled >= _characterConfig.slowHeight)
+				{
+					// slow the character for x secondes by y percent
+					_isSlowed = true;
+
+					// cross product to get the slow mitiged value on a 0-1 scale
+					float slowMitigedValue = (_lastDistanceTravelled - _characterConfig.slowHeight) / (_characterConfig.stunHeight - _characterConfig.slowHeight);
+					_slowTimer = _characterConfig.slowDuration.Evaluate(slowMitigedValue);
+					_slowModifier = _characterConfig.slowPercentage.Evaluate(slowMitigedValue);
+				}
+			}
+
 			_isGrounded = true;
+			_lastGroundedPosition = transform.position;
 
 			// slope acceleration and deceleration
 			Vector3 groundNormal = result.normal;
@@ -141,7 +213,6 @@ public class CharacterMotor : MonoBehaviour
 			{
 				_slopePercentage *= -1;
 			}
-
 		}
 
 		// update animator
@@ -153,6 +224,7 @@ public class CharacterMotor : MonoBehaviour
 			// save last grounded momentum
 			_lastGroundedSpeed = _speed;
 			_lastGroundedDirection = transform.forward;
+			_lastGroundedPosition = transform.position;
 
 			_groundedCheckLocked = true;
 		}
@@ -179,6 +251,16 @@ public class CharacterMotor : MonoBehaviour
 		else if (_slopePercentage < 0)
 		{
 			_targetSpeed *= 1 + _characterConfig.downhillAcceleration.Evaluate(-_slopePercentage);
+		}
+
+		if (_isSlowed)
+		{
+			_targetSpeed *= 1 - _slowModifier;
+		}
+
+		if (_isStunned)
+		{
+			_targetSpeed = 0;
 		}
 
 		// if there is no input, set the target speed to 0
@@ -305,6 +387,9 @@ public class CharacterMotor : MonoBehaviour
 		// clamp our rotations so our values are limited 360 degrees
 		_cinemachineTargetYaw = Matha.ClampAngle(_cinemachineTargetYaw, float.MinValue, float.MaxValue);
 		_cinemachineTargetPitch = Matha.ClampAngle(_cinemachineTargetPitch, _characterConfig.bottomClamp, _characterConfig.topClamp);
+
+		// stops the camera if the character is dead
+		if (_rsoPlayerDeath.value) return;
 
 		// cinemachine will follow this target
 		_cinemachineCameraTarget.transform.rotation = Quaternion.Euler(_cinemachineTargetPitch + _characterConfig.cameraAngleOverride, _cinemachineTargetYaw, 0.0f);
