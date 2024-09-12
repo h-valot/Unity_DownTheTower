@@ -93,28 +93,19 @@ public class CharacterMotor : MonoBehaviour
 
 	private void OnDrawGizmos()
 	{
-		// debug line
+		// down vector
 		Gizmos.color = Color.red;
 		Gizmos.DrawLine(
 			new Vector3(transform.position.x, transform.position.y - _characterConfig.groundedOffset, transform.position.z), 
 			transform.position + (transform.TransformDirection(Vector3.down).normalized * _characterConfig.groundedRadius)
 		);
-
-		if (_result.collider != null)
-		{
-			Gizmos.color = Color.blue;
-			Gizmos.DrawLine(
-				_result.point,
-				_result.point + (_result.normal.normalized * 1)
-			);
-		}
 	}
 
 	private RaycastHit _result;
 
 	private void CheckGrounded()
 	{
-		// set sphere position, with offset
+		// set ray with offset
 		Vector3 rayPosition = new Vector3(transform.position.x, transform.position.y - _characterConfig.groundedOffset, transform.position.z);
 		Vector3 downVector = transform.TransformDirection(Vector3.down);
 		Vector3 forwardVector = transform.TransformDirection(Vector3.forward);
@@ -124,9 +115,8 @@ public class CharacterMotor : MonoBehaviour
 		{
 			_isGrounded = true;
 
-			// slope deceleration
+			// slope acceleration and deceleration
 			Vector3 groundNormal = result.normal;
-			_result = result;
 
 			// for normalized vectors dot returns 
 			// • -1 if they point in completely opposite directions
@@ -138,10 +128,14 @@ public class CharacterMotor : MonoBehaviour
 			// cross product to get the delta 
 			// clamp it to avoid negative dot values and they are not needed
 			int slopeAngle = (int)Mathf.Clamp(groundDotValue * 90f, 0, _controller.slopeLimit);
-
-			float directionDotValue = 1 - Vector3.Dot(groundNormal, forwardVector);
-			
 			_slopePercentage = (float)slopeAngle / (float)_controller.slopeLimit;
+
+			// check the direction of the character based on the slope
+			if (Vector3.Dot(groundNormal, forwardVector) > 0)
+			{
+				_slopePercentage *= -1;
+			}
+			
 		}
 
 		// update animator
@@ -170,6 +164,16 @@ public class CharacterMotor : MonoBehaviour
 
 		// set target speed based on move speed, sprint speed and if sprint is pressed
 		_targetSpeed = _isSprinting ? _characterConfig.sprintSpeed : _characterConfig.moveSpeed;
+
+		// on slope acceleration and deceleration
+		if (_slopePercentage > 0)
+		{
+			_targetSpeed *= 1 - _characterConfig.uphillDeceleration.Evaluate(_slopePercentage);
+		}
+		else if (_slopePercentage < 0)
+		{
+			_targetSpeed *= 1 + _characterConfig.downhillAcceleration.Evaluate(-_slopePercentage);
+		}
 
 		// if there is no input, set the target speed to 0
 		// Vector2's == operator uses approximation so is not floating point error prone, and is cheaper than magnitude
@@ -227,15 +231,11 @@ public class CharacterMotor : MonoBehaviour
 		Vector3 targetDirection = Quaternion.Euler(0.0f, _targetRotation, 0.0f) * Vector3.forward;
 		float currentSpeed = _speed;
 
+		// handle air control
 		if (!_isGrounded) 
 		{
 			targetDirection = _lastGroundedDirection + (targetDirection * _characterConfig.airSpeed);
 			currentSpeed = _lastGroundedSpeed;
-		}
-
-		if (_slopePercentage > 0)
-		{
-			currentSpeed *= 1 - _characterConfig.uphillDeceleration.Evaluate(_slopePercentage);
 		}
 
 		// move the player
@@ -341,11 +341,13 @@ public class CharacterMotor : MonoBehaviour
 	{
 		if (!_isGrounded)
 		{
+			Debug.LogWarning("CHARACTER_MOTOR: can't jump, the character isn't grounded");
 			return;
 		}
 
 		if (_jumpDelayTimer >= 0)
 		{
+			Debug.LogWarning("CHARACTER_MOTOR: can't jump, the jump delay timer isn't ready");
 			return;
 		}
 

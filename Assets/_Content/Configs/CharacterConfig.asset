@@ -17,13 +17,49 @@ MonoBehaviour:
   airSpeed: 0.6
   uphillDeceleration:
     serializedVersion: 2
-    m_Curve: []
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 0.38294104
+      inSlope: 0.71301246
+      outSlope: 0.71301246
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.088
+      outWeight: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
   downhillAcceleration:
     serializedVersion: 2
-    m_Curve: []
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0.030075649
+      outSlope: 0.030075649
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.13866669
+    - serializedVersion: 3
+      time: 0.99544346
+      value: 0.30019045
+      inSlope: 0.720762
+      outSlope: 0.720762
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.15737215
+      outWeight: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
