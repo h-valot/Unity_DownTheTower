@@ -14,14 +14,63 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveSpeed: 3
   sprintSpeed: 5
+  airSpeed: 0.6
+  uphillDeceleration:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0.5101975
+      outSlope: 0.5101975
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.192
+    - serializedVersion: 3
+      time: 1
+      value: 0.9889085
+      inSlope: 1.4270189
+      outSlope: 1.4270189
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.10133332
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  downhillAcceleration:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0.51707006
+      outSlope: 0.51707006
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.20533334
+    - serializedVersion: 3
+      time: 0.98970616
+      value: 1.0125775
+      inSlope: 1.6153288
+      outSlope: 1.6153288
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.09859145
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
   rotationSmoothTime: 0.12
   speedChangeRate: 10
   jumpHeight: 1.2
   gravity: -15
   jumpDelay: 0
   fallDelay: 0.19
-  groundedOffset: -0.14
-  groundedRadius: 0.28
+  groundedOffset: -0.12
+  groundedRadius: 0.5
   groundLayers:
     serializedVersion: 2
     m_Bits: 1
