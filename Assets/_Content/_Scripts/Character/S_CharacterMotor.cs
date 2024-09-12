@@ -8,47 +8,49 @@ public class CharacterMotor : MonoBehaviour
 	[SerializeField] private CharacterController _controller;
 	[SerializeField] private Animator _animator;
 	[SerializeField] private GameObject _cinemachineCameraTarget;
+	[SerializeField] private GameObject _lockedCameraTarget;
 
 	[Header("External references")]
 	[SerializeField] private CharacterConfig _characterConfig;
+	[SerializeField] private Camera _mainCamera;
 	[SerializeField] private RSE_Move _rseMove;
 	[SerializeField] private RSE_Look _rseLook;
 	[SerializeField] private RSE_Jump _rseJump;
 	[SerializeField] private RSE_Sprint _rseSprint;
 	[SerializeField] private RSO_ControlScheme _rsoControlScheme;
-	[SerializeField] private RSE_PlayerDeath _rsePlayerDeath;
+	[SerializeField] private RSO_PlayerDeath _rsoPlayerDeath;
 
-	// ----- CINEMACHINE -----
+	// ----- DEBUG -----
+	[Header("Cinemachine")]
 	[ShowNonSerializedField] private float _cinemachineTargetYaw;
 	[ShowNonSerializedField] private float _cinemachineTargetPitch;
 
-	// ----- CHARACTER -----
-	// speed
+	[Header("Speed")]
 	[ShowNonSerializedField] private bool _isSprinting;
 	[ShowNonSerializedField] private Vector2 _moveInput;
 	[ShowNonSerializedField] private float _speed;	
 	[ShowNonSerializedField] private float _targetSpeed;
 	[ShowNonSerializedField] private float _animationBlend;
 	[ShowNonSerializedField] private float _slopePercentage;
-	// falling
+
+	[Header("Falling")]
 	[ShowNonSerializedField] private bool _isGrounded;
 	[ShowNonSerializedField] private float _lastGroundedSpeed;
 	[ShowNonSerializedField] private Vector3 _lastGroundedPosition;
 	[ShowNonSerializedField] private Vector3 _lastGroundedDirection;
+	[ShowNonSerializedField] private float _lastDistanceTravelled;
 	[ShowNonSerializedField] private bool _isStunned;
 	[ShowNonSerializedField] private float _stunTimer;
 	[ShowNonSerializedField] private bool _isSlowed;
 	[ShowNonSerializedField] private float _slowTimer;
 	[ShowNonSerializedField] private float _slowModifier;
-	// rotation
+
+	[Header("Rotation")]
 	[ShowNonSerializedField] private float _targetRotation = 0.0f;
 	[ShowNonSerializedField] private float _rotationVelocity;
 	[ShowNonSerializedField] private float _verticalVelocity;
-	// const
-	private const float _TERMINAL_VELOCITY = 53.0f;
-	private const float _LOOK_THRESHOLD = 0.01f;
 
-	// ----- DELAY TIMER -----
+	[Header("Delay timer")]
 	[ShowNonSerializedField] private float _fallDelayTimer;
 	[ShowNonSerializedField] private float _jumpDelayTimer;
 
@@ -60,15 +62,11 @@ public class CharacterMotor : MonoBehaviour
 	private int _animMotionSpeed;
 
 	// ----- PRIVATE VARIABLES -----
-	private GameObject _mainCamera;
 	private bool _groundedCheckLocked;
 
-
-	private void Awake()
-	{
-		// get a reference to our main camera if null
-		_mainCamera ??= GameObject.FindGameObjectWithTag("MainCamera");
-	}
+	// ----- CONSTS -----
+	private const float _TERMINAL_VELOCITY = 53.0f;
+	private const float _LOOK_THRESHOLD = 0.01f;
 
 	private void Start()
 	{
@@ -105,16 +103,6 @@ public class CharacterMotor : MonoBehaviour
 		HandleCamera();
 	}
 
-	private void OnDrawGizmos()
-	{
-		// down vector
-		Gizmos.color = Color.red;
-		Gizmos.DrawLine(
-			new Vector3(transform.position.x, transform.position.y - _characterConfig.groundedOffset, transform.position.z), 
-			transform.position + (transform.TransformDirection(Vector3.down).normalized * _characterConfig.groundedRadius)
-		);
-	}
-
 	private void HandleStun()
 	{
 		if (!_isStunned) return;
@@ -140,7 +128,12 @@ public class CharacterMotor : MonoBehaviour
 		_isSlowed = _slowTimer > 0;
 	}
 
-	private float _lastDistanceTravelled;
+	private void HandleDeath()
+	{
+		Destroy(gameObject);
+		_rsoPlayerDeath.value = true;
+	}
+
 	private void CheckGrounded()
 	{
 		// set ray with offset
@@ -149,18 +142,22 @@ public class CharacterMotor : MonoBehaviour
 		Vector3 forwardVector = transform.TransformDirection(Vector3.forward);
 		_isGrounded = false;
 
+		// check lethal death
+		_lastDistanceTravelled = Math.Abs(transform.position.y - _lastGroundedPosition.y);
+		if (_lastDistanceTravelled >= _characterConfig.lethalHeight)
+		{
+			// stops camera movements
+			_cinemachineCameraTarget.transform.SetParent(_lockedCameraTarget.transform);
+		}
+
 		if (Physics.Raycast(new Ray(rayPosition, downVector), out var result, _characterConfig.groundedRadius, _characterConfig.groundLayers, QueryTriggerInteraction.Ignore))
 		{
 			// first time the character touches the ground after being falling
 			if (!_isGrounded)
 			{
-				_lastDistanceTravelled = Math.Abs(transform.position.y - _lastGroundedPosition.y);
-
 				if (_lastDistanceTravelled >= _characterConfig.lethalHeight)
 				{
-					// handle character's death
-					_rsePlayerDeath.Call();
-					Debug.Log("CHARACTER_MOTOR: dead");
+					HandleDeath();
 				}
 				else if (_lastDistanceTravelled >= _characterConfig.stunHeight)
 				{
@@ -170,7 +167,6 @@ public class CharacterMotor : MonoBehaviour
 					// cross product to get the stun mitiged value on a 0-1 scale
 					float stunMitigedValue = (_lastDistanceTravelled - _characterConfig.stunHeight) / (_characterConfig.lethalHeight - _characterConfig.stunHeight);
 					_stunTimer = _characterConfig.stunDuration.Evaluate(stunMitigedValue);
-					Debug.Log("CHARACTER_MOTOR: stunned");
 				}
 				else if (_lastDistanceTravelled >= _characterConfig.slowHeight)
 				{
@@ -181,7 +177,6 @@ public class CharacterMotor : MonoBehaviour
 					float slowMitigedValue = (_lastDistanceTravelled - _characterConfig.slowHeight) / (_characterConfig.stunHeight - _characterConfig.slowHeight);
 					_slowTimer = _characterConfig.slowDuration.Evaluate(slowMitigedValue);
 					_slowModifier = _characterConfig.slowPercentage.Evaluate(slowMitigedValue);
-					Debug.Log("CHARACTER_MOTOR: slowed");
 				}
 			}
 
@@ -379,6 +374,9 @@ public class CharacterMotor : MonoBehaviour
 		// clamp our rotations so our values are limited 360 degrees
 		_cinemachineTargetYaw = Matha.ClampAngle(_cinemachineTargetYaw, float.MinValue, float.MaxValue);
 		_cinemachineTargetPitch = Matha.ClampAngle(_cinemachineTargetPitch, _characterConfig.bottomClamp, _characterConfig.topClamp);
+
+		// stops the camera if the character is dead
+		if (_rsoPlayerDeath.value) return;
 
 		// cinemachine will follow this target
 		_cinemachineCameraTarget.transform.rotation = Quaternion.Euler(_cinemachineTargetPitch + _characterConfig.cameraAngleOverride, _cinemachineTargetYaw, 0.0f);

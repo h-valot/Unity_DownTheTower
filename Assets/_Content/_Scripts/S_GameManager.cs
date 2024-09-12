@@ -8,7 +8,7 @@ public class GameManager : MonoBehaviour
 	[SerializeField] private GameStart _gameStart;
 
 	[Header("External references")]
-	[SerializeField] private RSE_PlayerDeath _rsePlayerDeath;
+	[SerializeField] private RSO_PlayerDeath _rsoPlayerDeath;
 
 	private void Start()
 	{
@@ -20,7 +20,7 @@ public class GameManager : MonoBehaviour
 		// can be used to start or restart a run
 		// reload the game level without resetting custom items placement
 
-		_gameStart.SpawnPlayer();
+		_gameStart.SpawnCharacter();
 	}
 
 	private void Reset()
@@ -33,16 +33,19 @@ public class GameManager : MonoBehaviour
 
 	private void HandleDeath()
 	{
+		if (!_rsoPlayerDeath.value) return;
+
+		Restart();
 		// TODO - fade in into ui to quit or restart
 	}
 
 	private void OnEnable()
 	{
-		_rsePlayerDeath.action += HandleDeath;
+		_rsoPlayerDeath.OnChanged += HandleDeath;
 	}
 
 	private void OnDisable()
 	{
-		_rsePlayerDeath.action -= HandleDeath;
+		_rsoPlayerDeath.OnChanged -= HandleDeath;
 	}
 }
