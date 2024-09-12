@@ -10,6 +10,8 @@ public class S_Torch : MonoBehaviour
     private Camera playerCam;
     [SerializeField] private GameObject ThrowTorchPrefab;
     private Rigidbody torchRigidbody;
+    private bool canThrow = true;
+    [SerializeField] private int litDuration;
         
     // Start is called before the first frame update
     void Start()
@@ -18,8 +20,9 @@ public class S_Torch : MonoBehaviour
         torchRigidbody = gameObject.GetComponent<Rigidbody>();
     }
 
-    void ChangeLightState() // Function to call to lit or unlit the torch
+    public void ChangeLightState() // Function to call to lit or unlit the torch
     {
+        Debug.Log("je tente d'éteindre la lumière");
         if (torchLight.GetComponent<Light>().enabled == true) // Si lit, unlit la torche
         {
             torchLight.GetComponent<Light>().enabled = false;
@@ -31,26 +34,29 @@ public class S_Torch : MonoBehaviour
         return;
     }
 
-    void ThrowTorch(Vector3 throwForward)
+    public void ThrowTorch(Vector3 throwForward)
     {
-        Ray r = playerCam.ScreenPointToRay(Input.mousePosition);
+        if (canThrow == true)
+        {
+            gameObject.transform.parent = null;
+            torchRigidbody.constraints = RigidbodyConstraints.None;
+            ThrowTorchPrefab.GetComponent<Rigidbody>().velocity = throwForward * 10;
+            canThrow = false;
 
-        Vector3 dir = r.GetPoint(1) - r.GetPoint(0);
-        torchRigidbody.constraints = RigidbodyConstraints.None;
-        ThrowTorchPrefab.GetComponent<Rigidbody>().velocity = throwForward * 5;
+            WaitAndDestroyTorch(5);
+        }
         
+    }
+
+    IEnumerator WaitAndDestroyTorch(int value)
+    {
+        Debug.Log("Je commence la coroutine");
+        yield return new WaitForSeconds(value);
+        Destroy(gameObject);
     }
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKeyDown("e"))
-        {
-            ChangeLightState();
-        }
 
-        if (Input.GetKeyDown("g"))
-        {
-            
-        }
     }
 }

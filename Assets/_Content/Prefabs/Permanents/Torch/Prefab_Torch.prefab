@@ -51,7 +51,7 @@ Light:
   m_InnerSpotAngle: 21.80208
   m_CookieSize: 10
   m_Shadows:
-    m_Type: 2
+    m_Type: 0
     m_Resolution: -1
     m_CustomResolution: -1
     m_Strength: 1
@@ -235,6 +235,7 @@ GameObject:
   - component: {fileID: 3539557874267728587}
   - component: {fileID: 4567227452422965972}
   - component: {fileID: 5666824575402529614}
+  - component: {fileID: 4147390464001591799}
   m_Layer: 0
   m_Name: Prefab_Torch
   m_TagString: Untagged
@@ -273,6 +274,7 @@ MonoBehaviour:
   torchLight: {fileID: 1720485948228762332}
   torchIntensity: 20
   ThrowTorchPrefab: {fileID: 4724440229257307352}
+  litDuration: 5
 --- !u!54 &5666824575402529614
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -300,6 +302,29 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 126
   m_CollisionDetection: 0
+--- !u!136 &4147390464001591799
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4724440229257307352}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.76384157
+  m_Height: 6.8672104
+  m_Direction: 1
+  m_Center: {x: 0, y: 2.2994947, z: 0.0105009675}
 --- !u!1 &8129817620367253673
 GameObject:
   m_ObjectHideFlags: 0
