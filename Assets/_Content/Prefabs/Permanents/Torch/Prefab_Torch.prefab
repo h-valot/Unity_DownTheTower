@@ -45,7 +45,7 @@ Light:
   m_Type: 2
   m_Shape: 0
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_Intensity: 20
+  m_Intensity: 1
   m_Range: 160
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
@@ -131,7 +131,7 @@ GameObject:
   - component: {fileID: 4883872469197812161}
   - component: {fileID: 2129995775548063007}
   m_Layer: 0
-  m_Name: Cube
+  m_Name: FlamablePart
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -181,7 +181,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
+  - {fileID: 2100000, guid: 2466adf1ddd6c80439d988e52d681216, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -253,7 +253,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.027540442, y: 0.06328619, z: 0.028671592}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 8237605278584517131}
@@ -271,10 +271,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e5cbb02d6223ce1469e3fb4d5d131fd6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  torchLight: {fileID: 1720485948228762332}
-  torchIntensity: 20
-  ThrowTorchPrefab: {fileID: 4724440229257307352}
-  litDuration: 5
+  _torchLight: {fileID: 1720485948228762332}
+  _torchIntensity: 20
+  _litDuration: 5
 --- !u!54 &5666824575402529614
 Rigidbody:
   m_ObjectHideFlags: 0

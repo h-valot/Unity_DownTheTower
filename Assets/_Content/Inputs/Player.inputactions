@@ -58,6 +58,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "CraftTorch",
+                    "type": "Button",
+                    "id": "9222ea07-1cf3-4c6a-ac37-958a110d6c66",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -212,6 +221,17 @@
                     "processors": "",
                     "groups": "KeyboardMouse",
                     "action": "Lit_Unlit",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "7be962e4-df27-40c8-a20d-58ec2cdade30",
+                    "path": "<Keyboard>/c",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "KeyboardMouse",
+                    "action": "CraftTorch",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

@@ -15,6 +15,7 @@ public class CharacterInput : MonoBehaviour
 	[SerializeField] private RSO_ControlScheme _rsoControlScheme;
 	[SerializeField] private RSE_Throw _rseThrow;
     [SerializeField] private RSE_Lit_Unlit _rseLit_Unlit;
+    [SerializeField] private RSE_CraftTorch _rseCraftTorch;
 
     [Header("Debugging")]
 	[ReadOnly] public Vector2 move;
@@ -84,6 +85,10 @@ public class CharacterInput : MonoBehaviour
 	public void OnLit_Unlit()
 	{
 		_rseLit_Unlit.Call();
-		Debug.Log("Action demandé");
+	}
+
+	public void OnCraftTorch()
+	{
+		_rseCraftTorch.Call();
 	}
 }

@@ -1,4 +1,5 @@
 ﻿using NaughtyAttributes;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class CharacterMotor : MonoBehaviour
@@ -17,7 +18,10 @@ public class CharacterMotor : MonoBehaviour
 	[SerializeField] private RSE_Sprint _rseSprint;
     [SerializeField] private RSE_Throw _rseThrow;
     [SerializeField] private RSE_Lit_Unlit _rseLit_Unlit;
+    [SerializeField] private RSE_CraftTorch _rseCraftTorch;
     [SerializeField] private RSO_ControlScheme _rsoControlScheme;
+	[SerializeField] private GameObject _torchPrefab;
+	[SerializeField] private GameObject _torchSpawner;
 
 	// ----- CINEMACHINE -----
 	[ShowNonSerializedField] private float _cinemachineTargetYaw;
@@ -54,9 +58,13 @@ public class CharacterMotor : MonoBehaviour
 	private int _animFreeFall;
 	private int _animMotionSpeed;
 
-	// ----- PRIVATE VARIABLES -----
+    // ----- PUBLIC VARIABLES -----
 
-	private bool _groundedCheckLocked;
+	public bool torchInHand;
+
+    // ----- PRIVATE VARIABLES -----
+
+    private bool _groundedCheckLocked;
 
 
 	private void Start()
@@ -306,6 +314,7 @@ public class CharacterMotor : MonoBehaviour
 		_rseSprint.action += Sprint;
 		_rseThrow.action += Throw;
         _rseLit_Unlit.action += Lit_Unlit;
+		_rseCraftTorch.action += CraftTorch;
     }
 
 	private void OnDisable()
@@ -316,6 +325,7 @@ public class CharacterMotor : MonoBehaviour
 		_rseSprint.action -= Sprint;
 		_rseThrow.action -= Throw;
 		_rseLit_Unlit.action -= Lit_Unlit;
+		_rseCraftTorch.action -= CraftTorch;
 	}
 
 	private void Move(Vector2 input)
@@ -398,4 +408,14 @@ public class CharacterMotor : MonoBehaviour
 		GetComponentInChildren<S_Torch>().ChangeLightState();
 
     }
+
+	private void CraftTorch()
+	{
+		if (torchInHand == true)
+		{
+			GameObject _newTorch = Instantiate(_torchPrefab, _torchSpawner.transform);
+			_newTorch.transform.position = _torchSpawner.transform.position;
+			_newTorch.transform.rotation = _torchSpawner.transform.rotation;
+		}
+	}
 }
