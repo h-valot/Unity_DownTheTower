@@ -1,4 +1,5 @@
 ﻿using NaughtyAttributes;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class CharacterMotor : MonoBehaviour
@@ -10,11 +11,17 @@ public class CharacterMotor : MonoBehaviour
 
 	[Header("External references")]
 	[SerializeField] private CharacterConfig _characterConfig;
+	[SerializeField] private Camera _mainCamera;
 	[SerializeField] private RSE_Move _rseMove;
 	[SerializeField] private RSE_Look _rseLook;
 	[SerializeField] private RSE_Jump _rseJump;
 	[SerializeField] private RSE_Sprint _rseSprint;
-	[SerializeField] private RSO_ControlScheme _rsoControlScheme;
+    [SerializeField] private RSE_Throw _rseThrow;
+    [SerializeField] private RSE_Lit_Unlit _rseLit_Unlit;
+    [SerializeField] private RSE_CraftTorch _rseCraftTorch;
+    [SerializeField] private RSO_ControlScheme _rsoControlScheme;
+	[SerializeField] private GameObject _torchPrefab;
+	[SerializeField] private GameObject _torchSpawner;
 	[SerializeField] private RSO_PlayerTransform _rsoPlayerTranform;
 
 	// ----- CINEMACHINE -----
@@ -25,7 +32,7 @@ public class CharacterMotor : MonoBehaviour
 	// speed
 	[ShowNonSerializedField] private bool _isSprinting;
 	[ShowNonSerializedField] private Vector2 _moveInput;
-	[ShowNonSerializedField] private float _speed;	
+	[ShowNonSerializedField] private float _speed;
 	[ShowNonSerializedField] private float _targetSpeed;
 	[ShowNonSerializedField] private float _animationBlend;
 	[ShowNonSerializedField] private float _slopePercentage;
@@ -52,16 +59,14 @@ public class CharacterMotor : MonoBehaviour
 	private int _animFreeFall;
 	private int _animMotionSpeed;
 
-	// ----- PRIVATE VARIABLES -----
-	private GameObject _mainCamera;
-	private bool _groundedCheckLocked;
+    // ----- PUBLIC VARIABLES -----
 
+	public bool torchInHand;
 
-	private void Awake()
-	{
-		// get a reference to our main camera if null
-		_mainCamera ??= GameObject.FindGameObjectWithTag("MainCamera");
-	}
+    // ----- PRIVATE VARIABLES -----
+
+    private bool _groundedCheckLocked;
+
 
 	private void Start()
 	{
@@ -97,7 +102,7 @@ public class CharacterMotor : MonoBehaviour
 		// down vector
 		Gizmos.color = Color.red;
 		Gizmos.DrawLine(
-			new Vector3(transform.position.x, transform.position.y - _characterConfig.groundedOffset, transform.position.z), 
+			new Vector3(transform.position.x, transform.position.y - _characterConfig.groundedOffset, transform.position.z),
 			transform.position + (transform.TransformDirection(Vector3.down).normalized * _characterConfig.groundedRadius)
 		);
 	}
@@ -136,7 +141,7 @@ public class CharacterMotor : MonoBehaviour
 			{
 				_slopePercentage *= -1;
 			}
-			
+
 		}
 
 		// update animator
@@ -152,7 +157,7 @@ public class CharacterMotor : MonoBehaviour
 			_groundedCheckLocked = true;
 		}
 
-		if (_isGrounded 
+		if (_isGrounded
 			&& _groundedCheckLocked)
 		{
 			_groundedCheckLocked = false;
@@ -233,7 +238,7 @@ public class CharacterMotor : MonoBehaviour
 		float currentSpeed = _speed;
 
 		// handle air control
-		if (!_isGrounded) 
+		if (!_isGrounded)
 		{
 			targetDirection = _lastGroundedDirection + (targetDirection * _characterConfig.airSpeed);
 			currentSpeed = _lastGroundedSpeed;
@@ -311,7 +316,10 @@ public class CharacterMotor : MonoBehaviour
 		_rseLook.action += Look;
 		_rseJump.action += Jump;
 		_rseSprint.action += Sprint;
-	}
+		_rseThrow.action += Throw;
+        _rseLit_Unlit.action += Lit_Unlit;
+		_rseCraftTorch.action += CraftTorch;
+    }
 
 	private void OnDisable()
 	{
@@ -319,6 +327,9 @@ public class CharacterMotor : MonoBehaviour
 		_rseLook.action -= Look;
 		_rseJump.action -= Jump;
 		_rseSprint.action -= Sprint;
+		_rseThrow.action -= Throw;
+		_rseLit_Unlit.action -= Lit_Unlit;
+		_rseCraftTorch.action -= CraftTorch;
 	}
 
 	private void Move(Vector2 input)
@@ -385,6 +396,30 @@ public class CharacterMotor : MonoBehaviour
 		if (animationEvent.animatorClipInfo.weight > 0.5f)
 		{
 			AudioSource.PlayClipAtPoint(_characterConfig.landingAudioClip, transform.TransformPoint(_controller.center), _characterConfig.audioVolume);
+		}
+	}
+
+	private void Throw()
+	{
+		Ray r = _mainCamera.ScreenPointToRay(Input.mousePosition);
+
+		Vector3 dir = r.GetPoint(1) - r.GetPoint(0);
+		GetComponentInChildren<S_Torch>().ThrowTorch(dir);
+	}
+
+	private void Lit_Unlit()
+	{
+		GetComponentInChildren<S_Torch>().ChangeLightState();
+
+    }
+
+	private void CraftTorch()
+	{
+		if (torchInHand == true)
+		{
+			GameObject _newTorch = Instantiate(_torchPrefab, _torchSpawner.transform);
+			_newTorch.transform.position = _torchSpawner.transform.position;
+			_newTorch.transform.rotation = _torchSpawner.transform.rotation;
 		}
 	}
 }

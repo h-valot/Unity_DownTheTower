@@ -5,52 +5,64 @@ using UnityEngine;
 
 public class S_Torch : MonoBehaviour
 {
-    [SerializeField] private Light torchLight;
-    [SerializeField] private int torchIntensity;
-    private Camera playerCam;
-    [SerializeField] private GameObject ThrowTorchPrefab;
-    private Rigidbody torchRigidbody;
-        
-    // Start is called before the first frame update
+    [Header("Internal References")]
+    [SerializeField] private Light _torchLight;
+
+    [Header("Torch Variables")]
+    [SerializeField] private int _torchIntensity;
+    [SerializeField] private int _litDuration;
+
+    // ----- PRIVATE VARIABLES -----
+    private Rigidbody _torchRigidbody;
+    private bool _canThrow = true;
+
+    // Start is called before the first frame update²
     void Start()
     {
-        playerCam = Camera.main;
-        torchRigidbody = gameObject.GetComponent<Rigidbody>();
+        _torchLight.intensity = _torchIntensity;
+        _torchRigidbody = gameObject.GetComponent<Rigidbody>();
+        _torchRigidbody.constraints = RigidbodyConstraints.FreezeAll;
+
     }
 
-    void ChangeLightState() // Function to call to lit or unlit the torch
+    public void ChangeLightState() // Function to call to lit or unlit the torch
     {
-        if (torchLight.GetComponent<Light>().enabled == true) // Si lit, unlit la torche
+        if (_canThrow == true)
         {
-            torchLight.GetComponent<Light>().enabled = false;
-        }  
-        else
-        {
-            torchLight.GetComponent<Light>().enabled = true; // Si Unlit, lit la torche
+            if (_torchLight.GetComponent<Light>().enabled == true) // Si lit, unlit la torche
+            {
+                _torchLight.GetComponent<Light>().enabled = false;
+            }
+            else
+            {
+                _torchLight.GetComponent<Light>().enabled = true; // Si Unlit, lit la torche
+            }
+            return;
         }
-        return;
     }
 
-    void ThrowTorch(Vector3 throwForward)
+    public void ThrowTorch(Vector3 _throwForward)
     {
-        Ray r = playerCam.ScreenPointToRay(Input.mousePosition);
+        if (_canThrow == true)
+        {
+            gameObject.transform.parent = null;
+            _torchRigidbody.constraints = RigidbodyConstraints.None;
+            gameObject.GetComponent<Rigidbody>().velocity = _throwForward * 10;
+            _canThrow = false;
 
-        Vector3 dir = r.GetPoint(1) - r.GetPoint(0);
-        torchRigidbody.constraints = RigidbodyConstraints.None;
-        ThrowTorchPrefab.GetComponent<Rigidbody>().velocity = throwForward * 5;
-        
+            StartCoroutine(WaitAndDestroyTorch(_litDuration));
+        }
+
+    }
+
+    IEnumerator WaitAndDestroyTorch(int _time)
+    {
+        yield return new WaitForSeconds(_time);
+        Destroy(gameObject);
     }
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKeyDown("e"))
-        {
-            ChangeLightState();
-        }
 
-        if (Input.GetKeyDown("g"))
-        {
-            
-        }
     }
 }
