@@ -4,14 +4,20 @@ using UnityEngine;
 public class CharacterConfig : ScriptableObject
 {
 	[Header("Player")]
-	[Tooltip("Move speed of the character in m/s")]
+	[Tooltip("Move speed of the character")]
 	public float moveSpeed = 3.0f;
 
-	[Tooltip("Sprint speed of the character in m/s")]
+	[Tooltip("Sprint speed of the character")]
 	public float sprintSpeed = 6.0f;
 
-	[Tooltip("Speed of the character in air is m/s")]
+	[Tooltip("Speed of the character in air")]
 	[Range(0f, 1f)] public float airSpeed = 0.6f;
+
+	[Tooltip("Percentage of character speed when ascending")]
+	public AnimationCurve uphillDeceleration;
+
+	[Tooltip("Percentage of character speed when descending")]
+	public AnimationCurve downhillAcceleration;
 
 	[Tooltip("How fast the character turns to face movement direction")]
 	[Range(0.0f, 0.3f)] public float rotationSmoothTime = 0.12f;
