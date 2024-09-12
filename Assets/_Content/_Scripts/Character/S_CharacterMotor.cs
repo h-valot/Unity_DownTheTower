@@ -489,13 +489,12 @@ public class CharacterMotor : MonoBehaviour
 		Ray r = _mainCamera.ScreenPointToRay(Input.mousePosition);
 
 		Vector3 dir = r.GetPoint(1) - r.GetPoint(0);
-		GetComponentInChildren<S_Torch>().ThrowTorch(dir);
+		GetComponentInChildren<Torch>().ThrowTorch(dir);
 	}
 
 	private void Lit_Unlit()
 	{
-		GetComponentInChildren<S_Torch>().ChangeLightState();
-
+		GetComponentInChildren<Torch>().ChangeLightState();
     }
 
 	private void CraftTorch()

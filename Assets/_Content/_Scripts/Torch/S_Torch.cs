@@ -1,9 +1,7 @@
 using System.Collections;
-using System.Collections.Generic;
-using UnityEditor.SceneManagement;
 using UnityEngine;
 
-public class S_Torch : MonoBehaviour
+public class Torch : MonoBehaviour
 {
     [Header("Internal References")]
     [SerializeField] private Light _torchLight;
@@ -16,8 +14,7 @@ public class S_Torch : MonoBehaviour
     private Rigidbody _torchRigidbody;
     private bool _canThrow = true;
 
-    // Start is called before the first frame update²
-    void Start()
+    private void Start()
     {
         _torchLight.intensity = _torchIntensity;
         _torchRigidbody = gameObject.GetComponent<Rigidbody>();
@@ -55,14 +52,9 @@ public class S_Torch : MonoBehaviour
 
     }
 
-    IEnumerator WaitAndDestroyTorch(int _time)
+    private IEnumerator WaitAndDestroyTorch(int _time)
     {
         yield return new WaitForSeconds(_time);
         Destroy(gameObject);
-    }
-    // Update is called once per frame
-    void Update()
-    {
-
     }
 }
