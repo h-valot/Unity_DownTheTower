@@ -13,8 +13,10 @@ public class CharacterInput : MonoBehaviour
 	[SerializeField] private RSE_Jump _rseJump;
 	[SerializeField] private RSE_Sprint _rseSprint;
 	[SerializeField] private RSO_ControlScheme _rsoControlScheme;
+	[SerializeField] private RSE_Throw _rseThrow;
+    [SerializeField] private RSE_Lit_Unlit _rseLit_Unlit;
 
-	[Header("Debugging")]
+    [Header("Debugging")]
 	[ReadOnly] public Vector2 move;
 	[ReadOnly] public Vector2 look;
 	[ReadOnly] public bool sprint;
@@ -72,5 +74,16 @@ public class CharacterInput : MonoBehaviour
 	{
 		// set cursor state
 		Cursor.lockState = hasFocus ? CursorLockMode.Locked : CursorLockMode.None;
+	}
+
+	public void OnThrow(InputValue value)
+	{
+		_rseThrow.Call();
+	}
+
+	public void OnLit_Unlit()
+	{
+		_rseLit_Unlit.Call();
+		Debug.Log("Action demandé");
 	}
 }
