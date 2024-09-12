@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class PlaceableData
+public class PermanentData
 {
 	public Transform transform;
 }
