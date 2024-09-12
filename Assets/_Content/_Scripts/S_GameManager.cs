@@ -10,7 +10,8 @@ public class GameManager : MonoBehaviour
 	private void Start()
 	{
 		Restart();
-	}
+        Cursor.lockState = CursorLockMode.Locked;
+    }
 
 	private void Restart()
 	{
