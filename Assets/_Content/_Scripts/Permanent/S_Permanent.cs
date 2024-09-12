@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class Placeable : MonoBehaviour
+public class Permanent : MonoBehaviour
 {
 	// empty class for the moment
 	// see Placeable.cs for more informations

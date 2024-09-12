@@ -1,10 +1,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlaceableSaver : MonoBehaviour
+public class PermanentSaver : MonoBehaviour
 {
-	public List<Placeable> placeables;
-	public List<PlaceableData> placeableDatas;
+	public List<Permanent> placeables;
+	public List<PermanentData> placeableDatas;
 
 	public void Save()
 	{
