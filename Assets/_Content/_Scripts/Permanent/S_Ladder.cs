@@ -1,20 +1,23 @@
 using DG.Tweening;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
+using static UnityEngine.UI.Image;
 
 public class Ladder : MonoBehaviour
 {
     [SerializeField] private GameObject _ladderMesh;
     [SerializeField] private GameObject _TPTriggerTop;
     [SerializeField] private GameObject _TPTriggerBottom;
-    [SerializeField] private float _maxHeight = 4;
+    [SerializeField] private GameObject _tippyTop;
+    [SerializeField] private float _maxHeight;
+    [SerializeField] private float _additionalRaycastHeight;
     [SerializeField] private LayerMask _layersToIgnore;
 
     private Vector3 _bottomPos;
-    private Vector3 _topPos;
-    private bool _isPlaced = false;
-    private int _cringeIndex = 0;
+    private Vector3 _topHitPos;
 
     // Start is called before the first frame update
     void Start()
@@ -31,38 +34,95 @@ public class Ladder : MonoBehaviour
     private void SpawnLadder()
     {
         _bottomPos = transform.position;
+        _tippyTop.transform.position = new Vector3(_bottomPos.x, _maxHeight, _bottomPos.z);
         _ladderMesh.transform.DOScaleY(_maxHeight / 2, 1);
         _ladderMesh.transform.DOMoveY(transform.position.y + (_maxHeight / 2), 1).OnComplete(() => Falling());
     }
 
     private void Falling()
     {
-        transform.DOLocalRotate(new Vector3(180,transform.rotation.eulerAngles.y,0), 2).OnUpdate(() => CastRayOnUpdate());
+        transform.DOLocalRotate(new Vector3(180,transform.rotation.eulerAngles.y,0), 2).OnUpdate(() => PlacementRay());
     }
 
-    private void CastRayOnUpdate()
+    [Tooltip("Raycast aligned with the ladder, meant to stop the ladder from falling further once it collides with something.")]
+    private void PlacementRay()
     {
         RaycastHit hit;
         Vector3 originPos = new Vector3(transform.position.x, transform.position.y + 0.2f, transform.position.z);
         if (Physics.Raycast(originPos, transform.up, out hit, _maxHeight, ~(_layersToIgnore)))
-        {   
+        {
             transform.DOKill();
-            _isPlaced = true;
-            _topPos = hit.point;
-            if(transform.rotation.eulerAngles.x <= 45)
+            _topHitPos = hit.point;
+            _tippyTop.transform.Rotate(- transform.rotation.eulerAngles.x, 0, 0);
+            Debug.Log("Placed. Angle: " + transform.rotation.eulerAngles.x + ", Has wall: " + ForwardRay().ToString());
+            if (transform.rotation.eulerAngles.x <= 45 && !ForwardRay())
             {
+                Debug.Log("Setting up to TP");
                 SetUpTP();
             }
         }
-        
+
+    }
+
+    [Tooltip("Raycast that checks that there are no walls at the top of the ladder.")]
+    private bool ForwardRay()
+    {
+        Vector3 originPos = new Vector3(_tippyTop.transform.position.x - 0.5f, _tippyTop.transform.position.y + _additionalRaycastHeight, _tippyTop.transform.position.z);
+        return Physics.Raycast(originPos, _tippyTop.transform.forward, 2, ~(_layersToIgnore));
     }
 
     private void SetUpTP()
     {
+        // activate trigger zones for top and bottom of ladder
         _TPTriggerTop.SetActive(true);
         _TPTriggerBottom.SetActive(true);
-        _TPTriggerTop.GetComponent<LadderTP>().SetVariables(_topPos, _bottomPos - transform.forward, false);
-        _TPTriggerBottom.GetComponent<LadderTP>().SetVariables(_bottomPos, _topPos + transform.forward, true);
+
+        // pass on values to trigger zones (origin, destination, isBottom)
+        _TPTriggerTop.GetComponent<LadderTP>().SetVariables(_topHitPos, _bottomPos - transform.forward, false);
+        _TPTriggerBottom.GetComponent<LadderTP>().SetVariables(_bottomPos, PickBestTeleportPoint(), true);
+    }
+    
+    private Vector3 PickBestTeleportPoint()
+    {
+        List<Vector3> hitlist = new List<Vector3>();
+
+        // left raycast
+        CastRayAndAddToList(hitlist, _tippyTop.transform.position + new Vector3(-0.5f, _additionalRaycastHeight, 0.5f));
+        Debug.Log(_tippyTop.transform.position.ToString());
+
+        // center raycast
+        CastRayAndAddToList(hitlist, _tippyTop.transform.position + new Vector3(0, _additionalRaycastHeight, 1));
+
+        // right raycast
+        CastRayAndAddToList(hitlist, _tippyTop.transform.position + new Vector3(0.5f, _additionalRaycastHeight, 0.5f));
+
+        // returns shortest vector
+        return GetShortestVectorToTop(hitlist);
     }
 
+    private void CastRayAndAddToList(List<Vector3> hitList, Vector3 origin)
+    {
+        RaycastHit hit;
+        if (Physics.Raycast(origin, -_tippyTop.transform.up, out hit, _maxHeight, ~(_layersToIgnore)))
+        {
+            hitList.Add(hit.point);
+        }
+    }
+
+    private Vector3 GetShortestVectorToTop(List<Vector3> hitList)
+    {
+        Vector3 shortest = _tippyTop.transform.position + new Vector3(0,0.5f,0);
+        if(hitList.Count > 0 )
+        {
+             hitList.ElementAt(0);
+            for (int i = 1; i < hitList.Count; i++)
+            {
+                if ((_tippyTop.transform.position - shortest).sqrMagnitude > (_tippyTop.transform.position - hitList.ElementAt(i)).sqrMagnitude)
+                {
+                    shortest = hitList.ElementAt(i);
+                }
+            }
+        }
+        return shortest;
+    }
 }

@@ -237,6 +237,37 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8eb9daa02bad9de418962b4b2005e291, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &5264941065734889905
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3953888267565371105}
+  m_Layer: 0
+  m_Name: TippyTop
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3953888267565371105
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5264941065734889905}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7874597281801129275}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &7852830467894126418
 GameObject:
   m_ObjectHideFlags: 0
@@ -270,6 +301,7 @@ Transform:
   - {fileID: 6926773669229438041}
   - {fileID: 6481429343032634344}
   - {fileID: 5716568214845695531}
+  - {fileID: 3953888267565371105}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &401168901208985354
@@ -287,7 +319,9 @@ MonoBehaviour:
   _ladderMesh: {fileID: 1809890234750479058}
   _TPTriggerTop: {fileID: 1405004917174353549}
   _TPTriggerBottom: {fileID: 4001296393094293437}
+  _tippyTop: {fileID: 5264941065734889905}
   _maxHeight: 4
+  _additionalRaycastHeight: 0.5
   _layersToIgnore:
     serializedVersion: 2
     m_Bits: 68

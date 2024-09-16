@@ -18,7 +18,6 @@ public class LadderTP : MonoBehaviour
             {
                 if (Input.GetKey(KeyCode.UpArrow))
                 {
-                    Debug.Log("Up.");
                     _character.transform.position = _teleportTo;
                 }
             }
@@ -26,7 +25,6 @@ public class LadderTP : MonoBehaviour
             {
                 if (Input.GetKey(KeyCode.DownArrow))
                 {
-                    Debug.Log("Down.");
                     _character.transform.position = _teleportTo;
                 }
             }
