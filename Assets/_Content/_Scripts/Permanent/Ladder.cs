@@ -25,22 +25,19 @@ public class Ladder : MonoBehaviour
     {
         ladderMesh.transform.DOScaleY(maxHeight / 2, 1);
         ladderMesh.transform.DOMoveY(transform.position.y + (maxHeight / 2), 1).OnComplete(() => Falling());
-        Debug.Log(transform.rotation.ToString());
-        Debug.Log(transform.forward.ToString());
     }
 
     private void Falling()
     {
-        transform.DORotate(transform.forward * 90, 1).OnUpdate(() => CastRayOnUpdate());
+        transform.DOLocalRotate(new Vector3(180,transform.rotation.eulerAngles.y,0), 2).OnUpdate(() => CastRayOnUpdate());
     }
 
     private void CastRayOnUpdate()
     {
         RaycastHit hit;
-        if (Physics.Raycast(transform.position, transform.up, out hit, maxHeight, ~(layersToIgnore)))
-        {
-            Debug.Log(hit.collider.gameObject.name);
-            
+        Vector3 originPos = new Vector3(transform.position.x, transform.position.y + 0.2f, transform.position.z);
+        if (Physics.Raycast(originPos, transform.up, out hit, maxHeight, ~(layersToIgnore)))
+        {   
             transform.DOKill();
         }
         
