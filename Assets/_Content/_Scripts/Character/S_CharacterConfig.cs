@@ -25,8 +25,11 @@ public class CharacterConfig : ScriptableObject
 	[Tooltip("Acceleration and deceleration")]
 	public float speedChangeRate = 10.0f;
 
+    [Tooltip("Time to craft the torch")]
+    public int timeToCraft;
 
-	[Space(10)]
+
+    [Space(10)]
 	[Tooltip("The height the player can jump")]
 	public float jumpHeight = 1.2f;
 
@@ -53,9 +56,11 @@ public class CharacterConfig : ScriptableObject
 	[Tooltip("What layers the character uses as ground")]
 	public LayerMask groundLayers;
 
+	[Header("Player Spawn")]
+	[Tooltip("Spawn the player with a torch already in hand")]
+	public bool torchInHand;
 
-
-	[Header("Cinemachine")]
+    [Header("Cinemachine")]
 	[Tooltip("How far in degrees can you move the camera up")]
 	public float topClamp = 70.0f;
 

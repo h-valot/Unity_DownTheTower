@@ -7,9 +7,6 @@ public class TorchConfig : ScriptableObject
     [Tooltip("Intensity of the light")]
     public int torchIntensity;
 
-    [Tooltip("Time to craft the torch")]
-    public int timeToCraft;
-
     [Tooltip("Lit duration when on ground")]
     public int litDuration;
 

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 
-public class S_Torch : MonoBehaviour
+public class Torch : MonoBehaviour
 {
     [Header("Internal References")]
     [SerializeField] private Light _torchLight;
@@ -32,14 +32,11 @@ public class S_Torch : MonoBehaviour
         {
             if (_torchLight.enabled == true) // Si lit, unlit la torche
             {
-                _torchLight.enabled = false;
-                _litBody.material = _unlitMaterial;
-                
+                StartCoroutine(UnlitTorch(_torchConfig.timeToUnlit));
             }
             else
             {
-                _torchLight.enabled = true; // Si Unlit, lit la torche
-                _litBody.material = _litMaterial;
+                StartCoroutine(LitTorch(_torchConfig.timeToLit));
             }
             return;
         }
@@ -59,6 +56,20 @@ public class S_Torch : MonoBehaviour
                 StartCoroutine(WaitAndDestroyTorch(_torchConfig.litDuration));
             }
         }
+    }
+
+    IEnumerator LitTorch(int _time)
+    {
+        yield return new WaitForSeconds(_time);
+        _torchLight.enabled = true; // Si Unlit, lit la torche
+        _litBody.material = _litMaterial;
+    }
+
+    IEnumerator UnlitTorch(int _time)
+    {
+        yield return new WaitForSeconds(_time);
+        _torchLight.enabled = false;
+        _litBody.material = _unlitMaterial;
     }
 
     IEnumerator WaitAndDestroyTorch(int _time)
