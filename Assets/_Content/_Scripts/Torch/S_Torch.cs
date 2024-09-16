@@ -7,10 +7,7 @@ public class S_Torch : MonoBehaviour
 {
     [Header("Internal References")]
     [SerializeField] private Light _torchLight;
-
-    [Header("Torch Variables")]
-    [SerializeField] private int _torchIntensity;
-    [SerializeField] private int _litDuration;
+    [SerializeField] private TorchConfig _torchConfig; 
 
     // ----- PRIVATE VARIABLES -----
     private Rigidbody _torchRigidbody;
@@ -19,7 +16,7 @@ public class S_Torch : MonoBehaviour
     // Start is called before the first frame update²
     void Start()
     {
-        _torchLight.intensity = _torchIntensity;
+        _torchLight.intensity = _torchConfig.torchIntensity;
         _torchRigidbody = gameObject.GetComponent<Rigidbody>();
         _torchRigidbody.constraints = RigidbodyConstraints.FreezeAll;
 
@@ -29,13 +26,13 @@ public class S_Torch : MonoBehaviour
     {
         if (_canThrow == true)
         {
-            if (_torchLight.GetComponent<Light>().enabled == true) // Si lit, unlit la torche
+            if (_torchLight.enabled == true) // Si lit, unlit la torche
             {
-                _torchLight.GetComponent<Light>().enabled = false;
+                _torchLight.enabled = false;
             }
             else
             {
-                _torchLight.GetComponent<Light>().enabled = true; // Si Unlit, lit la torche
+                _torchLight.enabled = true; // Si Unlit, lit la torche
             }
             return;
         }
@@ -50,7 +47,7 @@ public class S_Torch : MonoBehaviour
             gameObject.GetComponent<Rigidbody>().velocity = _throwForward * 10;
             _canThrow = false;
 
-            StartCoroutine(WaitAndDestroyTorch(_litDuration));
+            StartCoroutine(WaitAndDestroyTorch(_torchConfig.litDuration));
         }
 
     }

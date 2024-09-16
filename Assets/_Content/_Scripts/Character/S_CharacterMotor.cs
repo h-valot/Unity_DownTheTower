@@ -415,7 +415,6 @@ public class CharacterMotor : MonoBehaviour
 		{
 			GameObject _newTorch = Instantiate(_torchPrefab, _torchSpawner.transform);
 			_newTorch.transform.position = _torchSpawner.transform.position;
-			_newTorch.transform.rotation = _torchSpawner.transform.rotation;
 		}
 	}
 }

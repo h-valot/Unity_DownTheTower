@@ -26,12 +26,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1035575013021803281}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 5, z: 0}
+  m_LocalScale: {x: 1.4999999, y: 1.5392, z: 1.5392}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 737660014055088952}
+  m_Father: {fileID: 3539557874267728587}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!108 &1720485948228762332
 Light:
@@ -149,8 +149,7 @@ Transform:
   m_LocalPosition: {x: 0, y: 0.5, z: 0}
   m_LocalScale: {x: 1.5, y: 0.25653332, z: 1.5392}
   m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 3790414532766466559}
+  m_Children: []
   m_Father: {fileID: 8237605278584517131}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &5978870089118318135
@@ -257,6 +256,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 8237605278584517131}
+  - {fileID: 3790414532766466559}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &4567227452422965972
@@ -272,6 +272,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _torchLight: {fileID: 1720485948228762332}
+  _torchConfig: {fileID: 11400000, guid: 0c5c3bc89382c9e439e0ef105c99e62b, type: 2}
   _torchIntensity: 20
   _litDuration: 5
 --- !u!54 &5666824575402529614
