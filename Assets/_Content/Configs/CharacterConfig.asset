@@ -66,11 +66,15 @@ MonoBehaviour:
     m_RotationOrder: 4
   rotationSmoothTime: 0.12
   jumpHeight: 1.2
-  gravity: -15
   jumpDelay: 0
+  edgingSpeedThreshold: 0.5
+  edgingDownRaycastLengthScalar: 2
+  edgingForwardOffsetScalar: 2
+  edgingDotProductThreshold: -0.5
+  gravity: -15
   fallDelay: 0.19
-  lethalHeight: 7
-  stunHeight: 3
+  lethalHeight: 15
+  stunHeight: 9
   stunDuration:
     serializedVersion: 2
     m_Curve:
@@ -95,7 +99,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  slowHeight: 1
+  slowHeight: 6
   slowDuration:
     serializedVersion: 2
     m_Curve:

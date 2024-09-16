@@ -37,14 +37,25 @@ public class CharacterConfig : ScriptableObject
 	[Tooltip("The height the player can jump")]
 	public float jumpHeight = 1.2f;
 
-	[Tooltip("The character uses its own gravity value. The engine default is -9.8f")]
-	public float gravity = -15.0f;
-
 	[Tooltip("Time required to pass before being able to jump again. Set to 0f to instantly jump again")]
 	public float jumpDelay = 0.50f;
 
 
+	[Header("Edging")]
+	[Tooltip("If the character moves below this move speed and gathers others edging properties, snap the character on the edge.")]
+	public float edgingSpeedThreshold = 0.50f;
+
+	[Tooltip("The forward offset scalar of the down ray check.")]
+	public float edgingForwardOffsetScalar = 1.5f;
+
+	[Tooltip("Snap the character to the face if the dot product of the normal of the face touched by the down ray and the down vector of the character is less or equal to this value (vectors dot returns: (1) -1 if they point in completely opposite directions; (2) 0 if the vectors are perpendicular which means a angle of 90 degrees; (3) 1 if they point in exactly the same direction which means a angle of 0 degrees.")]
+	[Range(-0.001f, -1f)] public float edgingDotProductThreshold = -0.5f;
+
+
 	[Header("Fall")]
+	[Tooltip("The character uses its own gravity value. The engine default is -9.8f")]
+	public float gravity = -15.0f;
+
 	[Tooltip("Time required to pass before entering the fall state. Useful for walking down stairs")]
 	public float fallDelay = 0.15f;
 
