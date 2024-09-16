@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.Experimental.GraphView;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 
@@ -13,9 +14,17 @@ public class Torch : MonoBehaviour
     [SerializeField] private Material _unlitMaterial;
     [SerializeField] private TorchConfig _torchConfig;
 
+    // ----- PREVISUALIZER -----
+    [SerializeField] private LineRenderer _lineVisual;
+    [SerializeField] private float _trajectoryTimeStep = 0.05f;
+    [SerializeField] private int _trajectoryStepCount = 15;
+    [SerializeField] private GameObject torchSpawner;
+
+
+
     // ----- PRIVATE VARIABLES -----
     private bool _isActive;
-
+    private Vector3 _velocity;
   
 
     // Start is called before the first frame update²
@@ -52,10 +61,25 @@ public class Torch : MonoBehaviour
                 _torchRigidbody.constraints = RigidbodyConstraints.None;
                 gameObject.GetComponent<Rigidbody>().velocity = _throwForward * 10;
                 _isActive = false;
+                DrawTrajectory();
 
                 StartCoroutine(WaitAndDestroyTorch(_torchConfig.litDuration));
+
             }
         }
+    }
+
+    private void DrawTrajectory()
+    {
+        Vector3[] positions = new Vector3[_trajectoryStepCount];
+        for (int i = 0;  i < _trajectoryStepCount; i++)
+        {
+            float t = i * _trajectoryTimeStep;
+            Vector3 pos = torchSpawner.transform.position + _velocity * t +0.5f * Physics.gravity * t * t;
+        }
+
+        _lineVisual.positionCount = _trajectoryStepCount;
+        _lineVisual.SetPositions(positions);
     }
 
     IEnumerator LitTorch(int _time)

@@ -19,5 +19,7 @@ public class TorchConfig : ScriptableObject
     [Tooltip("Can throw the torch when handled")]
     public bool canThrow;
 
+    [Tooltip("Launch force of the throw")]
+    public float lauchForce;
     
 }
