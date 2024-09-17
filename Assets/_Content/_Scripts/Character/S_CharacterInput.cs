@@ -45,8 +45,11 @@ public class CharacterInput : MonoBehaviour
 		// temp
 		if (Input.GetKeyDown(KeyCode.R))
 		{
-			Vector3 ladderPos = _rsoPlayerTransform.value.position + _rsoPlayerTransform.value.forward * _ladder_spawn_dist;
-            Instantiate(_pfLadder, ladderPos, _rsoPlayerTransform.value.rotation);
+            Vector3 ladderPos = _rsoPlayerTransform.value.position + _rsoPlayerTransform.value.forward * _ladder_spawn_dist;
+            if (Physics.Raycast(ladderPos + new Vector3(0, 0.25f, 0), new Vector3(0, -1, 0), 0.5f))
+            {
+                Instantiate(_pfLadder, ladderPos, _rsoPlayerTransform.value.rotation);
+            }
 		}
 	}
 
