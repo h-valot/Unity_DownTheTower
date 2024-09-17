@@ -402,14 +402,35 @@ public class CharacterMotor : MonoBehaviour
 		else
 		{
 			// - handle air control -
-			float airSpeedModifier = _isJumpEnhanced
+			float airSpeed = _isJumpEnhanced
 				? _characterConfig.enhancedAirControlSpeed
 				: _characterConfig.airControlSpeed;
+
+			// clamp the airSpeed to the max speed
+			float maxSpeed = _isSprinting
+				? _characterConfig.sprintSpeed
+				: _characterConfig.moveSpeed;
+
+			if (_lastGroundedSpeed >= maxSpeed)
+			{
+				_lastGroundedSpeed = maxSpeed;
+				airSpeed = 0;
+			}
+			else if (_lastGroundedSpeed + airSpeed >= maxSpeed)
+			{
+				airSpeed -= maxSpeed - (_lastGroundedSpeed + airSpeed); 
+			}
+
+			// nullify the direction if input's magnitude are smaller than enhanced jump threshol
+			if (_moveInput.magnitude <= _characterConfig.enhancedAirControlThreshold)
+			{
+				direction = Vector3.zero;
+			}
 
 			// - in-air movement -
 			_controller.Move(Time.deltaTime * (
 				_lastGroundedDirection.normalized * _lastGroundedSpeed  // last ground direction and speed to keep the inertia going on
-				+ direction.normalized * airSpeedModifier               // current direction and air control speeds to slightly moves while on air
+				+  direction * airSpeed               					// current direction and air control speeds to slightly moves while on air
 				+ _gravityModifier                                      // and the gravity modifier
 			));
 		}
