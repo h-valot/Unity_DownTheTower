@@ -12,8 +12,15 @@ public class CharacterConfig : ScriptableObject
 	[Tooltip("Sprint speed of the character")]
 	public float sprintSpeed = 6.0f;
 
+	[Header("Air control")]
 	[Tooltip("Speed of the character in air")]
-	[Range(0f, 1f)] public float airSpeed = 0.6f;
+	public float airControlSpeed = 1.0f;
+
+	[Tooltip("While initializing a jump with a currentSpeed below this threshold, the airControlSpeed is increased to enhancedAirControlSpeed.")]
+	public float enhancedAirControlThreshold = 0.2f;
+
+	[Tooltip("Speed of the character in air with the speed boost.")]
+	public float enhancedAirControlSpeed = 3.0f;
 
 
 	[Header("Acceleration and deceletation")]
