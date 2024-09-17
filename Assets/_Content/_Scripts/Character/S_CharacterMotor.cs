@@ -71,7 +71,7 @@ public class CharacterMotor : MonoBehaviour
 
     // ----- PUBLIC VARIABLES -----
 	public bool torchInHand;
-    public GameObject _interactibleObject;
+    public Interactible _interactibleObject;
 
     // ----- PRIVATE VARIABLES -----
     private bool _groundedCheckLocked;

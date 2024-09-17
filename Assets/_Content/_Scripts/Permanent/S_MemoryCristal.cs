@@ -7,7 +7,6 @@ public class MemoryCristal : Interactible
 {
 
     [SerializeField] private GameObject _door;
-    private GameObject _self;
     private bool _doorOpen;
     private Animation _animDoor;
 
@@ -15,14 +14,13 @@ public class MemoryCristal : Interactible
     private void Start()
     {
         _animDoor = _door.GetComponent<Animation>();
-        _self = this.GetComponent<GameObject>();
     }
 
     private void OnTriggerEnter(Collider other)
     {
         if (other.TryGetComponent<CharacterMotor>(out CharacterMotor _player))
         {
-            _player._interactibleObject = _self;
+            _player._interactibleObject = this;
 
               
         }
