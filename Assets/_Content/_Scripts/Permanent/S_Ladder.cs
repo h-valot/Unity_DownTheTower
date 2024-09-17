@@ -34,7 +34,7 @@ public class Ladder : MonoBehaviour
     private void SpawnLadder()
     {
         _bottomPos = transform.position;
-        _tippyTop.transform.position = new Vector3(_bottomPos.x, _maxHeight, _bottomPos.z);
+        _tippyTop.transform.position = new Vector3(_bottomPos.x, _bottomPos.y + _maxHeight, _bottomPos.z);
         _ladderMesh.transform.DOScaleY(_maxHeight / 2, 1);
         _ladderMesh.transform.DOMoveY(transform.position.y + (_maxHeight / 2), 1).OnComplete(() => Falling());
     }
@@ -54,10 +54,8 @@ public class Ladder : MonoBehaviour
             transform.DOKill();
             _topHitPos = hit.point;
             _tippyTop.transform.Rotate(- transform.rotation.eulerAngles.x, 0, 0);
-            Debug.Log("Placed. Angle: " + transform.rotation.eulerAngles.x + ", Has wall: " + ForwardRay().ToString());
             if (transform.rotation.eulerAngles.x <= 45 && !ForwardRay())
             {
-                Debug.Log("Setting up to TP");
                 SetUpTP();
             }
         }
@@ -68,7 +66,7 @@ public class Ladder : MonoBehaviour
     private bool ForwardRay()
     {
         Vector3 originPos = new Vector3(_tippyTop.transform.position.x - 0.5f, _tippyTop.transform.position.y + _additionalRaycastHeight, _tippyTop.transform.position.z);
-        return Physics.Raycast(originPos, _tippyTop.transform.forward, 2, ~(_layersToIgnore));
+        return Physics.Raycast(originPos, _tippyTop.transform.forward, 1, ~(_layersToIgnore));
     }
 
     private void SetUpTP()
@@ -86,15 +84,14 @@ public class Ladder : MonoBehaviour
     {
         List<Vector3> hitlist = new List<Vector3>();
 
-        // left raycast
-        CastRayAndAddToList(hitlist, _tippyTop.transform.position + new Vector3(-0.5f, _additionalRaycastHeight, 0.5f));
-        Debug.Log(_tippyTop.transform.position.ToString());
-
         // center raycast
-        CastRayAndAddToList(hitlist, _tippyTop.transform.position + new Vector3(0, _additionalRaycastHeight, 1));
+        CastRayAndAddToList(hitlist, _tippyTop.transform.position + new Vector3(0, _additionalRaycastHeight, 0) + (_tippyTop.transform.forward));
+
+        // left raycast
+        CastRayAndAddToList(hitlist, _tippyTop.transform.position + (-_tippyTop.transform.right * 0.5f) + new Vector3(0, _additionalRaycastHeight, 0) + (_tippyTop.transform.forward * 0.5f));
 
         // right raycast
-        CastRayAndAddToList(hitlist, _tippyTop.transform.position + new Vector3(0.5f, _additionalRaycastHeight, 0.5f));
+        CastRayAndAddToList(hitlist, _tippyTop.transform.position + (_tippyTop.transform.right * 0.5f) + new Vector3(0, _additionalRaycastHeight, 0) + (_tippyTop.transform.forward * 0.5f));
 
         // returns shortest vector
         return GetShortestVectorToTop(hitlist);
@@ -111,10 +108,11 @@ public class Ladder : MonoBehaviour
 
     private Vector3 GetShortestVectorToTop(List<Vector3> hitList)
     {
+        
         Vector3 shortest = _tippyTop.transform.position + new Vector3(0,0.5f,0);
         if(hitList.Count > 0 )
         {
-             hitList.ElementAt(0);
+            shortest = hitList.ElementAt(0);
             for (int i = 1; i < hitList.Count; i++)
             {
                 if ((_tippyTop.transform.position - shortest).sqrMagnitude > (_tippyTop.transform.position - hitList.ElementAt(i)).sqrMagnitude)
