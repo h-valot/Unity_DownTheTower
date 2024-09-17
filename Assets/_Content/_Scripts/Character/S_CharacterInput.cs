@@ -22,6 +22,8 @@ public class CharacterInput : MonoBehaviour
     [Header("Temp")]
 	[SerializeField] private RSO_PlayerTransform _rsoPlayerTransform;
     [SerializeField] private Ladder _pfLadder;
+	[SerializeField] private PreLadder _pfPreLadder;
+	private PreLadder currentPreLadder;
     [SerializeField] private float _ladder_spawn_dist = 1f;
 
     [Header("Debugging")]
@@ -43,14 +45,24 @@ public class CharacterInput : MonoBehaviour
 	{
 		UpdateControlScheme();
 		// temp
-		if (Input.GetKeyDown(KeyCode.R))
-		{
+		if (Input.GetKeyDown(KeyCode.Mouse1))
+        {
+            currentPreLadder = Instantiate(_pfPreLadder, _rsoPlayerTransform.value.position + _rsoPlayerTransform.value.forward * _ladder_spawn_dist, _rsoPlayerTransform.value.rotation);
+        }
+		if (Input.GetKeyUp(KeyCode.Mouse1))
+        {
+			if (currentPreLadder != null)
+            {
+                Destroy(currentPreLadder);
+                currentPreLadder = null;
+            }
+
             Vector3 ladderPos = _rsoPlayerTransform.value.position + _rsoPlayerTransform.value.forward * _ladder_spawn_dist;
             if (Physics.Raycast(ladderPos + new Vector3(0, 0.25f, 0), new Vector3(0, -1, 0), 0.5f))
             {
                 Instantiate(_pfLadder, ladderPos, _rsoPlayerTransform.value.rotation);
             }
-		}
+        }
 	}
 
 	private void UpdateControlScheme()

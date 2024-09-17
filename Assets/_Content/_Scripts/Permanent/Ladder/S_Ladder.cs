@@ -65,7 +65,7 @@ public class Ladder : MonoBehaviour
     [Tooltip("Raycast that checks that there are no walls at the top of the ladder.")]
     private bool ForwardRay()
     {
-        Vector3 originPos = new Vector3(_tippyTop.transform.position.x - 0.5f, _tippyTop.transform.position.y + _additionalRaycastHeight, _tippyTop.transform.position.z);
+        Vector3 originPos = _tippyTop.transform.position + (-_tippyTop.transform.forward * 0.5f) + new Vector3(0, _additionalRaycastHeight, 0);
         return Physics.Raycast(originPos, _tippyTop.transform.forward, 1, ~(_layersToIgnore));
     }
 
@@ -85,7 +85,7 @@ public class Ladder : MonoBehaviour
         List<Vector3> hitlist = new List<Vector3>();
 
         // center raycast
-        CastRayAndAddToList(hitlist, _tippyTop.transform.position + new Vector3(0, _additionalRaycastHeight, 0) + (_tippyTop.transform.forward));
+        CastRayAndAddToList(hitlist, _tippyTop.transform.position + new Vector3(0, _additionalRaycastHeight, 0) + _tippyTop.transform.forward);
 
         // left raycast
         CastRayAndAddToList(hitlist, _tippyTop.transform.position + (-_tippyTop.transform.right * 0.5f) + new Vector3(0, _additionalRaycastHeight, 0) + (_tippyTop.transform.forward * 0.5f));
