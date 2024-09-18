@@ -9,6 +9,7 @@ public class NewCharacterMotor : MonoBehaviour
 
 	[Header("Scriptable references")]
 	[SerializeField] private NewCharacterConfig _characterConfig;
+	[SerializeField] private RSO_PlayerTransform _rsoPlayerTransform;
 	[SerializeField] private RSO_PlayerDeath _rsoPlayerDeath;
 	[SerializeField] private RSE_Sprint _rseSprint;
 	[SerializeField] private RSE_Look _rseLook;
@@ -24,6 +25,16 @@ public class NewCharacterMotor : MonoBehaviour
 	[ReadOnly] public bool _isJumping;
 	[ReadOnly] public bool _isGrounded;
 	[ReadOnly] public bool _isSprinting;
+
+	// ----- PRIVATE VARIABLES -----
+	private bool _groundedCheckLocked;
+	private Vector3 _lastGroundedPosition;
+	private Vector3 _lastGroundedDirection;
+	private float _lastGroundedSpeed;
+
+	// ----- CONST -----
+	private const float _RIGIDBODY_FORCE_MODIFIER = 10f;
+
 
 	private void Update()
 	{
@@ -50,9 +61,33 @@ public class NewCharacterMotor : MonoBehaviour
 		_rseSprint.action -= Sprint;
 	}
 
+
 	private void CheckGround()
 	{
-		_isGrounded = Physics.Raycast(transform.position, Vector3.down, _characterConfig.groundedRaycastLength);
+		_isGrounded = false;
+
+		Vector3 origin = new Vector3(transform.position.x, transform.position.y + _characterConfig.groundCheckY, transform.position.z);
+		if (Physics.SphereCast(origin, _characterConfig.sphereCastRadius, Vector3.down, out var result, _characterConfig.sphereCastDistance))
+		{
+			_isGrounded = true;
+		}
+
+		// - when the character leaves the ground -
+		if (!_isGrounded && !_groundedCheckLocked)
+		{
+			// save last grounded momentum
+			_lastGroundedSpeed = _moveSpeed;
+			_lastGroundedDirection = transform.forward;
+			_lastGroundedPosition = transform.position;
+
+			_groundedCheckLocked = true;
+		}
+
+		// - when the character touches the ground -
+		if (_isGrounded && _groundedCheckLocked)
+		{
+			_groundedCheckLocked = false;
+		}
 	}
 
 	private void SpeedControl()
@@ -72,23 +107,31 @@ public class NewCharacterMotor : MonoBehaviour
 	private void HandleMovement()
 	{
 		// - variables -
-		Vector3 moveDirection = _orientation.forward * _moveInput.y + _orientation.right * _moveInput.x;
-		float speed;
+		Vector3 direction = _orientation.forward * _moveInput.y + _orientation.right * _moveInput.x;
 
 		// - grounded -
 		if (_isGrounded)
 		{
-			speed = _moveSpeed * 10f;
+			_rigidbody.AddForce(
+				direction.normalized * _moveSpeed * _RIGIDBODY_FORCE_MODIFIER,
+				ForceMode.Force
+			);
 		}
 
 		// - in air -
 		else
 		{
-			speed = _moveSpeed * 10f * _characterConfig.airControlModifier;
+			_rigidbody.AddForce(
+				// last ground direction and speed to keep the inertia going on
+				_lastGroundedDirection.normalized * _lastGroundedSpeed * _RIGIDBODY_FORCE_MODIFIER
+				// current direction and speed reduced by the air control modifier to slightly moves while in air
+				+ direction * _moveSpeed * _characterConfig.airControlModifier * _RIGIDBODY_FORCE_MODIFIER,
+				ForceMode.Force
+			);
 		}
 
-		// - move -
-		_rigidbody.AddForce(moveDirection.normalized * speed, ForceMode.Force);
+		// update rso character transform data
+		if (_rsoPlayerTransform.value != transform) _rsoPlayerTransform.value = transform;
 	}
 
 	private void Move(Vector2 input)

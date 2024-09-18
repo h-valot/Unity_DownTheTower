@@ -78,7 +78,7 @@ public class ThirdPersonCamera : MonoBehaviour
 		if (_rsoPlayerDeath.value) return;
 
 		// cinemachine will follow this target
-		_cinemachineCameraTarget.transform.rotation = Quaternion.Euler(_cinemachineTargetPitch + _characterConfig.cameraAngleOverride, _cinemachineTargetYaw, 0.0f);
+		_cinemachineCameraTarget.transform.rotation = Quaternion.Euler(_cinemachineTargetPitch, _cinemachineTargetYaw, 0.0f);
 
 		// rotate orientation
 		Vector3 viewDirection = _character.position - new Vector3(transform.position.x, _character.position.y, transform.position.z);

@@ -10,23 +10,21 @@ public class NewCharacterConfig : ScriptableObject
 	[Header("Ground")]
 	public float groundedRaycastLength = 1.3f;
 	public float gravity = -9.8f;
+	[Tooltip("0.25 + 0.08 (sphereCastRadius + CC skin width)")]
+	public float groundCheckY = 0.33f;
+	[Tooltip("Radius of area to detect the ground")]
+	public float sphereCastRadius = 0.25f;
+	[Tooltip("How far spherecast moves down from origin point")]
+	public float sphereCastDistance = 0.75f;
 
 	[Header("Jump")]
 	public float jumpHeight;
 	public float jumpCooldown;
 	[Range(0f, 1f)] public float airControlModifier;
 
-	[Header("CAMERA")]
-	[Tooltip("How far in degrees can you move the camera up")]
+	[Header("Camera")]
 	public float topClamp = 70.0f;
-
-	[Tooltip("How far in degrees can you move the camera down")]
 	public float bottomClamp = -60.0f;
-
-	[Tooltip("Additional degress to override the camera. Useful for fine tuning camera position when locked")]
-	public float cameraAngleOverride = 0.0f;
-
-
 	public CameraStyle startingStyle;
 	public float rotationSpeed = 7;
 }
