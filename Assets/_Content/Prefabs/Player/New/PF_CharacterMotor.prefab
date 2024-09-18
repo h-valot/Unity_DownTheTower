@@ -188,9 +188,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _orientation: {fileID: 1967125294990807407}
   _rigidbody: {fileID: 9082802498901928959}
-  _cinemachineCameraTarget: {fileID: 8079376364656704475}
   _characterConfig: {fileID: 11400000, guid: 1940b106405212f469b44119418b1e43, type: 2}
-  _rsoControlScheme: {fileID: 11400000, guid: 08b8e15a7a2491145baa753f14863b03, type: 2}
   _rsoPlayerDeath: {fileID: 11400000, guid: faee3d4fb6d36d5439a3b69f5e064b1e, type: 2}
   _rseSprint: {fileID: 11400000, guid: c137e572374debb4488914fb65cbdf94, type: 2}
   _rseLook: {fileID: 11400000, guid: 96e37ccd82d6cfd43bade6f66c27a479, type: 2}
@@ -198,6 +196,7 @@ MonoBehaviour:
   _rseJump: {fileID: 11400000, guid: d6896f12727744441bfeccf04390e194, type: 2}
   _moveSpeed: 0
   _moveInput: {x: 0, y: 0, z: 0}
+  _gravity: {x: 0, y: 0, z: 0}
   _isJumping: 0
   _isGrounded: 0
   _isSprinting: 0
@@ -226,7 +225,7 @@ Rigidbody:
   m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 1
-  m_Constraints: 0
+  m_Constraints: 112
   m_CollisionDetection: 1
 --- !u!1 &8035248599218380277
 GameObject:

@@ -18,23 +18,12 @@ public class NewCharacterMotor : MonoBehaviour
 	[Header("debug: move")]
 	[ReadOnly] public float _moveSpeed;
 	[ReadOnly] public Vector3 _moveInput;
+	[ReadOnly] public Vector3 _gravity;
 
 	[Header("debug: status")]
 	[ReadOnly] public bool _isJumping;
 	[ReadOnly] public bool _isGrounded;
 	[ReadOnly] public bool _isSprinting;
-
-	// ----- PRIVATE VARIABLES -----
-	// - input -
-	private KeyCode _jumpKey = KeyCode.Space;
-
-	// - move -
-	private Vector3 _moveDirection;
-
-	private void Start()
-	{
-		Initialize();
-	}
 
 	private void Update()
 	{
@@ -61,11 +50,6 @@ public class NewCharacterMotor : MonoBehaviour
 		_rseSprint.action -= Sprint;
 	}
 
-	private void Initialize()
-	{
-		_rigidbody.freezeRotation = true;
-	}
-
 	private void CheckGround()
 	{
 		_isGrounded = Physics.Raycast(transform.position, Vector3.down, _characterConfig.groundedRaycastLength);
@@ -73,9 +57,9 @@ public class NewCharacterMotor : MonoBehaviour
 
 	private void SpeedControl()
 	{
-		_moveSpeed = _isSprinting ? _characterConfig.sprintSpeed : _characterConfig.walkSpeed;
-
+		// - variables -
 		Vector3 flatVelocity = new Vector3(_rigidbody.velocity.x, 0f, _rigidbody.velocity.z);
+		_moveSpeed = _isSprinting ? _characterConfig.sprintSpeed : _characterConfig.walkSpeed;
 
 		// limit velocity if needed
 		if (flatVelocity.magnitude > _moveSpeed)
@@ -85,34 +69,26 @@ public class NewCharacterMotor : MonoBehaviour
 		}
 	}
 
-	private void HandleDrag()
-	{
-		if (_isGrounded)
-		{
-			_rigidbody.drag = _characterConfig.groundDrag;
-		}
-		else
-		{
-			_rigidbody.drag = 0;
-		}
-	}
-
 	private void HandleMovement()
 	{
-		// calculate movement direction
-		_moveDirection = _orientation.forward * _moveInput.y + _orientation.right * _moveInput.x;
+		// - variables -
+		Vector3 moveDirection = _orientation.forward * _moveInput.y + _orientation.right * _moveInput.x;
+		float speed;
 
-		// on ground
+		// - grounded -
 		if (_isGrounded)
 		{
-			_rigidbody.AddForce(_moveDirection.normalized * _moveSpeed * 10f, ForceMode.Force);
+			speed = _moveSpeed * 10f;
 		}
 
-		// in air
-		else if (!_isGrounded)
+		// - in air -
+		else
 		{
-			_rigidbody.AddForce(_moveDirection.normalized * _moveSpeed * 10f * _characterConfig.airControlModifier, ForceMode.Force);
+			speed = _moveSpeed * 10f * _characterConfig.airControlModifier;
 		}
+
+		// - move -
+		_rigidbody.AddForce(moveDirection.normalized * speed, ForceMode.Force);
 	}
 
 	private void Move(Vector2 input)
@@ -130,19 +106,13 @@ public class NewCharacterMotor : MonoBehaviour
 
 		_isJumping = true;
 
-		// reset y velocity
-		_rigidbody.velocity = new Vector3(_rigidbody.velocity.x, 0f, _rigidbody.velocity.z);
-
-		_rigidbody.AddForce(transform.up * _characterConfig.jumpForce, ForceMode.Impulse);
-
-		Invoke(nameof(ResetJump), _characterConfig.jumpCooldown);
-
 		// the square root of H * -2 * G = how much velocity needed to reach desired height
-		// _gravityModifier.y = Mathf.Sqrt(_characterConfig.jumpHeight * -2f * _characterConfig.gravity);
-	}
+		_rigidbody.velocity = new Vector3(
+			_rigidbody.velocity.x,
+			Mathf.Sqrt(_characterConfig.jumpHeight * -2f * _characterConfig.gravity),   
+			_rigidbody.velocity.z
+		);
 
-	private void ResetJump()
-	{
 		_isJumping = false;
 	}
 

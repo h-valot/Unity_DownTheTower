@@ -9,10 +9,10 @@ public class NewCharacterConfig : ScriptableObject
 
 	[Header("Ground")]
 	public float groundedRaycastLength = 1.3f;
-	public float groundDrag;
+	public float gravity = -9.8f;
 
 	[Header("Jump")]
-	public float jumpForce;
+	public float jumpHeight;
 	public float jumpCooldown;
 	[Range(0f, 1f)] public float airControlModifier;
 
