@@ -8,6 +8,7 @@ public class PreLadder : MonoBehaviour
 {
     [SerializeField] private RSO_PlayerTransform _rsoPlayerTransform;
     [SerializeField] private Ladder _pfLadder;
+    [SerializeField] private MeshRenderer _meshToColor;
     [SerializeField] private float _minDistFromPlayer;
     [SerializeField] private float _maxDistFromPlayer;
     [SerializeField] private float _minCameraAngle;
@@ -26,7 +27,7 @@ public class PreLadder : MonoBehaviour
     private void UpdatePosition()
     {
         transform.position = _rsoPlayerTransform.value.position + _rsoPlayerTransform.value.forward * GetDistanceWithCamera();
-        _isPlaceable = !Physics.Raycast(transform.position + new Vector3(0, 0.25f, 0), new Vector3(0, -1, 0), 0.5f);
+        UpdateColor(CheckIfPlaceable());
     }
 
     private float GetDistanceWithCamera()
@@ -49,11 +50,27 @@ public class PreLadder : MonoBehaviour
         }
     }
 
-    private void CheckIfPlaceable()
+    private bool CheckIfPlaceable()
     {
         // Cast 1 = Check if there is ground under the ladder ; Cast 2 = Check that there is enough room above
-        _isPlaceable = Physics.Raycast(transform.position + new Vector3(0, 0.25f, 0), new Vector3(0, -1, 0), 0.5f) &&
+        return Physics.Raycast(transform.position + new Vector3(0, 0.25f, 0), new Vector3(0, -1, 0), 0.5f) &&
             !Physics.Raycast(transform.position + new Vector3(0, 0.25f, 0), new Vector3(0, 1, 0), _ladderHeight - 0.25f);
 
+    }
+
+    private void UpdateColor(bool newIsPlaceable)
+    {
+        if (newIsPlaceable != _isPlaceable)
+        {
+            _isPlaceable = newIsPlaceable;
+            if(!_isPlaceable)
+            {
+                _meshToColor.material.SetFloat("_colorSwitch", 1f);
+            }
+            else
+            {
+                _meshToColor.material.SetFloat("_colorSwitch", 0f);
+            }
+        }
     }
 }
