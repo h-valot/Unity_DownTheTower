@@ -21,7 +21,8 @@ public class CharacterInput : MonoBehaviour
 
     [Header("Temp")]
 	[SerializeField] private RSO_PlayerTransform _rsoPlayerTransform;
-    [SerializeField] private Ladder _pfLadder;
+	[SerializeField] private PreLadder _pfPreLadder;
+	private PreLadder currentPreLadder;
     [SerializeField] private float _ladder_spawn_dist = 1f;
 
     [Header("Debugging")]
@@ -43,11 +44,19 @@ public class CharacterInput : MonoBehaviour
 	{
 		UpdateControlScheme();
 		// temp
-		if (Input.GetKeyDown(KeyCode.R))
-		{
-			Vector3 ladderPos = _rsoPlayerTransform.value.position + _rsoPlayerTransform.value.forward * _ladder_spawn_dist;
-            Instantiate(_pfLadder, ladderPos, _rsoPlayerTransform.value.rotation);
-		}
+		if (Input.GetKeyDown(KeyCode.Mouse1))
+        {
+            currentPreLadder = Instantiate(_pfPreLadder, _rsoPlayerTransform.value.position + _rsoPlayerTransform.value.forward * _ladder_spawn_dist, _rsoPlayerTransform.value.rotation);
+        }
+		if (Input.GetKeyUp(KeyCode.Mouse1))
+        {
+            currentPreLadder.InstanciateLadder();
+            if (currentPreLadder != null)
+            {
+                Destroy(currentPreLadder.gameObject);
+                currentPreLadder = null;
+            }
+        }
 	}
 
 	private void UpdateControlScheme()
