@@ -3,11 +3,10 @@ using UnityEngine;
 
 public class ThirdPersonCamera : MonoBehaviour
 {
-	[Header("Tweakable values")]
-	[SerializeField] private CameraStyle _currentStyle;
-	[SerializeField] private float _rotationSpeed;
-
 	[Header("Scriptable references")]
+	[SerializeField] private NewCharacterConfig _characterConfig;
+	[SerializeField] private RSO_ControlScheme _rsoControlScheme;
+	[SerializeField] private RSO_PlayerDeath _rsoPlayerDeath;
 	[SerializeField] private RSE_Look _rseLook;
 
 	[Header("External references")]
@@ -18,13 +17,32 @@ public class ThirdPersonCamera : MonoBehaviour
 	[SerializeField] private Rigidbody _rigidbody;
 	[SerializeField] private GameObject _thirdPersonCamera;
 	[SerializeField] private GameObject _aimingCamera;
+	[SerializeField] private Transform _cinemachineCameraTarget;
 
-	[Header("debug: look")]
+	[Header("debug")]
 	[ReadOnly] public Vector2 _lookInput;
+	[ReadOnly] public CameraStyle _currentStyle;
+
+	// ----- PRIVATE VARIABLES -----
+	// - cinemachine - 
+	private float _cinemachineTargetYaw;
+	private float _cinemachineTargetPitch;
+
+	// ----- CONST -----
+	private const float _LOOK_THRESHOLD = 0.01f;
+
+	private void Start()
+	{
+		Initialize();
+	}
 
 	private void Update()
 	{
 		HandleInputs();
+	}
+
+	private void LateUpdate()
+	{
 		HandleCamera();
 	}
 
@@ -38,6 +56,12 @@ public class ThirdPersonCamera : MonoBehaviour
 		_rseLook.action -= Look;
 	}
 
+	private void Initialize()
+	{
+		SwitchCameraStyle(_characterConfig.startingStyle);
+		_cinemachineTargetYaw = _cinemachineCameraTarget.transform.rotation.eulerAngles.y;
+	}
+
 	private void HandleInputs()
 	{
 		if (Input.GetKeyDown(KeyCode.Alpha1)) SwitchCameraStyle(CameraStyle.BASIC);
@@ -46,6 +70,16 @@ public class ThirdPersonCamera : MonoBehaviour
 
 	private void HandleCamera()
 	{
+		// clamp our rotations so our values are limited 360 degrees
+		_cinemachineTargetYaw = Matha.ClampAngle(_cinemachineTargetYaw, float.MinValue, float.MaxValue);
+		_cinemachineTargetPitch = Matha.ClampAngle(_cinemachineTargetPitch, _characterConfig.bottomClamp, _characterConfig.topClamp);
+
+		// stops the camera if the character is dead
+		if (_rsoPlayerDeath.value) return;
+
+		// cinemachine will follow this target
+		_cinemachineCameraTarget.transform.rotation = Quaternion.Euler(_cinemachineTargetPitch + _characterConfig.cameraAngleOverride, _cinemachineTargetYaw, 0.0f);
+
 		// rotate orientation
 		Vector3 viewDirection = _character.position - new Vector3(transform.position.x, _character.position.y, transform.position.z);
 		if (viewDirection != Vector3.zero)
@@ -60,7 +94,7 @@ public class ThirdPersonCamera : MonoBehaviour
 
 			if (inputDirection != Vector3.zero)
 			{
-				_characterGraphics.forward = Vector3.Slerp(_characterGraphics.forward, inputDirection.normalized, Time.deltaTime * _rotationSpeed);
+				_characterGraphics.forward = Vector3.Slerp(_characterGraphics.forward, inputDirection.normalized, Time.deltaTime * _characterConfig.rotationSpeed);
 			}
 		}
 
@@ -86,6 +120,18 @@ public class ThirdPersonCamera : MonoBehaviour
 
 	private void Look(Vector2 input)
 	{
+		// exit, if there is no inputs
+		if (input.sqrMagnitude < _LOOK_THRESHOLD)
+		{
+			return;
+		}
+
 		_lookInput = input;
+
+		// don't multiply mouse input by Time.deltaTime;
+		float deltaTimeMultiplier = _rsoControlScheme.value == "KeyboardMouse" ? 1.0f : Time.deltaTime;
+
+		_cinemachineTargetYaw += input.x * deltaTimeMultiplier;
+		_cinemachineTargetPitch += input.y * deltaTimeMultiplier;
 	}
 }

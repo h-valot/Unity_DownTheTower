@@ -6,11 +6,9 @@ public class NewCharacterMotor : MonoBehaviour
 	[Header("Internal references")]
 	[SerializeField] private Transform _orientation;
 	[SerializeField] private Rigidbody _rigidbody;
-	[SerializeField] private Transform _cinemachineCameraTarget;
 
 	[Header("Scriptable references")]
 	[SerializeField] private NewCharacterConfig _characterConfig;
-	[SerializeField] private RSO_ControlScheme _rsoControlScheme;
 	[SerializeField] private RSO_PlayerDeath _rsoPlayerDeath;
 	[SerializeField] private RSE_Sprint _rseSprint;
 	[SerializeField] private RSE_Look _rseLook;
@@ -27,18 +25,11 @@ public class NewCharacterMotor : MonoBehaviour
 	[ReadOnly] public bool _isSprinting;
 
 	// ----- PRIVATE VARIABLES -----
-	// - cinemachine - 
-	private float _cinemachineTargetYaw;
-	private float _cinemachineTargetPitch;
-
 	// - input -
 	private KeyCode _jumpKey = KeyCode.Space;
 
 	// - move -
 	private Vector3 _moveDirection;
-
-	// ----- CONST -----
-	private const float _LOOK_THRESHOLD = 0.01f;
 
 	private void Start()
 	{
@@ -56,15 +47,9 @@ public class NewCharacterMotor : MonoBehaviour
 		HandleMovement();
 	}
 
-	private void LateUpdate()
-	{
-		HandleCamera();
-	}
-
 	private void OnEnable()
 	{
 		_rseMove.action += Move;
-		_rseLook.action += Look;
 		_rseJump.action += Jump;
 		_rseSprint.action += Sprint;
 	}
@@ -72,7 +57,6 @@ public class NewCharacterMotor : MonoBehaviour
 	private void OnDisable()
 	{
 		_rseMove.action -= Move;
-		_rseLook.action -= Look;
 		_rseJump.action -= Jump;
 		_rseSprint.action -= Sprint;
 	}
@@ -80,8 +64,6 @@ public class NewCharacterMotor : MonoBehaviour
 	private void Initialize()
 	{
 		_rigidbody.freezeRotation = true;
-
-		_cinemachineTargetYaw = _cinemachineCameraTarget.transform.rotation.eulerAngles.y;
 	}
 
 	private void CheckGround()
@@ -138,21 +120,6 @@ public class NewCharacterMotor : MonoBehaviour
 		_moveInput = input;
 	}
 
-	private void Look(Vector2 input)
-	{
-		// exit, if there is no inputs
-		if (input.sqrMagnitude < _LOOK_THRESHOLD)
-		{
-			return;
-		}
-
-		// don't multiply mouse input by Time.deltaTime;
-		float deltaTimeMultiplier = _rsoControlScheme.value == "KeyboardMouse" ? 1.0f : Time.deltaTime;
-
-		_cinemachineTargetYaw += input.x * deltaTimeMultiplier;
-		_cinemachineTargetPitch += input.y * deltaTimeMultiplier;
-	}
-
 	private void Jump()
 	{
 		if (!_isGrounded
@@ -184,16 +151,4 @@ public class NewCharacterMotor : MonoBehaviour
 		_isSprinting = isSprinting;
 	}
 
-	private void HandleCamera()
-	{
-		// clamp our rotations so our values are limited 360 degrees
-		_cinemachineTargetYaw = Matha.ClampAngle(_cinemachineTargetYaw, float.MinValue, float.MaxValue);
-		_cinemachineTargetPitch = Matha.ClampAngle(_cinemachineTargetPitch, _characterConfig.bottomClamp, _characterConfig.topClamp);
-
-		// stops the camera if the character is dead
-		if (_rsoPlayerDeath.value) return;
-
-		// cinemachine will follow this target
-		_cinemachineCameraTarget.transform.rotation = Quaternion.Euler(_cinemachineTargetPitch + _characterConfig.cameraAngleOverride, _cinemachineTargetYaw, 0.0f);
-	}
 }
