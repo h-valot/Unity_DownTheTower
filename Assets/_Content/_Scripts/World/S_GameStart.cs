@@ -5,9 +5,11 @@ public class GameStart : MonoBehaviour
 	[Header("Tweakable values")]
 	[SerializeField] private GameObject _pfPlayer;
 
+	[Header("Scriptable references")]
+	[SerializeField] private RSO_PlayerDeath _rsoPlayerDeath;
+
 	[Header("External references")]
 	[SerializeField] private Transform _levelDesigneSpan;
-	[SerializeField] private RSO_PlayerDeath _rsoPlayerDeath;
 
 	private GameObject _currentCharacter;
 
@@ -31,6 +33,7 @@ public class GameStart : MonoBehaviour
 		Debug.Log($"GAME_START: player instantiated");
 	}
 
+#if UNITY_EDITOR
 	public void OnDrawGizmos()
 	{
 		// display the game start gizmos in editor
@@ -38,4 +41,5 @@ public class GameStart : MonoBehaviour
 		Gizmos.DrawWireSphere(transform.position, 1f);
 		Gizmos.DrawLine(transform.position, 1.5f * transform.forward.normalized + transform.position);
 	}
+#endif
 }

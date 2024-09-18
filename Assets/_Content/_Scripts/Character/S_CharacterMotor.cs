@@ -6,7 +6,6 @@ public class CharacterMotor : MonoBehaviour
 {
 	[Header("Internal references")]
 	[SerializeField] private CharacterController _controller;
-	[SerializeField] private CapsuleCollider _triggerCapsule;
 	[SerializeField] private Animator _animator;
 	[SerializeField] private GameObject _cinemachineCameraTarget;
 
@@ -133,11 +132,11 @@ public class CharacterMotor : MonoBehaviour
 		_cinemachineTargetYaw = _cinemachineCameraTarget.transform.rotation.eulerAngles.y;
 
 		// assign animations params
-		_animSpeed = Animator.StringToHash("Speed");
-		_animJump = Animator.StringToHash("Jump");
-		_animGrounded = Animator.StringToHash("Grounded");
-		_animFreeFall = Animator.StringToHash("FreeFall");
-		_animMotionSpeed = Animator.StringToHash("MotionSpeed");
+		if (_animator) _animSpeed = Animator.StringToHash("Speed");
+		if (_animator) _animJump = Animator.StringToHash("Jump");
+		if (_animator) _animGrounded = Animator.StringToHash("Grounded");
+		if (_animator) _animFreeFall = Animator.StringToHash("FreeFall");
+		if (_animator) _animMotionSpeed = Animator.StringToHash("MotionSpeed");
 
 		// reset our timeouts on start
 		_fallDelayTimer = _characterConfig.fallDelay;
@@ -258,7 +257,7 @@ public class CharacterMotor : MonoBehaviour
 		}
 
 		// update animator
-		_animator.SetBool(_animGrounded, _isGrounded);
+		if (_animator) _animator.SetBool(_animGrounded, _isGrounded);
 
 		if (!_isGrounded
 			&& !_groundedCheckLocked)
@@ -339,12 +338,15 @@ public class CharacterMotor : MonoBehaviour
 			_currentSpeed = _targetSpeed;
 		}
 
-		_animationBlend = Mathf.Lerp(_animationBlend, _targetSpeed, Time.deltaTime * _characterConfig.speedChangeRate);
-		if (_animationBlend < 0.01f) _animationBlend = 0f;
+		if (_animator)
+		{
+			_animationBlend = Mathf.Lerp(_animationBlend, _targetSpeed, Time.deltaTime * _characterConfig.speedChangeRate);
+			if (_animationBlend < 0.01f) _animationBlend = 0f;
 
-		// update animator if using character
-		_animator.SetFloat(_animSpeed, _animationBlend);
-		_animator.SetFloat(_animMotionSpeed, inputMagnitude);
+			// update animator if using character
+			_animator.SetFloat(_animSpeed, _animationBlend);
+			_animator.SetFloat(_animMotionSpeed, inputMagnitude);
+		}
 	}
 
 	private void Move()
@@ -446,12 +448,12 @@ public class CharacterMotor : MonoBehaviour
 			// reset the fall delay timer
 			_fallDelayTimer = _characterConfig.fallDelay;
 
-			_animator.SetBool(_animFreeFall, false);
+			if (_animator) _animator.SetBool(_animFreeFall, false);
 
 			// the jump function can be called at any moment
 			// to prevent the following line to cancel the jump animation
 			// it is commented and the animation param bool have been switch to a trigger
-			// _animator.SetBool(_animJump, false);
+			// if (_animator) _animator.SetBool(_animJump, false);
 
 			// stop our velocity dropping infinitely when grounded
 			if (_gravityModifier.y < 0.0f)
@@ -477,7 +479,7 @@ public class CharacterMotor : MonoBehaviour
 			}
 			else
 			{
-				_animator.SetBool(_animFreeFall, true);
+				if (_animator) _animator.SetBool(_animFreeFall, true);
 			}
 		}
 
@@ -594,7 +596,7 @@ public class CharacterMotor : MonoBehaviour
 
 		// this function can be called at any moment
 		// to prevent the jump animation to be cancelled, the animation param bool have been switch to a trigger
-		_animator.SetTrigger(_animJump);
+		if (_animator) _animator.SetTrigger(_animJump);
 	}
 
 	private void Sprint(bool isSprinting)
