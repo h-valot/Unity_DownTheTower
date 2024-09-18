@@ -7,7 +7,7 @@ public class MemoryCristal : Interactible
 {
 
     [SerializeField] private GameObject _door;
-    private bool _doorOpen;
+
     private Animation _animDoor;
 
 
@@ -20,18 +20,15 @@ public class MemoryCristal : Interactible
     {
         if (other.TryGetComponent<CharacterMotor>(out CharacterMotor _player))
         {
-            _player._interactibleObject = this;
-
-              
+            _player.AddToInteractList(this);
+            Debug.Log(this.name);
         }
     }
     public void OnTriggerExit(Collider other)
     {
         if (other.TryGetComponent<CharacterMotor>(out CharacterMotor _player))
         {
-            _player._interactibleObject = null;
-
-
+            _player.RemoveFromInteractList(this);
         }
     }
 

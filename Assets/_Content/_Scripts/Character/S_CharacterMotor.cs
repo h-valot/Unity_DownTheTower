@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using NaughtyAttributes;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -71,13 +72,14 @@ public class CharacterMotor : MonoBehaviour
 
     // ----- PUBLIC VARIABLES -----
 	public bool torchInHand;
-    public Interactible _interactibleObject;
 
     // ----- PRIVATE VARIABLES -----
     private bool _groundedCheckLocked;
+    private List<Interactible> _interactables;
+	private Interactible _nearestInteractible;
 
-	// ----- CONSTS -----
-	private const float _TERMINAL_VELOCITY = 53.0f;
+    // ----- CONSTS -----
+    private const float _TERMINAL_VELOCITY = 53.0f;
 	private const float _LOOK_THRESHOLD = 0.01f;
 
 	private void Start()
@@ -97,6 +99,9 @@ public class CharacterMotor : MonoBehaviour
 
 		// update last grounded position to avoid instant death on spawn
 		_lastGroundedPosition = transform.position;
+
+        // creation of the interaction list
+        _interactables = new List<Interactible>();
 	}
 
 	private void Update()
@@ -513,7 +518,32 @@ public class CharacterMotor : MonoBehaviour
 
     private void Interact()
 	{
-		_interactibleObject.InteractionTrigger();
+		for (int i = 0; i < _interactables.Count ; i++)
+		{
+			float distance = (_interactables[i].transform.position - this.transform.position).sqrMagnitude;
+			
+			if (distance < _nearestInteractible.transform.position.sqrMagnitude)
+			{
+				_nearestInteractible = _interactables[i];
+				distance = _nearestInteractible.transform.position.sqrMagnitude;
+			}
+		}
+
+		if (_nearestInteractible == null)
+		{
+			return;
+		}
 		Debug.Log("Try to interact");
+		_nearestInteractible.InteractionTrigger();
+	}
+
+	public void AddToInteractList(Interactible _interactibleObject)
+	{
+		_interactables.Add(_interactibleObject);
+	}
+
+	public void RemoveFromInteractList(Interactible _interactibleObject)
+	{
+		_interactables.Remove(_interactibleObject);
 	}
 }
