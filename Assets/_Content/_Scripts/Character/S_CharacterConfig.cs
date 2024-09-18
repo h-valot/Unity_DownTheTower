@@ -1,9 +1,17 @@
+using System;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "CharacterConfig", menuName = "Configs/Character")]
 public class CharacterConfig : ScriptableObject
 {
-	[Header("MOTOR")]
+	//Trigerred when a value is changed
+	public Action OnValueChanged;
+    public void OnValidate()
+    {
+		OnValueChanged?.Invoke();
+    }
+
+    [Header("MOTOR")]
 
 	[Header("Speed")]
 	[Tooltip("Move speed of the character")]
@@ -93,7 +101,15 @@ public class CharacterConfig : ScriptableObject
 	[Tooltip("For locking the camera position on all axis")]
 	public bool lockCameraPosition = false;
 
-
+	[Header("SELF GLOW")]
+    [Tooltip("Radius of the self glow capsule")]
+    public float glowRadius = 2f;
+    [Tooltip("Height of the self glow capsule")]
+    public float glowHeight = 1f;
+    [Tooltip("Strength of the glow")]
+    public float glowStrength = 0.1f;
+    [Tooltip("Tint of the glow")]
+    public Color glowColor = new Color(1f, 0.8196079f, 0.6666667f, 1f);
 
 	[Header("AUDIO")]
 	[Range(0, 1)] public float audioVolume = 0.5f;
