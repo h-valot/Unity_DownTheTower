@@ -521,17 +521,16 @@ public class CharacterMotor : MonoBehaviour
 		for (int i = 0; i < _interactables.Count ; i++)
 		{
 			float distance = (_interactables[i].transform.position - this.transform.position).sqrMagnitude;
-			
-			if (distance < _nearestInteractible.transform.position.sqrMagnitude)
+
+			if (_nearestInteractible == null)
 			{
 				_nearestInteractible = _interactables[i];
-				distance = _nearestInteractible.transform.position.sqrMagnitude;
 			}
-		}
-
-		if (_nearestInteractible == null)
-		{
-			return;
+			
+			else if (distance < (_nearestInteractible.transform.position - this.transform.position).sqrMagnitude)
+			{
+				_nearestInteractible = _interactables[i];
+			}
 		}
 		Debug.Log("Try to interact");
 		_nearestInteractible.InteractionTrigger();

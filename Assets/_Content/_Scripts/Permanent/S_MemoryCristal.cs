@@ -8,6 +8,7 @@ public class MemoryCristal : Interactible
 
     [SerializeField] private GameObject _door;
 
+    private bool _doorOpen;
     private Animation _animDoor;
 
 
@@ -34,6 +35,16 @@ public class MemoryCristal : Interactible
 
     public override void InteractionTrigger()
     {
-        _animDoor.Play();
+        if (_doorOpen == false)
+        {
+            _animDoor.Play();
+            _doorOpen = true;
+        }
+
+        if (_doorOpen == true )
+        {
+            _animDoor.Rewind();
+            _doorOpen = false;
+        }
     }
 }
