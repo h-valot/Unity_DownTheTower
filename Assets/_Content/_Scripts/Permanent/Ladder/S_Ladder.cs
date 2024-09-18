@@ -123,4 +123,9 @@ public class Ladder : MonoBehaviour
         }
         return shortest;
     }
+
+    public void SetHeight(float height)
+    {
+        _maxHeight = height;
+    }
 }
