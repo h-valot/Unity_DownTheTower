@@ -18,6 +18,7 @@ public class ThirdPersonCamera : MonoBehaviour
 	[SerializeField] private GameObject _thirdPersonCamera;
 	[SerializeField] private GameObject _aimingCamera;
 	[SerializeField] private Transform _cinemachineCameraTarget;
+	[SerializeField] private Transform _lockedCameraTarget;
 
 	[Header("debug")]
 	[ReadOnly] public Vector2 _lookInput;
@@ -49,12 +50,15 @@ public class ThirdPersonCamera : MonoBehaviour
 	private void OnEnable()
 	{
 		_rseLook.action += Look;
+		_rsoPlayerDeath.OnChanged += HandleDeath;
 	}
 
 	private void OnDisable()
 	{
 		_rseLook.action -= Look;
+		_rsoPlayerDeath.OnChanged -= HandleDeath;
 	}
+
 
 	private void Initialize()
 	{
@@ -133,5 +137,12 @@ public class ThirdPersonCamera : MonoBehaviour
 
 		_cinemachineTargetYaw += input.x * deltaTimeMultiplier;
 		_cinemachineTargetPitch += input.y * deltaTimeMultiplier;
+	}
+
+	private void HandleDeath()
+	{
+		if (!_rsoPlayerDeath.value) return;
+
+		_cinemachineCameraTarget.transform.SetParent(_lockedCameraTarget.transform);
 	}
 }

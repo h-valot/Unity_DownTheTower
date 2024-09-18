@@ -1,4 +1,6 @@
+using System;
 using NaughtyAttributes;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 public class NewCharacterMotor : MonoBehaviour
@@ -18,26 +20,38 @@ public class NewCharacterMotor : MonoBehaviour
 
 	[Header("debug: move")]
 	[ReadOnly] public float _moveSpeed;
-	[ReadOnly] public Vector3 _moveInput;
-	[ReadOnly] public Vector3 _gravity;
-
-	[Header("debug: status")]
-	[ReadOnly] public bool _isJumping;
-	[ReadOnly] public bool _isGrounded;
 	[ReadOnly] public bool _isSprinting;
+	[ReadOnly] public Vector3 _moveInput;
+
+	[Header("debug: fall")]
+	[ReadOnly] public bool _isGrounded;
+	[ReadOnly] public bool _isStunned;
+	[ReadOnly] public bool _isSlowed;
+	[ReadOnly] public bool _isJumping;
 
 	// ----- PRIVATE VARIABLES -----
 	private bool _groundedCheckLocked;
 	private Vector3 _lastGroundedPosition;
 	private Vector3 _lastGroundedDirection;
 	private float _lastGroundedSpeed;
+	private float _lastDistanceTravelled;
+	private float _stunTimer;
+	private float _slowTimer;
+	private float _slowModifier;
 
 	// ----- CONST -----
 	private const float _RIGIDBODY_FORCE_MODIFIER = 10f;
 
+	private void Start()
+	{
+		Initialize();
+	}
 
 	private void Update()
 	{
+		HandleStun();
+		HandleSlow();
+
 		CheckGround();
 		SpeedControl();
 	}
@@ -61,10 +75,17 @@ public class NewCharacterMotor : MonoBehaviour
 		_rseSprint.action -= Sprint;
 	}
 
+	private void Initialize()
+	{
+		// update last grounded position to avoid instant death on spawn
+		_lastGroundedPosition = transform.position;
+	}
 
 	private void CheckGround()
 	{
 		_isGrounded = false;
+		
+		_lastDistanceTravelled = Math.Abs(transform.position.y - _lastGroundedPosition.y);
 
 		Vector3 origin = new Vector3(transform.position.x, transform.position.y + _characterConfig.groundCheckY, transform.position.z);
 		if (Physics.SphereCast(origin, _characterConfig.sphereCastRadius, Vector3.down, out var result, _characterConfig.sphereCastDistance))
@@ -75,19 +96,74 @@ public class NewCharacterMotor : MonoBehaviour
 		// - when the character leaves the ground -
 		if (!_isGrounded && !_groundedCheckLocked)
 		{
+			_groundedCheckLocked = true;
+
 			// save last grounded momentum
 			_lastGroundedSpeed = _moveSpeed;
-			_lastGroundedDirection = transform.forward;
+			_lastGroundedDirection = _orientation.forward;
 			_lastGroundedPosition = transform.position;
-
-			_groundedCheckLocked = true;
 		}
 
 		// - when the character touches the ground -
 		if (_isGrounded && _groundedCheckLocked)
 		{
 			_groundedCheckLocked = false;
+
+			if (_lastDistanceTravelled >= _characterConfig.lethalHeight)
+			{
+				HandleDeath();
+			}
+			else if (_lastDistanceTravelled >= _characterConfig.stunHeight)
+			{
+				// stun the character for x secondes
+				_isStunned = true;
+
+				// cross product to get the stun mitiged value on a 0-1 scale
+				float stunMitigedValue = (_lastDistanceTravelled - _characterConfig.stunHeight) / (_characterConfig.lethalHeight - _characterConfig.stunHeight);
+				_stunTimer = _characterConfig.stunDuration.Evaluate(stunMitigedValue);
+			}
+			else if (_lastDistanceTravelled >= _characterConfig.slowHeight)
+			{
+				// slow the character for x secondes by y percent
+				_isSlowed = true;
+
+				// cross product to get the slow mitiged value on a 0-1 scale
+				float slowMitigedValue = (_lastDistanceTravelled - _characterConfig.slowHeight) / (_characterConfig.stunHeight - _characterConfig.slowHeight);
+				_slowTimer = _characterConfig.slowDuration.Evaluate(slowMitigedValue);
+				_slowModifier = _characterConfig.slowPercentage.Evaluate(slowMitigedValue);
+			}
 		}
+	}
+
+	private void HandleDeath()
+	{
+		_rsoPlayerDeath.value = true;
+		Destroy(gameObject);
+	}
+
+	private void HandleStun()
+	{
+		if (!_isStunned) return;
+
+		_stunTimer -= Time.deltaTime;
+		if (_stunTimer <= 0)
+		{
+			_isStunned = false;
+
+			// slows the character using the stun and lethal height
+			_isSlowed = true;
+			float slowMitigedValue = (_lastDistanceTravelled - _characterConfig.stunHeight) / (_characterConfig.lethalHeight - _characterConfig.stunHeight);
+			_slowTimer = _characterConfig.slowDuration.Evaluate(slowMitigedValue);
+			_slowModifier = _characterConfig.slowPercentage.Evaluate(slowMitigedValue);
+		}
+	}
+
+	private void HandleSlow()
+	{
+		if (!_isSlowed) return;
+
+		_slowTimer -= Time.deltaTime;
+		_isSlowed = _slowTimer > 0;
 	}
 
 	private void SpeedControl()
@@ -95,6 +171,10 @@ public class NewCharacterMotor : MonoBehaviour
 		// - variables -
 		Vector3 flatVelocity = new Vector3(_rigidbody.velocity.x, 0f, _rigidbody.velocity.z);
 		_moveSpeed = _isSprinting ? _characterConfig.sprintSpeed : _characterConfig.walkSpeed;
+
+		// - apply status effects -
+		if (_isSlowed) _moveSpeed *= 1 - _slowModifier;
+		if (_isStunned) _moveSpeed = 0;
 
 		// limit velocity if needed
 		if (flatVelocity.magnitude > _moveSpeed)
@@ -163,5 +243,4 @@ public class NewCharacterMotor : MonoBehaviour
 	{
 		_isSprinting = isSprinting;
 	}
-
 }
