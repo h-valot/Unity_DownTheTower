@@ -17,6 +17,7 @@ public class CharacterInput : MonoBehaviour
 	[SerializeField] private RSE_Throw _rseThrow;
     [SerializeField] private RSE_Lit_Unlit _rseLit_Unlit;
     [SerializeField] private RSE_CraftTorch _rseCraftTorch;
+	[SerializeField] private RSE_Interact _rseInteract;
 
 
     [Header("Temp")]
@@ -112,5 +113,10 @@ public class CharacterInput : MonoBehaviour
 	public void OnCraftTorch()
 	{
 		_rseCraftTorch.Call();
+	}
+
+	public void OnInteract()
+	{
+		_rseInteract.Call();
 	}
 }

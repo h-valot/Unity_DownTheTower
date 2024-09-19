@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using NaughtyAttributes;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -19,6 +20,7 @@ public class CharacterMotor : MonoBehaviour
 	[SerializeField] private RSE_Jump _rseJump;
 	[SerializeField] private RSE_Sprint _rseSprint;
     [SerializeField] private RSE_Throw _rseThrow;
+    [SerializeField] private RSE_Interact _rseInteract;
     [SerializeField] private RSE_Lit_Unlit _rseLit_Unlit;
     [SerializeField] private RSE_CraftTorch _rseCraftTorch;
     [SerializeField] private RSO_ControlScheme _rsoControlScheme;
@@ -71,11 +73,13 @@ public class CharacterMotor : MonoBehaviour
     // ----- PUBLIC VARIABLES -----
 	public bool torchInHand;
 
-	// ----- PRIVATE VARIABLES -----
-	private bool _groundedCheckLocked;
+    // ----- PRIVATE VARIABLES -----
+    private bool _groundedCheckLocked;
+    private List<Interactible> _interactables;
+	private Interactible _nearestInteractible;
 
-	// ----- CONSTS -----
-	private const float _TERMINAL_VELOCITY = 53.0f;
+    // ----- CONSTS -----
+    private const float _TERMINAL_VELOCITY = 53.0f;
 	private const float _LOOK_THRESHOLD = 0.01f;
 
 	private void Start()
@@ -95,6 +99,9 @@ public class CharacterMotor : MonoBehaviour
 
 		// update last grounded position to avoid instant death on spawn
 		_lastGroundedPosition = transform.position;
+
+        // creation of the interaction list
+        _interactables = new List<Interactible>();
 	}
 
 	private void Update()
@@ -404,6 +411,7 @@ public class CharacterMotor : MonoBehaviour
 		_rseThrow.action += Throw;
         _rseLit_Unlit.action += Lit_Unlit;
 		_rseCraftTorch.action += CraftTorch;
+		_rseInteract.action += Interact;
     }
 
 	private void OnDisable()
@@ -415,7 +423,8 @@ public class CharacterMotor : MonoBehaviour
 		_rseThrow.action -= Throw;
 		_rseLit_Unlit.action -= Lit_Unlit;
 		_rseCraftTorch.action -= CraftTorch;
-	}
+        _rseInteract.action -= Interact;
+    }
 
 	private void Move(Vector2 input)
 	{
@@ -505,5 +514,35 @@ public class CharacterMotor : MonoBehaviour
 			_newTorch.transform.position = _torchSpawner.transform.position;
 			_newTorch.transform.rotation = _torchSpawner.transform.rotation;
 		}
+	}
+
+    private void Interact()
+	{
+		for (int i = 0; i < _interactables.Count ; i++)
+		{
+			float distance = (_interactables[i].transform.position - this.transform.position).sqrMagnitude;
+
+			if (_nearestInteractible == null)
+			{
+				_nearestInteractible = _interactables[i];
+			}
+			
+			else if (distance < (_nearestInteractible.transform.position - this.transform.position).sqrMagnitude)
+			{
+				_nearestInteractible = _interactables[i];
+			}
+		}
+		Debug.Log("Try to interact");
+		_nearestInteractible.InteractionTrigger();
+	}
+
+	public void AddToInteractList(Interactible _interactibleObject)
+	{
+		_interactables.Add(_interactibleObject);
+	}
+
+	public void RemoveFromInteractList(Interactible _interactibleObject)
+	{
+		_interactables.Remove(_interactibleObject);
 	}
 }
