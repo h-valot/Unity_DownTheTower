@@ -65,6 +65,7 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   rotationSmoothTime: 0.12
+  timeToCraft: 1
   jumpHeight: 1.2
   gravity: -15
   jumpDelay: 0
@@ -149,10 +150,15 @@ MonoBehaviour:
   groundLayers:
     serializedVersion: 2
     m_Bits: 65
+  torchInHand: 0
   topClamp: 70
   bottomClamp: -60
   cameraAngleOverride: 0
   lockCameraPosition: 0
+  glowRadius: 2
+  glowHeight: 1
+  glowStrength: 0.1
+  glowColor: {r: 1, g: 0.8196079, b: 0.6666667, a: 1}
   audioVolume: 0.5
   landingAudioClip: {fileID: 8300000, guid: ff697d3070687ce4583faa0561a145a2, type: 3}
   footstepAudioClips:

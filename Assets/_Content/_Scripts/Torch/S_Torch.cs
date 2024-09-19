@@ -18,8 +18,8 @@ public class Torch : MonoBehaviour
 
 
     // ----- PRIVATE VARIABLES -----
-    private Rigidbody _torchRigidbody;
     private bool _canThrow = true;
+    private bool _isActive = false;
 
     private void Start()
     {

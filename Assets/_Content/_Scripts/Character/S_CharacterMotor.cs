@@ -525,7 +525,7 @@ public class CharacterMotor : MonoBehaviour
 
 	private void Lit_Unlit()
 	{
-		GetComponentInChildren<S_Torch>().ChangeLightState();
+		GetComponentInChildren<Torch>().ChangeLightState();
 
     }
 
