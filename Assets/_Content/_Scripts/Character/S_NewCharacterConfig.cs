@@ -4,57 +4,50 @@ using UnityEngine;
 public class NewCharacterConfig : ScriptableObject
 {
 	[Header("Move")]
-	[Tooltip("")]
+	[Tooltip("Walk speed of the character")]
 	public float walkSpeed;
-	[Tooltip("")]
+	
+	[Tooltip("Sprint speed of the character")]
 	public float sprintSpeed;
-	[Tooltip("")]
+	
+	[Tooltip("Acceleration and deceleration rate. The current move speed of the character increases and decreases times this value times time.deltatime.")]
 	public float speedChangeRate = 10.0f;
 
 	[Header("Slope")]
-	[Tooltip("")]
-	public int slopeLimit = 45;
-
-	[Tooltip("Percentage of character speed when ascending")]
+	[Tooltip("Percentage of character speed when ascending. The current move speed is reduced by this value based on the slope angle")]
 	public AnimationCurve uphillDeceleration;
 
-	[Tooltip("Percentage of character speed when descending")]
+	[Tooltip("Percentage of character speed when descending. The current move speed is increased by this value based on the slope angle")]
 	public AnimationCurve downhillAcceleration;
 
 
 	[Header("Edge")]
 	[Tooltip("")]
 	public float noSlipDistance = 0.5f;
-	[Tooltip("")]
+	[Tooltip("Speed scalar when the character is on an edge.")]
 	public float edgeFallFactor = 1f;
 
 
 	[Header("Ground")]
-	[Tooltip("")]
-	public float groundedRaycastLength = 1.3f;
-
-	[Tooltip("0.25 + 0.08 (sphereCastRadius + CC skin width)")]
+	[Tooltip("Ground check raycast is cast from character's position plus this value times up vector")]
 	public float groundCheckY = 0.33f;
 
-	[Tooltip("Radius of area to detect the ground")]
-	public float sphereCastRadius = 0.25f;
-
-	[Tooltip("How far raycast moves down from origin point")]
+	[Tooltip("How far raycast moves down from origin point calculate from the groundCheckY value")]
 	public float raycastLength = 0.75f;
 
 
 	[Header("Jump")]
-	[Tooltip("The height the player can jump")]
+	[Tooltip("When jumping, the character reaches this height")]
 	public float jumpHeight;
 
-	[Tooltip("Time required to pass before being able to jump again. Set to 0f to instantly jump again")]
+	[Tooltip("After touching the ground, this value is the time required to pass before being able to jump again. Set to 0f to instantly jump again")]
 	public float jumpDelay = 0.50f;
 
 
 	[Header("Gravity")]
 	[Tooltip("The character uses its own gravity value. The engine default is -9.8f")]
-	public float gravity = -9.8f;
-	[Tooltip("")]
+	public float gravity = -15f;
+	[Tooltip("Multiply this value by the player's directional inputs while in the air.")]
 	[Range(0f, 1f)] public float airControlModifier;
 
 
@@ -79,12 +72,15 @@ public class NewCharacterConfig : ScriptableObject
 
 
 	[Header("Camera")]
-	[Tooltip("")]
+	[Tooltip("Clamp the camera rotation to this angle when looking down")]
 	public float topClamp = 70.0f;
-	[Tooltip("")]
+	
+	[Tooltip("Clamp the camera rotation to this angle when looking up")]
 	public float bottomClamp = -60.0f;
-	[Tooltip("")]
+	
+	[Tooltip("Starting style of the third person character's camera. (1) BASIC is a free camera and (2) AIMING locks the character's facing direction towards the player's look inputs")]
 	public CameraStyle startingStyle;
-	[Tooltip("")]
+	
+	[Tooltip("Slerp the character's graphics to the character's moving direction at this value times time.deltatime")]
 	public float rotationSpeed = 7;
 }

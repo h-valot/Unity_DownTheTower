@@ -1,6 +1,5 @@
 using System;
 using NaughtyAttributes;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class NewCharacterMotor : MonoBehaviour
@@ -60,6 +59,7 @@ public class NewCharacterMotor : MonoBehaviour
 	private void Update()
 	{
 		CheckGround();
+		HandleSlope();
 		HandleStun();
 		HandleSlow();
 		Accelerate();
@@ -83,16 +83,8 @@ public class NewCharacterMotor : MonoBehaviour
 
 	private void CheckGround()
 	{
-		// - is grounded raycasts check -
-		_isGrounded = false;
 		Vector3 origin = new Vector3(transform.position.x, transform.position.y + _characterConfig.groundCheckY, transform.position.z);
-		if (Physics.Raycast(origin, Vector3.down, out _groundHit, _characterConfig.raycastLength))
-		{
-			_isGrounded = true;
-			HandleSlope();
-		}
-
-		_lastDistanceTravelled = Math.Abs(transform.position.y - _lastGroundedPosition.y);
+		_isGrounded = Physics.Raycast(origin, Vector3.down, out _groundHit, _characterConfig.raycastLength);
 
 		// - when the character leaves the ground after being grounded-
 		if (!_isGrounded && !_groundedCheckLocked)
@@ -110,6 +102,7 @@ public class NewCharacterMotor : MonoBehaviour
 		{
 			_groundedCheckLocked = false;
 
+			_lastDistanceTravelled = Math.Abs(transform.position.y - _lastGroundedPosition.y);
 			if (_lastDistanceTravelled >= _characterConfig.lethalHeight)
 			{
 				HandleDeath();
@@ -138,6 +131,8 @@ public class NewCharacterMotor : MonoBehaviour
 
 	private void HandleSlope()
 	{
+		if (!_isGrounded) return;
+
 		float middleAngle = Vector3.Angle(_groundHit.normal, Vector3.up);
 
 		// we get angle values that we don't want. to correct for this, let's do some raycasts.
@@ -179,7 +174,7 @@ public class NewCharacterMotor : MonoBehaviour
 		}
 
 		// get the slope percentage to calculate slows later in the movement function
-		_slopePercentage = _slopeAngle / _characterConfig.slopeLimit;
+		_slopePercentage = _slopeAngle / _controller.slopeLimit;
 
 		// check the direction of the character based on the slope
 		if (Vector3.Dot(_groundHit.normal, _graphicsParent.forward) > 0)

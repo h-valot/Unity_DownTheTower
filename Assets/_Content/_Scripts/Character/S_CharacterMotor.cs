@@ -2,6 +2,7 @@ using System;
 using NaughtyAttributes;
 using UnityEngine;
 
+[Obsolete("CharacterMotor is outdated. Use NewCharacterMotor instead.")]
 public class CharacterMotor : MonoBehaviour
 {
 	[Header("Internal references")]
