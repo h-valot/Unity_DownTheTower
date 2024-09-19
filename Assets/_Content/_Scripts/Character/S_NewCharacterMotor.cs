@@ -46,11 +46,16 @@ public class NewCharacterMotor : MonoBehaviour
 	[ReadOnly] public float _lastDistanceTravelled;
 
 	// ----- PRIVATE VARIABLES -----
-	private bool _groundedCheckLocked;
+	// - status -
 	private float _stunTimer;
 	private float _slowTimer;
 	private float _slowModifier;
+
+	// - ground -
+	private bool _groundedCheckLocked;
 	private RaycastHit _groundHit;
+
+	// - jump -
 	private float _jumpDelayTimer;
 
 	// ----- CONST -----
