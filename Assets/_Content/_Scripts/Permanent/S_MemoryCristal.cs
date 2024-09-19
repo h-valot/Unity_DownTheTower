@@ -37,14 +37,8 @@ public class MemoryCristal : Interactible
     {
         if (_doorOpen == false)
         {
-            _animDoor.Play();
             _doorOpen = true;
-        }
-
-        if (_doorOpen == true )
-        {
-            _animDoor.Rewind();
-            _doorOpen = false;
+            _animDoor.Play();
         }
     }
 }
