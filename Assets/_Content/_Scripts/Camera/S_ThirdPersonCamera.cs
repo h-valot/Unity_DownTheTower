@@ -1,5 +1,6 @@
 using NaughtyAttributes;
 using UnityEngine;
+using UnityEngine.Scripting.APIUpdating;
 
 public class ThirdPersonCamera : MonoBehaviour
 {
@@ -8,6 +9,7 @@ public class ThirdPersonCamera : MonoBehaviour
 	[SerializeField] private RSO_ControlScheme _rsoControlScheme;
 	[SerializeField] private RSO_PlayerDeath _rsoPlayerDeath;
 	[SerializeField] private RSE_Look _rseLook;
+	[SerializeField] private RSE_Move _rseMove;
 
 	[Header("External references")]
 	[SerializeField] private Transform _orientation;
@@ -22,6 +24,7 @@ public class ThirdPersonCamera : MonoBehaviour
 
 	[Header("debug")]
 	[ReadOnly] public Vector2 _lookInput;
+	[ReadOnly] public Vector2 _moveInput;
 	[ReadOnly] public CameraStyle _currentStyle;
 
 	// ----- PRIVATE VARIABLES -----
@@ -50,12 +53,14 @@ public class ThirdPersonCamera : MonoBehaviour
 	private void OnEnable()
 	{
 		_rseLook.action += Look;
+		_rseMove.action += Move;
 		_rsoPlayerDeath.OnChanged += HandleDeath;
 	}
 
 	private void OnDisable()
 	{
 		_rseLook.action -= Look;
+		_rseMove.action -= Move;
 		_rsoPlayerDeath.OnChanged -= HandleDeath;
 	}
 
@@ -94,11 +99,12 @@ public class ThirdPersonCamera : MonoBehaviour
 		// rotate player object
 		if (_currentStyle == CameraStyle.BASIC)
 		{
-			Vector3 inputDirection = _orientation.forward * _lookInput.y + _orientation.right * _lookInput.x;
-
-			if (inputDirection != Vector3.zero)
+			// character is facing the movement direction
+			// but not is the moveInput is null or equals to zero
+			Vector3 moveDirection = _orientation.forward * _moveInput.y + _orientation.right * _moveInput.x;
+			if (_moveInput != Vector2.zero)
 			{
-				_characterGraphics.forward = Vector3.Slerp(_characterGraphics.forward, inputDirection.normalized, Time.deltaTime * _characterConfig.rotationSpeed);
+				_characterGraphics.forward = Vector3.Slerp(_characterGraphics.forward, moveDirection.normalized, Time.deltaTime * _characterConfig.rotationSpeed);
 			}
 		}
 
@@ -137,6 +143,11 @@ public class ThirdPersonCamera : MonoBehaviour
 
 		_cinemachineTargetYaw += input.x * deltaTimeMultiplier;
 		_cinemachineTargetPitch += input.y * deltaTimeMultiplier;
+	}
+
+	private void Move(Vector2 input)
+	{
+		_moveInput = input;
 	}
 
 	private void HandleDeath()

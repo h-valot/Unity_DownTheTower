@@ -14,15 +14,66 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   walkSpeed: 3
   sprintSpeed: 5
+  speedChangeRate: 10
+  slopeLimit: 45
+  uphillDeceleration:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0.49859548
+      outSlope: 0.49859548
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 1
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 2
+      outSlope: 2
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  downhillAcceleration:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0.5014124
+      outSlope: 0.5014124
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.9971831
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 2
+      outSlope: 2
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  noSlipDistance: 0.5
+  edgeFallFactor: 1
   groundedRaycastLength: 1.3
   groundCheckY: 0.33
   sphereCastRadius: 0.25
   sphereCastDistance: 0.75
   jumpHeight: 1.2
-  jumpCooldown: 0
+  jumpDelay: 0.3
+  gravity: -15
   airControlModifier: 0.2
-  gravity: -9.8
-  fallDelay: 0.15
   lethalHeight: 15
   stunHeight: 9
   stunDuration:
