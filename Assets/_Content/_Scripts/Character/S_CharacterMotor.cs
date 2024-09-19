@@ -1,6 +1,7 @@
 using System;
 using NaughtyAttributes;
 using Unity.VisualScripting;
+using System.Collections;
 using UnityEngine;
 
 public class CharacterMotor : MonoBehaviour
@@ -69,16 +70,19 @@ public class CharacterMotor : MonoBehaviour
 	private int _animMotionSpeed;
 
     // ----- PUBLIC VARIABLES -----
+
 	public bool torchInHand;
 
 	// ----- PRIVATE VARIABLES -----
 	private bool _groundedCheckLocked;
+	private bool _torchInHand;
+	private bool _isCrafting = false;
 
 	// ----- CONSTS -----
 	private const float _TERMINAL_VELOCITY = 53.0f;
 	private const float _LOOK_THRESHOLD = 0.01f;
 
-	private void Start()
+    private void Start()
 	{
 		_cinemachineTargetYaw = _cinemachineCameraTarget.transform.rotation.eulerAngles.y;
 
@@ -92,6 +96,19 @@ public class CharacterMotor : MonoBehaviour
 		// reset our timeouts on start
 		_fallDelayTimer = _characterConfig.fallDelay;
 		_jumpDelayTimer = _characterConfig.jumpDelay;
+
+		// spawn the torch if the parameter is true
+		if(_characterConfig.torchInHand == true)
+		{
+			SpawnTorch();
+			_torchInHand = true;
+		}
+
+		else
+		{
+			_torchInHand = false;
+		}
+		return;
 
 		// update last grounded position to avoid instant death on spawn
 		_lastGroundedPosition = transform.position;
@@ -486,24 +503,45 @@ public class CharacterMotor : MonoBehaviour
 
 	private void Throw()
 	{
-		Ray r = _mainCamera.ScreenPointToRay(Input.mousePosition);
+        if (_torchInHand == true)
+        {
+            Ray r = _mainCamera.ScreenPointToRay(Input.mousePosition);
 
-		Vector3 dir = r.GetPoint(1) - r.GetPoint(0);
-		GetComponentInChildren<Torch>().ThrowTorch(dir);
+            Vector3 dir = r.GetPoint(1) - r.GetPoint(0);
+            GetComponentInChildren<Torch>().ThrowTorch(dir);
+			_torchInHand = false;
+        }
+       
 	}
 
 	private void Lit_Unlit()
 	{
-		GetComponentInChildren<Torch>().ChangeLightState();
+		GetComponentInChildren<S_Torch>().ChangeLightState();
+
     }
 
 	private void CraftTorch()
 	{
-		if (torchInHand == true)
+		
+		if (_torchInHand == false & _isCrafting == false)
 		{
-			GameObject _newTorch = Instantiate(_torchPrefab, _torchSpawner.transform);
-			_newTorch.transform.position = _torchSpawner.transform.position;
-			_newTorch.transform.rotation = _torchSpawner.transform.rotation;
+			StartCoroutine(SpawnTorch(_characterConfig.timeToCraft));
+			_isCrafting = true;
 		}
 	}
+
+	private void SpawnTorch()
+	{
+        GameObject _newTorch = Instantiate(_torchPrefab, _torchSpawner.transform);
+        _newTorch.transform.position = _torchSpawner.transform.position;
+        _torchInHand = true;
+		_isCrafting = false;
+    }
+
+    IEnumerator SpawnTorch(int _time)
+    {
+        yield return new WaitForSeconds(_time);
+		SpawnTorch();
+
+    }
 }
