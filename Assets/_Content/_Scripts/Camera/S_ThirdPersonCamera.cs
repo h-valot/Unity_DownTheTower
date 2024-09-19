@@ -1,6 +1,5 @@
 using NaughtyAttributes;
 using UnityEngine;
-using UnityEngine.Scripting.APIUpdating;
 
 public class ThirdPersonCamera : MonoBehaviour
 {
@@ -13,7 +12,7 @@ public class ThirdPersonCamera : MonoBehaviour
 
 	[Header("External references")]
 	[SerializeField] private Transform _orientation;
-	[SerializeField] private Transform _character;
+	[SerializeField] private Transform _characterMotor;
 	[SerializeField] private Transform _characterGraphics;
 	[SerializeField] private Transform _aimingLookAt;
 	[SerializeField] private Rigidbody _rigidbody;
@@ -90,7 +89,7 @@ public class ThirdPersonCamera : MonoBehaviour
 		_cinemachineCameraTarget.transform.rotation = Quaternion.Euler(_cinemachineTargetPitch, _cinemachineTargetYaw, 0.0f);
 
 		// rotate orientation
-		Vector3 viewDirection = _character.position - new Vector3(transform.position.x, _character.position.y, transform.position.z);
+		Vector3 viewDirection = _characterMotor.position - new Vector3(transform.position.x, _characterMotor.position.y, transform.position.z);
 		if (viewDirection != Vector3.zero)
 		{
 			_orientation.forward = viewDirection.normalized;
@@ -110,7 +109,7 @@ public class ThirdPersonCamera : MonoBehaviour
 
 		else if (_currentStyle == CameraStyle.AIMING)
 		{
-			Vector3 directionToAimingLookAt = _aimingLookAt.position - new Vector3(_character.position.x, _aimingLookAt.position.y, _character.position.z);
+			Vector3 directionToAimingLookAt = _aimingLookAt.position - new Vector3(_characterMotor.position.x, _aimingLookAt.position.y, _characterMotor.position.z);
 			_orientation.forward = directionToAimingLookAt.normalized;
 
 			_characterGraphics.forward = directionToAimingLookAt.normalized;
