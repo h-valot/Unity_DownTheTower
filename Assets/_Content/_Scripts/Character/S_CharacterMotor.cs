@@ -66,6 +66,7 @@ public class CharacterMotor : MonoBehaviour
 
     private bool _groundedCheckLocked;
 	private bool _torchInHand;
+	private bool _isCrafting = false;
 
 
     private void Start()
@@ -431,9 +432,10 @@ public class CharacterMotor : MonoBehaviour
 	private void CraftTorch()
 	{
 		
-		if (_torchInHand == false)
+		if (_torchInHand == false & _isCrafting == false)
 		{
 			StartCoroutine(SpawnTorch(_characterConfig.timeToCraft));
+			_isCrafting = true;
 		}
 	}
 
@@ -442,6 +444,7 @@ public class CharacterMotor : MonoBehaviour
         GameObject _newTorch = Instantiate(_torchPrefab, _torchSpawner.transform);
         _newTorch.transform.position = _torchSpawner.transform.position;
         _torchInHand = true;
+		_isCrafting = false;
     }
 
     IEnumerator SpawnTorch(int _time)
