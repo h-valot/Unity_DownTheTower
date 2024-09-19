@@ -1076,6 +1076,7 @@ MonoBehaviour:
   _controller: {fileID: 4416926081852918491}
   _animator: {fileID: 6982812146204527121}
   _cinemachineCameraTarget: {fileID: 8338988566280778634}
+  _lockedCameraTarget: {fileID: 0}
   _characterConfig: {fileID: 11400000, guid: f1b21fa5f2a5d0942b63889e748851ad, type: 2}
   _mainCamera: {fileID: 0}
   _rseMove: {fileID: 11400000, guid: 4c899dda7396ed24c8e3d098dfe89471, type: 2}
@@ -1083,12 +1084,16 @@ MonoBehaviour:
   _rseJump: {fileID: 11400000, guid: d6896f12727744441bfeccf04390e194, type: 2}
   _rseSprint: {fileID: 11400000, guid: c137e572374debb4488914fb65cbdf94, type: 2}
   _rseThrow: {fileID: 11400000, guid: 9c0f340dc33672b4ca20f5f1cf2f8528, type: 2}
+  _rseInteract: {fileID: 11400000, guid: be798e2f50da79e448b01830a7c3441f, type: 2}
   _rseLit_Unlit: {fileID: 11400000, guid: 7a9790bca8621c54e9d98c0c7f0820b3, type: 2}
-  _rseCraftTorch: {fileID: 11400000, guid: 39c1315289215604f84537f1a87ecdee, type: 2}
+  _rseCraftTorch: {fileID: 11400000, guid: a5a67e5b9e43b3e47b905af27b5b8657, type: 2}
   _rsoControlScheme: {fileID: 11400000, guid: 08b8e15a7a2491145baa753f14863b03, type: 2}
   _torchPrefab: {fileID: 4724440229257307352, guid: c06366f12c0c9ff4db3b81d641d4173b,
     type: 3}
   _torchSpawner: {fileID: 2718444874908674311}
+  _rsoPlayerTranform: {fileID: 11400000, guid: 7cfc39952cca0d6478396ad49ab9e0db, type: 2}
+  _rsoPlayerDeath: {fileID: 11400000, guid: faee3d4fb6d36d5439a3b69f5e064b1e, type: 2}
+  torchInHand: 0
 --- !u!143 &4416926081852918491
 CharacterController:
   m_ObjectHideFlags: 0

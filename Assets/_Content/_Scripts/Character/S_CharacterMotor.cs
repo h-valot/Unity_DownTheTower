@@ -112,7 +112,6 @@ public class CharacterMotor : MonoBehaviour
 		{
 			_torchInHand = false;
 		}
-		return;
 
 		// update last grounded position to avoid instant death on spawn
 		_lastGroundedPosition = transform.position;
