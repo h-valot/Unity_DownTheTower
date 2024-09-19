@@ -1,5 +1,6 @@
 using System;
 using NaughtyAttributes;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class NewCharacterMotor : MonoBehaviour
@@ -82,26 +83,18 @@ public class NewCharacterMotor : MonoBehaviour
 
 	private void CheckGround()
 	{
+		// - is grounded raycasts check -
 		_isGrounded = false;
-		
-		_lastDistanceTravelled = Math.Abs(transform.position.y - _lastGroundedPosition.y);
-
 		Vector3 origin = new Vector3(transform.position.x, transform.position.y + _characterConfig.groundCheckY, transform.position.z);
-		if (Physics.Raycast(origin, Vector3.down, out _groundHit, _characterConfig.sphereCastDistance))
+		if (Physics.Raycast(origin, Vector3.down, out _groundHit, _characterConfig.raycastLength))
 		{
 			_isGrounded = true;
-
-			_slopeAngle = Vector3.Angle(_groundHit.normal, Vector3.up);
-			_slopePercentage = _slopeAngle / _characterConfig.slopeLimit;
-
-			// check the direction of the character based on the slope
-			if (Vector3.Dot(_groundHit.normal, _graphicsParent.forward) > 0)
-			{
-				_slopePercentage *= -1;
-			}
+			HandleSlope();
 		}
 
-		// - when the character leaves the ground -
+		_lastDistanceTravelled = Math.Abs(transform.position.y - _lastGroundedPosition.y);
+
+		// - when the character leaves the ground after being grounded-
 		if (!_isGrounded && !_groundedCheckLocked)
 		{
 			_groundedCheckLocked = true;
@@ -112,7 +105,7 @@ public class NewCharacterMotor : MonoBehaviour
 			_lastGroundedPosition = transform.position;
 		}
 
-		// - when the character touches the ground -
+		// - when the character touches the ground after being in the air -
 		if (_isGrounded && _groundedCheckLocked)
 		{
 			_groundedCheckLocked = false;
@@ -140,6 +133,58 @@ public class NewCharacterMotor : MonoBehaviour
 				_slowTimer = _characterConfig.slowDuration.Evaluate(slowMitigedValue);
 				_slowModifier = _characterConfig.slowPercentage.Evaluate(slowMitigedValue);
 			}
+		}
+	}
+
+	private void HandleSlope()
+	{
+		float middleAngle = Vector3.Angle(_groundHit.normal, Vector3.up);
+
+		// we get angle values that we don't want. to correct for this, let's do some raycasts.
+		Vector3 originForward =
+			transform.position
+			+ Vector3.up * _characterConfig.groundCheckY
+			+ _graphicsParent.forward * 0.5f;
+
+		if (Physics.Raycast(originForward, Vector3.down, out var slopeHitForward, _characterConfig.raycastLength))
+		{
+			UnityEngine.Debug.DrawRay(originForward, Vector3.down, Color.white);
+
+			// get angle of slope on hit normal
+			float angleForward = Vector3.Angle(slopeHitForward.normal, Vector3.up);
+
+			Vector3 originBackward =
+				transform.position
+				+ Vector3.up * _characterConfig.groundCheckY
+				- _graphicsParent.forward * 0.5f;
+
+			if (Physics.Raycast(originBackward, Vector3.down, out var slopeHitBackward, _characterConfig.raycastLength))
+			{
+				UnityEngine.Debug.DrawRay(originBackward, Vector3.down, Color.white);
+
+				// get angle of slope of these two hit points.
+				float angleBackward = Vector3.Angle(slopeHitBackward.normal, Vector3.up);
+
+				// 3 collision points: Take the MEDIAN by sorting array and grabbing middle.
+				float[] angles = new float[] { angleForward, middleAngle, angleBackward };
+				System.Array.Sort(angles);
+				_slopeAngle = angles[1];
+			}
+			else
+			{
+				// 2 collision points (sphere and first raycast): MINIMUM the two
+				float minimum = Mathf.Min(angleForward, middleAngle);
+				_slopeAngle = minimum;
+			}
+		}
+
+		// get the slope percentage to calculate slows later in the movement function
+		_slopePercentage = _slopeAngle / _characterConfig.slopeLimit;
+
+		// check the direction of the character based on the slope
+		if (Vector3.Dot(_groundHit.normal, _graphicsParent.forward) > 0)
+		{
+			_slopePercentage *= -1;
 		}
 	}
 
@@ -178,18 +223,20 @@ public class NewCharacterMotor : MonoBehaviour
 	{
 		// - variables -
 		_targetSpeed = _isSprinting ? _characterConfig.sprintSpeed : _characterConfig.walkSpeed;
-		_currentSpeed = new Vector3(_controller.velocity.x, 0.0f, _controller.velocity.z).magnitude;
 		float speedOffset = 0.1f;
 
 		// slope modifications
 		Vector3 origin = 
 			transform.position 
-			+ _graphicsParent.forward.normalized * 0.5f
-			+ Vector3.up.normalized * 0.5f;
+			+ _graphicsParent.forward * 0.5f
+			+ Vector3.up * 0.5f;
 
-		if (Physics.Raycast(origin, Vector3.down, out var hitInfo, 1f) && _isGrounded)
+		if (Physics.Raycast(origin, Vector3.down, out var hitInfo, 1f) 
+			&& _isGrounded
+			&& _slopeAngle <= _controller.slopeLimit)
 		{
 			UnityEngine.Debug.DrawRay(origin, Vector3.down, Color.red);
+
 			if (_slopePercentage > 0)
 			{
 				_targetSpeed *= 1 - _characterConfig.uphillDeceleration.Evaluate(_slopePercentage);
@@ -220,12 +267,8 @@ public class NewCharacterMotor : MonoBehaviour
 		if (_currentSpeed < _targetSpeed - speedOffset
 		|| _currentSpeed > _targetSpeed + speedOffset)
 		{
-			// creates curved result rather than a linear one giving a more organic speed change
-			// T in Lerp is clamped, so we don't need to clamp our speed
-			_moveSpeed = Mathf.Lerp(_currentSpeed, _targetSpeed, Time.deltaTime * _characterConfig.speedChangeRate);
-
-			// round speed to 3 decimal places
-			_moveSpeed = Mathf.Round(_moveSpeed * 1000f) / 1000f;
+			_moveSpeed += Time.deltaTime * _characterConfig.speedChangeRate;
+			_moveSpeed = Mathf.Clamp(_moveSpeed, 0, _targetSpeed);
 		}
 		else
 		{
@@ -298,8 +341,10 @@ public class NewCharacterMotor : MonoBehaviour
 			));
 		}
 
-		// keep the character grounded
-		if (_isGrounded && !_inAir && _gravityModifier.y <= 2f)
+		// keep the character grounded for stairs and downhill slopes
+		if (_isGrounded 
+			&& !_inAir 
+			&& _gravityModifier.y <= 2f)
 		{
 			Vector3 extraGravity = new Vector3(
 				_controller.velocity.x,

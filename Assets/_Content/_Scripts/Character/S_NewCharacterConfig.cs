@@ -40,7 +40,7 @@ public class NewCharacterConfig : ScriptableObject
 	public float sphereCastRadius = 0.25f;
 
 	[Tooltip("How far raycast moves down from origin point")]
-	public float sphereCastDistance = 0.75f;
+	public float raycastLength = 0.75f;
 
 
 	[Header("Jump")]
