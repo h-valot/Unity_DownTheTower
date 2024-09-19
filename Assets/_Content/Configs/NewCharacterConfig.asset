@@ -9,35 +9,33 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe5d77c49eb63454b8f7962becef4ea4, type: 3}
-  m_Name: CharacterConfig
+  m_Script: {fileID: 11500000, guid: 816ba0c10377e2e4aab515f89adf1bd2, type: 3}
+  m_Name: NewCharacterConfig
   m_EditorClassIdentifier: 
-  moveSpeed: 3
+  walkSpeed: 3
   sprintSpeed: 5
-  airControlSpeed: 1
-  enhancedAirControlThreshold: 0.2
-  enhancedAirControlSpeed: 3
   speedChangeRate: 10
+  slopeLimit: 45
   uphillDeceleration:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3
       time: 0
       value: 0
-      inSlope: 0.5101975
-      outSlope: 0.5101975
+      inSlope: 0.49859548
+      outSlope: 0.49859548
       tangentMode: 0
       weightedMode: 0
       inWeight: 0
-      outWeight: 0.192
+      outWeight: 1
     - serializedVersion: 3
       time: 1
-      value: 0.9889085
-      inSlope: 1.4270189
-      outSlope: 1.4270189
+      value: 1
+      inSlope: 2
+      outSlope: 2
       tangentMode: 0
       weightedMode: 0
-      inWeight: 0.10133332
+      inWeight: 0
       outWeight: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
@@ -48,49 +46,15 @@ MonoBehaviour:
     - serializedVersion: 3
       time: 0
       value: 0
-      inSlope: 0.51707006
-      outSlope: 0.51707006
+      inSlope: 0.5014124
+      outSlope: 0.5014124
       tangentMode: 0
       weightedMode: 0
       inWeight: 0
-      outWeight: 0.20533334
+      outWeight: 0.9971831
     - serializedVersion: 3
-      time: 0.98970616
-      value: 1.0125775
-      inSlope: 1.6153288
-      outSlope: 1.6153288
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.09859145
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  rotationSmoothTime: 0.12
-  jumpHeight: 1.2
-  jumpDelay: 0
-  edgingSpeedThreshold: 0.5
-  edgingForwardOffsetScalar: 2
-  edgingDotProductThreshold: -0.5
-  gravity: -15
-  fallDelay: 0.19
-  lethalHeight: 15
-  stunHeight: 9
-  stunDuration:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0.017027186
-      value: 1.995875
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - serializedVersion: 3
-      time: 1.0113515
-      value: 2.9863706
+      time: 1
+      value: 1
       inSlope: 2
       outSlope: 2
       tangentMode: 0
@@ -100,13 +64,24 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  slowHeight: 6
-  slowDuration:
+  noSlipDistance: 0.5
+  edgeFallFactor: 1
+  groundedRaycastLength: 1.3
+  groundCheckY: 0.33
+  sphereCastRadius: 0.25
+  raycastLength: 0.75
+  jumpHeight: 1.2
+  jumpDelay: 0.3
+  gravity: -15
+  airControlModifier: 0.2
+  lethalHeight: 15
+  stunHeight: 9
+  stunDuration:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3
-      time: 0.008896589
-      value: 3.0167751
+      time: 0
+      value: 1.9939152
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -114,8 +89,33 @@ MonoBehaviour:
       inWeight: 0
       outWeight: 0
     - serializedVersion: 3
-      time: 1.0088966
-      value: 4.016775
+      time: 1
+      value: 3.0037134
+      inSlope: 2
+      outSlope: 2
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  slowHeight: 7
+  slowDuration:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: -0
+      value: 3.0112658
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 4.0112658
       inSlope: 2
       outSlope: 2
       tangentMode: 0
@@ -129,8 +129,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3
-      time: 0.0103788385
-      value: 0.20855597
+      time: 0
+      value: 0.3500061
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -138,36 +138,18 @@ MonoBehaviour:
       inWeight: 0
       outWeight: 0
     - serializedVersion: 3
-      time: 1.0103788
-      value: 0.6871662
-      inSlope: 0.015961206
-      outSlope: 0.015961206
+      time: 1
+      value: 0.7665094
+      inSlope: 0
+      outSlope: 0
       tangentMode: 0
       weightedMode: 0
-      inWeight: 0.33104604
+      inWeight: 0
       outWeight: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  groundedOffset: -0.12
-  groundedRadius: 0.5
-  groundLayers:
-    serializedVersion: 2
-    m_Bits: 1
   topClamp: 70
   bottomClamp: -60
-  cameraAngleOverride: 0
-  lockCameraPosition: 0
-  audioVolume: 0.5
-  landingAudioClip: {fileID: 8300000, guid: ff697d3070687ce4583faa0561a145a2, type: 3}
-  footstepAudioClips:
-  - {fileID: 8300000, guid: 72f526a6a9890f643a88e85a61c86c8a, type: 3}
-  - {fileID: 8300000, guid: 85016e0f2b01da248b9663dd49a161b0, type: 3}
-  - {fileID: 8300000, guid: 186de84b3207156479abe98f4958fed0, type: 3}
-  - {fileID: 8300000, guid: 1a91fcd19acf1e54bba0945d9f390849, type: 3}
-  - {fileID: 8300000, guid: 14e8a8d2158bec840b56c54f5266e692, type: 3}
-  - {fileID: 8300000, guid: 29841e7d5bbfb5b419c9ad16ca8bc4c1, type: 3}
-  - {fileID: 8300000, guid: dd1af302b8902684d9381de1f2d3a5af, type: 3}
-  - {fileID: 8300000, guid: 67c8b33e424ccdc4486edf538ab91c5a, type: 3}
-  - {fileID: 8300000, guid: 274649b0e221539409070ebf6c18918b, type: 3}
-  - {fileID: 8300000, guid: a3194b8bbc96ef84fab1f98f4b7dae3e, type: 3}
+  startingStyle: 0
+  rotationSpeed: 7

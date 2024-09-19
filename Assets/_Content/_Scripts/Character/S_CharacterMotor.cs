@@ -1,82 +1,93 @@
 using System;
 using System.Collections.Generic;
 using NaughtyAttributes;
-using Unity.VisualScripting;
 using System.Collections;
 using UnityEngine;
 
+[Obsolete("CharacterMotor is outdated. Use NewCharacterMotor instead.")]
 public class CharacterMotor : MonoBehaviour
 {
 	[Header("Internal references")]
 	[SerializeField] private CharacterController _controller;
 	[SerializeField] private Animator _animator;
 	[SerializeField] private GameObject _cinemachineCameraTarget;
-	[SerializeField] private GameObject _lockedCameraTarget;
 
-	[Header("External references")]
+	[Header("Scriptable references")]
 	[SerializeField] private CharacterConfig _characterConfig;
-	[SerializeField] private Camera _mainCamera;
 	[SerializeField] private RSE_Move _rseMove;
 	[SerializeField] private RSE_Look _rseLook;
 	[SerializeField] private RSE_Jump _rseJump;
 	[SerializeField] private RSE_Sprint _rseSprint;
-    [SerializeField] private RSE_Throw _rseThrow;
+	[SerializeField] private RSE_Throw _rseThrow;
     [SerializeField] private RSE_Interact _rseInteract;
-    [SerializeField] private RSE_Lit_Unlit _rseLit_Unlit;
-    [SerializeField] private RSE_CraftTorch _rseCraftTorch;
-    [SerializeField] private RSO_ControlScheme _rsoControlScheme;
+	[SerializeField] private RSE_Lit_Unlit _rseLit_Unlit;
+	[SerializeField] private RSE_CraftTorch _rseCraftTorch;
+	[SerializeField] private RSO_ControlScheme _rsoControlScheme;
 	[SerializeField] private GameObject _torchPrefab;
 	[SerializeField] private GameObject _torchSpawner;
 	[SerializeField] private RSO_PlayerTransform _rsoPlayerTranform;
 	[SerializeField] private RSO_PlayerDeath _rsoPlayerDeath;
 
+	[Header("External references")]
+	[SerializeField] private GameObject _lockedCameraTarget;
+	[SerializeField] private Camera _mainCamera;
+
 	// ----- DEBUG -----
-	[Header("Cinemachine")]
-	[ShowNonSerializedField] private float _cinemachineTargetYaw;
-	[ShowNonSerializedField] private float _cinemachineTargetPitch;
+	[Header("debug: speed")]
+	[ReadOnly] public bool _isSprinting;
+	[ReadOnly] public float _targetSpeed;
+	[ReadOnly] public float _currentSpeed;
 
-	[Header("Speed")]
-	[ShowNonSerializedField] private bool _isSprinting;
-	[ShowNonSerializedField] private Vector2 _moveInput;
-	[ShowNonSerializedField] private float _speed;
-	[ShowNonSerializedField] private float _targetSpeed;
-	[ShowNonSerializedField] private float _animationBlend;
-	[ShowNonSerializedField] private float _slopePercentage;
+	[Header("debug: gravity")]
+	[ReadOnly] public Vector3 _gravityModifier;
 
-	[Header("Falling")]
-	[ShowNonSerializedField] private bool _isGrounded;
-	[ShowNonSerializedField] private float _lastGroundedSpeed;
-	[ShowNonSerializedField] private Vector3 _lastGroundedPosition;
-	[ShowNonSerializedField] private Vector3 _lastGroundedDirection;
-	[ShowNonSerializedField] private float _lastDistanceTravelled;
-	[ShowNonSerializedField] private bool _isStunned;
-	[ShowNonSerializedField] private float _stunTimer;
-	[ShowNonSerializedField] private bool _isSlowed;
-	[ShowNonSerializedField] private float _slowTimer;
-	[ShowNonSerializedField] private float _slowModifier;
+	[Header("debug: ground & slope")]
+	[ReadOnly] public float _slopePercentage;
+	[ReadOnly] public float _slopeAngle;
+	[ReadOnly] public Vector3 _slopeDirection;
 
-	[Header("Rotation")]
-	[ShowNonSerializedField] private float _targetRotation = 0.0f;
-	[ShowNonSerializedField] private float _rotationVelocity;
-	[ShowNonSerializedField] private float _verticalVelocity;
+	[Header("debug: fall")]
+	[ReadOnly] public bool _isGrounded;
+	[ReadOnly] public bool _isStunned;
+	[ReadOnly] public bool _isSlowed;
+	[ReadOnly] public bool _isJumpEnhanced;
 
-	[Header("Delay timer")]
-	[ShowNonSerializedField] private float _fallDelayTimer;
-	[ShowNonSerializedField] private float _jumpDelayTimer;
+	// ----- PUBLIC VARIABLES -----
+	[HideInInspector] public bool torchInHand;
 
-	// ----- ANIMATIONS PARAMS -----
+	// ----- PRIVATE VARIABLES -----
+	// - move -
+	private Vector2 _moveInput;
+	private float _fallDelayTimer;
+	private float _jumpDelayTimer;
+
+	// - rotation -
+	private float _targetRotation;
+	private float _rotationVelocity;
+
+	// - fall -
+	private bool _groundedCheckLocked;
+	private float _lastGroundedSpeed;
+	private Vector3 _lastGroundedPosition;
+	private Vector3 _lastGroundedDirection;
+	private float _lastDistanceTravelled;
+	private float _stunTimer;
+	private float _slowTimer;
+	private float _slowModifier;
+
+	// - cinemachine - 
+ 	private float _cinemachineTargetYaw;
+	private float _cinemachineTargetPitch;
+
+	// - animation -
+	private float _animationBlend;
 	private int _animSpeed;
 	private int _animGrounded;
 	private int _animJump;
 	private int _animFreeFall;
 	private int _animMotionSpeed;
 
-    // ----- PUBLIC VARIABLES -----
-
-	public bool torchInHand;
-
-    // ----- PRIVATE VARIABLES -----
-    private bool _groundedCheckLocked;
+    // - permanent -
 	private bool _torchInHand;
 	private bool _isCrafting = false;
     private List<Interactible> _interactables;
@@ -86,16 +97,56 @@ public class CharacterMotor : MonoBehaviour
     private const float _TERMINAL_VELOCITY = 53.0f;
 	private const float _LOOK_THRESHOLD = 0.01f;
 
-    private void Start()
+	// ----- ADDITIONAL SETTINGS -----
+	// the starting position of the _isGrounded spherecast. set to the sphereCastRadius plus the CC Skin Width. enable showGizmos to visualize.
+	// this should be just above the base of the cc, in the amount of the skin width (in case the cc sinks in)
+	private float _groundCheckY = 0.33f;               // 0.25 + 0.08 (sphereCastRadius + CC skin width)
+	private float _sphereCastRadius = 0.25f;           // radius of area to detect for ground
+	private float _sphereCastDistance = 0.75f;         // How far spherecast moves down from origin point
+	private float _raycastLength = 0.75f;              // secondary raycasts (match to sphereCastDistance)
+
+	private Vector3 _rayOriginOffset1 = new Vector3(-0.2f, 0f, 0.16f);
+	private Vector3 _rayOriginOffset2 = new Vector3(0.2f, 0f, -0.16f);
+
+
+	private void Start()
+	{
+		Initialize();
+	}
+
+	private void Update()
+	{
+		// apply movement effect
+		HandleStun();
+		HandleSlow();
+
+		// status checker
+		CheckGrounded();
+
+		// apply mandatory forces
+		Accelerate();
+		ApplyGravity();
+		Move();
+
+		// fix edge motor cases 
+		HandleEdging();
+	}
+
+	private void LateUpdate()
+	{
+		HandleCamera();
+	}
+
+	private void Initialize()
 	{
 		_cinemachineTargetYaw = _cinemachineCameraTarget.transform.rotation.eulerAngles.y;
 
 		// assign animations params
-		_animSpeed = Animator.StringToHash("Speed");
-		_animJump = Animator.StringToHash("Jump");
-		_animGrounded = Animator.StringToHash("Grounded");
-		_animFreeFall = Animator.StringToHash("FreeFall");
-		_animMotionSpeed = Animator.StringToHash("MotionSpeed");
+		if (_animator) _animSpeed = Animator.StringToHash("Speed");
+		if (_animator) _animJump = Animator.StringToHash("Jump");
+		if (_animator) _animGrounded = Animator.StringToHash("Grounded");
+		if (_animator) _animFreeFall = Animator.StringToHash("FreeFall");
+		if (_animator) _animMotionSpeed = Animator.StringToHash("MotionSpeed");
 
 		// reset our timeouts on start
 		_fallDelayTimer = _characterConfig.fallDelay;
@@ -119,22 +170,6 @@ public class CharacterMotor : MonoBehaviour
 
         // creation of the interaction list
         _interactables = new List<Interactible>();
-	}
-
-	private void Update()
-	{
-		HandleStun();
-		HandleSlow();
-
-		CheckGrounded();
-		Accelerate();
-		Move();
-		ApplyGravity();
-	}
-
-	private void LateUpdate()
-	{
-		HandleCamera();
 	}
 
 	private void HandleStun()
@@ -171,8 +206,6 @@ public class CharacterMotor : MonoBehaviour
 	private void CheckGrounded()
 	{
 		// set ray with offset
-		Vector3 rayPosition = new Vector3(transform.position.x, transform.position.y - _characterConfig.groundedOffset, transform.position.z);
-		Vector3 downVector = transform.TransformDirection(Vector3.down);
 		Vector3 forwardVector = transform.TransformDirection(Vector3.forward);
 		_isGrounded = false;
 
@@ -184,7 +217,8 @@ public class CharacterMotor : MonoBehaviour
 			_cinemachineCameraTarget.transform.SetParent(_lockedCameraTarget.transform);
 		}
 
-		if (Physics.Raycast(new Ray(rayPosition, downVector), out var result, _characterConfig.groundedRadius, _characterConfig.groundLayers, QueryTriggerInteraction.Ignore))
+		Vector3 origin = new Vector3(transform.position.x, transform.position.y + _groundCheckY, transform.position.z);
+		if (Physics.SphereCast(origin, _sphereCastRadius, Vector3.down, out var result, _sphereCastDistance))
 		{
 			// first time the character touches the ground after being falling
 			if (!_isGrounded)
@@ -217,15 +251,12 @@ public class CharacterMotor : MonoBehaviour
 			_isGrounded = true;
 			_lastGroundedPosition = transform.position;
 
-			// slope acceleration and deceleration
-			Vector3 groundNormal = result.normal;
-
 			// for normalized vectors dot returns 
 			// • -1 if they point in completely opposite directions
 			// • 0 if the vectors are perpendicular which means a angle of 90 degrees
 			// • 1 if they point in exactly the same direction which means a angle of 0 degrees
 			// so, 0.5 means a angle of 45 degrees
-			float groundDotValue = 1 - Vector3.Dot(groundNormal, -downVector);
+			float groundDotValue = 1 - Vector3.Dot(result.normal, Vector3.up);
 
 			// cross product to get the delta 
 			// clamp it to avoid negative dot values and they are not needed
@@ -233,20 +264,34 @@ public class CharacterMotor : MonoBehaviour
 			_slopePercentage = (float)slopeAngle / (float)_controller.slopeLimit;
 
 			// check the direction of the character based on the slope
-			if (Vector3.Dot(groundNormal, forwardVector) > 0)
+			if (Vector3.Dot(result.normal, forwardVector) > 0)
 			{
 				_slopePercentage *= -1;
 			}
+
+			// angle of our slope (between these two vectors). 
+			// a hit normal is at a 90 degree angle from the surface that is collided with (at the point of collision).
+			// e.g. on a flat surface, both vectors are facing straight up, so the angle is 0.
+			_slopeAngle = Vector3.Angle(result.normal, Vector3.up);
+
+			// find the vector that represents our slope as well. 
+			// temp: basically, finds vector moving across hit surface 
+			Vector3 temp = Vector3.Cross(result.normal, Vector3.down);
+
+			// now use this vector and the hit normal, to find the other vector moving up and down the hit surface
+			_slopeDirection = Vector3.Cross(temp, result.normal);
 		}
 
 		// update animator
-		_animator.SetBool(_animGrounded, _isGrounded);
+		if (_animator) _animator.SetBool(_animGrounded, _isGrounded);
 
 		if (!_isGrounded
 			&& !_groundedCheckLocked)
 		{
+			// - when the character leaves the ground -
+
 			// save last grounded momentum
-			_lastGroundedSpeed = _speed;
+			_lastGroundedSpeed = _currentSpeed;
 			_lastGroundedDirection = transform.forward;
 			_lastGroundedPosition = transform.position;
 
@@ -256,14 +301,17 @@ public class CharacterMotor : MonoBehaviour
 		if (_isGrounded
 			&& _groundedCheckLocked)
 		{
+			// - when the character touches the ground -
+
+			// disable enhanced jump
+			_isJumpEnhanced = false;
+
 			_groundedCheckLocked = false;
 		}
 	}
 
 	private void Accelerate()
 	{
-		// a simplistic acceleration and deceleration designed to be easy to remove, replace, or iterate upon
-
 		// set target speed based on move speed, sprint speed and if sprint is pressed
 		_targetSpeed = _isSprinting ? _characterConfig.sprintSpeed : _characterConfig.moveSpeed;
 
@@ -306,56 +354,118 @@ public class CharacterMotor : MonoBehaviour
 		{
 			// creates curved result rather than a linear one giving a more organic speed change
 			// T in Lerp is clamped, so we don't need to clamp our speed
-			_speed = Mathf.Lerp(currentSpeed, _targetSpeed * inputMagnitude, Time.deltaTime * _characterConfig.speedChangeRate);
+			_currentSpeed = Mathf.Lerp(currentSpeed, _targetSpeed * inputMagnitude, Time.deltaTime * _characterConfig.speedChangeRate);
 
 			// round speed to 3 decimal places
-			_speed = Mathf.Round(_speed * 1000f) / 1000f;
+			_currentSpeed = Mathf.Round(_currentSpeed * 1000f) / 1000f;
 		}
 		else
 		{
-			_speed = _targetSpeed;
+			_currentSpeed = _targetSpeed;
 		}
 
-		_animationBlend = Mathf.Lerp(_animationBlend, _targetSpeed, Time.deltaTime * _characterConfig.speedChangeRate);
-		if (_animationBlend < 0.01f) _animationBlend = 0f;
+		if (_animator)
+		{
+			_animationBlend = Mathf.Lerp(_animationBlend, _targetSpeed, Time.deltaTime * _characterConfig.speedChangeRate);
+			if (_animationBlend < 0.01f) _animationBlend = 0f;
 
-		// update animator if using character
-		_animator.SetFloat(_animSpeed, _animationBlend);
-		_animator.SetFloat(_animMotionSpeed, inputMagnitude);
+			// update animator if using character
+			_animator.SetFloat(_animSpeed, _animationBlend);
+			_animator.SetFloat(_animMotionSpeed, inputMagnitude);
+		}
 	}
 
 	private void Move()
 	{
-		// normalise input direction
-		Vector3 inputDirection = new Vector3(_moveInput.x, 0.0f, _moveInput.y).normalized;
+		// - variables -
+		Vector3 input = new Vector3(_moveInput.x, 0.0f, _moveInput.y).normalized;
+		Vector3 direction = Quaternion.Euler(0.0f, _targetRotation, 0.0f) * Vector3.forward;
 
 		// if there is a move input rotate player when the player is moving
 		// Vector2's != operator uses approximation so is not floating point error prone, and is cheaper than magnitude
 		if (_moveInput != Vector2.zero)
 		{
-			_targetRotation = Mathf.Atan2(inputDirection.x, inputDirection.z) * Mathf.Rad2Deg + _mainCamera.transform.eulerAngles.y;
+			_targetRotation = Mathf.Atan2(input.x, input.z) * Mathf.Rad2Deg + _mainCamera.transform.eulerAngles.y;
 			float rotation = Mathf.SmoothDampAngle(transform.eulerAngles.y, _targetRotation, ref _rotationVelocity, _characterConfig.rotationSmoothTime);
 
 			// rotate to face input direction relative to camera position
 			transform.rotation = Quaternion.Euler(0.0f, rotation, 0.0f);
 		}
 
-		Vector3 targetDirection = Quaternion.Euler(0.0f, _targetRotation, 0.0f) * Vector3.forward;
-		float currentSpeed = _speed;
-
-		// handle air control
-		if (!_isGrounded)
+		if (_isGrounded)
 		{
-			targetDirection = _lastGroundedDirection + (targetDirection * _characterConfig.airSpeed);
-			currentSpeed = _lastGroundedSpeed;
+			if (_slopeAngle > _controller.slopeLimit)
+			{
+				// movement left/right while slipping down
+				// player rotation to slope
+				Vector3 slopeRight = Quaternion.LookRotation(Vector3.right) * _slopeDirection;
+				float dot = Vector3.Dot(slopeRight, transform.right);
+
+				// move on X axis, with Y rotation relative to slopeDir
+				direction = slopeRight * (dot > 0 ? transform.forward.normalized.x : -transform.forward.normalized.x);
+
+				// speed
+				_currentSpeed = Mathf.Lerp(_currentSpeed, _characterConfig.sprintSpeed, 5f * Time.deltaTime);
+
+				// increase angular gravity
+				Vector3 rotationAngle = Vector3.Slerp(_gravityModifier, _slopeDirection * _characterConfig.sprintSpeed, 4f * Time.deltaTime);
+				_gravityModifier = rotationAngle.normalized * _gravityModifier.magnitude;
+			}
+			else
+			{
+				// reset angular gravity mod movement
+				_gravityModifier.x = 0;
+				_gravityModifier.z = 0;
+
+				// constant grounded gravity
+				if (_gravityModifier.y < 0)
+				{
+					_gravityModifier.y = Mathf.Lerp(_gravityModifier.y, -1f, 4f * Time.deltaTime);
+				}
+			}
+
+			// - grounded movement -
+			_controller.Move(Time.deltaTime * (direction.normalized * _currentSpeed + _gravityModifier));
+		}
+		else
+		{
+			// - handle air control -
+			float airSpeed = _isJumpEnhanced
+				? _characterConfig.enhancedAirControlSpeed
+				: _characterConfig.airControlSpeed;
+
+			// clamp the airSpeed to the max speed
+			float maxSpeed = _isSprinting
+				? _characterConfig.sprintSpeed
+				: _characterConfig.moveSpeed;
+
+			if (_lastGroundedSpeed >= maxSpeed)
+			{
+				_lastGroundedSpeed = maxSpeed;
+				airSpeed = 0;
+			}
+			else if (_lastGroundedSpeed + airSpeed >= maxSpeed)
+			{
+				airSpeed -= maxSpeed - (_lastGroundedSpeed + airSpeed); 
+			}
+
+			// nullify the direction if input's magnitude are smaller than enhanced jump threshol
+			if (_moveInput.magnitude <= _characterConfig.enhancedAirControlThreshold)
+			{
+				direction = Vector3.zero;
+			}
+
+			// - in-air movement -
+			_controller.Move(Time.deltaTime * (
+				_lastGroundedDirection.normalized * _lastGroundedSpeed  // last ground direction and speed to keep the inertia going on
+				+  direction * airSpeed               					// current direction and air control speeds to slightly moves while on air
+				+ _gravityModifier                                      // and the gravity modifier
+			));
 		}
 
-		// move the player
-		_controller.Move(targetDirection.normalized * (currentSpeed * Time.deltaTime) + new Vector3(0.0f, _verticalVelocity, 0.0f) * Time.deltaTime);
-
-        _rsoPlayerTranform.value = transform;
-
-    }
+		// update rso character transform data
+		if (_rsoPlayerTranform.value != transform) _rsoPlayerTranform.value = transform;
+	}
 
 	private void ApplyGravity()
 	{
@@ -364,17 +474,17 @@ public class CharacterMotor : MonoBehaviour
 			// reset the fall delay timer
 			_fallDelayTimer = _characterConfig.fallDelay;
 
-			_animator.SetBool(_animFreeFall, false);
+			if (_animator) _animator.SetBool(_animFreeFall, false);
 
 			// the jump function can be called at any moment
 			// to prevent the following line to cancel the jump animation
 			// it is commented and the animation param bool have been switch to a trigger
-			// _animator.SetBool(_animJump, false);
+			// if (_animator) _animator.SetBool(_animJump, false);
 
 			// stop our velocity dropping infinitely when grounded
-			if (_verticalVelocity < 0.0f)
+			if (_gravityModifier.y < 0.0f)
 			{
-				_verticalVelocity = -2f;
+				_gravityModifier.y = -2f;
 			}
 
 			// jump delay
@@ -395,14 +505,42 @@ public class CharacterMotor : MonoBehaviour
 			}
 			else
 			{
-				_animator.SetBool(_animFreeFall, true);
+				if (_animator) _animator.SetBool(_animFreeFall, true);
 			}
 		}
 
 		// apply gravity over time if under terminal (multiply by delta time twice to linearly speed up over time)
-		if (_verticalVelocity < _TERMINAL_VELOCITY)
+		if (_gravityModifier.y < _TERMINAL_VELOCITY)
 		{
-			_verticalVelocity += _characterConfig.gravity * Time.deltaTime;
+			_gravityModifier.y += _characterConfig.gravity * Time.deltaTime;
+		}
+	}
+
+	private void HandleEdging()
+	{
+		// we get angle values that we don't want. to correct for this, let's do some raycasts.
+		Vector3 origin = new Vector3(transform.position.x, transform.position.y + _groundCheckY, transform.position.z);
+		if (Physics.Raycast(origin + _rayOriginOffset1, Vector3.down, out var slopeHit1, _raycastLength))
+		{
+			// get angle of slope on hit normal
+			float angleOne = Vector3.Angle(slopeHit1.normal, Vector3.up);
+
+			if (Physics.Raycast(origin + _rayOriginOffset2, Vector3.down, out var slopeHit2, _raycastLength))
+			{
+				// get angle of slope of these two hit points.
+				float angleTwo = Vector3.Angle(slopeHit2.normal, Vector3.up);
+
+				// 3 collision points: Take the MEDIAN by sorting array and grabbing middle.
+				float[] angles = new float[] { _slopeAngle, angleOne, angleTwo };
+				System.Array.Sort(angles);
+				_slopeAngle = angles[1];
+			}
+			else
+			{
+				// 2 collision points (sphere and first raycast): AVERAGE the two
+				float average = (_slopeAngle + angleOne) / 2;
+				_slopeAngle = average;
+			}
 		}
 	}
 
@@ -477,12 +615,16 @@ public class CharacterMotor : MonoBehaviour
 			return;
 		}
 
+		// sometimes, the character is not able to climb on mid/low ground with impulsion
+		// add speed or increase the air control sensibility
+		_isJumpEnhanced = _currentSpeed <= _characterConfig.enhancedAirControlThreshold;
+
 		// the square root of H * -2 * G = how much velocity needed to reach desired height
-		_verticalVelocity = Mathf.Sqrt(_characterConfig.jumpHeight * -2f * _characterConfig.gravity);
+		_gravityModifier.y = Mathf.Sqrt(_characterConfig.jumpHeight * -2f * _characterConfig.gravity);
 
 		// this function can be called at any moment
 		// to prevent the jump animation to be cancelled, the animation param bool have been switch to a trigger
-		_animator.SetTrigger(_animJump);
+		if (_animator) _animator.SetTrigger(_animJump);
 	}
 
 	private void Sprint(bool isSprinting)
@@ -531,7 +673,6 @@ public class CharacterMotor : MonoBehaviour
 
 	private void CraftTorch()
 	{
-		
 		if (_torchInHand == false & _isCrafting == false)
 		{
 			StartCoroutine(SpawnTorch(_characterConfig.timeToCraft));

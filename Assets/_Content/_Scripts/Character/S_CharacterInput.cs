@@ -1,7 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using NaughtyAttributes;
-using DG.Tweening;
 
 public class CharacterInput : MonoBehaviour
 {
