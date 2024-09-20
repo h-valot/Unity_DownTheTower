@@ -291,10 +291,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 31204da13082dad46ab33612da9f598b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _orientation: {fileID: 1967125294990807407}
-  _graphicsParent: {fileID: 1227528473670976241}
+  _cameraDirection: {fileID: 1967125294990807407}
+  _characterDirection: {fileID: 1227528473670976241}
   _controller: {fileID: 8128893969073989014}
   _characterConfig: {fileID: 11400000, guid: 1940b106405212f469b44119418b1e43, type: 2}
+  _ladderConfig: {fileID: 11400000, guid: 6502514940db9bb4e8194b9e57b509d9, type: 2}
   _rsoPlayerTransform: {fileID: 11400000, guid: 7cfc39952cca0d6478396ad49ab9e0db,
     type: 2}
   _rsoPlayerDeath: {fileID: 11400000, guid: faee3d4fb6d36d5439a3b69f5e064b1e, type: 2}
@@ -386,7 +387,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1967125294990807407}
   m_Layer: 0
-  m_Name: Orientation
+  m_Name: Look
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

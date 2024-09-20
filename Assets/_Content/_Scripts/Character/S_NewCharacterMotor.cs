@@ -5,13 +5,14 @@ using UnityEngine;
 public class NewCharacterMotor : MonoBehaviour
 {
 	[Header("Internal references")]
-	[SerializeField] private Transform _orientation;
-	[SerializeField] private Transform _graphicsParent;
+	[SerializeField] private Transform _cameraDirection;
+	[SerializeField] private Transform _characterDirection;
 	[SerializeField] private CharacterController _controller;
 
 	[Header("Scriptable references")]
 	[SerializeField] private NewCharacterConfig _characterConfig;
-	[SerializeField] private RSO_PlayerTransform _rsoPlayerTransform;
+	[SerializeField] private LadderConfig _ladderConfig;
+	[SerializeField] private RSO_PlayeGraphicsDirection _rsoPlayerTransform;
 	[SerializeField] private RSO_PlayerDeath _rsoPlayerDeath;
 	[SerializeField] private RSE_Sprint _rseSprint;
 	[SerializeField] private RSE_Look _rseLook;
@@ -58,11 +59,17 @@ public class NewCharacterMotor : MonoBehaviour
 	// - jump -
 	private float _jumpDelayTimer;
 
+	// - permanent -
+	private PreLadder _currentPreLadder;
+
 	// ----- CONST -----
 	private const float _TERMINAL_VELOCITY = 53.0f;
 
 	private void Update()
 	{
+		// temp
+		HandleInputs();
+
 		CheckGround();
 		HandleSlope();
 		HandleStun();
@@ -70,6 +77,26 @@ public class NewCharacterMotor : MonoBehaviour
 		Accelerate();
 		ApplyGravity();
 		HandleMovement();
+	}
+
+	private void HandleInputs()
+	{
+		// temp
+		if (Input.GetKeyDown(KeyCode.Mouse1))
+		{
+			_currentPreLadder = Instantiate(_ladderConfig.pfPreLadder);
+			_currentPreLadder.Initialize(_cameraDirection);
+		}
+
+		if (Input.GetKeyUp(KeyCode.Mouse1))
+		{
+			_currentPreLadder.InstantiateLadder();
+			if (_currentPreLadder != null)
+			{
+				Destroy(_currentPreLadder.gameObject);
+				_currentPreLadder = null;
+			}
+		}
 	}
 
 	private void OnEnable()
@@ -98,7 +125,7 @@ public class NewCharacterMotor : MonoBehaviour
 
 			// save last grounded momentum
 			_lastGroundedSpeed = _moveSpeed;
-			_lastGroundedDirection = _graphicsParent.forward;
+			_lastGroundedDirection = _characterDirection.forward;
 			_lastGroundedPosition = transform.position;
 		}
 
@@ -144,7 +171,7 @@ public class NewCharacterMotor : MonoBehaviour
 		Vector3 originForward =
 			transform.position
 			+ Vector3.up * _characterConfig.groundCheckY
-			+ _graphicsParent.forward * 0.5f;
+			+ _characterDirection.forward * 0.5f;
 
 		if (Physics.Raycast(originForward, Vector3.down, out var slopeHitForward, _characterConfig.raycastLength))
 		{
@@ -156,7 +183,7 @@ public class NewCharacterMotor : MonoBehaviour
 			Vector3 originBackward =
 				transform.position
 				+ Vector3.up * _characterConfig.groundCheckY
-				- _graphicsParent.forward * 0.5f;
+				- _characterDirection.forward * 0.5f;
 
 			if (Physics.Raycast(originBackward, Vector3.down, out var slopeHitBackward, _characterConfig.raycastLength))
 			{
@@ -182,7 +209,7 @@ public class NewCharacterMotor : MonoBehaviour
 		_slopePercentage = _slopeAngle / _controller.slopeLimit;
 
 		// check the direction of the character based on the slope
-		if (Vector3.Dot(_groundHit.normal, _graphicsParent.forward) > 0)
+		if (Vector3.Dot(_groundHit.normal, _characterDirection.forward) > 0)
 		{
 			_slopePercentage *= -1;
 		}
@@ -228,7 +255,7 @@ public class NewCharacterMotor : MonoBehaviour
 		// slope modifications
 		Vector3 origin = 
 			transform.position 
-			+ _graphicsParent.forward * 0.5f
+			+ _characterDirection.forward * 0.5f
 			+ Vector3.up * 0.5f;
 
 		if (Physics.Raycast(origin, Vector3.down, out var hitInfo, 1f) 
@@ -304,7 +331,7 @@ public class NewCharacterMotor : MonoBehaviour
 	private void HandleMovement()
 	{
 		// - variables -
-		Vector3 direction = _orientation.forward * _moveInput.y + _orientation.right * _moveInput.x;
+		Vector3 direction = _cameraDirection.forward * _moveInput.y + _cameraDirection.right * _moveInput.x;
 
 		// - handle slope sliding -
 		if (Physics.SphereCast(transform.position + _controller.center, _controller.radius - _controller.skinWidth, Vector3.down, out var hitInfo, _controller.height * 0.7f))

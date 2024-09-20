@@ -11,11 +11,10 @@ public class ThirdPersonCamera : MonoBehaviour
 	[SerializeField] private RSE_Move _rseMove;
 
 	[Header("External references")]
-	[SerializeField] private Transform _orientation;
+	[SerializeField] private Transform _lookDirection;
+	[SerializeField] private Transform _graphicsDirection;
 	[SerializeField] private Transform _characterMotor;
-	[SerializeField] private Transform _characterGraphics;
 	[SerializeField] private Transform _aimingLookAt;
-	[SerializeField] private Rigidbody _rigidbody;
 	[SerializeField] private GameObject _thirdPersonCamera;
 	[SerializeField] private GameObject _aimingCamera;
 	[SerializeField] private Transform _cinemachineCameraTarget;
@@ -72,6 +71,7 @@ public class ThirdPersonCamera : MonoBehaviour
 
 	private void HandleInputs()
 	{
+		// temp
 		if (Input.GetKeyDown(KeyCode.Alpha1)) SwitchCameraStyle(CameraStyle.BASIC);
 		if (Input.GetKeyDown(KeyCode.Alpha2)) SwitchCameraStyle(CameraStyle.AIMING);
 	}
@@ -92,7 +92,7 @@ public class ThirdPersonCamera : MonoBehaviour
 		Vector3 viewDirection = _characterMotor.position - new Vector3(transform.position.x, _characterMotor.position.y, transform.position.z);
 		if (viewDirection != Vector3.zero)
 		{
-			_orientation.forward = viewDirection.normalized;
+			_lookDirection.forward = viewDirection.normalized;
 		}
 
 		// rotate player object
@@ -100,19 +100,19 @@ public class ThirdPersonCamera : MonoBehaviour
 		{
 			// character is facing the movement direction
 			// but not is the moveInput is null or equals to zero
-			Vector3 moveDirection = _orientation.forward * _moveInput.y + _orientation.right * _moveInput.x;
+			Vector3 moveDirection = _lookDirection.forward * _moveInput.y + _lookDirection.right * _moveInput.x;
 			if (_moveInput != Vector2.zero)
 			{
-				_characterGraphics.forward = Vector3.Slerp(_characterGraphics.forward, moveDirection.normalized, Time.deltaTime * _characterConfig.rotationSpeed);
+				_graphicsDirection.forward = Vector3.Slerp(_graphicsDirection.forward, moveDirection.normalized, Time.deltaTime * _characterConfig.rotationSpeed);
 			}
 		}
 
 		else if (_currentStyle == CameraStyle.AIMING)
 		{
 			Vector3 directionToAimingLookAt = _aimingLookAt.position - new Vector3(_characterMotor.position.x, _aimingLookAt.position.y, _characterMotor.position.z);
-			_orientation.forward = directionToAimingLookAt.normalized;
+			_lookDirection.forward = directionToAimingLookAt.normalized;
 
-			_characterGraphics.forward = directionToAimingLookAt.normalized;
+			_graphicsDirection.forward = directionToAimingLookAt.normalized;
 		}
 	}
 

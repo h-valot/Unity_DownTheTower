@@ -5,7 +5,7 @@ using UnityEngine;
 public class CharacterGlow : MonoBehaviour
 {
     [Header("External references")]
-    [SerializeField] private RSO_PlayerTransform _rsoPlayerTranform;
+    [SerializeField] private RSO_PlayeGraphicsDirection _rsoPlayerTranform;
     [SerializeField] private CharacterConfig _characterConfig;
 
     private void OnEnable()

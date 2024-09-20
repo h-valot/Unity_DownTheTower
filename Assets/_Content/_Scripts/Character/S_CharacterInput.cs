@@ -18,20 +18,14 @@ public class CharacterInput : MonoBehaviour
     [SerializeField] private RSE_CraftTorch _rseCraftTorch;
 	[SerializeField] private RSE_Interact _rseInteract;
 
-
-    [Header("Temp")]
-	[SerializeField] private RSO_PlayerTransform _rsoPlayerTransform;
-	[SerializeField] private PreLadder _pfPreLadder;
-	private PreLadder currentPreLadder;
-    [SerializeField] private float _ladder_spawn_dist = 1f;
-
     [Header("Debugging")]
 	[ReadOnly] public Vector2 move;
 	[ReadOnly] public Vector2 look;
 	[ReadOnly] public bool sprint;
 
-    private const float _CONTROL_SCHEME_CHECK_DELAY = 1f;
 	private float _controlSchemeCheckTimer;
+
+    private const float _CONTROL_SCHEME_CHECK_DELAY = 1f;
 
 	private void Start()
 	{
@@ -43,20 +37,6 @@ public class CharacterInput : MonoBehaviour
 	private void Update()
 	{
 		UpdateControlScheme();
-		// temp
-		if (Input.GetKeyDown(KeyCode.Mouse1))
-        {
-            currentPreLadder = Instantiate(_pfPreLadder, _rsoPlayerTransform.value.position + _rsoPlayerTransform.value.forward * _ladder_spawn_dist, _rsoPlayerTransform.value.rotation);
-        }
-		if (Input.GetKeyUp(KeyCode.Mouse1))
-        {
-            currentPreLadder.InstanciateLadder();
-            if (currentPreLadder != null)
-            {
-                Destroy(currentPreLadder.gameObject);
-                currentPreLadder = null;
-            }
-        }
 	}
 
 	private void UpdateControlScheme()

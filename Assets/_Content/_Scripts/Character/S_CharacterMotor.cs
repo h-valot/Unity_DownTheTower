@@ -25,7 +25,7 @@ public class CharacterMotor : MonoBehaviour
 	[SerializeField] private RSO_ControlScheme _rsoControlScheme;
 	[SerializeField] private GameObject _torchPrefab;
 	[SerializeField] private GameObject _torchSpawner;
-	[SerializeField] private RSO_PlayerTransform _rsoPlayerTranform;
+	[SerializeField] private RSO_PlayeGraphicsDirection _rsoPlayerTranform;
 	[SerializeField] private RSO_PlayerDeath _rsoPlayerDeath;
 
 	[Header("External references")]

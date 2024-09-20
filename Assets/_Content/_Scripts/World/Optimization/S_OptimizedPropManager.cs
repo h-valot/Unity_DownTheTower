@@ -6,7 +6,7 @@ using UnityEngine;
 public class OptimizedPropManager : MonoBehaviour
 {
 	[Header("External references")]
-	[SerializeField] private RSO_PlayerTransform _rsoPlayerTransform;
+	[SerializeField] private RSO_PlayeGraphicsDirection _rsoPlayerTransform;
 	[SerializeField] private WorldConfig _worldConfig;
 
 	private List<OptimizedProp> props;

@@ -1,24 +1,29 @@
-using System.Collections;
-using System.Collections.Generic;
-using Unity.Mathematics;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class PreLadder : MonoBehaviour
 {
-    [SerializeField] private RSO_PlayerTransform _rsoPlayerTransform;
-    [SerializeField] private Ladder _pfLadder;
-    [SerializeField] private MeshRenderer _meshToColor;
-    [SerializeField] private float _minDistFromPlayer;
-    [SerializeField] private float _maxDistFromPlayer;
-    [SerializeField] private float _minCameraAngle;
-    [SerializeField] private float _maxCameraAngle;
-    [SerializeField] private float _ladderHeight;
+	[Header("Internal references")]
+	[SerializeField] private MeshRenderer _meshToColor;
 
-    private bool _isPlaceable = true;
+	[Header("Scriptable references")]
+	[SerializeField] private RSO_PlayeGraphicsDirection _rsoPlayerTransform;
+	[SerializeField] private LadderConfig _ladderConfig;
 
-    // Update is called once per frame
-    void Update()
+	private bool _isPlaceable = true;
+	private Camera _camera;
+	private Transform _lookDirection;
+
+	private void Start()
+	{
+		_camera = Camera.main;
+	}
+
+	public void Initialize(Transform newLookDirection)
+	{
+		_lookDirection = newLookDirection;
+	}
+
+    private void Update()
     {
         UpdatePosition();
         CheckIfPlaceable();
@@ -26,50 +31,49 @@ public class PreLadder : MonoBehaviour
 
     private void UpdatePosition()
     {
-        transform.position = _rsoPlayerTransform.value.position + _rsoPlayerTransform.value.forward * GetDistanceWithCamera();
+        transform.position = _lookDirection.position + _lookDirection.forward * GetDistanceWithCamera();
         UpdateColor(CheckIfPlaceable());
     }
 
     private float GetDistanceWithCamera()
     {
         // get camera angle & clamp
-        float angle = Camera.main.transform.rotation.eulerAngles.x;
-        if (angle > 80 || angle < _minCameraAngle) angle = _minCameraAngle;
-        else if (angle > _maxCameraAngle) angle = _maxCameraAngle;
+        float angle = _camera.transform.rotation.eulerAngles.x;
+        if (angle > 80 || angle < _ladderConfig.minCameraAngle) angle = _ladderConfig.minCameraAngle;
+        else if (angle > _ladderConfig.maxCameraAngle) angle = _ladderConfig.maxCameraAngle;
 
         // convert camera angle value to distance from player value
-        return _maxDistFromPlayer - ((angle - _minCameraAngle) * (_maxDistFromPlayer - _minDistFromPlayer) / (_maxCameraAngle - _minCameraAngle));
+        return _ladderConfig.maxDistFromPlayer - ((angle - _ladderConfig.minCameraAngle) * (_ladderConfig.maxDistFromPlayer - _ladderConfig.minDistFromPlayer) / (_ladderConfig.maxCameraAngle - _ladderConfig.minCameraAngle));
     }
 
-    public void InstanciateLadder()
+    public void InstantiateLadder()
     {
-        if (_isPlaceable)
-        {
-            Ladder newLadder = Instantiate(_pfLadder, transform.position, _rsoPlayerTransform.value.rotation);
-            newLadder.SetHeight(_ladderHeight);
-        }
+        if (!_isPlaceable) return;
+
+		Ladder newLadder = Instantiate(_ladderConfig.pfLadder, transform.position, _lookDirection.rotation);
+		newLadder.Initialize();
     }
 
     private bool CheckIfPlaceable()
     {
-        // Cast 1 = Check if there is ground under the ladder ; Cast 2 = Check that there is enough room above
-        return Physics.Raycast(transform.position + new Vector3(0, 0.25f, 0), new Vector3(0, -1, 0), 0.5f) &&
-            !Physics.Raycast(transform.position + new Vector3(0, 0.25f, 0), new Vector3(0, 1, 0), _ladderHeight - 0.25f);
+        // cast 1 = Check if there is ground under the ladder 
+		// cast 2 = Check that there is enough room above
+        return Physics.Raycast(transform.position + new Vector3(0, 0.25f, 0), Vector3.down, 0.5f) &&
+            !Physics.Raycast(transform.position + new Vector3(0, 0.25f, 0), Vector3.up, _ladderConfig.maxHeight - 0.25f);
     }
 
     private void UpdateColor(bool newIsPlaceable)
     {
-        if (newIsPlaceable != _isPlaceable)
-        {
-            _isPlaceable = newIsPlaceable;
-            if(!_isPlaceable)
-            {
-                _meshToColor.material.SetFloat("_colorSwitch", 1f);
-            }
-            else
-            {
-                _meshToColor.material.SetFloat("_colorSwitch", 0f);
-            }
-        }
+        if (newIsPlaceable == _isPlaceable) return;
+
+		_isPlaceable = newIsPlaceable;
+		if(!_isPlaceable)
+		{
+			_meshToColor.material.SetFloat("_colorSwitch", 1f);
+		}
+		else
+		{
+			_meshToColor.material.SetFloat("_colorSwitch", 0f);
+		}
     }
 }
