@@ -14,7 +14,7 @@ public class CharacterInput : MonoBehaviour
 	[SerializeField] private RSE_Sprint _rseSprint;
 	[SerializeField] private RSO_ControlScheme _rsoControlScheme;
 	[SerializeField] private RSE_Throw _rseThrow;
-    [SerializeField] private RSE_Lit_Unlit _rseLit_Unlit;
+    [SerializeField] private RSE_ToggleLight _rseToggleLight;
     [SerializeField] private RSE_CraftTorch _rseCraftTorch;
 	[SerializeField] private RSE_Interact _rseInteract;
 
@@ -37,6 +37,12 @@ public class CharacterInput : MonoBehaviour
 	private void Update()
 	{
 		UpdateControlScheme();
+	}
+
+	private void OnApplicationFocus(bool hasFocus)
+	{
+		// set cursor state
+		Cursor.lockState = hasFocus ? CursorLockMode.Locked : CursorLockMode.None;
 	}
 
 	private void UpdateControlScheme()
@@ -73,20 +79,14 @@ public class CharacterInput : MonoBehaviour
 		_rseSprint.Call(sprint);
 	}
 
-	private void OnApplicationFocus(bool hasFocus)
-	{
-		// set cursor state
-		Cursor.lockState = hasFocus ? CursorLockMode.Locked : CursorLockMode.None;
-	}
-
 	public void OnThrow(InputValue value)
 	{
 		_rseThrow.Call();
 	}
 
-	public void OnLit_Unlit()
+	public void OnToggleLight()
 	{
-		_rseLit_Unlit.Call();
+		_rseToggleLight.Call();
 	}
 
 	public void OnCraftTorch()

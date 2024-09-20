@@ -20,7 +20,7 @@ public class CharacterMotor : MonoBehaviour
 	[SerializeField] private RSE_Sprint _rseSprint;
 	[SerializeField] private RSE_Throw _rseThrow;
     [SerializeField] private RSE_Interact _rseInteract;
-	[SerializeField] private RSE_Lit_Unlit _rseLit_Unlit;
+	[SerializeField] private RSE_ToggleLight _rseLit_Unlit;
 	[SerializeField] private RSE_CraftTorch _rseCraftTorch;
 	[SerializeField] private RSO_ControlScheme _rsoControlScheme;
 	[SerializeField] private GameObject _torchPrefab;
@@ -659,7 +659,7 @@ public class CharacterMotor : MonoBehaviour
             Ray r = _mainCamera.ScreenPointToRay(Input.mousePosition);
 
             Vector3 dir = r.GetPoint(1) - r.GetPoint(0);
-            GetComponentInChildren<Torch>().ThrowTorch(dir);
+            GetComponentInChildren<Torch>().Throw(dir);
 			_torchInHand = false;
         }
        
@@ -667,7 +667,7 @@ public class CharacterMotor : MonoBehaviour
 
 	private void Lit_Unlit()
 	{
-		GetComponentInChildren<Torch>().ChangeLightState();
+		GetComponentInChildren<Torch>().ToggleLight();
 
     }
 

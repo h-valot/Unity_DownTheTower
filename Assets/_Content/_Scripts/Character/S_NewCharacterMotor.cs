@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using NaughtyAttributes;
 using UnityEngine;
 
@@ -7,17 +8,22 @@ public class NewCharacterMotor : MonoBehaviour
 	[Header("Internal references")]
 	[SerializeField] private Transform _cameraDirection;
 	[SerializeField] private Transform _characterDirection;
+	[SerializeField] private Transform _torchParent;
 	[SerializeField] private CharacterController _controller;
 
 	[Header("Scriptable references")]
 	[SerializeField] private NewCharacterConfig _characterConfig;
 	[SerializeField] private LadderConfig _ladderConfig;
+	[SerializeField] private TorchConfig _torchConfig;
 	[SerializeField] private RSO_PlayeGraphicsDirection _rsoPlayerTransform;
 	[SerializeField] private RSO_PlayerDeath _rsoPlayerDeath;
 	[SerializeField] private RSE_Sprint _rseSprint;
 	[SerializeField] private RSE_Look _rseLook;
 	[SerializeField] private RSE_Move _rseMove;
 	[SerializeField] private RSE_Jump _rseJump;
+	[SerializeField] private RSE_Throw _rseThrow;
+	[SerializeField] private RSE_ToggleLight _rseToggleLight;
+	[SerializeField] private RSE_CraftTorch _rseCraftTorch;
 
 	[Header("debug: move")]
 	[ReadOnly] public Vector2 _moveInput;
@@ -61,6 +67,8 @@ public class NewCharacterMotor : MonoBehaviour
 
 	// - permanent -
 	private PreLadder _currentPreLadder;
+	private Torch _currentTorch;
+	private bool _isCrafting;
 
 	// ----- CONST -----
 	private const float _TERMINAL_VELOCITY = 53.0f;
@@ -104,6 +112,9 @@ public class NewCharacterMotor : MonoBehaviour
 		_rseMove.action += Move;
 		_rseJump.action += Jump;
 		_rseSprint.action += Sprint;
+		_rseThrow.action += Throw;
+		_rseCraftTorch.action += CraftTorch;
+		_rseToggleLight.action += ToggleLight;
 	}
 
 	private void OnDisable()
@@ -111,6 +122,9 @@ public class NewCharacterMotor : MonoBehaviour
 		_rseMove.action -= Move;
 		_rseJump.action -= Jump;
 		_rseSprint.action -= Sprint;
+		_rseThrow.action -= Throw;
+		_rseCraftTorch.action -= CraftTorch;
+		_rseToggleLight.action -= ToggleLight;
 	}
 
 	private void CheckGround()
@@ -405,5 +419,47 @@ public class NewCharacterMotor : MonoBehaviour
 	private void Sprint(bool isSprinting)
 	{
 		_isSprinting = isSprinting;
+	}
+
+	private void Throw()
+	{
+		// the following code works only with the torch
+		// this will change as soon of throw and craft component are ready to use
+
+		if (_currentTorch == null) return;
+
+		Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+		Vector3 direction = ray.GetPoint(1) - ray.GetPoint(0);
+		_currentTorch?.Throw(direction);
+
+		_currentTorch = null;
+	}
+
+	private void ToggleLight()
+	{
+		_currentTorch?.ToggleLight();
+	}
+
+	private void CraftTorch()
+	{
+		if (_currentTorch == null 
+			&& !_isCrafting)
+		{
+			StartCoroutine(SpawnTorch());
+		}
+	}
+
+	private IEnumerator SpawnTorch()
+	{
+		_isCrafting = true;
+
+		// wait the crafting duration
+		yield return new WaitForSeconds(_torchConfig.craftingDuration);
+
+		// instantiate the torch in the character's hand
+		_currentTorch = Instantiate(_torchConfig.pfTorch, _torchParent.transform);
+		_currentTorch.transform.position = _torchParent.transform.position;
+
+		_isCrafting = false;
 	}
 }

@@ -271,11 +271,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e5cbb02d6223ce1469e3fb4d5d131fd6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _torchLight: {fileID: 1720485948228762332}
-  _torchRigidbody: {fileID: 5666824575402529614}
-  _litBody: {fileID: 4883872469197812161}
-  _litMaterial: {fileID: 2100000, guid: 48499840755e5e14dbae8eb3a7c9fca6, type: 2}
-  _unlitMaterial: {fileID: 2100000, guid: 6556fddf40050d74f8b9ca072c9b26e0, type: 2}
+  _light: {fileID: 1720485948228762332}
+  _rigidbody: {fileID: 5666824575402529614}
+  _meshRenderer: {fileID: 4883872469197812161}
   _torchConfig: {fileID: 11400000, guid: 0c5c3bc89382c9e439e0ef105c99e62b, type: 2}
 --- !u!54 &5666824575402529614
 Rigidbody:
