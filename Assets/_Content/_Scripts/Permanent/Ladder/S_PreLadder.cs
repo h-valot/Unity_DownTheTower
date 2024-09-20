@@ -15,7 +15,7 @@ public class PreLadder : MonoBehaviour
     [SerializeField] private float _maxCameraAngle;
     [SerializeField] private float _ladderHeight;
 
-    private bool _isPlaceable = false;
+    private bool _isPlaceable = true;
 
     // Update is called once per frame
     void Update()
@@ -55,7 +55,6 @@ public class PreLadder : MonoBehaviour
         // Cast 1 = Check if there is ground under the ladder ; Cast 2 = Check that there is enough room above
         return Physics.Raycast(transform.position + new Vector3(0, 0.25f, 0), new Vector3(0, -1, 0), 0.5f) &&
             !Physics.Raycast(transform.position + new Vector3(0, 0.25f, 0), new Vector3(0, 1, 0), _ladderHeight - 0.25f);
-
     }
 
     private void UpdateColor(bool newIsPlaceable)
