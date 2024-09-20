@@ -13,6 +13,9 @@ public class Lever : Interactible
     [SerializeField] private Vector3 _rotationTargetActivate;
     [SerializeField] private Vector3 _rotationTargetDeactivate;
 
+    // animation curve
+    [SerializeField] private AnimationCurve _rotationCurve;
+
     private bool _objectActivate;
 
 
@@ -62,7 +65,7 @@ public class Lever : Interactible
 
     private void RotateTargetDeactivate()
     {
-        _target.transform.DOLocalRotate(_rotationTargetDeactivate, 5f).SetId("Platform");
+        _target.transform.DOLocalRotate(_rotationTargetDeactivate, 3f).SetEase(_rotationCurve).SetId("Platform");
     }
 
     private void RotateLeverDeactivate()
