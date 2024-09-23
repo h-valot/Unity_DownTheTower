@@ -56,8 +56,8 @@ public class PreLadder : MonoBehaviour
 
 	private bool IsGroundFlat(RaycastHit hit)
 	{
-		float product = Vector3.Dot(hit.normal, new Vector3(0, 0, 1));
-		return (product < _ladderConfig.maxGroundAngle && product > -_ladderConfig.maxGroundAngle);
+		float product = Vector3.Dot(hit.normal, new Vector3(0, 1, 0));
+		return (product >= _ladderConfig.maxGroundAngle);
 	}
 
 
