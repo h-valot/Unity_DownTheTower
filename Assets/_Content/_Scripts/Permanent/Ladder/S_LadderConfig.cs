@@ -12,11 +12,8 @@ public class LadderConfig : ScriptableObject
 	public float additionalRaycastHeight = 0.5f;
 	public LayerMask layersToIgnore;
 
-	[Header("Placement")]
-	public float minDistFromPlayer = 1f;
-	public float maxDistFromPlayer = 4f;
-
 	[Header("Camera")]
-	public float minCameraAngle = 1f;
-	public float maxCameraAngle = 30f;
+    [Tooltip("1f = 0° ; 0f = 90° ; -1f = 180°")]
+    public float maxGroundAngle = 0.5f;
+    public float maxDistFromCamera = 6f;
 }

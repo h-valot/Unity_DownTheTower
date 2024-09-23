@@ -1,9 +1,10 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class PreLadder : MonoBehaviour
 {
 	[Header("Internal references")]
-	[SerializeField] private MeshRenderer _meshToColor;
+	[SerializeField] private MeshRenderer _placementMesh;
 
 	[Header("Scriptable references")]
 	[SerializeField] private RSO_PlayeGraphicsDirection _rsoPlayerTransform;
@@ -25,55 +26,58 @@ public class PreLadder : MonoBehaviour
 
     private void Update()
     {
-        UpdatePosition();
-        CheckIfPlaceable();
-    }
-
-    private void UpdatePosition()
-    {
-        transform.position = _lookDirection.position + _lookDirection.forward * GetDistanceWithCamera();
-        UpdateColor(CheckIfPlaceable());
-    }
-
-    private float GetDistanceWithCamera()
-    {
-        // get camera angle & clamp
-        float angle = _camera.transform.rotation.eulerAngles.x;
-        if (angle > 80 || angle < _ladderConfig.minCameraAngle) angle = _ladderConfig.minCameraAngle;
-        else if (angle > _ladderConfig.maxCameraAngle) angle = _ladderConfig.maxCameraAngle;
-
-        // convert camera angle value to distance from player value
-        return _ladderConfig.maxDistFromPlayer - ((angle - _ladderConfig.minCameraAngle) * (_ladderConfig.maxDistFromPlayer - _ladderConfig.minDistFromPlayer) / (_ladderConfig.maxCameraAngle - _ladderConfig.minCameraAngle));
+		UpdatePosition();
     }
 
     public void InstantiateLadder()
     {
         if (!_isPlaceable) return;
 
-		Ladder newLadder = Instantiate(_ladderConfig.pfLadder, transform.position, _lookDirection.rotation);
+		Quaternion rotation = Quaternion.identity;
+		rotation.eulerAngles = new Vector3(0, _camera.transform.rotation.eulerAngles.y, 0);
+		Ladder newLadder = Instantiate(_ladderConfig.pfLadder, transform.position, rotation);
 		newLadder.Initialize();
     }
 
-    private bool CheckIfPlaceable()
+	private void UpdatePosition()
+	{
+		if(Physics.Raycast(_camera.transform.position, _camera.transform.forward, out var hit, _ladderConfig.maxDistFromCamera))
+        {
+            _placementMesh.enabled = true;
+			transform.position = hit.point;
+			UpdateColor(IsGroundFlat(hit) && !IsCeiling());
+
+        }
+		else
+		{
+			_placementMesh.enabled = false;
+		}
+	}
+
+	private bool IsGroundFlat(RaycastHit hit)
+	{
+		float product = Vector3.Dot(hit.normal, new Vector3(0, 1, 0));
+		return (product >= _ladderConfig.maxGroundAngle);
+	}
+
+
+	private bool IsCeiling()
     {
-        // cast 1 = Check if there is ground under the ladder 
-		// cast 2 = Check that there is enough room above
-        return Physics.Raycast(transform.position + new Vector3(0, 0.25f, 0), Vector3.down, 0.5f) &&
-            !Physics.Raycast(transform.position + new Vector3(0, 0.25f, 0), Vector3.up, _ladderConfig.maxHeight - 0.25f);
+        //Check that there is enough room above current position
+        return Physics.Raycast(transform.position + new Vector3(0, 0.25f, 0), Vector3.up, _ladderConfig.maxHeight - 0.25f);
     }
 
     private void UpdateColor(bool newIsPlaceable)
     {
         if (newIsPlaceable == _isPlaceable) return;
-
-		_isPlaceable = newIsPlaceable;
+        _isPlaceable = newIsPlaceable;
 		if(!_isPlaceable)
 		{
-			_meshToColor.material.SetFloat("_colorSwitch", 1f);
+			_placementMesh.material.SetFloat("_colorSwitch", 1f);
 		}
 		else
 		{
-			_meshToColor.material.SetFloat("_colorSwitch", 0f);
+			_placementMesh.material.SetFloat("_colorSwitch", 0f);
 		}
     }
 }
