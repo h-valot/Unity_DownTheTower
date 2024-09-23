@@ -1756,6 +1756,34 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 1415483324}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &239250719 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6401502057964862670, guid: 8d9703feddc9f834a924d2fe0f4d678d,
+    type: 3}
+  m_PrefabInstance: {fileID: 1375879822}
+  m_PrefabAsset: {fileID: 0}
+--- !u!64 &239250721
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 239250719}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 5
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 0}
 --- !u!1001 &245473198
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4560,6 +4588,30 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _gameStart: {fileID: 3925373052224556771}
   _rsoPlayerDeath: {fileID: 11400000, guid: faee3d4fb6d36d5439a3b69f5e064b1e, type: 2}
+--- !u!114 &712606650 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8307310262378912332, guid: 0dfe6889adf481246afedc08a42cda52,
+    type: 3}
+  m_PrefabInstance: {fileID: 1537788818}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 293ef9978589ae849972dd4b291534fb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &712606651 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1517017858032438292, guid: 0dfe6889adf481246afedc08a42cda52,
+    type: 3}
+  m_PrefabInstance: {fileID: 1537788818}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1703bde79b5fb944796cb82be3a3b990, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!4 &723947298 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8718778828885884488, guid: e5f4daf24146ee040b5a2d7a73b30aa0,
@@ -7923,7 +7975,7 @@ PrefabInstance:
     - target: {fileID: 8102757759080591753, guid: 8d9703feddc9f834a924d2fe0f4d678d,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: -19.05687
+      value: -22.95
       objectReference: {fileID: 0}
     - target: {fileID: 8102757759080591753, guid: 8d9703feddc9f834a924d2fe0f4d678d,
         type: 3}
@@ -7933,7 +7985,7 @@ PrefabInstance:
     - target: {fileID: 8102757759080591753, guid: 8d9703feddc9f834a924d2fe0f4d678d,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: -12.55816
+      value: -7.75
       objectReference: {fileID: 0}
     - target: {fileID: 8102757759080591753, guid: 8d9703feddc9f834a924d2fe0f4d678d,
         type: 3}
@@ -7973,7 +8025,11 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 6401502057964862670, guid: 8d9703feddc9f834a924d2fe0f4d678d,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 239250721}
   m_SourcePrefab: {fileID: 100100000, guid: 8d9703feddc9f834a924d2fe0f4d678d, type: 3}
 --- !u!1 &1380387290
 GameObject:
@@ -8745,6 +8801,21 @@ PrefabInstance:
       propertyPath: m_Name
       value: T_PF_Guardian
       objectReference: {fileID: 0}
+    - target: {fileID: 1517017858032438292, guid: 0dfe6889adf481246afedc08a42cda52,
+        type: 3}
+      propertyPath: _pathPatrol
+      value: 
+      objectReference: {fileID: 712606650}
+    - target: {fileID: 8307310262378912332, guid: 0dfe6889adf481246afedc08a42cda52,
+        type: 3}
+      propertyPath: _aggro
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8307310262378912332, guid: 0dfe6889adf481246afedc08a42cda52,
+        type: 3}
+      propertyPath: _guardianRef
+      value: 
+      objectReference: {fileID: 712606651}
     - target: {fileID: 8307310262378912332, guid: 0dfe6889adf481246afedc08a42cda52,
         type: 3}
       propertyPath: _patrolPoints.Array.size
