@@ -5,6 +5,8 @@ using UnityEngine;
 
 public class NewCharacterMotor : MonoBehaviour
 {
+	#region exposed variables
+
 	[Header("Internal references")]
 	[SerializeField] private Transform _cameraDirection;
 	[SerializeField] private Transform _characterDirection;
@@ -24,6 +26,10 @@ public class NewCharacterMotor : MonoBehaviour
 	[SerializeField] private RSE_Throw _rseThrow;
 	[SerializeField] private RSE_ToggleLight _rseToggleLight;
 	[SerializeField] private RSE_CraftTorch _rseCraftTorch;
+
+	#endregion
+
+	#region runtime variables
 
 	[Header("debug: move")]
 	[ReadOnly] public Vector2 _moveInput;
@@ -73,6 +79,10 @@ public class NewCharacterMotor : MonoBehaviour
 	// ----- CONST -----
 	private const float _TERMINAL_VELOCITY = 53.0f;
 
+	#endregion
+
+	#region monobehaviour functions
+
 	private void Update()
 	{
 		// temp
@@ -85,26 +95,6 @@ public class NewCharacterMotor : MonoBehaviour
 		Accelerate();
 		ApplyGravity();
 		HandleMovement();
-	}
-
-	private void HandleInputs()
-	{
-		// temp
-		if (Input.GetKeyDown(KeyCode.Mouse1))
-		{
-			_currentPreLadder = Instantiate(_ladderConfig.pfPreLadder);
-			_currentPreLadder.Initialize(_cameraDirection);
-		}
-
-		if (Input.GetKeyUp(KeyCode.Mouse1))
-		{
-			_currentPreLadder.InstantiateLadder();
-			if (_currentPreLadder != null)
-			{
-				Destroy(_currentPreLadder.gameObject);
-				_currentPreLadder = null;
-			}
-		}
 	}
 
 	private void OnEnable()
@@ -127,6 +117,15 @@ public class NewCharacterMotor : MonoBehaviour
 		_rseToggleLight.action -= ToggleLight;
 	}
 
+	#endregion
+
+	#region ground checks
+
+	/// <summary>
+	/// 	use raycasting to check if the character has a collider below it.
+	/// 	save last grounded variables when the character leaves the ground.
+	/// 	handle falling when the character touches the ground.
+	/// </summary>
 	private void CheckGround()
 	{
 		Vector3 origin = new Vector3(transform.position.x, transform.position.y + _characterConfig.groundCheckY, transform.position.z);
@@ -175,6 +174,10 @@ public class NewCharacterMotor : MonoBehaviour
 		}
 	}
 
+	/// <summary>
+	/// 	set the slope angle to the smallest angle value amoung 3 raycasts.
+	/// 	try to get the slope deceleration or acceleration percentage based on the slope angle.
+	/// </summary>
 	private void HandleSlope()
 	{
 		if (!_isGrounded) return;
@@ -206,16 +209,15 @@ public class NewCharacterMotor : MonoBehaviour
 				// get angle of slope of these two hit points.
 				float angleBackward = Vector3.Angle(slopeHitBackward.normal, Vector3.up);
 
-				// 3 collision points: Take the MEDIAN by sorting array and grabbing middle.
+				// 3 collision points: Take the MINIMUM by sorting array and grabbing middle.
 				float[] angles = new float[] { angleForward, middleAngle, angleBackward };
 				System.Array.Sort(angles);
-				_slopeAngle = angles[1];
+				_slopeAngle = Mathf.Min(angles);
 			}
 			else
 			{
 				// 2 collision points (sphere and first raycast): MINIMUM the two
-				float minimum = Mathf.Min(angleForward, middleAngle);
-				_slopeAngle = minimum;
+				_slopeAngle = Mathf.Min(angleForward, middleAngle);
 			}
 		}
 
@@ -229,12 +231,23 @@ public class NewCharacterMotor : MonoBehaviour
 		}
 	}
 
+	#endregion
+
+	#region character status
+
+	/// <summary>
+	/// 	kill the character
+	/// </summary>
 	private void HandleDeath()
 	{
 		_rsoPlayerDeath.value = true;
 		Destroy(gameObject);
 	}
 
+	/// <summary>
+	/// 	set the character as stunned for the stun timer duration,
+	/// 	then set the character as slowed.
+	/// </summary>
 	private void HandleStun()
 	{
 		if (!_isStunned) return;
@@ -252,6 +265,9 @@ public class NewCharacterMotor : MonoBehaviour
 		}
 	}
 
+	/// <summary>
+	/// 	set the character as slowed for the slow timer duration.
+	/// </summary>
 	private void HandleSlow()
 	{
 		if (!_isSlowed) return;
@@ -260,6 +276,17 @@ public class NewCharacterMotor : MonoBehaviour
 		_isSlowed = _slowTimer > 0;
 	}
 
+	#endregion
+
+	#region movement
+
+	/// <summary>
+	/// 	lerp the current speed to the target speed with several modifiers: 
+	/// 	(1) slope acceleration or deceleration,
+	/// 	(2) slow status, 
+	/// 	(3) stun status,
+	/// 	(4) player's input magnitude - stops the character if the player don't command it to
+	/// </summary>
 	private void Accelerate()
 	{
 		// - variables -
@@ -317,6 +344,9 @@ public class NewCharacterMotor : MonoBehaviour
 		}
 	}
 
+	/// <summary>
+	/// 	handle gravity modifier, and jump delay
+	/// </summary>
 	private void ApplyGravity()
 	{
 		if (_isGrounded)
@@ -342,6 +372,9 @@ public class NewCharacterMotor : MonoBehaviour
 		}
 	}
 
+	/// <summary>
+	/// 	moves the character towards the input directions 
+	/// </summary>
 	private void HandleMovement()
 	{
 		// - variables -
@@ -400,11 +433,46 @@ public class NewCharacterMotor : MonoBehaviour
 		if (_rsoPlayerTransform.value != transform) _rsoPlayerTransform.value = transform;
 	}
 
+	#endregion
+
+	#region inputs
+
+	/// <summary>
+	/// 	temporary function to handle ladder placement. whenever the craft system works
+	/// 	the ladder and torch inputs will be managed there
+	/// </summary>
+	private void HandleInputs()
+	{
+		// temp
+		if (Input.GetKeyDown(KeyCode.Mouse1))
+		{
+			_currentPreLadder = Instantiate(_ladderConfig.pfPreLadder);
+			_currentPreLadder.Initialize(_cameraDirection);
+		}
+
+		if (Input.GetKeyUp(KeyCode.Mouse1))
+		{
+			_currentPreLadder.InstantiateLadder();
+			if (_currentPreLadder != null)
+			{
+				Destroy(_currentPreLadder.gameObject);
+				_currentPreLadder = null;
+			}
+		}
+	}
+
+	/// <summary>
+	/// 	update the movement input when pressed
+	/// </summary>
+	/// <param name="input">input direction value</param>
 	private void Move(Vector2 input)
 	{
 		_moveInput = input;
 	}
 
+	/// <summary>
+	/// 	add vertical velocity to the gravity modifier to make it jump
+	/// </summary>
 	private void Jump()
 	{
 		if (!_isGrounded || _jumpDelayTimer > 0.0f)
@@ -416,16 +484,21 @@ public class NewCharacterMotor : MonoBehaviour
 		_gravityModifier.y = Mathf.Sqrt(_characterConfig.jumpHeight * -2f * _characterConfig.gravity);
 	}
 
+	/// <summary>
+	/// 	update the sprint input value
+	/// </summary>
+	/// <param name="isSprinting">is the input pressed</param>
 	private void Sprint(bool isSprinting)
 	{
 		_isSprinting = isSprinting;
 	}
 
+	/// <summary>
+	/// 	(temp) throw the torch towards the camera.
+	/// 	this will change as soon of throw and craft component are ready to use.
+	/// </summary>
 	private void Throw()
 	{
-		// the following code works only with the torch
-		// this will change as soon of throw and craft component are ready to use
-
 		if (_currentTorch == null) return;
 
 		Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -435,11 +508,17 @@ public class NewCharacterMotor : MonoBehaviour
 		_currentTorch = null;
 	}
 
+	/// <summary>
+	/// 	lit and unlit the currently equipped torch
+	/// </summary>
 	private void ToggleLight()
 	{
 		_currentTorch?.ToggleLight();
 	}
 
+	/// <summary>
+	/// 	start the spawn torch coroutine if (1) there is no torch equiped, (2) another permanent is being crafted
+	/// </summary>
 	private void CraftTorch()
 	{
 		if (_currentTorch == null 
@@ -449,6 +528,11 @@ public class NewCharacterMotor : MonoBehaviour
 		}
 	}
 
+	#endregion
+
+	/// <summary>
+	/// 	instantiate the torch prefab after the fixed duration.
+	/// </summary>
 	private IEnumerator SpawnTorch()
 	{
 		_isCrafting = true;
