@@ -40,6 +40,7 @@ public class NewCharacterMotor : MonoBehaviour
 	[ReadOnly] public float _currentSpeed;
 	[ReadOnly] public float _moveSpeed;
 	[ReadOnly] public bool _isSprinting;
+	[ReadOnly] public float _coyoteTimer;
 
 	[Header("debug: gravity")]
 	[ReadOnly] public Vector3 _gravityModifier;
@@ -72,7 +73,7 @@ public class NewCharacterMotor : MonoBehaviour
 	private RaycastHit _groundHit;
 
 	// - jump -
-	private float _jumpDelayTimer;
+	private float _jumpTimer;
 
 	// - permanent -
 	private PreLadder _currentPreLadder;
@@ -259,6 +260,7 @@ public class NewCharacterMotor : MonoBehaviour
 		if (_isGrounded && _groundedCheckLocked)
 		{
 			_groundedCheckLocked = false;
+			_isJumping = false;
 
 			_lastDistanceTravelled = Math.Abs(transform.position.y - _lastGroundedPosition.y);
 			if (_lastDistanceTravelled >= _characterConfig.lethalHeight)
@@ -468,12 +470,21 @@ public class NewCharacterMotor : MonoBehaviour
 			if (_gravityModifier.y < 0.0f) _gravityModifier.y = -2.0f;
 
 			// runs prevent jump timer
-			if (_jumpDelayTimer >= 0.0f) _jumpDelayTimer -= Time.deltaTime;
+			if (_jumpTimer >= 0.0f) _jumpTimer -= Time.deltaTime;
 			else _inAir = false;
+
+			// reset the coyote timer
+			_coyoteTimer = _characterConfig.coyoteTime;
 		}
 		else 
 		{
-			_jumpDelayTimer = _characterConfig.jumpDelay;
+			// runs the coyote timer
+			if (_coyoteTimer >= 0.0f) _coyoteTimer -= Time.deltaTime;
+
+			// reset the jump delay timer
+			_jumpTimer = _characterConfig.jumpCooldown;
+
+			// set the character as in the air
 			_inAir = true;
 		}
 
@@ -583,18 +594,31 @@ public class NewCharacterMotor : MonoBehaviour
 		_moveInput = input;
 	}
 
+	private bool _isJumping;
+
 	/// <summary>
 	/// 	add vertical velocity to the gravity modifier to make it jump
 	/// </summary>
 	private void Jump()
 	{
-		if (!_isGrounded || _jumpDelayTimer > 0.0f)
+		// exit, if the character is already jumping
+		if (_isJumping) 
 		{
 			return;
 		}
 
+		// exit, if the coyote time is exhaused 
+		// or character is grounded but the jump delay is not over
+		if ((_coyoteTimer <= 0.0f || _isGrounded)
+			&& (!_isGrounded || _jumpTimer >= 0.0f))
+		{
+			return;
+		}
+		
 		// the square root of H * -2 * G = how much velocity needed to reach desired height
 		_gravityModifier.y = Mathf.Sqrt(_characterConfig.jumpHeight * -2f * _characterConfig.gravity);
+
+		_isJumping = true;
 	}
 
 	/// <summary>
