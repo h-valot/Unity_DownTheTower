@@ -93,7 +93,6 @@ public class NewCharacterMotor : MonoBehaviour
 		if (Input.GetKeyDown(KeyCode.Mouse1))
 		{
 			_currentPreLadder = Instantiate(_ladderConfig.pfPreLadder);
-			_currentPreLadder.Initialize(_cameraDirection);
 		}
 
 		if (Input.GetKeyUp(KeyCode.Mouse1))

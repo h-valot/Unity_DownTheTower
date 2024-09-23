@@ -12,6 +12,9 @@ public class LadderConfig : ScriptableObject
 	public float additionalRaycastHeight = 0.5f;
 	public LayerMask layersToIgnore;
 
+	[Header("Checks")]
+	public float minDistanceFromWall = 0.4f;
+
 	[Header("Camera")]
     [Tooltip("1f = 0° ; 0f = 90° ; -1f = 180°")]
     public float maxGroundAngle = 0.5f;
