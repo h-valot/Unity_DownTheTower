@@ -31,6 +31,9 @@ public class NewCharacterMotor : MonoBehaviour
 
 	#region runtime variables
 
+	[Header("debug: animation")]
+	[ReadOnly] public AnimationState _currentState;
+
 	[Header("debug: move")]
 	[ReadOnly] public Vector2 _moveInput;
 	[ReadOnly] public float _targetSpeed;
@@ -83,18 +86,14 @@ public class NewCharacterMotor : MonoBehaviour
 
 	#region monobehaviour functions
 
+	private void Start()
+	{
+		SwitchState(AnimationState.LOCOMOTION);
+	}
+
 	private void Update()
 	{
-		// temp
-		HandleInputs();
-
-		CheckGround();
-		HandleSlope();
-		HandleStun();
-		HandleSlow();
-		Accelerate();
-		ApplyGravity();
-		HandleMovement();
+		UpdateCurrentState();
 	}
 
 	private void OnEnable()
@@ -115,6 +114,120 @@ public class NewCharacterMotor : MonoBehaviour
 		_rseThrow.action -= Throw;
 		_rseCraftTorch.action -= CraftTorch;
 		_rseToggleLight.action -= ToggleLight;
+	}
+
+	#endregion
+
+	#region animation state
+
+	/// <summary>
+	/// 	call the update function of the current state.
+	/// </summary>
+	private void UpdateCurrentState()
+	{
+		switch (_currentState)
+		{
+			case AnimationState.LOCOMOTION:
+				UpdateLocomotionState();
+				break;
+
+			case AnimationState.JUMP:
+				UpdateJumpState();
+				break;
+
+			case AnimationState.FALL:
+				UpdateFallState();
+				break;
+
+			case AnimationState.CRAFT:
+				UpdateCraftState();
+				break;
+
+			case AnimationState.ROPE:
+				UpdateRopeState();
+				break;
+
+			case AnimationState.LADDER:
+				UpdateLadderState();
+				break;
+		}
+	}
+
+	/// <summary>
+	/// 	exit current state and enter the given state.
+	/// </summary>
+	/// <param name="newState">state to enter into</param>
+	private void SwitchState(AnimationState newState)
+	{
+		ExitCurrentState();
+		EnterState(newState);
+	}
+
+	/// <summary>
+	/// 	call the exit function of the current state.
+	/// </summary>
+	private void ExitCurrentState()
+	{
+		switch (_currentState)
+		{
+			case AnimationState.LOCOMOTION:
+				ExitLocomotionState();
+				break;
+			
+			case AnimationState.JUMP:
+				ExitJumpState();
+				break;
+			
+			case AnimationState.FALL:
+				ExitFallState();
+				break;
+			
+			case AnimationState.CRAFT:
+				ExitCraftState();
+				break;
+			
+			case AnimationState.ROPE:
+				ExitRopeState();
+				break;
+			
+			case AnimationState.LADDER:
+				ExitLadderState();
+				break;
+		}
+	}
+
+	/// <summary>
+	/// 	call the enter function of the given state.
+	/// </summary>
+	/// <param name="newState">state to enter into</param>
+	private void EnterState(AnimationState newState)
+	{
+		switch (newState)
+		{
+			case AnimationState.LOCOMOTION:
+				EnterLocomotionState();
+				break;
+
+			case AnimationState.JUMP:
+				EnterJumpState();
+				break;
+
+			case AnimationState.FALL:
+				EnterFallState();
+				break;
+
+			case AnimationState.CRAFT:
+				EnterCraftState();
+				break;
+
+			case AnimationState.ROPE:
+				EnterRopeState();
+				break;
+
+			case AnimationState.LADDER:
+				EnterLadderState();
+				break;
+		}
 	}
 
 	#endregion
@@ -546,4 +659,127 @@ public class NewCharacterMotor : MonoBehaviour
 
 		_isCrafting = false;
 	}
+
+	#region locomotion state
+
+	private void EnterLocomotionState()
+	{
+
+	}
+
+	private void UpdateLocomotionState()
+	{
+		// temp
+		HandleInputs();
+
+		CheckGround();
+		HandleSlope();
+		HandleStun();
+		HandleSlow();
+		Accelerate();
+		ApplyGravity();
+		HandleMovement();
+	}
+
+	private void ExitLocomotionState()
+	{
+
+	}
+
+	#endregion
+
+	#region jump state
+
+	private void EnterJumpState()
+	{
+
+	}
+
+	private void UpdateJumpState()
+	{
+
+	}
+
+	private void ExitJumpState()
+	{
+
+	}
+
+	#endregion
+
+	#region fall state
+
+	private void EnterFallState()
+	{
+
+	}
+
+	private void UpdateFallState()
+	{
+
+	}
+
+	private void ExitFallState()
+	{
+
+	}
+
+	#endregion
+
+	#region craft state
+
+	private void EnterCraftState()
+	{
+
+	}
+
+	private void UpdateCraftState()
+	{
+
+	}
+
+	private void ExitCraftState()
+	{
+
+	}
+
+	#endregion
+
+	#region rope state
+
+	private void EnterRopeState()
+	{
+
+	}
+
+	private void UpdateRopeState()
+	{
+
+	}
+
+	private void ExitRopeState()
+	{
+
+	}
+
+	#endregion
+
+	#region ladder state
+
+	private void EnterLadderState()
+	{
+
+	}
+
+	private void UpdateLadderState()
+	{
+
+	}
+
+	private void ExitLadderState()
+	{
+
+	}
+
+	#endregion
 }
