@@ -25,7 +25,7 @@ public class CharacterMotor : MonoBehaviour
 	[SerializeField] private RSO_ControlScheme _rsoControlScheme;
 	[SerializeField] private GameObject _torchPrefab;
 	[SerializeField] private GameObject _torchSpawner;
-	[SerializeField] private RSO_PlayeGraphicsDirection _rsoPlayerTranform;
+	[SerializeField] private RSO_CharacterPosition _rsoPlayerTranform;
 	[SerializeField] private RSO_PlayerDeath _rsoPlayerDeath;
 
 	[Header("External references")]
@@ -464,7 +464,7 @@ public class CharacterMotor : MonoBehaviour
 		}
 
 		// update rso character transform data
-		if (_rsoPlayerTranform.value != transform) _rsoPlayerTranform.value = transform;
+		if (_rsoPlayerTranform.value != transform.position) _rsoPlayerTranform.value = transform.position;
 	}
 
 	private void ApplyGravity()
