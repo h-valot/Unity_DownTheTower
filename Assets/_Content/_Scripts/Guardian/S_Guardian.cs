@@ -83,7 +83,7 @@ public class Guardian : MonoBehaviour
     {
         FireRay();
 
-        if (hitDataHead.)
+        if (Physics.Raycast(ray)
 
         return false;
     }
@@ -92,17 +92,17 @@ public class Guardian : MonoBehaviour
     {
         // Head raycast
         Ray rayHead = new Ray(_raycastHead.transform.position, transform.forward);
-        RaycastHit _hitDataHead;
+        RaycastHit hitDataHead;
         Physics.Raycast(rayHead, out hitDataHead);
 
         // Eyes raycast
         Ray rayEyes = new Ray(_raycastEyes.transform.position, transform.forward);
-        RaycastHit _hitDataEyes;
+        RaycastHit hitDataEyes;
         Physics.Raycast(rayHead, out hitDataEyes);
 
         // Feet raycast
         Ray rayFeet = new Ray(_raycastFeet.transform.position, transform.forward);
-        RaycastHit _hitDataFeet;
+        RaycastHit hitDataFeet;
         Physics.Raycast(rayFeet, out hitDataFeet);
     }
 }
