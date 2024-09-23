@@ -15,8 +15,9 @@ public class NewCharacterMotor : MonoBehaviour
 	[SerializeField] private NewCharacterConfig _characterConfig;
 	[SerializeField] private LadderConfig _ladderConfig;
 	[SerializeField] private TorchConfig _torchConfig;
-	[SerializeField] private RSO_PlayeGraphicsDirection _rsoPlayerTransform;
-	[SerializeField] private RSO_PlayerDeath _rsoPlayerDeath;
+    [SerializeField] private RSO_CharacterForward _rsoCharacterForward;
+	[SerializeField] private RSO_CharacterPosition _rsoCharacterPosition;
+    [SerializeField] private RSO_PlayerDeath _rsoPlayerDeath;
 	[SerializeField] private RSE_Sprint _rseSprint;
 	[SerializeField] private RSE_Look _rseLook;
 	[SerializeField] private RSE_Move _rseMove;
@@ -397,8 +398,9 @@ public class NewCharacterMotor : MonoBehaviour
 		}
 
 		// - update variables -
-		if (_rsoPlayerTransform.value != transform) _rsoPlayerTransform.value = transform;
-	}
+		if (_rsoCharacterPosition.value != _characterDirection.position) { _rsoCharacterPosition.value = _characterDirection.position; }
+		if (_rsoCharacterForward.value != _characterDirection.forward) { _rsoCharacterForward.value = _characterDirection.forward; }
+    }
 
 	private void Move(Vector2 input)
 	{

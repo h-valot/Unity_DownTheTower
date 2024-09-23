@@ -7,7 +7,7 @@ public class PreLadder : MonoBehaviour
 	[SerializeField] private MeshRenderer _placementMesh;
 
 	[Header("Scriptable references")]
-	[SerializeField] private RSO_PlayeGraphicsDirection _rsoPlayerTransform;
+	[SerializeField] private RSO_CharacterPosition _rsoPlayerTransform;
 	[SerializeField] private LadderConfig _ladderConfig;
 
 	private bool _isPlaceable = true;
