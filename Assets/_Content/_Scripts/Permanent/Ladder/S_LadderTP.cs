@@ -39,6 +39,7 @@ public class LadderTP : MonoBehaviour
         {
             _playerIsIn = true;
             _character = character;
+            Debug.Log("Player is in");
         }
     }
 
@@ -54,6 +55,7 @@ public class LadderTP : MonoBehaviour
         if (other.TryGetComponent<NewCharacterMotor>(out var character))
         {
             _playerIsIn = false;
+            Debug.Log("Player is out");
         }
     }
 }

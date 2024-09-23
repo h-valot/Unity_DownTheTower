@@ -24,9 +24,9 @@ public class PreLadder : MonoBehaviour
 		_lookDirection = newLookDirection;
 	}
 
-    private void Update()
+    private void LateUpdate()
     {
-		UpdatePosition();
+        UpdatePosition();
     }
 
     public void InstantiateLadder()

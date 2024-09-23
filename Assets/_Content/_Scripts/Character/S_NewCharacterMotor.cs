@@ -428,7 +428,7 @@ public class NewCharacterMotor : MonoBehaviour
 
 		if (_currentTorch == null) return;
 
-		Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+		Ray ray = new Ray(_cameraDirection.position, _cameraDirection.forward);
 		Vector3 direction = ray.GetPoint(1) - ray.GetPoint(0);
 		_currentTorch?.Throw(direction);
 
