@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.PlayerLoop;
 using UnityEngine.UI;
 
 public class Guardian : MonoBehaviour
@@ -17,15 +18,19 @@ public class Guardian : MonoBehaviour
     [SerializeField] private GameObject _raycastHead;
     [SerializeField] private GameObject _raycastEyes;
     [SerializeField] private GameObject _raycastFeet;
-    private RaycastHit hitDataHead;
-    private RaycastHit hitDataEyes;
-    private RaycastHit hitDataFeet;
+
+    //Height
+    float headHeight;
+    float eyesHeight;
+    float feetHeight;
+
 
     private void Start()
     {
         _agent = GetComponent<NavMeshAgent>();
         _aggro = false;
     }
+
     IEnumerator CheckForXSecond(float X)
     {
         yield return new WaitForSeconds(X);
@@ -37,11 +42,15 @@ public class Guardian : MonoBehaviour
 
         if (other.TryGetComponent<NewCharacterMotor>(out _playerRef))
         {
-            if (_coroutine != null )
+            if (CheckRaycast() == true)
             {
-                StopCoroutine(_coroutine);
+                if (_coroutine != null)
+                {
+                    StopCoroutine(_coroutine);
+                }
+                AgroState();
             }
-            AgroState();
+            
         }
     }
 
@@ -56,8 +65,11 @@ public class Guardian : MonoBehaviour
 
     private void AgroState()
     {
+        //_agent.destination = _playerRef.transform.position;
+        //_aggro = true;
         _agent.destination = _playerRef.transform.position;
         _aggro = true;
+
     }
 
     private void ToIdle()
@@ -81,28 +93,34 @@ public class Guardian : MonoBehaviour
 
     bool CheckRaycast()
     {
-        FireRay();
+        //RaycastHit hitDataHead = 0;
+        CheckPlayerHeight();
+        Physics.Raycast(_raycastHead.transform.position, ((_playerRef.transform.position + new Vector3(0, headHeight, 0)) - _raycastHead.transform.position).normalized, out var hitDataHead);
+        UnityEngine.Debug.DrawRay(_raycastEyes.transform.position, ((_playerRef.transform.position + new Vector3(0, headHeight, 0)) - _raycastEyes.transform.position).normalized, Color.red);
 
-        if (Physics.Raycast(ray)
+        Physics.Raycast(_raycastEyes.transform.position, ((_playerRef.transform.position + new Vector3(0, eyesHeight, 0)) - _raycastEyes.transform.position).normalized, out var hitDataEyes);
 
-        return false;
+        Physics.Raycast(_raycastEyes.transform.position, ((_playerRef.transform.position + new Vector3(0, feetHeight, 0)) - _raycastEyes.transform.position).normalized, out var hitDataFeet);
+
+        if (hitDataHead.transform == _playerRef.transform && hitDataEyes.transform == _playerRef.transform && hitDataFeet.transform == _playerRef.transform)
+        {
+            Debug.Log("pas de mur entre");
+            return true;
+        }
+        else
+        {
+
+            Debug.Log(" mur entre");
+            return false;
+        }
     }
-
-    private void FireRay()
+    private void CheckPlayerHeight()
     {
-        // Head raycast
-        Ray rayHead = new Ray(_raycastHead.transform.position, transform.forward);
-        RaycastHit hitDataHead;
-        Physics.Raycast(rayHead, out hitDataHead);
-
-        // Eyes raycast
-        Ray rayEyes = new Ray(_raycastEyes.transform.position, transform.forward);
-        RaycastHit hitDataEyes;
-        Physics.Raycast(rayHead, out hitDataEyes);
-
-        // Feet raycast
-        Ray rayFeet = new Ray(_raycastFeet.transform.position, transform.forward);
-        RaycastHit hitDataFeet;
-        Physics.Raycast(rayFeet, out hitDataFeet);
+        CharacterController CharacterControllerRef = _playerRef.GetComponent<CharacterController>();
+        headHeight = CharacterControllerRef.height*0.8f;
+        eyesHeight = CharacterControllerRef.height*0.5f;
+        feetHeight = CharacterControllerRef.height*0.2f;
+        
     }
+
 }
