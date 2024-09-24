@@ -14,6 +14,10 @@ public class Guardian : MonoBehaviour
     private Coroutine _coroutine;
     private bool _aggro;
 
+    //Collision
+    [SerializeField] private GameObject _SmallCollider;
+    [SerializeField] private GameObject _BigCollider;
+
     //raycast
     [SerializeField] private GameObject _raycastHead;
     [SerializeField] private GameObject _raycastEyes;
