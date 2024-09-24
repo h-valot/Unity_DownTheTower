@@ -16,6 +16,7 @@ public class PreLadder : MonoBehaviour
 	private void Start()
 	{
 		_camera = Camera.main;
+		_placementMesh.transform.localScale = new Vector3(_placementMesh.transform.localScale.x, _ladderConfig.maxHeight, _placementMesh.transform.localScale.z);
 	}
 
     private void LateUpdate()
