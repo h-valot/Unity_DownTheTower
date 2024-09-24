@@ -43,9 +43,11 @@ public class PreLadder : MonoBehaviour
 
         }
 		else
-		{
-			_placementMesh.enabled = false;
-		}
+        {
+            UpdateColor(false);
+            _placementMesh.enabled = false;
+
+        }
 	}
 
 	private bool IsGroundFlat(RaycastHit hit)
