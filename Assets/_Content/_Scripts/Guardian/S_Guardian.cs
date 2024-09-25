@@ -12,11 +12,8 @@ public class Guardian : MonoBehaviour
     private NavMeshAgent _agent;
     private NewCharacterMotor _playerRef;
     private Coroutine _coroutine;
+    private Coroutine _coroutineUpdate;
     private bool _aggro;
-
-    //Collision
-    [SerializeField] private GameObject _SmallCollider;
-    [SerializeField] private GameObject _BigCollider;
 
     //raycast
     [SerializeField] private GameObject _raycastHead;
@@ -37,41 +34,58 @@ public class Guardian : MonoBehaviour
 
     IEnumerator CheckForXSecond(float X)
     {
+        
         yield return new WaitForSeconds(X);
         Idle();
     }
 
-    private void OnTriggerStay(Collider other)
+    IEnumerator UpdatePlayerPosition()
     {
+        int i = 0;
 
-        if (other.TryGetComponent<NewCharacterMotor>(out _playerRef))
+        while (i < 10)
         {
-            if (CheckRaycast() == true)
+            SetDestination();
+            i++;
+            yield return null;
+        }
+
+        while (i > 0)
+        {
+            SetDestination();
+            i--;
+            yield return null;
+        }
+
+        // All done!
+    }
+    public void PlayerStayIn()
+    {
+        if (CheckRaycast() == true)
+        {
+            if (_coroutine != null)
             {
-                if (_coroutine != null)
-                {
-                    StopCoroutine(_coroutine);
-                }
-                AgroState();
+                StopCoroutine(_coroutine);
+                StopCoroutine(_coroutineUpdate);
             }
-            
+            AgroState();
         }
     }
 
-    private void OnTriggerExit(Collider other)
+    private void SetDestination()
     {
-        if (other.TryGetComponent<NewCharacterMotor>(out _playerRef))
-        {
-            Debug.Log("plus devant");
-            ToIdle();
-        }
+        _agent.destination = _playerRef.transform.position;
+    }
+
+    public void PlayerExit()
+    {
+        Debug.Log("plus devant");
+        ToIdle();
     }
 
     private void AgroState()
     {
-        //_agent.destination = _playerRef.transform.position;
-        //_aggro = true;
-        _agent.destination = _playerRef.transform.position;
+        SetDestination();
         _aggro = true;
 
     }
@@ -79,7 +93,8 @@ public class Guardian : MonoBehaviour
     private void ToIdle()
     {
         Debug.Log("To idle");
-        _coroutine = StartCoroutine(CheckForXSecond(3));
+        _coroutine = StartCoroutine(CheckForXSecond(3f));
+        _coroutineUpdate = StartCoroutine(UpdatePlayerPosition());
     }
 
     private void Idle ()
@@ -88,6 +103,7 @@ public class Guardian : MonoBehaviour
         Debug.Log("Idle");
         _aggro = false;
         _pathPatrol.GoingBackToPatrol();
+        StopCoroutine(_coroutineUpdate);
     }
 
     public bool StateAggro()
@@ -97,7 +113,6 @@ public class Guardian : MonoBehaviour
 
     bool CheckRaycast()
     {
-        //RaycastHit hitDataHead = 0;
         CheckPlayerHeight();
         Physics.Raycast(_raycastHead.transform.position, ((_playerRef.transform.position + new Vector3(0, headHeight, 0)) - _raycastHead.transform.position).normalized, out var hitDataHead);
         UnityEngine.Debug.DrawRay(_raycastEyes.transform.position, ((_playerRef.transform.position + new Vector3(0, headHeight, 0)) - _raycastEyes.transform.position).normalized, Color.red);
@@ -125,6 +140,11 @@ public class Guardian : MonoBehaviour
         eyesHeight = CharacterControllerRef.height*0.5f;
         feetHeight = CharacterControllerRef.height*0.2f;
         
+    }
+
+    public void MakePLayerRef(NewCharacterMotor Player)
+    {
+        _playerRef = Player;
     }
 
 }

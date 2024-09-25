@@ -59,4 +59,6 @@ public class PathPatrol : MonoBehaviour
         _aggro = _guardianRef.StateAggro();
     }
 
+
+
 }
