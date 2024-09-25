@@ -41,7 +41,7 @@ public class NewCharacterConfig : ScriptableObject
 	public float jumpHeight;
 
 	[Tooltip("After touching the ground, this value is the time required to pass before being able to jump again. Set to 0f to instantly jump again")]
-	public float jumpDelay = 0.50f;
+	public float jumpCooldown = 0.50f;
 
 
 	[Header("Gravity")]
@@ -52,6 +52,9 @@ public class NewCharacterConfig : ScriptableObject
 
 
 	[Header("Fall")]
+	[Tooltip("Whenever the character leaves a plateform, the coyote time counter starts. During this periode of time, the character can still jump.")]
+	public float coyoteTime = 0.25f;
+
 	[Tooltip("If the distance on the y-axis travelled while falling is greater or equal to this value, the character dies")]
 	public float lethalHeight = 7;
 

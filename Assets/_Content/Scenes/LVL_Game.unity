@@ -196,11 +196,49 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 889601776}
     m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 8345070700331616361, guid: 09aade0ecefd01e4b8f7661acf64f5c2,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 61427576}
     - targetCorrespondingSourceObject: {fileID: 1888427756403250876, guid: 09aade0ecefd01e4b8f7661acf64f5c2,
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 127936566}
+    - targetCorrespondingSourceObject: {fileID: 3019802357415506049, guid: 09aade0ecefd01e4b8f7661acf64f5c2,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1646659878}
   m_SourcePrefab: {fileID: 100100000, guid: 09aade0ecefd01e4b8f7661acf64f5c2, type: 3}
+--- !u!1 &61427571 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8345070700331616361, guid: 09aade0ecefd01e4b8f7661acf64f5c2,
+    type: 3}
+  m_PrefabInstance: {fileID: 47147005}
+  m_PrefabAsset: {fileID: 0}
+--- !u!64 &61427573 stripped
+MeshCollider:
+  m_CorrespondingSourceObject: {fileID: 8345070700331616359, guid: 09aade0ecefd01e4b8f7661acf64f5c2,
+    type: 3}
+  m_PrefabInstance: {fileID: 47147005}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &61427576
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 61427571}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6757b231cedd544c583ef8aeaf773b2a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  thickness: 0
+  inverted: 0
+  material: {fileID: 0}
+  filter: -65535
+  m_SourceCollider: {fileID: 61427573}
+  m_DistanceField: {fileID: 0}
 --- !u!1 &127936562 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1888427756403250876, guid: 09aade0ecefd01e4b8f7661acf64f5c2,
@@ -763,6 +801,7 @@ GameObject:
   - component: {fileID: 889601779}
   - component: {fileID: 889601778}
   - component: {fileID: 889601777}
+  - component: {fileID: 889601780}
   m_Layer: 0
   m_Name: Cube
   m_TagString: Untagged
@@ -856,6 +895,24 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 889601775}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &889601780
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 889601775}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6757b231cedd544c583ef8aeaf773b2a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  thickness: 0
+  inverted: 0
+  material: {fileID: 0}
+  filter: -65535
+  m_SourceCollider: {fileID: 889601777}
+  m_DistanceField: {fileID: 0}
 --- !u!4 &1184191599 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3551308047566853199, guid: b9c11633fb8f74f45ae6426c189e0c00,
@@ -901,6 +958,36 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 47147005}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1646659873 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3019802357415506049, guid: 09aade0ecefd01e4b8f7661acf64f5c2,
+    type: 3}
+  m_PrefabInstance: {fileID: 47147005}
+  m_PrefabAsset: {fileID: 0}
+--- !u!64 &1646659875 stripped
+MeshCollider:
+  m_CorrespondingSourceObject: {fileID: 4562799558224224499, guid: 09aade0ecefd01e4b8f7661acf64f5c2,
+    type: 3}
+  m_PrefabInstance: {fileID: 47147005}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1646659878
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1646659873}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6757b231cedd544c583ef8aeaf773b2a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  thickness: 0
+  inverted: 0
+  material: {fileID: 0}
+  filter: -65535
+  m_SourceCollider: {fileID: 1646659875}
+  m_DistanceField: {fileID: 0}
 --- !u!4 &1863955998 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8345070699079395522, guid: 09aade0ecefd01e4b8f7661acf64f5c2,

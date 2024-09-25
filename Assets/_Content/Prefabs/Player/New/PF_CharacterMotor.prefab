@@ -286,6 +286,7 @@ GameObject:
   - component: {fileID: 3475349417308713120}
   - component: {fileID: 8128893969073989014}
   - component: {fileID: 102844715671480840}
+  - component: {fileID: 5025025688622371851}
   m_Layer: 0
   m_Name: PF_CharacterMotor
   m_TagString: Player
@@ -327,8 +328,10 @@ MonoBehaviour:
   _characterDirection: {fileID: 1227528473670976241}
   _torchParent: {fileID: 49414001897713379}
   _controller: {fileID: 8128893969073989014}
+  obiCollider: {fileID: 5025025688622371851}
   _characterConfig: {fileID: 11400000, guid: 1940b106405212f469b44119418b1e43, type: 2}
   _ladderConfig: {fileID: 11400000, guid: 6502514940db9bb4e8194b9e57b509d9, type: 2}
+  _ropeConfig: {fileID: 11400000, guid: ebd551676fad39148a6ccab29ef4ebce, type: 2}
   _torchConfig: {fileID: 11400000, guid: 0c5c3bc89382c9e439e0ef105c99e62b, type: 2}
   _rsoCharacterForward: {fileID: 11400000, guid: f11ff9193bdced54b854af6c1bce0b2f,
     type: 2}
@@ -342,11 +345,14 @@ MonoBehaviour:
   _rseThrow: {fileID: 11400000, guid: 9c0f340dc33672b4ca20f5f1cf2f8528, type: 2}
   _rseToggleLight: {fileID: 11400000, guid: 7a9790bca8621c54e9d98c0c7f0820b3, type: 2}
   _rseCraftTorch: {fileID: 11400000, guid: a5a67e5b9e43b3e47b905af27b5b8657, type: 2}
+  _currentState: 0
   _moveInput: {x: 0, y: 0}
+  _velocity: {x: 0, y: 0, z: 0}
   _targetSpeed: 0
   _currentSpeed: 0
   _moveSpeed: 0
   _isSprinting: 0
+  _coyoteTimer: 0
   _gravityModifier: {x: 0, y: 0, z: 0}
   _slopePercentage: 0
   _slopeAngle: 0
@@ -400,6 +406,24 @@ MonoBehaviour:
   _rsoCharacterPosition: {fileID: 11400000, guid: 7cfc39952cca0d6478396ad49ab9e0db,
     type: 2}
   _characterConfig: {fileID: 11400000, guid: f1b21fa5f2a5d0942b63889e748851ad, type: 2}
+--- !u!114 &5025025688622371851
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7786579620462389323}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6757b231cedd544c583ef8aeaf773b2a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  thickness: 0
+  inverted: 0
+  material: {fileID: 0}
+  filter: -65535
+  m_SourceCollider: {fileID: 8128893969073989014}
+  m_DistanceField: {fileID: 0}
 --- !u!1 &8035248599218380277
 GameObject:
   m_ObjectHideFlags: 0

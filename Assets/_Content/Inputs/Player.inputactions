@@ -159,7 +159,7 @@
                 {
                     "name": "",
                     "id": "8f0834cd-b71b-435d-bc4c-3a7346f2a178",
-                    "path": "<Gamepad>/buttonSouth",
+                    "path": "<Gamepad>/leftTrigger",
                     "interactions": "",
                     "processors": "",
                     "groups": "Gamepad",
@@ -181,7 +181,7 @@
                 {
                     "name": "",
                     "id": "111ea63e-d60c-4b8a-aefd-82f8fe870f64",
-                    "path": "<Gamepad>/leftTrigger",
+                    "path": "<Gamepad>/buttonSouth",
                     "interactions": "",
                     "processors": "",
                     "groups": "Gamepad",
@@ -205,7 +205,7 @@
                     "id": "843bd0ef-438b-40ca-a373-9b87d798c79a",
                     "path": "<Gamepad>/rightStick",
                     "interactions": "",
-                    "processors": "InvertVector2(invertX=false),StickDeadzone,ScaleVector2(x=300,y=300)",
+                    "processors": "InvertVector2(invertX=false),ScaleVector2(x=4,y=4)",
                     "groups": "Gamepad",
                     "action": "Look",
                     "isComposite": false,
@@ -224,11 +224,33 @@
                 },
                 {
                     "name": "",
+                    "id": "ee6fbfc2-b7e8-475b-8fab-7605cd0fd097",
+                    "path": "<Gamepad>/rightTrigger",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "Throw",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "7a3f36fb-b938-4cea-a59d-6b7132ebd570",
                     "path": "<Keyboard>/e",
                     "interactions": "",
                     "processors": "",
                     "groups": "KeyboardMouse",
+                    "action": "ToggleLight",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "129f360e-b9ad-45b3-8157-8cf1bc56c079",
+                    "path": "<Gamepad>/leftShoulder",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
                     "action": "ToggleLight",
                     "isComposite": false,
                     "isPartOfComposite": false
@@ -246,11 +268,44 @@
                 },
                 {
                     "name": "",
+                    "id": "9b5a708c-2216-4b74-96d6-64974731acd6",
+                    "path": "<Gamepad>/dpad/up",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "CraftTorch",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "5b78c3d5-5d46-410e-bf24-453d053b53b8",
                     "path": "<Keyboard>/q",
                     "interactions": "",
                     "processors": "",
                     "groups": "KeyboardMouse",
+                    "action": "Interact",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "29724323-14fa-4d69-ab69-6374088aac8b",
+                    "path": "<Gamepad>/buttonNorth",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "Interact",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "3ad1b88b-7bf9-42de-bb15-99307d10db02",
+                    "path": "<Gamepad>/buttonWest",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
                     "action": "Interact",
                     "isComposite": false,
                     "isPartOfComposite": false

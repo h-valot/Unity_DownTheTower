@@ -1024,7 +1024,14 @@ namespace Synty.AnimationBaseLocomotion.Samples
             _rearRayPos.rotation = Quaternion.Euler(transform.rotation.x, 0, 0);
             _frontRayPos.rotation = Quaternion.Euler(transform.rotation.x, 0, 0);
 
-            Physics.Raycast(_rearRayPos.position, _rearRayPos.TransformDirection(-Vector3.up), out RaycastHit rearHit, rayDistance, _groundLayerMask);
+            Physics.Raycast(
+				_rearRayPos.position, 
+				_rearRayPos.TransformDirection(-Vector3.up), 
+				out RaycastHit rearHit, 
+				rayDistance, 
+				_groundLayerMask
+			);
+
             Physics.Raycast(
                 _frontRayPos.position,
                 _frontRayPos.TransformDirection(-Vector3.up),

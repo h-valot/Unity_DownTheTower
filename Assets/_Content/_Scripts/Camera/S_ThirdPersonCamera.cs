@@ -6,6 +6,7 @@ public class ThirdPersonCamera : MonoBehaviour
 	[Header("Scriptable references")]
 	[SerializeField] private NewCharacterConfig _characterConfig;
 	[SerializeField] private RSO_ControlScheme _rsoControlScheme;
+	[SerializeField] private RSO_CameraForward _rsoCameraForward;
 	[SerializeField] private RSO_PlayerDeath _rsoPlayerDeath;
 	[SerializeField] private RSE_Look _rseLook;
 	[SerializeField] private RSE_Move _rseMove;
@@ -114,6 +115,8 @@ public class ThirdPersonCamera : MonoBehaviour
 
 			_graphicsDirection.forward = directionToAimingLookAt.normalized;
 		}
+
+		_rsoCameraForward.value = _lookDirection.forward;
 	}
 
 	private void SwitchCameraStyle(CameraStyle newStyle)

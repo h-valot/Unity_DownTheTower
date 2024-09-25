@@ -7,7 +7,6 @@ public class PreLadder : MonoBehaviour
 	[SerializeField] private MeshRenderer _placementMesh;
 
 	[Header("Scriptable references")]
-	[SerializeField] private RSO_CharacterPosition _rsoPlayerTransform;
 	[SerializeField] private LadderConfig _ladderConfig;
 
 	private bool _isPlaceable = true;
@@ -18,7 +17,7 @@ public class PreLadder : MonoBehaviour
 		_camera = Camera.main;
 	}
 
-    private void LateUpdate()
+	private void LateUpdate()
     {
         UpdatePosition();
     }
