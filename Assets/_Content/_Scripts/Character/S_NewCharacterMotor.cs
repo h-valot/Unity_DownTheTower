@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using NaughtyAttributes;
+using Obi;
 using UnityEngine;
 
 public class NewCharacterMotor : MonoBehaviour
@@ -12,10 +13,12 @@ public class NewCharacterMotor : MonoBehaviour
 	[SerializeField] private Transform _characterDirection;
 	[SerializeField] private Transform _torchParent;
 	[SerializeField] private CharacterController _controller;
+	public ObiCollider obiCollider;
 
 	[Header("Scriptable references")]
 	[SerializeField] private NewCharacterConfig _characterConfig;
 	[SerializeField] private LadderConfig _ladderConfig;
+	[SerializeField] private RopeConfig _ropeConfig;
 	[SerializeField] private TorchConfig _torchConfig;
 	[SerializeField] private RSO_PlayeGraphicsDirection _rsoPlayerTransform;
 	[SerializeField] private RSO_PlayerDeath _rsoPlayerDeath;
@@ -36,6 +39,7 @@ public class NewCharacterMotor : MonoBehaviour
 
 	[Header("debug: move")]
 	[ReadOnly] public Vector2 _moveInput;
+	[ReadOnly] public Vector3 _velocity;
 	[ReadOnly] public float _targetSpeed;
 	[ReadOnly] public float _currentSpeed;
 	[ReadOnly] public float _moveSpeed;
@@ -77,6 +81,7 @@ public class NewCharacterMotor : MonoBehaviour
 
 	// - permanent -
 	private PreLadder _currentPreLadder;
+	private PreRope _currentPreRope;
 	private Torch _currentTorch;
 	private bool _isCrafting;
 
@@ -561,13 +566,19 @@ public class NewCharacterMotor : MonoBehaviour
 
 	#region inputs
 
+	private Rope _lastInstantiatedRope;
+
 	/// <summary>
-	/// 	temporary function to handle ladder placement. whenever the craft system works
-	/// 	the ladder and torch inputs will be managed there
+	/// 	temporary function to handle ladder and rope placement.
 	/// </summary>
 	private void HandleInputs()
 	{
-		// temp
+		// TODO - whenever one of the crafting input are pressed, switch to craft state
+		// reduce the movement, switch to aim camera, disable sprinting, disable jumping
+		// regroup preladder with prerope to make one modular component that instantiate
+		// either rope or ladder based on player's input
+
+		// - ladder -
 		if (Input.GetKeyDown(KeyCode.Mouse1))
 		{
 			_currentPreLadder = Instantiate(_ladderConfig.pfPreLadder);
@@ -582,6 +593,28 @@ public class NewCharacterMotor : MonoBehaviour
 				Destroy(_currentPreLadder.gameObject);
 				_currentPreLadder = null;
 			}
+		}
+
+		// - rope -
+		if (Input.GetKeyDown(KeyCode.Mouse0))
+		{
+			_currentPreRope = Instantiate(_ropeConfig.pfPreRope);
+			_currentPreRope.Initialize(_cameraDirection);
+		}
+
+		if (Input.GetKeyUp(KeyCode.Mouse0))
+		{
+			_lastInstantiatedRope = _currentPreRope.InstantiateRope();
+			if (_currentPreRope != null)
+			{
+				Destroy(_currentPreRope.gameObject);
+				_currentPreRope = null;
+			}
+		}
+
+		if (Input.GetKeyDown(KeyCode.K))
+		{
+			_lastInstantiatedRope?.Interact(this);
 		}
 	}
 
@@ -697,10 +730,14 @@ public class NewCharacterMotor : MonoBehaviour
 		HandleInputs();
 
 		CheckGround();
+
+		// speed calculations
 		HandleSlope();
 		HandleStun();
 		HandleSlow();
 		Accelerate();
+
+		// velocity calculations
 		ApplyGravity();
 		HandleMovement();
 	}
@@ -759,7 +796,16 @@ public class NewCharacterMotor : MonoBehaviour
 
 	private void UpdateCraftState()
 	{
+		// temp
+		HandleInputs();
 
+		CheckGround();
+		HandleSlope();
+		HandleStun();
+		HandleSlow();
+		Accelerate();
+		ApplyGravity();
+		HandleMovement();
 	}
 
 	private void ExitCraftState()
