@@ -4,7 +4,7 @@ using UnityEngine;
 public class ThirdPersonCamera : MonoBehaviour
 {
 	[Header("Scriptable references")]
-	[SerializeField] private NewCharacterConfig _characterConfig;
+	[SerializeField] private CharacterConfig _characterConfig;
 	[SerializeField] private RSO_ControlScheme _rsoControlScheme;
 	[SerializeField] private RSO_CameraForward _rsoCameraForward;
 	[SerializeField] private RSO_PlayerDeath _rsoPlayerDeath;

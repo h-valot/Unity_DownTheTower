@@ -11,7 +11,7 @@ public class Rope : MonoBehaviour, IInteractable
 	[SerializeField] private RopeConfig _ropeConfig;
 
 	// ----- PRIVATE VARIABLES -----
-	private NewCharacterMotor attachedCharacter;
+	private CharacterMotor attachedCharacter;
 
 	public void Initialize()
 	{
@@ -48,7 +48,7 @@ public class Rope : MonoBehaviour, IInteractable
 	/// 	attach the character obi collider to the obi particle attachement
 	/// </summary>
 	/// <param name="newCharacterMotor">source of the interaction</param>
-	public void Interact(NewCharacterMotor source)
+	public void Interact(CharacterMotor source)
 	{
 		attachedCharacter = source;
 

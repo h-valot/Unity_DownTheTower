@@ -6,7 +6,7 @@ public class CharacterGlow : MonoBehaviour
 {
     [Header("External references")]
     [SerializeField] private RSO_CharacterPosition _rsoCharacterPosition;
-    [SerializeField] private CharacterConfig _characterConfig;
+    [SerializeField] private FormerCharacterConfig _characterConfig;
 
     private void OnEnable()
     {

@@ -4,7 +4,7 @@ public class LadderTP : MonoBehaviour
 {
     private Vector3 _teleportTo;
     private bool _playerIsIn = false;
-    private NewCharacterMotor _character;
+    private CharacterMotor _character;
     private bool _isBottomTP;
 
     private void Update()
@@ -35,7 +35,7 @@ public class LadderTP : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.TryGetComponent<NewCharacterMotor>(out var character))
+        if (other.TryGetComponent<CharacterMotor>(out var character))
         {
             _playerIsIn = true;
             _character = character;
@@ -51,7 +51,7 @@ public class LadderTP : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
-        if (other.TryGetComponent<NewCharacterMotor>(out var character))
+        if (other.TryGetComponent<CharacterMotor>(out var character))
         {
             _playerIsIn = false;
         }

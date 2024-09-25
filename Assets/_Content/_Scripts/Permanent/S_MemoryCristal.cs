@@ -1,6 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class MemoryCristal : Interactible
@@ -19,17 +16,17 @@ public class MemoryCristal : Interactible
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.TryGetComponent<CharacterMotor>(out CharacterMotor _player))
+        if (other.TryGetComponent<CharacterMotor>(out var _character))
         {
-            _player.AddToInteractList(this);
+            // character.AddToInteractList(this);
             Debug.Log(this.name);
         }
     }
     public void OnTriggerExit(Collider other)
     {
-        if (other.TryGetComponent<CharacterMotor>(out CharacterMotor _player))
+        if (other.TryGetComponent<CharacterMotor>(out var _character))
         {
-            _player.RemoveFromInteractList(this);
+            // _character.RemoveFromInteractList(this);
         }
     }
 

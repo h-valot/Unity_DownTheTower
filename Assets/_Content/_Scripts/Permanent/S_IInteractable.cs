@@ -1,5 +1,5 @@
 public interface IInteractable
 {
-	public void Interact(NewCharacterMotor source);
+	public void Interact(CharacterMotor source);
 	public void Cancel();
 }
