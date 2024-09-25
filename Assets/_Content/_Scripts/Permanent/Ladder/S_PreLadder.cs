@@ -16,7 +16,7 @@ public class PreLadder : MonoBehaviour
 	private void Start()
 	{
 		_camera = Camera.main;
-		_placementMesh.transform.localScale = new Vector3(_placementMesh.transform.localScale.x, _ladderConfig.maxHeight, _placementMesh.transform.localScale.z);
+		ScalePreLadder();
 	}
 
     private void LateUpdate()
@@ -24,7 +24,22 @@ public class PreLadder : MonoBehaviour
         UpdatePosition();
     }
 
-    public void InstantiateLadder()
+	public void ScalePreLadder()
+    {
+        _placementMesh.transform.localScale = new Vector3(
+			_placementMesh.transform.localScale.x, 
+			_ladderConfig.maxHeight / 2, 
+			_placementMesh.transform.localScale.z
+		);
+		_placementMesh.transform.position = new Vector3(
+			_placementMesh.transform.position.x, 
+			transform.position.y + (_ladderConfig.maxHeight / 2), 
+			_placementMesh.transform.position.z
+		);
+    }
+
+
+	public void InstantiateLadder()
     {
         if (!_isPlaceable) return;
 
@@ -35,8 +50,8 @@ public class PreLadder : MonoBehaviour
     }
 
 	private void UpdatePosition()
-	{
-		if(Physics.Raycast(_camera.transform.position, _camera.transform.forward, out var hit, _ladderConfig.maxDistFromCamera, ~(_ladderConfig.layersToIgnore)))
+    {
+        if (Physics.Raycast(_camera.transform.position, GetPositionRayDirection(), out var hit, _ladderConfig.maxDistFromCamera, ~(_ladderConfig.layersToIgnore)))
         {
             _placementMesh.enabled = true;
 			transform.position = hit.point;
@@ -50,6 +65,18 @@ public class PreLadder : MonoBehaviour
 
         }
 	}
+
+	private Vector3 GetPositionRayDirection()
+	{
+		Vector3 cameraUpRotation = _camera.transform.up;
+
+        if (_camera.transform.up.y <= _ladderConfig.maxCameraDownwardClamp)
+		{
+			cameraUpRotation.y = _ladderConfig.maxCameraDownwardClamp;
+        }
+
+		return _camera.transform.forward - cameraUpRotation * _ladderConfig.cameraOffset;
+    }
 
 	private bool IsGroundFlat(RaycastHit hit)
 	{
