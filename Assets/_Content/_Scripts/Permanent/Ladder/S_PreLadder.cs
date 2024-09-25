@@ -68,14 +68,15 @@ public class PreLadder : MonoBehaviour
 
 	private Vector3 GetPositionRayDirection()
 	{
-		Vector3 cameraUpRotation = _camera.transform.up;
-
-        if (_camera.transform.up.y <= _ladderConfig.maxCameraDownwardClamp)
+		Vector3 offsetRay = Quaternion.AngleAxis(_ladderConfig.cameraOffset, _camera.transform.right) * _camera.transform.forward;
+		float angleDifference = Vector3.SignedAngle(new Vector3(_camera.transform.forward.x, 0, _camera.transform.forward.z).normalized, offsetRay.normalized, _camera.transform.right);
+        if (_ladderConfig.maxCameraDownwardClamp < angleDifference)
 		{
-			cameraUpRotation.y = _ladderConfig.maxCameraDownwardClamp;
+            offsetRay = Quaternion.AngleAxis(_ladderConfig.cameraOffset - (angleDifference - _ladderConfig.maxCameraDownwardClamp) * 0.5f, _camera.transform.right).normalized * _camera.transform.forward;
         }
+		
 
-		return _camera.transform.forward - cameraUpRotation * _ladderConfig.cameraOffset;
+		return offsetRay;
     }
 
 	private bool IsGroundFlat(RaycastHit hit)
