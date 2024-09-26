@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 6541003324269000719}
   - component: {fileID: 5612494249812760547}
   - component: {fileID: 8806527345689815506}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Base
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -134,7 +134,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1248870248709849336}
   - component: {fileID: 2423774863846630498}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: PF_Rope
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -173,6 +173,7 @@ MonoBehaviour:
   _obiParticleCharacterAttachment: {fileID: 3177114466907266519}
   _obiRope: {fileID: 6979612858226739966}
   _ropeConfig: {fileID: 11400000, guid: ebd551676fad39148a6ccab29ef4ebce, type: 2}
+  folds: []
 --- !u!1001 &1552218826326415212
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -185,6 +186,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: PF_ObiSolver
+      objectReference: {fileID: 0}
+    - target: {fileID: 8631576089045206388, guid: c4d3ee0e9ff64a34996302e854fba219,
+        type: 3}
+      propertyPath: m_Layer
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 9130639452078428658, guid: c4d3ee0e9ff64a34996302e854fba219,
         type: 3}
@@ -263,6 +269,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: PF_ObiRope
+      objectReference: {fileID: 0}
+    - target: {fileID: 38039324857215563, guid: 10dcc50d2e652f94686adcdc8e17236f,
+        type: 3}
+      propertyPath: m_Layer
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 437213837823247100, guid: 10dcc50d2e652f94686adcdc8e17236f,
         type: 3}

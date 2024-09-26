@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Obi;
 using UnityEngine;
 
@@ -10,13 +11,20 @@ public class Rope : MonoBehaviour, IInteractable
 	[Header("Scriptable references")]
 	[SerializeField] private RopeConfig _ropeConfig;
 
+	[Header("debug: length")]
+	public List<Vector3> folds;
+
 	// ----- PRIVATE VARIABLES -----
 	private CharacterMotor attachedCharacter;
 
+
 	public void Initialize()
 	{
+		// initialize folds list
+		folds = new List<Vector3>() { transform.position };
+
 		// update the last particle group position
-		_obiRope.blueprint.positions[^1] = new Vector3(_ropeConfig.maxRopeLength, 0, 0);
+		_obiRope.blueprint.positions[^1] = new Vector3(_ropeConfig.maxLength, 0, 0);
 
 		// Debug.Log($"ROPE: attachement = {_obiParticleCharacterAttachment.particleGroup}");
 	}
@@ -35,7 +43,7 @@ public class Rope : MonoBehaviour, IInteractable
 		if (attachedCharacter == null) return;
 
 		float characterBaseLength = (transform.position - attachedCharacter.transform.position).magnitude;
-		if (characterBaseLength <= _ropeConfig.maxRopeLength)
+		if (characterBaseLength <= _ropeConfig.maxLength)
 		{
 			// update particle group position the character is attached to
 			// simply update on x-axis because _obiRope.blueprint.positions[0] = [0, 0, 0]
@@ -62,5 +70,21 @@ public class Rope : MonoBehaviour, IInteractable
 
 		// remove the obi particle attachement target
 		_obiParticleCharacterAttachment.target = null;
+	}
+
+	public float GetLength()
+	{
+		float output = 0;
+
+		for (int i = 0; i < folds.Count; i++)
+		{
+			Vector3 nextPosition = i + 1 >= folds.Count
+				? attachedCharacter.transform.position
+				: folds[i + 1];
+
+			output += (folds[i] - nextPosition).magnitude;
+		}
+
+		return output;
 	}
 }
