@@ -30,12 +30,15 @@ public class CharacterMotor : MonoBehaviour
 	[SerializeField] private RSE_Throw _rseThrow;
 	[SerializeField] private RSE_ToggleLight _rseToggleLight;
 	[SerializeField] private RSE_CraftTorch _rseCraftTorch;
+    [SerializeField] private RSE_CancelAction _rseCancelAction;
+    [SerializeField] private RSE_CraftLadder _rseCraftLadder;
+    [SerializeField] private RSE_CraftRope _rseCraftRope;
 
-	#endregion
+    #endregion
 
-	#region runtime variables
+    #region runtime variables
 
-	[Header("debug: animation")]
+    [Header("debug: animation")]
 	[ReadOnly] public AnimationState _currentState;
 
 	[Header("debug: move")]
@@ -111,6 +114,10 @@ public class CharacterMotor : MonoBehaviour
 		_rseThrow.action += Throw;
 		_rseCraftTorch.action += CraftTorch;
 		_rseToggleLight.action += ToggleLight;
+		_rseCancelAction.action += CancelAction;
+		_rseCraftRope.action += CraftRope;
+		_rseCraftLadder.action += CraftLadder;
+
 	}
 
 	private void OnDisable()
@@ -121,7 +128,10 @@ public class CharacterMotor : MonoBehaviour
 		_rseThrow.action -= Throw;
 		_rseCraftTorch.action -= CraftTorch;
 		_rseToggleLight.action -= ToggleLight;
-	}
+        _rseCancelAction.action -= CancelAction;
+        _rseCraftRope.action -= CraftRope;
+        _rseCraftLadder.action -= CraftLadder;
+    }
 
 	#endregion
 
@@ -686,17 +696,11 @@ public class CharacterMotor : MonoBehaviour
 		_currentTorch?.ToggleLight();
 	}
 
-	/// <summary>
-	/// 	start the spawn torch coroutine if (1) there is no torch equiped, (2) another permanent is being crafted
-	/// </summary>
-	private void CraftTorch()
+	private void CancelAction()
 	{
-		if (_currentTorch == null 
-			&& !_isCrafting)
-		{
-			StartCoroutine(SpawnTorch());
-		}
+
 	}
+
 
 	#endregion
 
@@ -808,7 +812,29 @@ public class CharacterMotor : MonoBehaviour
 		HandleMovement();
 	}
 
-	private void ExitCraftState()
+    /// <summary>
+    /// 	start the spawn torch coroutine if (1) there is no torch equiped, (2) another permanent is being crafted
+    /// </summary>
+    private void CraftTorch()
+    {
+        if (_currentTorch == null
+            && !_isCrafting)
+        {
+            StartCoroutine(SpawnTorch());
+        }
+    }
+
+    private void CraftRope()
+	{
+
+	}
+
+    private void CraftLadder()
+    {
+
+    }
+
+    private void ExitCraftState()
 	{
 
 	}
