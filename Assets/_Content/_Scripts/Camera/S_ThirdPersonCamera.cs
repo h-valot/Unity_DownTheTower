@@ -12,7 +12,7 @@ public class ThirdPersonCamera : MonoBehaviour
 	[SerializeField] private RSE_Move _rseMove;
 
 	[Header("External references")]
-	[SerializeField] private Transform _lookDirection;
+	[SerializeField] private Transform _cameraDirection;
 	[SerializeField] private Transform _graphicsDirection;
 	[SerializeField] private Transform _characterMotor;
 	[SerializeField] private Transform _aimingLookAt;
@@ -89,11 +89,12 @@ public class ThirdPersonCamera : MonoBehaviour
 		// cinemachine will follow this target
 		_cinemachineCameraTarget.transform.rotation = Quaternion.Euler(_cinemachineTargetPitch, _cinemachineTargetYaw, 0.0f);
 
-		// rotate orientation
-		Vector3 viewDirection = _characterMotor.position - new Vector3(transform.position.x, _characterMotor.position.y, transform.position.z);
-		if (viewDirection != Vector3.zero)
+        // rotate orientation
+        Vector3 viewDirection = transform.forward - new Vector3(0, transform.forward.y, 0);
+        if (viewDirection != Vector3.zero)
 		{
-			_lookDirection.forward = viewDirection.normalized;
+			_cameraDirection.forward = viewDirection.normalized;
+			_aimingLookAt.position = transform.position + transform.forward * 5.5f;
 		}
 
 		// rotate player object
@@ -101,7 +102,7 @@ public class ThirdPersonCamera : MonoBehaviour
 		{
 			// character is facing the movement direction
 			// but not is the moveInput is null or equals to zero
-			Vector3 moveDirection = _lookDirection.forward * _moveInput.y + _lookDirection.right * _moveInput.x;
+			Vector3 moveDirection = _cameraDirection.forward * _moveInput.y + _cameraDirection.right * _moveInput.x;
 			if (_moveInput != Vector2.zero)
 			{
 				_graphicsDirection.forward = Vector3.Slerp(_graphicsDirection.forward, moveDirection.normalized, Time.deltaTime * _characterConfig.rotationSpeed);
@@ -110,13 +111,9 @@ public class ThirdPersonCamera : MonoBehaviour
 
 		else if (_currentStyle == CameraStyle.AIMING)
 		{
-			Vector3 directionToAimingLookAt = _aimingLookAt.position - new Vector3(_characterMotor.position.x, _aimingLookAt.position.y, _characterMotor.position.z);
-			_lookDirection.forward = directionToAimingLookAt.normalized;
-
-			_graphicsDirection.forward = directionToAimingLookAt.normalized;
+			_graphicsDirection.forward = _aimingLookAt.position - new Vector3(_cameraDirection.transform.position.x, _aimingLookAt.position.y, _cameraDirection.transform.position.z);
 		}
-
-		_rsoCameraForward.value = _lookDirection.forward;
+		_rsoCameraForward.value = _cameraDirection.forward;
 	}
 
 	private void SwitchCameraStyle(CameraStyle newStyle)

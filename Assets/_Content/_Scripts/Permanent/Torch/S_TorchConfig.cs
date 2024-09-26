@@ -13,17 +13,17 @@ public class TorchConfig : ScriptableObject
 	public float lightIntensity;
 
 	[Tooltip("Lit duration when on ground")]
-	public float groundedLitDuration;
+	public float groundedLightDuration;
 
 	public Material litMaterial;
 
-	[Tooltip("Time to lit the torch")]
-	public float litDuration;
+	[Tooltip("Time to light the torch")]
+	public float lightStartupDuration;
 
 	public Material unlitMaterial;
 
-    [Tooltip("Time to unlit the torch")]
-    public float unlitDuration;
+    [Tooltip("Time to extinguish the torch")]
+    public float extinguishDuration;
 
 
 	[Header("Throw")]

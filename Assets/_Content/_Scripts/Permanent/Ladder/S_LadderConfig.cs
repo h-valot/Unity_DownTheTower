@@ -15,11 +15,11 @@ public class LadderConfig : ScriptableObject
 	[Header("Checks")]
 	public float minDistanceFromWall = 0.4f;
 	public float heightForDistFromWall = 0.25f;
-
-	[Header("Camera")]
     [Tooltip("1f = 0° ; 0f = 90° ; -1f = 180°")]
     public float maxGroundAngle = 0.5f;
+
+    [Header("Camera")]
 	public float maxDistFromCamera = 8f;
-	public float minCameraAngle = 10f;
-	public float maxCameraAngle = 70f;
+	public float cameraOffset = 0.3f;
+	public float maxCameraDownwardClamp = 0.90f;
 }

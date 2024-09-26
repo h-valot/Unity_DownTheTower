@@ -15,6 +15,7 @@ public class PreLadder : MonoBehaviour
 	private void Start()
 	{
 		_camera = Camera.main;
+		ScalePreLadder();
 	}
 
 	private void LateUpdate()
@@ -22,7 +23,22 @@ public class PreLadder : MonoBehaviour
         UpdatePosition();
     }
 
-    public void InstantiateLadder()
+	public void ScalePreLadder()
+    {
+        _placementMesh.transform.localScale = new Vector3(
+			_placementMesh.transform.localScale.x, 
+			_ladderConfig.maxHeight / 2, 
+			_placementMesh.transform.localScale.z
+		);
+		_placementMesh.transform.position = new Vector3(
+			_placementMesh.transform.position.x, 
+			transform.position.y + (_ladderConfig.maxHeight / 2), 
+			_placementMesh.transform.position.z
+		);
+    }
+
+
+	public void InstantiateLadder()
     {
         if (!_isPlaceable) return;
 
@@ -33,8 +49,8 @@ public class PreLadder : MonoBehaviour
     }
 
 	private void UpdatePosition()
-	{
-		if(Physics.Raycast(_camera.transform.position, _camera.transform.forward, out var hit, _ladderConfig.maxDistFromCamera, ~(_ladderConfig.layersToIgnore)))
+    {
+        if (Physics.Raycast(_camera.transform.position, GetPositionRayDirection(), out var hit, _ladderConfig.maxDistFromCamera, ~(_ladderConfig.layersToIgnore)))
         {
             _placementMesh.enabled = true;
 			transform.position = hit.point;
@@ -42,10 +58,25 @@ public class PreLadder : MonoBehaviour
 
         }
 		else
-		{
-			_placementMesh.enabled = false;
-		}
+        {
+            UpdateColor(false);
+            _placementMesh.enabled = false;
+
+        }
 	}
+
+	private Vector3 GetPositionRayDirection()
+	{
+		Vector3 offsetRay = Quaternion.AngleAxis(_ladderConfig.cameraOffset, _camera.transform.right) * _camera.transform.forward;
+		float angleDifference = Vector3.SignedAngle(new Vector3(_camera.transform.forward.x, 0, _camera.transform.forward.z).normalized, offsetRay.normalized, _camera.transform.right);
+        if (_ladderConfig.maxCameraDownwardClamp < angleDifference)
+		{
+            offsetRay = Quaternion.AngleAxis(_ladderConfig.cameraOffset - (angleDifference - _ladderConfig.maxCameraDownwardClamp) * 0.5f, _camera.transform.right).normalized * _camera.transform.forward;
+        }
+		
+
+		return offsetRay;
+    }
 
 	private bool IsGroundFlat(RaycastHit hit)
 	{

@@ -27,11 +27,11 @@ public class Torch : MonoBehaviour
 
 		if (_light.enabled) 
 		{
-			StartCoroutine(SetMaterial(_torchConfig.unlitDuration, _torchConfig.unlitMaterial));
+			StartCoroutine(SetMaterial(_torchConfig.extinguishDuration, _torchConfig.unlitMaterial));
 		}
 		else
 		{
-			StartCoroutine(SetMaterial(_torchConfig.litDuration, _torchConfig.litMaterial));
+			StartCoroutine(SetMaterial(_torchConfig.lightStartupDuration, _torchConfig.litMaterial));
 		}
     }
 
@@ -48,7 +48,7 @@ public class Torch : MonoBehaviour
 		_rigidbody.velocity = direction * 10f;
 		_isActive = false;
 
-		StartCoroutine(WaitAndDestroyTorch(_torchConfig.groundedLitDuration));
+		StartCoroutine(WaitAndDestroyTorch(_torchConfig.groundedLightDuration));
     }
 
     private IEnumerator SetMaterial(float duration, Material material)

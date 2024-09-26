@@ -27,7 +27,6 @@ public class CharacterGlow : MonoBehaviour
 
     private void UpdateCharPositionShaderGlobalParameter()
     {
-        Debug.Log("Character moved");
         Shader.SetGlobalVector("_GlowOrigin", transform.position);
     }
 
