@@ -5,26 +5,31 @@ using UnityEngine.AI;
 
 public class PathPatrol : MonoBehaviour
 {
+    [SerializeField] private Guardian _guardianRef;
+
+    //private
+    private NavMeshAgent _agent;
+
+    //public
     public Transform[] _patrolPoints;
     public int _targetPoint;
-    public float _speed;
     public bool _aggro;
-    private NavMeshAgent _agent;
-    [SerializeField] private Guardian _guardianRef;
 
     // Start is called before the first frame update
     void Start()
     {
         _agent = GetComponent<NavMeshAgent>();
         _targetPoint = 0;
-        _aggro = false;
     }
 
     // Update is called once per frame
     void Update()
     {
-        Patrolling();
-        GetAggro();
+        if (_guardianRef.IsActif() == true)
+        {
+            Patrolling();
+            GetAggro();
+        }
     }
 
     void Patrolling()

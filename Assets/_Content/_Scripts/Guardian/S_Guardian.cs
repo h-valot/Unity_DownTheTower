@@ -9,6 +9,7 @@ using UnityEngine.UI;
 public class Guardian : MonoBehaviour
 {
     [SerializeField] private PathPatrol _pathPatrol;
+    [SerializeField] public bool _isActif;
     private NavMeshAgent _agent;
     private NewCharacterMotor _playerRef;
     private Coroutine _coroutine;
@@ -61,26 +62,28 @@ public class Guardian : MonoBehaviour
     }
     public void PlayerStayIn()
     {
-        if (CheckRaycast() == true)
+        if (IsActif() == true)
         {
-            if (_coroutine != null)
+            if (CheckRaycast() == true)
             {
-                StopCoroutine(_coroutine);
-                StopCoroutine(_coroutineUpdate);
+                if (_coroutine != null)
+                {
+                    StopCoroutine(_coroutine);
+                    StopCoroutine(_coroutineUpdate);
+                }
+                AgroState();
             }
-            AgroState();
         }
     }
 
-    private void SetDestination()
-    {
-        _agent.destination = _playerRef.transform.position;
-    }
 
     public void PlayerExit()
     {
-        Debug.Log("plus devant");
-        ToIdle();
+        if (IsActif() == true)
+        {
+            Debug.Log("plus devant");
+            ToIdle();
+        }
     }
 
     private void AgroState()
@@ -88,6 +91,22 @@ public class Guardian : MonoBehaviour
         SetDestination();
         _aggro = true;
 
+    }
+    private void SetDestination()
+    {
+        _agent.destination = _playerRef.transform.position;
+    }
+
+    public bool IsActif()
+    {
+        if (_isActif == true)
+        {
+            return true;
+        }
+        else
+        {
+            return false; 
+        }  
     }
 
     private void ToIdle()
