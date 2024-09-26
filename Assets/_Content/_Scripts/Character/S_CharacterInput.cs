@@ -17,6 +17,9 @@ public class CharacterInput : MonoBehaviour
     [SerializeField] private RSE_ToggleLight _rseToggleLight;
     [SerializeField] private RSE_CraftTorch _rseCraftTorch;
 	[SerializeField] private RSE_Interact _rseInteract;
+	[SerializeField] private RSE_CancelAction _rseCancelAction;
+    [SerializeField] private RSE_CraftLadder _rseCraftLadder;
+    [SerializeField] private RSE_CraftRope _rseCraftRope;
 
     [Header("Debugging")]
 	[ReadOnly] public Vector2 move;
@@ -98,4 +101,19 @@ public class CharacterInput : MonoBehaviour
 	{
 		_rseInteract.Call();
 	}
+
+    public void OnCancelAction()
+    {
+        _rseCancelAction.Call();
+    }
+
+    public void OnCraftLadder()
+    {
+        _rseCraftLadder.Call();
+    }
+
+    public void OnCraftRope()
+    {
+        _rseCraftRope.Call();
+    }
 }

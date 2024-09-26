@@ -76,6 +76,33 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "CancelAction",
+                    "type": "Button",
+                    "id": "5d232460-59ae-44b6-bc7b-b01bf5a4f1ce",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "CraftRope",
+                    "type": "Button",
+                    "id": "51552c63-0e58-4232-b51f-00f86ed22a0b",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "CraftLadder",
+                    "type": "Button",
+                    "id": "cc11127a-f99c-4390-aa40-34340dd82e11",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -139,7 +166,7 @@
                     "id": "77b9d4c6-191b-44a7-bd80-dca615833b21",
                     "path": "<Gamepad>/leftStick",
                     "interactions": "",
-                    "processors": "StickDeadzone",
+                    "processors": "StickDeadzone,InvertVector2(invertX=false,invertY=false)",
                     "groups": "Gamepad",
                     "action": "Move",
                     "isComposite": false,
@@ -205,7 +232,7 @@
                     "id": "843bd0ef-438b-40ca-a373-9b87d798c79a",
                     "path": "<Gamepad>/rightStick",
                     "interactions": "",
-                    "processors": "InvertVector2(invertX=false),ScaleVector2(x=4,y=4)",
+                    "processors": "InvertVector2(invertX=false,invertY=false),ScaleVector2(x=4,y=4),StickDeadzone",
                     "groups": "Gamepad",
                     "action": "Look",
                     "isComposite": false,
@@ -247,7 +274,7 @@
                 {
                     "name": "",
                     "id": "129f360e-b9ad-45b3-8157-8cf1bc56c079",
-                    "path": "<Gamepad>/leftShoulder",
+                    "path": "<Gamepad>/rightShoulder",
                     "interactions": "",
                     "processors": "",
                     "groups": "Gamepad",
@@ -307,6 +334,39 @@
                     "processors": "",
                     "groups": "",
                     "action": "Interact",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b9e1a13e-650b-45fe-a5ce-f3a50e4625e8",
+                    "path": "<Gamepad>/buttonEast",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "CancelAction",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "3bbb3d11-c9bc-4110-8142-a9304d643e6c",
+                    "path": "<Gamepad>/dpad/left",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "CraftRope",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "c1f4d18f-ae76-404b-bc37-b5e66feec7fd",
+                    "path": "<Gamepad>/dpad/right",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "CraftLadder",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
