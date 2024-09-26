@@ -7,6 +7,7 @@ public class Torch : MonoBehaviour
     [SerializeField] private Light _light;
     [SerializeField] private Rigidbody _rigidbody;
     [SerializeField] private MeshRenderer _meshRenderer;
+    [SerializeField] private TorchPointLight _torchPointLight;
 
 	[Header("Scriptable References")]
 	[SerializeField] private TorchConfig _torchConfig;
@@ -37,13 +38,15 @@ public class Torch : MonoBehaviour
 
     public void Throw(Vector3 direction)
     {
-        if (!_isActive 
-			|| !_torchConfig.canThrow) 
+        if (!_isActive || !_torchConfig.canThrow) 
 		{
 			return;
 		}
 
-		gameObject.transform.parent = null;
+        _torchPointLight.SetIsInHand(false);
+
+
+        gameObject.transform.parent = null;
 		_rigidbody.constraints = RigidbodyConstraints.None;
 		_rigidbody.velocity = direction * 10f;
 		_isActive = false;
