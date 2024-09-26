@@ -1,18 +1,14 @@
+using DG.Tweening;
 using UnityEngine;
 
 public class MemoryCristal : Interactible
 {
 
-    [SerializeField] private GameObject _door;
+    [SerializeField] private Transform _door;
+    [SerializeField] private Vector3 _openvector;
 
     private bool _doorOpen;
-    private Animation _animDoor;
 
-
-    private void Start()
-    {
-        _animDoor = _door.GetComponent<Animation>();
-    }
 
     private void OnTriggerEnter(Collider other)
     {
@@ -35,9 +31,15 @@ public class MemoryCristal : Interactible
     {
         if (_doorOpen == false)
         {
-            _doorOpen = true;
             Debug.Log("Animation lancée");
-            _animDoor.Play();
+            _door.transform.DOLocalMove(_openvector, 3f).SetEase(Ease.InBack).SetId("Door");
+            _doorOpen = true;
         }
+    }
+
+    private void Animation()
+    {
+        Debug.Log("dot");
+        
     }
 }
