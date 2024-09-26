@@ -38,7 +38,7 @@ public class Ladder : MonoBehaviour
             transform.DOKill();
             _topHitPos = hit.point;
             _tippyTop.transform.Rotate(- transform.rotation.eulerAngles.x, 0, 0);
-            if (transform.rotation.eulerAngles.x <= 45 && !ForwardRay())
+            if (transform.rotation.eulerAngles.x <= _ladderConfig.minWalkableAngle && !ForwardRay())
             {
                 SetUpTP();
             }

@@ -11,6 +11,8 @@ public class LadderConfig : ScriptableObject
 	public float maxHeight = 4f;
 	public float additionalRaycastHeight = 0.5f;
 	public LayerMask layersToIgnore;
+    [Tooltip("Horizontal is 90°, Vertical is 0°")]
+    public float minWalkableAngle = 45f;
 
 	[Header("Checks")]
 	public float minDistanceFromWall = 0.4f;
