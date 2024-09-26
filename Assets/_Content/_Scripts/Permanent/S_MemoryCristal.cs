@@ -18,15 +18,16 @@ public class MemoryCristal : Interactible
     {
         if (other.TryGetComponent<CharacterMotor>(out var _character))
         {
-            // character.AddToInteractList(this);
             Debug.Log(this.name);
+            _character.AddToInteractList(this);
+            
         }
     }
     public void OnTriggerExit(Collider other)
     {
         if (other.TryGetComponent<CharacterMotor>(out var _character))
         {
-            // _character.RemoveFromInteractList(this);
+            _character.RemoveFromInteractList(this);
         }
     }
 
@@ -35,6 +36,7 @@ public class MemoryCristal : Interactible
         if (_doorOpen == false)
         {
             _doorOpen = true;
+            Debug.Log("Animation lancée");
             _animDoor.Play();
         }
     }
