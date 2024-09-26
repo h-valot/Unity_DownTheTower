@@ -233,9 +233,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3539557874267728587}
-  - component: {fileID: 4567227452422965972}
   - component: {fileID: 5666824575402529614}
   - component: {fileID: 4147390464001591799}
+  - component: {fileID: 4430131793523295223}
   m_Layer: 0
   m_Name: PF_Torch
   m_TagString: Untagged
@@ -259,22 +259,6 @@ Transform:
   - {fileID: 8237605278584517131}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &4567227452422965972
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4724440229257307352}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e5cbb02d6223ce1469e3fb4d5d131fd6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _light: {fileID: 1720485948228762332}
-  _rigidbody: {fileID: 5666824575402529614}
-  _meshRenderer: {fileID: 4883872469197812161}
-  _torchConfig: {fileID: 11400000, guid: 0c5c3bc89382c9e439e0ef105c99e62b, type: 2}
 --- !u!54 &5666824575402529614
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -325,6 +309,22 @@ CapsuleCollider:
   m_Height: 6.8672104
   m_Direction: 1
   m_Center: {x: 0, y: 2.2994947, z: 0.0105009675}
+--- !u!114 &4430131793523295223
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4724440229257307352}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e5cbb02d6223ce1469e3fb4d5d131fd6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _light: {fileID: 1720485948228762332}
+  _rigidbody: {fileID: 5666824575402529614}
+  _meshRenderer: {fileID: 4883872469197812161}
+  _torchConfig: {fileID: 11400000, guid: 0c5c3bc89382c9e439e0ef105c99e62b, type: 2}
 --- !u!1 &8129817620367253673
 GameObject:
   m_ObjectHideFlags: 0

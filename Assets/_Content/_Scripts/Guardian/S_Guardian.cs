@@ -11,7 +11,7 @@ public class Guardian : MonoBehaviour
     [SerializeField] private PathPatrol _pathPatrol;
     [SerializeField] public bool _isActif;
     private NavMeshAgent _agent;
-    private NewCharacterMotor _playerRef;
+    private CharacterMotor _playerRef;
     private Coroutine _coroutine;
     private Coroutine _coroutineUpdate;
     private bool _aggro;
@@ -161,7 +161,7 @@ public class Guardian : MonoBehaviour
         
     }
 
-    public void MakePLayerRef(NewCharacterMotor Player)
+    public void MakePLayerRef(CharacterMotor Player)
     {
         _playerRef = Player;
     }
