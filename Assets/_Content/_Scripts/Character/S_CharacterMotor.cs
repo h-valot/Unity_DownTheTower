@@ -12,6 +12,7 @@ public class CharacterMotor : MonoBehaviour
 	[SerializeField] private Transform _cameraDirection;
 	[SerializeField] private Transform _characterDirection;
 	[SerializeField] private Transform _torchParent;
+	[SerializeField] private Transform _ropeAttach;
 	[SerializeField] private CharacterController _controller;
 	public ObiCollider obiCollider;
 
@@ -69,6 +70,9 @@ public class CharacterMotor : MonoBehaviour
 	[ReadOnly] public Vector3 _lastGroundedPosition;
 	[ReadOnly] public Vector3 _lastGroundedDirection;
 	[ReadOnly] public float _lastDistanceTravelled;
+
+	[Header("debug: permanent")]
+	[ReadOnly] public float ropeLength;
 
 	// ----- PRIVATE VARIABLES -----
 	// - status -
@@ -579,6 +583,7 @@ public class CharacterMotor : MonoBehaviour
 	#region inputs
 
 	private Rope _lastInstantiatedRope;
+	private Rope _equippedRope;
 
 	/// <summary>
 	/// 	temporary function to handle ladder and rope placement.
@@ -622,9 +627,18 @@ public class CharacterMotor : MonoBehaviour
 			}
 		}
 
-		if (Input.GetKeyDown(KeyCode.K))
+		if (Input.GetKeyDown(KeyCode.K)
+			&& _lastInstantiatedRope != null)
 		{
-			_lastInstantiatedRope?.Interact(this);
+			_lastInstantiatedRope.Interact(this);
+			_equippedRope = _lastInstantiatedRope;
+		}
+
+		if (Input.GetKeyDown(KeyCode.L)
+			&& _equippedRope != null)
+		{
+			_equippedRope.Cancel();
+			_equippedRope = null;
 		}
 	}
 
@@ -744,6 +758,8 @@ public class CharacterMotor : MonoBehaviour
 		// velocity calculations
 		ApplyGravity();
 		HandleMovement();
+
+		// HandleRopeLength();
 	}
 
 	private void ExitLocomotionState()
@@ -851,6 +867,33 @@ public class CharacterMotor : MonoBehaviour
 	private void UpdateRopeState()
 	{
 
+	}
+
+	private void HandleRopeLength()
+	{
+		// exit, if there is no rope equipped
+		if (_equippedRope == null) return;
+
+		if (Physics.Linecast(_ropeAttach.transform.position, _equippedRope.folds[^1], out var addHit, ~_ropeConfig.foldLayer))
+		{
+			_equippedRope.folds.Add(addHit.point);
+		}
+
+		if (_equippedRope.folds.Count >= 2
+			&& !Physics.Linecast(_ropeAttach.transform.position, _equippedRope.folds[^2], out var removeHit, ~_ropeConfig.foldLayer))
+		{
+			_equippedRope.folds.Remove(_equippedRope.folds[^1]);
+		}
+
+		ropeLength = _equippedRope.GetLength();
+		if (ropeLength >= _ropeConfig.maxLength)
+		{
+			// reposition the player within the rope radius
+			if (Vector3.Dot(_characterDirection.forward, (_ropeAttach.transform.position - _equippedRope.folds[^1]).normalized) >= 0)
+			{
+				_velocity = Vector3.zero;
+			}
+		}
 	}
 
 	private void ExitRopeState()

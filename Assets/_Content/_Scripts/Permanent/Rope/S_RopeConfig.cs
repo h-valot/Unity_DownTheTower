@@ -8,7 +8,8 @@ public class RopeConfig : ScriptableObject
 	public Rope pfRope;
 
 	[Header("Settings")]
-	public float maxRopeLength;
+	public float maxLength;
+	public LayerMask foldLayer;
 
 	[Header("Deploy")]
 	public float maxHeight = 4f;
