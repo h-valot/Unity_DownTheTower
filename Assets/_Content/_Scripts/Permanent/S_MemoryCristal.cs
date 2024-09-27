@@ -4,7 +4,7 @@ using UnityEngine;
 public class MemoryCristal : Interactible
 {
 
-    [SerializeField] private Transform _door;
+    [SerializeField] private GameObject _door;
     [SerializeField] private Vector3 _openvector;
 
     private bool _doorOpen;
@@ -31,8 +31,8 @@ public class MemoryCristal : Interactible
     {
         if (_doorOpen == false)
         {
-            Debug.Log("Animation lancée");
-            _door.transform.DOLocalMove(_openvector, 3f).SetEase(Ease.InBack).SetId("Door");
+            Debug.Log(_openvector.ToString());
+            _door.transform.DOMove(_door.transform.position + _openvector, 3f).SetId("Door");
             _doorOpen = true;
         }
     }
