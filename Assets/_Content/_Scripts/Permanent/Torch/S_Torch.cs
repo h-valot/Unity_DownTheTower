@@ -1,7 +1,7 @@
 using System.Collections;
 using UnityEngine;
 
-public class Torch : MonoBehaviour
+public class Torch : Permanent
 {
     [Header("Internal References")]
     [SerializeField] private Light _light;

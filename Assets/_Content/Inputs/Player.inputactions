@@ -60,13 +60,13 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "CraftTorch",
-                    "type": "Button",
+                    "name": "Craft",
+                    "type": "Value",
                     "id": "9222ea07-1cf3-4c6a-ac37-958a110d6c66",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
-                    "initialStateCheck": false
+                    "initialStateCheck": true
                 },
                 {
                     "name": "Interact",
@@ -289,7 +289,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "KeyboardMouse",
-                    "action": "CraftTorch",
+                    "action": "Craft",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -300,7 +300,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "Gamepad",
-                    "action": "CraftTorch",
+                    "action": "Craft",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },

@@ -31,7 +31,7 @@ public class CharacterMotor : MonoBehaviour
 	[SerializeField] private RSE_Jump _rseJump;
 	[SerializeField] private RSE_Throw _rseThrow;
 	[SerializeField] private RSE_ToggleLight _rseToggleLight;
-	[SerializeField] private RSE_CraftTorch _rseCraftTorch;
+	[SerializeField] private RSE_Craft _rseCraft;
 	[SerializeField] private RSE_Interact _rseInteract;
     [SerializeField] private RSE_CancelAction _rseCancelAction;
     [SerializeField] private RSE_CraftLadder _rseCraftLadder;
@@ -75,6 +75,7 @@ public class CharacterMotor : MonoBehaviour
 
 	[Header("debug: permanent")]
 	[ReadOnly] public float ropeLength;
+	[ReadOnly] public Permanent _craftInHand;
 
 	// ----- PRIVATE VARIABLES -----
 	// - status -
@@ -97,7 +98,7 @@ public class CharacterMotor : MonoBehaviour
     private PreLadder _currentPreLadder;
 	private PreRope _currentPreRope;
 	private Torch _currentTorch;
-	private bool _isCrafting;
+	private Coroutine _craftCoroutine;
 
 	// ----- CONST -----
 	private const float _TERMINAL_VELOCITY = 53.0f;
@@ -125,7 +126,7 @@ public class CharacterMotor : MonoBehaviour
 		_rseJump.action += Jump;
 		_rseSprint.action += Sprint;
 		_rseThrow.action += Throw;
-		_rseCraftTorch.action += CraftTorch;
+		_rseCraft.action += ToggleCraft;
 		_rseToggleLight.action += ToggleLight;
 		_rseCancelAction.action += CancelAction;
 		_rseCraftRope.action += CraftRope;
@@ -139,7 +140,7 @@ public class CharacterMotor : MonoBehaviour
 		_rseJump.action -= Jump;
 		_rseSprint.action -= Sprint;
 		_rseThrow.action -= Throw;
-		_rseCraftTorch.action -= CraftTorch;
+		_rseCraft.action -= ToggleCraft;
 		_rseToggleLight.action -= ToggleLight;
         _rseCancelAction.action -= CancelAction;
         _rseCraftRope.action -= CraftRope;
@@ -181,7 +182,11 @@ public class CharacterMotor : MonoBehaviour
 			case AnimationState.LADDER:
 				UpdateLadderState();
 				break;
-		}
+
+            case AnimationState.AIM:
+                UpdateAimState();
+                break;
+        }
 	}
 
 	/// <summary>
@@ -224,7 +229,11 @@ public class CharacterMotor : MonoBehaviour
 			case AnimationState.LADDER:
 				ExitLadderState();
 				break;
-		}
+
+            case AnimationState.AIM:
+                ExitAimState();
+                break;
+        }
 	}
 
 	/// <summary>
@@ -258,7 +267,11 @@ public class CharacterMotor : MonoBehaviour
 			case AnimationState.LADDER:
 				EnterLadderState();
 				break;
-		}
+
+            case AnimationState.AIM:
+                EnterAimState();
+                break;
+        }
 	}
 
 	#endregion
@@ -588,11 +601,11 @@ public class CharacterMotor : MonoBehaviour
 		if (_rsoCharacterForward.value != _characterDirection.forward) { _rsoCharacterForward.value = _characterDirection.forward; }
     }
 
-	#endregion
+    #endregion
 
-	#region inputs
+    #region inputs
 
-	private Rope _lastInstantiatedRope;
+    private Rope _lastInstantiatedRope;
 	private Rope _equippedRope;
 
 	/// <summary>
@@ -710,6 +723,7 @@ public class CharacterMotor : MonoBehaviour
 		_currentTorch?.Throw(direction);
 
 		_currentTorch = null;
+		_craftInHand = null;
 	}
 
 	/// <summary>
@@ -727,23 +741,6 @@ public class CharacterMotor : MonoBehaviour
 
 
 	#endregion
-
-	/// <summary>
-	/// 	instantiate the torch prefab after the fixed duration.
-	/// </summary>
-	private IEnumerator SpawnTorch()
-	{
-		_isCrafting = true;
-
-		// wait the crafting duration
-		yield return new WaitForSeconds(_torchConfig.craftingDuration);
-
-		// instantiate the torch in the character's hand
-		_currentTorch = Instantiate(_torchConfig.pfTorch, _torchParent.transform);
-		_currentTorch.transform.position = _torchParent.transform.position;
-
-		_isCrafting = false;
-	}
 
 	#region locomotion state
 
@@ -815,11 +812,66 @@ public class CharacterMotor : MonoBehaviour
 
 	}
 
-	#endregion
+    #endregion
 
-	#region craft state
+    #region craft state
 
-	private void EnterCraftState()
+    private void ToggleCraft(CraftType _craftName, bool _isInputPressed)
+    {
+        //Prevent switching to craft state if not in locomotion or crafting state
+        if (_currentState != AnimationState.LOCOMOTION && _currentState != AnimationState.CRAFT)
+        {
+            return;
+        }
+
+        //If craft button is pressed
+        if (_isInputPressed)
+        {
+            switch (_craftName)
+            {
+                case CraftType.None:
+                    break;
+
+                case CraftType.Torch:
+                    if (_craftInHand != null)
+                    {
+						Debug.Log(_craftInHand._craftType.ToString());
+                        if (_craftInHand._craftType != CraftType.Torch)
+                        {
+                            SwitchState(AnimationState.CRAFT);
+                            Destroy(_craftInHand);
+                            _craftCoroutine = StartCoroutine(Craft(CraftType.Torch, _torchConfig.craftingDuration));
+                        }
+                    }
+                    else
+                    {
+                        SwitchState(AnimationState.CRAFT);
+                        _craftCoroutine = StartCoroutine(Craft(CraftType.Torch, _torchConfig.craftingDuration));
+                    }
+                    break;
+
+                case CraftType.Ladder:
+                    break;
+
+                case CraftType.Rope:
+                    break;
+            }
+        }
+        else // if craft button is released
+        {
+            if (_craftCoroutine != null)
+            {
+                StopCoroutine(_craftCoroutine);
+            }
+            if (_currentState == AnimationState.CRAFT)
+            {
+                SwitchState(AnimationState.LOCOMOTION);
+            }
+        }
+
+    }
+
+    private void EnterCraftState()
 	{
 
 	}
@@ -836,19 +888,7 @@ public class CharacterMotor : MonoBehaviour
 		Accelerate();
 		ApplyGravity();
 		HandleMovement();
-	}
-
-    /// <summary>
-    /// 	start the spawn torch coroutine if (1) there is no torch equiped, (2) another permanent is being crafted
-    /// </summary>
-    private void CraftTorch()
-    {
-        if (_currentTorch == null
-            && !_isCrafting)
-        {
-            StartCoroutine(SpawnTorch());
-        }
-    }
+	}    
 
     private void CraftRope()
 	{
@@ -860,16 +900,52 @@ public class CharacterMotor : MonoBehaviour
 
     }
 
+    /// <summary>
+    /// 	instantiate the torch prefab after the fixed duration.
+    /// </summary>
+    private IEnumerator Craft(CraftType _objectToCraft,float _craftduration)
+    {
+        // wait the crafting duration
+        yield return new WaitForSeconds(_craftduration);
+
+		// instantiate the crafted object
+		
+		switch (_objectToCraft)
+		{
+            case CraftType.None:
+                break;
+
+            case CraftType.Torch:
+                _craftInHand = Instantiate(_torchConfig.pfTorch, _torchParent.transform);
+                _currentTorch = (Torch)_craftInHand;
+                _craftInHand.transform.position = _torchParent.transform.position;
+                break;
+
+			case CraftType.Ladder:
+				break;
+
+			case CraftType.Rope: 
+				break;
+		}        
+    }
+
     private void ExitCraftState()
 	{
 
 	}
 
-	#endregion
+	public enum CraftType
+	{
+		None,
+		Torch,
+		Ladder,
+		Rope,
+	}
+    #endregion
 
-	#region rope state
+    #region rope state
 
-	private void EnterRopeState()
+    private void EnterRopeState()
 	{
 
 	}
@@ -923,7 +999,7 @@ public class CharacterMotor : MonoBehaviour
 	private void UpdateLadderState()
 	{
 
-	}
+    }
 
 	private void ExitLadderState()
 	{
@@ -932,8 +1008,56 @@ public class CharacterMotor : MonoBehaviour
 
     #endregion
 
-   
-	#region interaction
+    #region aim state
+
+	private void ToggleAim(bool _isPressed)
+	{
+        //Prevent switching to aim state if not in locomotion or no craft in hand
+        if (_currentState != AnimationState.LOCOMOTION && _craftInHand == null)
+        {
+            return;
+        }
+
+        if (_isPressed)
+		{
+			SwitchState(AnimationState.AIM);
+		}
+		else
+		{
+			if (_currentState == AnimationState.AIM)
+			{
+                SwitchState(AnimationState.LOCOMOTION);
+            }
+        }
+	}
+
+    private void EnterAimState()
+    {
+
+    }
+
+    private void UpdateAimState()
+    {
+        // temp
+        HandleInputs();
+
+        CheckGround();
+        HandleSlope();
+        HandleStun();
+        HandleSlow();
+        Accelerate();
+        ApplyGravity();
+        HandleMovement();
+    }
+
+    private void ExitAimState()
+    {
+
+    }
+
+    #endregion
+
+    #region interaction
 
     private void Interact()
     {

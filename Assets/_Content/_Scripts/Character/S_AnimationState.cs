@@ -5,5 +5,6 @@ public enum AnimationState
 	FALL,
 	CRAFT,
 	ROPE,
-	LADDER
+	LADDER,
+	AIM,
 }

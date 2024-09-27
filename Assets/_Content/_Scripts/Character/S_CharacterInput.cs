@@ -8,18 +8,18 @@ public class CharacterInput : MonoBehaviour
 	[SerializeField] private PlayerInput _playerInput;
 
 	[Header("External references")]
+	[SerializeField] private RSO_ControlScheme _rsoControlScheme;
 	[SerializeField] private RSE_Move _rseMove;
 	[SerializeField] private RSE_Look _rseLook;
 	[SerializeField] private RSE_Jump _rseJump;
 	[SerializeField] private RSE_Sprint _rseSprint;
-	[SerializeField] private RSO_ControlScheme _rsoControlScheme;
-	[SerializeField] private RSE_Throw _rseThrow;
-    [SerializeField] private RSE_ToggleLight _rseToggleLight;
-    [SerializeField] private RSE_CraftTorch _rseCraftTorch;
 	[SerializeField] private RSE_Interact _rseInteract;
 	[SerializeField] private RSE_CancelAction _rseCancelAction;
+    [SerializeField] private RSE_Craft _rseCraft;
     [SerializeField] private RSE_CraftLadder _rseCraftLadder;
     [SerializeField] private RSE_CraftRope _rseCraftRope;
+	[SerializeField] private RSE_Throw _rseThrow;
+    [SerializeField] private RSE_ToggleLight _rseToggleLight;
 
     [Header("Debugging")]
 	[ReadOnly] public Vector2 move;
@@ -92,9 +92,9 @@ public class CharacterInput : MonoBehaviour
 		_rseToggleLight.Call();
 	}
 
-	public void OnCraftTorch()
+	public void OnCraft(InputValue value)
 	{
-		_rseCraftTorch.Call();
+		_rseCraft.Call(CharacterMotor.CraftType.Torch, value.isPressed);
 	}
 
 	public void OnInteract()
