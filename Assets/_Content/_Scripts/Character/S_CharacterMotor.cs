@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using NaughtyAttributes;
 using Obi;
 using UnityEngine;
@@ -31,6 +32,7 @@ public class CharacterMotor : MonoBehaviour
 	[SerializeField] private RSE_Throw _rseThrow;
 	[SerializeField] private RSE_ToggleLight _rseToggleLight;
 	[SerializeField] private RSE_CraftTorch _rseCraftTorch;
+	[SerializeField] private RSE_Interact _rseInteract;
     [SerializeField] private RSE_CancelAction _rseCancelAction;
     [SerializeField] private RSE_CraftLadder _rseCraftLadder;
     [SerializeField] private RSE_CraftRope _rseCraftRope;
@@ -87,8 +89,12 @@ public class CharacterMotor : MonoBehaviour
 	// - jump -
 	private float _jumpTimer;
 
-	// - permanent -
-	private PreLadder _currentPreLadder;
+    // - interact -
+    private List<Interactible> _interactables;
+    private Interactible _nearestInteractible;
+
+    // - permanent -
+    private PreLadder _currentPreLadder;
 	private PreRope _currentPreRope;
 	private Torch _currentTorch;
 	private bool _isCrafting;
@@ -103,7 +109,10 @@ public class CharacterMotor : MonoBehaviour
 	private void Start()
 	{
 		SwitchState(AnimationState.LOCOMOTION);
-	}
+
+        // creation of the interaction list
+        _interactables = new List<Interactible>();
+    }
 
 	private void Update()
 	{
@@ -121,8 +130,8 @@ public class CharacterMotor : MonoBehaviour
 		_rseCancelAction.action += CancelAction;
 		_rseCraftRope.action += CraftRope;
 		_rseCraftLadder.action += CraftLadder;
-
-	}
+        _rseInteract.action += Interact;
+    }
 
 	private void OnDisable()
 	{
@@ -135,6 +144,7 @@ public class CharacterMotor : MonoBehaviour
         _rseCancelAction.action -= CancelAction;
         _rseCraftRope.action -= CraftRope;
         _rseCraftLadder.action -= CraftLadder;
+        _rseInteract.action -= Interact;
     }
 
 	#endregion
@@ -920,5 +930,44 @@ public class CharacterMotor : MonoBehaviour
 
 	}
 
-	#endregion
+    #endregion
+
+   
+	#region interaction
+
+    private void Interact()
+    {
+		if (_interactables.Count >= 1)
+		{
+            for (int i = 0; i < _interactables.Count; i++)
+            {
+                float distance = (_interactables[i].transform.position - this.transform.position).sqrMagnitude;
+
+                if (_nearestInteractible == null)
+                {
+                    _nearestInteractible = _interactables[i];
+                }
+
+                else if (distance < (_nearestInteractible.transform.position - this.transform.position).sqrMagnitude)
+                {
+                    _nearestInteractible = _interactables[i];
+                }
+            }
+            Debug.Log("Try to interact");
+            _nearestInteractible.InteractionTrigger();
+        }
+    }
+
+    public void AddToInteractList(Interactible _interactibleObject)
+    {
+		Debug.Log("ajoute");
+        _interactables.Add(_interactibleObject);
+    }
+
+    public void RemoveFromInteractList(Interactible _interactibleObject)
+    {
+        _interactables.Remove(_interactibleObject);
+    }
+
+    #endregion
 }
