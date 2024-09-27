@@ -8,9 +8,12 @@ public class Torch : MonoBehaviour
     [SerializeField] private Rigidbody _rigidbody;
     [SerializeField] private MeshRenderer _meshRenderer;
     [SerializeField] private TorchPointLight _torchPointLight;
+    [SerializeField] private LineRenderer _aimPreview;
 
-	[Header("Scriptable References")]
+    [Header("Scriptable References")]
 	[SerializeField] private TorchConfig _torchConfig;
+
+
 
     // ----- PRIVATE VARIABLES -----
     private bool _isActive = false;
@@ -65,5 +68,42 @@ public class Torch : MonoBehaviour
     {
         yield return new WaitForSeconds(duration);
         Destroy(gameObject);
+    }
+
+    private void DrawPreview(Vector3 direction)
+    {
+        _aimPreview.enabled = true;
+        _aimPreview.positionCount = Mathf.CeilToInt(_torchConfig.previewLength / _torchConfig.previewSmoothing) + 1;
+
+        // set up starting point and velocity
+        Vector3 startPosition = transform.position;
+        Vector3 startVelocity = direction * _torchConfig.launchForce;
+
+        // placing points along the line renderer
+        int i = 0;
+        _aimPreview.SetPosition(i, startPosition);
+        for (float time = 0; time < _torchConfig.previewLength; time += _torchConfig.previewSmoothing)
+        {
+            i++;
+            Vector3 point = startPosition + time * startVelocity;
+            // defines placement over time using gravity as an accelerator
+            point.y = startPosition.y + startVelocity.y * time + (Physics.gravity.y / 2f * time * time);
+
+            _aimPreview.SetPosition(i, point);
+
+            if(CheckEndOfPreview(i, point)) return;
+        }
+    }
+
+    private bool CheckEndOfPreview(int pointNb, Vector3 pointPos)
+    {
+        Vector3 lastPosition = _aimPreview.GetPosition(pointNb - 1);
+        if(Physics.Raycast(lastPosition, (pointPos - lastPosition).normalized, out var hit, (pointPos - lastPosition).magnitude, _torchConfig.layersToIgnorePreview))
+        {
+            _aimPreview.SetPosition(pointNb, hit.point);
+            _aimPreview.positionCount = pointNb + 1;
+            return true;
+        }
+        return false;
     }
 }

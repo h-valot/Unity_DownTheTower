@@ -31,10 +31,16 @@ public class TorchConfig : ScriptableObject
     public bool canThrow;
 
     [Tooltip("Launch force of the throw")]
-    public float launchForce;
+    public float launchForce = 10f;
 
 
 	[Header("Crafting")]
 	[Tooltip("Wait this value after pressing the craft button to get the torch prefab instantiate")]
 	public float craftingDuration;
+
+
+	[Header("Aim Preview Variables")]
+	[SerializeField] [Range(10, 100)] public int previewLength = 25;
+	[SerializeField] [Range(0.1f, 0.25f)] public float previewSmoothing = 0.1f;
+	[SerializeField] public LayerMask layersToIgnorePreview;
 }
