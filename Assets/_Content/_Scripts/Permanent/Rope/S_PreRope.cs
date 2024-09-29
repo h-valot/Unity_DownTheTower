@@ -55,7 +55,7 @@ public class PreRope : MonoBehaviour
 		// cast 1 = Check if there is ground under the ladder 
 		// cast 2 = Check that there is enough room above
 		return Physics.Raycast(transform.position + new Vector3(0, 0.25f, 0), Vector3.down, 0.5f) &&
-			!Physics.Raycast(transform.position + new Vector3(0, 0.25f, 0), Vector3.up, _ropeConfig.maxHeight - 0.25f);
+			!Physics.Raycast(transform.position + new Vector3(0, 0.25f, 0), Vector3.up, _ropeConfig.heightLimit - 0.25f);
 	}
 
 	private void UpdateColor(bool newIsPlaceable)

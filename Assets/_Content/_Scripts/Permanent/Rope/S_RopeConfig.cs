@@ -6,14 +6,15 @@ public class RopeConfig : ScriptableObject
 	[Header("Prefabs")]
 	public PreRope pfPreRope;
 	public Rope pfRope;
+	public RopeSegment pfSegment;
 
 	[Header("Settings")]
 	public float maxLength;
-	public LayerMask foldLayer;
+	public LayerMask foldLayerToIgnore;
+	public float foldMinimalDistance = 0.25f;
 
 	[Header("Deploy")]
-	public float maxHeight = 4f;
-	public float additionalRaycastHeight = 0.5f;
+	internal float heightLimit = 1f;
 	public LayerMask layersToIgnore;
 
 	[Header("Placement")]

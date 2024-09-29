@@ -1,54 +1,78 @@
+using System;
 using System.Collections.Generic;
-using Obi;
+using System.Runtime.InteropServices.WindowsRuntime;
 using UnityEngine;
 
 public class Rope : MonoBehaviour, IInteractable
 {
 	[Header("Internal references")]
-	[SerializeField] private ObiParticleAttachment _obiParticleCharacterAttachment;
-	[SerializeField] private ObiRope _obiRope;
+	[SerializeField] private Transform _ropeAttach;
+	[SerializeField] private ConfigurableJoint _configurableJoint;
 
 	[Header("Scriptable references")]
 	[SerializeField] private RopeConfig _ropeConfig;
 
 	[Header("debug: length")]
-	public List<Vector3> folds;
+	public List<Vector3> folds = new List<Vector3>();
+	public List<RopeSegment> segments = new List<RopeSegment>();
 
 	// ----- PRIVATE VARIABLES -----
 	private CharacterMotor attachedCharacter;
+	private bool _isInitialized;
 
+	// ----- PROPRIETIES -----
+	/// <summary>
+	/// 	current distance between the character's position and the base of the rope.
+	/// </summary>
+	public float baseCharaDistance => GetBaseCharaDistance();
+
+	/// <summary>
+	/// 	current length of the rope.
+	/// </summary>
+	public float ropeLength => GetRopeLength();
+
+	// ----- DEFAULT FUNCTIONS -----
+	public void Update()
+	{
+		if (!_isInitialized) return;
+
+		ExtendRope();
+	}
 
 	public void Initialize()
 	{
 		// initialize folds list
-		folds = new List<Vector3>() { transform.position };
+		folds = new List<Vector3>() { _ropeAttach.position.CutDigits(2) };
+		ExtendRope();
 
-		// update the last particle group position
-		_obiRope.blueprint.positions[^1] = new Vector3(_ropeConfig.maxLength, 0, 0);
-
-		// Debug.Log($"ROPE: attachement = {_obiParticleCharacterAttachment.particleGroup}");
+		_isInitialized = true;
 	}
 
-	public void Update()
+	public void ExtendRope()
 	{
-		// HandleMoveAlong();
-	}
-
-	/// <summary>
-	/// 	update particle group attached to the character's obi collider 
-	/// </summary>
-	public void HandleMoveAlong()
-	{
-		// exit, if there is no attached character
 		if (attachedCharacter == null) return;
 
-		float characterBaseLength = (transform.position - attachedCharacter.transform.position).magnitude;
-		if (characterBaseLength <= _ropeConfig.maxLength)
+		if (baseCharaDistance >= _ropeConfig.maxLength) return;
+
+		float delta = baseCharaDistance - ropeLength;
+		float instantiableSegment = delta / GetSegmentLength();
+		int segmentToInstantiate = Mathf.FloorToInt(instantiableSegment);
+
+		if (segmentToInstantiate <= 0) return;
+
+		for (int i = 0; i < segmentToInstantiate; i++)
 		{
-			// update particle group position the character is attached to
-			// simply update on x-axis because _obiRope.blueprint.positions[0] = [0, 0, 0]
-			// and _obiRope.blueprint.positions[^1] = [maxRopeLength, 0, 0]
-			_obiRope.blueprint.positions[1] = new Vector3(characterBaseLength, 0, 0);
+			// instantiate a new segment
+			RopeSegment newSegment = Instantiate(
+				_ropeConfig.pfSegment,
+				segments[^1].top.position,
+				segments[^1].transform.rotation,
+				segments[^1].transform
+			);
+			newSegment.Connect(segments[^1].rb);
+			attachedCharacter.configurableJoint.connectedBody = newSegment.rb;
+			segments.Add(newSegment);
+
 		}
 	}
 
@@ -59,20 +83,14 @@ public class Rope : MonoBehaviour, IInteractable
 	public void Interact(CharacterMotor source)
 	{
 		attachedCharacter = source;
-
-		// attach the character obi collider to the obi particle attachement
-		_obiParticleCharacterAttachment.target = attachedCharacter.obiCollider.transform;
 	}
 
 	public void Cancel()
 	{
 		attachedCharacter = null;
-
-		// remove the obi particle attachement target
-		_obiParticleCharacterAttachment.target = null;
 	}
 
-	public float GetLength()
+	private float GetBaseCharaDistance()
 	{
 		float output = 0;
 
@@ -86,5 +104,16 @@ public class Rope : MonoBehaviour, IInteractable
 		}
 
 		return output;
+	}
+
+	private float GetRopeLength()
+	{
+		return GetSegmentLength() * segments.Count;
+	}
+
+	private float GetSegmentLength()
+	{
+		return _ropeConfig.pfSegment.capsuleCollider.height             // height of the segment collider
+			- (2 * _ropeConfig.pfSegment.capsuleCollider.radius);       // top and bot offset that overlap with other segments
 	}
 }

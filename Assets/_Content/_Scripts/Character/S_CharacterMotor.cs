@@ -12,8 +12,9 @@ public class CharacterMotor : MonoBehaviour
 	[SerializeField] private Transform _cameraDirection;
 	[SerializeField] private Transform _characterDirection;
 	[SerializeField] private Transform _torchParent;
-	[SerializeField] private Transform _ropeAttach;
-	[SerializeField] private CharacterController _controller;
+	public Transform _ropeAttach;
+	public CharacterController _controller;
+	public ConfigurableJoint configurableJoint;
 	public ObiCollider obiCollider;
 
 	[Header("Scriptable references")]
@@ -620,18 +621,15 @@ public class CharacterMotor : MonoBehaviour
 		if (Input.GetKeyUp(KeyCode.Mouse0))
 		{
 			_lastInstantiatedRope = _currentPreRope.InstantiateRope();
+			_lastInstantiatedRope.Interact(this);
+			_equippedRope = _lastInstantiatedRope;
+
+			// destroy rope previsualization
 			if (_currentPreRope != null)
 			{
 				Destroy(_currentPreRope.gameObject);
 				_currentPreRope = null;
 			}
-		}
-
-		if (Input.GetKeyDown(KeyCode.K)
-			&& _lastInstantiatedRope != null)
-		{
-			_lastInstantiatedRope.Interact(this);
-			_equippedRope = _lastInstantiatedRope;
 		}
 
 		if (Input.GetKeyDown(KeyCode.L)
@@ -874,18 +872,31 @@ public class CharacterMotor : MonoBehaviour
 		// exit, if there is no rope equipped
 		if (_equippedRope == null) return;
 
-		if (Physics.Linecast(_ropeAttach.transform.position, _equippedRope.folds[^1], out var addHit, ~_ropeConfig.foldLayer))
+		if (Physics.Linecast(_ropeAttach.transform.position, _equippedRope.folds[^1], out var addHit, ~_ropeConfig.foldLayerToIgnore))
 		{
-			_equippedRope.folds.Add(addHit.point);
+			Vector3 approximatePoint = addHit.point.CutDigits(2);
+
+			if (_equippedRope.folds.Count >= 2)
+			{
+				// minimal distance between two fold point to be register
+				if ((_equippedRope.folds[^1] - _equippedRope.folds[^2]).magnitude >= _ropeConfig.foldMinimalDistance)
+				{
+					_equippedRope.folds.AddUnique(approximatePoint);
+				}
+			}
+			else 
+			{
+				_equippedRope.folds.AddUnique(approximatePoint);
+			}
 		}
 
 		if (_equippedRope.folds.Count >= 2
-			&& !Physics.Linecast(_ropeAttach.transform.position, _equippedRope.folds[^2], out var removeHit, ~_ropeConfig.foldLayer))
+			&& !Physics.Linecast(_ropeAttach.transform.position, _equippedRope.folds[^2], out var removeHit, ~_ropeConfig.foldLayerToIgnore))
 		{
 			_equippedRope.folds.Remove(_equippedRope.folds[^1]);
 		}
 
-		ropeLength = _equippedRope.GetLength();
+		ropeLength = _equippedRope.baseCharaDistance;
 		if (ropeLength >= _ropeConfig.maxLength)
 		{
 			// reposition the player within the rope radius
