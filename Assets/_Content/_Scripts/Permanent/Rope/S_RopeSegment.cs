@@ -15,16 +15,4 @@ public class RopeSegment : MonoBehaviour
 	{
 		configurableJoint.connectedBody = connectedRigidbody;
 	}
-
-#if UNITY_EDITOR
-
-	private void OnDrawGizmos()
-	{
-		Gizmos.DrawCube(
-			transform.position + capsuleCollider.center, 
-			new Vector3(capsuleCollider.radius, capsuleCollider.height, capsuleCollider.radius)
-		);
-	}
-
-#endif
 }

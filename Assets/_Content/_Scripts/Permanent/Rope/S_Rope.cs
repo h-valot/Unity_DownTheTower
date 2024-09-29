@@ -1,13 +1,11 @@
-using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices.WindowsRuntime;
 using UnityEngine;
 
 public class Rope : MonoBehaviour, IInteractable
 {
 	[Header("Internal references")]
 	[SerializeField] private Transform _ropeAttach;
-	[SerializeField] private ConfigurableJoint _configurableJoint;
+	[SerializeField] private RopeSegment _firstSegment;
 
 	[Header("Scriptable references")]
 	[SerializeField] private RopeConfig _ropeConfig;
@@ -41,8 +39,8 @@ public class Rope : MonoBehaviour, IInteractable
 
 	public void Initialize()
 	{
-		// initialize folds list
 		folds = new List<Vector3>() { _ropeAttach.position.CutDigits(2) };
+		segments = new List<RopeSegment>() { _firstSegment };
 		ExtendRope();
 
 		_isInitialized = true;
@@ -62,17 +60,22 @@ public class Rope : MonoBehaviour, IInteractable
 
 		for (int i = 0; i < segmentToInstantiate; i++)
 		{
+			Quaternion facingCharacter = Quaternion.LookRotation((segments[^1].top.position - attachedCharacter.transform.position).normalized);
+
 			// instantiate a new segment
 			RopeSegment newSegment = Instantiate(
 				_ropeConfig.pfSegment,
 				segments[^1].top.position,
-				segments[^1].transform.rotation,
+				facingCharacter,
 				segments[^1].transform
 			);
+
+			// connect joints together
 			newSegment.Connect(segments[^1].rb);
 			attachedCharacter.configurableJoint.connectedBody = newSegment.rb;
-			segments.Add(newSegment);
 
+			// store the newly created segment
+			segments.Add(newSegment);
 		}
 	}
 

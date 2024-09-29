@@ -757,7 +757,7 @@ public class CharacterMotor : MonoBehaviour
 		ApplyGravity();
 		HandleMovement();
 
-		// HandleRopeLength();
+		HandleRopeLength();
 	}
 
 	private void ExitLocomotionState()
