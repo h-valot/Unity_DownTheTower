@@ -16,8 +16,11 @@ public class CharacterMotor : MonoBehaviour
 	[SerializeField] private Transform _ropeAttach;
 	[SerializeField] private CharacterController _controller;
 	public ObiCollider obiCollider;
-
-	[Header("Scriptable references")]
+	[Space(5)]
+    [Header("External references")]
+	[SerializeField] private ThirdPersonCamera _thirdPersonCamera;
+    [Space(5)]
+    [Header("Scriptable references")]
 	[SerializeField] private CharacterConfig _characterConfig;
 	[SerializeField] private LadderConfig _ladderConfig;
 	[SerializeField] private RopeConfig _ropeConfig;
@@ -30,7 +33,7 @@ public class CharacterMotor : MonoBehaviour
 	[SerializeField] private RSE_Move _rseMove;
 	[SerializeField] private RSE_Jump _rseJump;
 	[SerializeField] private RSE_Throw _rseThrow;
-	[SerializeField] private RSE_ToggleLight _rseToggleLight;
+	[SerializeField] private RSE_ToggleInHand _rseToggleInHand;
 	[SerializeField] private RSE_Craft _rseCraft;
 	[SerializeField] private RSE_Interact _rseInteract;
     [SerializeField] private RSE_CancelAction _rseCancelAction;
@@ -125,9 +128,9 @@ public class CharacterMotor : MonoBehaviour
 		_rseMove.action += Move;
 		_rseJump.action += Jump;
 		_rseSprint.action += Sprint;
-		_rseThrow.action += Throw;
+		_rseThrow.action += ToggleAim;
 		_rseCraft.action += ToggleCraft;
-		_rseToggleLight.action += ToggleLight;
+		_rseToggleInHand.action += ToggleInHand;
 		_rseCancelAction.action += CancelAction;
 		_rseCraftRope.action += CraftRope;
 		_rseCraftLadder.action += CraftLadder;
@@ -139,9 +142,9 @@ public class CharacterMotor : MonoBehaviour
 		_rseMove.action -= Move;
 		_rseJump.action -= Jump;
 		_rseSprint.action -= Sprint;
-		_rseThrow.action -= Throw;
+		_rseThrow.action -= ToggleAim;
 		_rseCraft.action -= ToggleCraft;
-		_rseToggleLight.action -= ToggleLight;
+		_rseToggleInHand.action -= ToggleInHand;
         _rseCancelAction.action -= CancelAction;
         _rseCraftRope.action -= CraftRope;
         _rseCraftLadder.action -= CraftLadder;
@@ -272,6 +275,8 @@ public class CharacterMotor : MonoBehaviour
                 EnterAimState();
                 break;
         }
+
+		_currentState = newState;
 	}
 
 	#endregion
@@ -711,27 +716,11 @@ public class CharacterMotor : MonoBehaviour
 	}
 
 	/// <summary>
-	/// 	(temp) throw the torch towards the camera.
-	/// 	this will change as soon of throw and craft component are ready to use.
-	/// </summary>
-	private void Throw()
-	{
-		if (_currentTorch == null) return;
-
-		Ray ray = new Ray(_cameraDirection.position, _cameraDirection.forward);
-		Vector3 direction = ray.GetPoint(1) - ray.GetPoint(0);
-		_currentTorch?.Throw(direction);
-
-		_currentTorch = null;
-		_craftInHand = null;
-	}
-
-	/// <summary>
 	/// 	lit and unlit the currently equipped torch
 	/// </summary>
-	private void ToggleLight()
+	private void ToggleInHand()
 	{
-		_currentTorch?.ToggleLight();
+		_craftInHand?.ToggleInHand();
 	}
 
 	private void CancelAction()
@@ -917,7 +906,6 @@ public class CharacterMotor : MonoBehaviour
 
             case CraftType.Torch:
                 _craftInHand = Instantiate(_torchConfig.pfTorch, _torchParent.transform);
-                _currentTorch = (Torch)_craftInHand;
                 _craftInHand.transform.position = _torchParent.transform.position;
                 break;
 
@@ -1013,7 +1001,7 @@ public class CharacterMotor : MonoBehaviour
 	private void ToggleAim(bool _isPressed)
 	{
         //Prevent switching to aim state if not in locomotion or no craft in hand
-        if (_currentState != AnimationState.LOCOMOTION && _craftInHand == null)
+        if ((_currentState != AnimationState.LOCOMOTION && _currentState != AnimationState.AIM) || _craftInHand == null)
         {
             return;
         }
@@ -1021,11 +1009,17 @@ public class CharacterMotor : MonoBehaviour
         if (_isPressed)
 		{
 			SwitchState(AnimationState.AIM);
-		}
+            _thirdPersonCamera.SwitchCameraStyle(CameraStyle.AIMING);
+        }
 		else
 		{
-			if (_currentState == AnimationState.AIM)
+            if (_currentState == AnimationState.AIM)
 			{
+                _craftInHand?.Throw(_cameraDirection.forward);
+
+                _craftInHand = null;
+
+                _thirdPersonCamera.SwitchCameraStyle(CameraStyle.BASIC);
                 SwitchState(AnimationState.LOCOMOTION);
             }
         }
@@ -1038,7 +1032,7 @@ public class CharacterMotor : MonoBehaviour
 
     private void UpdateAimState()
     {
-        // temp
+		// temp
         HandleInputs();
 
         CheckGround();
@@ -1048,6 +1042,8 @@ public class CharacterMotor : MonoBehaviour
         Accelerate();
         ApplyGravity();
         HandleMovement();
+
+		_craftInHand.PreviewThrow(_cameraDirection.forward);
     }
 
     private void ExitAimState()
@@ -1084,7 +1080,6 @@ public class CharacterMotor : MonoBehaviour
 
     public void AddToInteractList(Interactible _interactibleObject)
     {
-		Debug.Log("ajoute");
         _interactables.Add(_interactibleObject);
     }
 

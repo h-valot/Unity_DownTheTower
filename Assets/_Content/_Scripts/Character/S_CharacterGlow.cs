@@ -32,7 +32,6 @@ public class CharacterGlow : MonoBehaviour
 
     private void UpdateGlowGlobalParameters()
     {
-        Debug.Log(transform.position.ToString());
         Shader.SetGlobalFloat("_GlowHeight", _characterConfig.glowHeight);
         Shader.SetGlobalFloat("_GlowRadius", _characterConfig.glowRadius);
         Shader.SetGlobalFloat("_GlowStrength", _characterConfig.glowStrength);

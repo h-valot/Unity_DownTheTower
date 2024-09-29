@@ -43,15 +43,15 @@
                 },
                 {
                     "name": "Throw",
-                    "type": "Button",
+                    "type": "Value",
                     "id": "cccd9322-1253-48af-9266-47674cc34a5f",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
-                    "initialStateCheck": false
+                    "initialStateCheck": true
                 },
                 {
-                    "name": "ToggleLight",
+                    "name": "ToggleInHand",
                     "type": "Button",
                     "id": "694f2d6a-84f3-4e8c-9492-0de9de8de4b4",
                     "expectedControlType": "Button",
@@ -267,7 +267,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "KeyboardMouse",
-                    "action": "ToggleLight",
+                    "action": "ToggleInHand",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -278,7 +278,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "Gamepad",
-                    "action": "ToggleLight",
+                    "action": "ToggleInHand",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },

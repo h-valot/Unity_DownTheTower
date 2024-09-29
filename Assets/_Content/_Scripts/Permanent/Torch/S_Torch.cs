@@ -22,7 +22,7 @@ public class Torch : Permanent
         _isActive = true;
     }
 
-	public void ToggleLight() 
+	public override void ToggleInHand()
     {
         if (!_isActive) return;
 
@@ -36,7 +36,7 @@ public class Torch : Permanent
 		}
     }
 
-    public void Throw(Vector3 direction)
+    public override void Throw(Vector3 direction)
     {
         if (!_isActive || !_torchConfig.canThrow) 
 		{

@@ -116,7 +116,7 @@ public class ThirdPersonCamera : MonoBehaviour
 		_rsoCameraForward.value = _cameraDirection.forward;
 	}
 
-	private void SwitchCameraStyle(CameraStyle newStyle)
+	public void SwitchCameraStyle(CameraStyle newStyle)
 	{
 		_aimingCamera.SetActive(false);
 		_thirdPersonCamera.SetActive(false);

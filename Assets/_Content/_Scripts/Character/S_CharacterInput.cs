@@ -19,7 +19,7 @@ public class CharacterInput : MonoBehaviour
     [SerializeField] private RSE_CraftLadder _rseCraftLadder;
     [SerializeField] private RSE_CraftRope _rseCraftRope;
 	[SerializeField] private RSE_Throw _rseThrow;
-    [SerializeField] private RSE_ToggleLight _rseToggleLight;
+    [SerializeField] private RSE_ToggleInHand _rseToggleInHand;
 
     [Header("Debugging")]
 	[ReadOnly] public Vector2 move;
@@ -84,12 +84,12 @@ public class CharacterInput : MonoBehaviour
 
 	public void OnThrow(InputValue value)
 	{
-		_rseThrow.Call();
+		_rseThrow.Call(value.isPressed);
 	}
 
-	public void OnToggleLight()
+	public void OnToggleInHand()
 	{
-		_rseToggleLight.Call();
+		_rseToggleInHand.Call();
 	}
 
 	public void OnCraft(InputValue value)

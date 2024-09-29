@@ -61,7 +61,6 @@ public class PreLadder : MonoBehaviour
         {
             UpdateColor(false);
             _placementMesh.enabled = false;
-
         }
 	}
 

@@ -14,9 +14,7 @@ public class MemoryCristal : Interactible
     {
         if (other.TryGetComponent<CharacterMotor>(out var _character))
         {
-            Debug.Log(this.name);
             _character.AddToInteractList(this);
-            
         }
     }
     public void OnTriggerExit(Collider other)
@@ -31,7 +29,6 @@ public class MemoryCristal : Interactible
     {
         if (_doorOpen == false)
         {
-            Debug.Log(_openvector.ToString());
             _door.transform.DOMove(_door.transform.position + _openvector, 3f).SetId("Door");
             _doorOpen = true;
         }
@@ -39,7 +36,6 @@ public class MemoryCristal : Interactible
 
     private void Animation()
     {
-        Debug.Log("dot");
         
     }
 }

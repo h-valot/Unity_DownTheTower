@@ -3,6 +3,10 @@ using UnityEngine;
 public class Permanent : MonoBehaviour
 {
 	public CharacterMotor.CraftType _craftType;
-	// empty class for the moment
-	// see Placeable.cs for more informations
+
+	public virtual void PreviewThrow(Vector3 _cameraForward) { }
+
+	public virtual void Throw(Vector3 _cameraForward) { }
+
+	public virtual void ToggleInHand() { }
 }
