@@ -16,8 +16,6 @@ public class CharacterInput : MonoBehaviour
 	[SerializeField] private RSE_Interact _rseInteract;
 	[SerializeField] private RSE_CancelAction _rseCancelAction;
     [SerializeField] private RSE_Craft _rseCraft;
-    [SerializeField] private RSE_CraftLadder _rseCraftLadder;
-    [SerializeField] private RSE_CraftRope _rseCraftRope;
 	[SerializeField] private RSE_Throw _rseThrow;
     [SerializeField] private RSE_ToggleInHand _rseToggleInHand;
 
@@ -92,11 +90,6 @@ public class CharacterInput : MonoBehaviour
 		_rseToggleInHand.Call();
 	}
 
-	public void OnCraft(InputValue value)
-	{
-		_rseCraft.Call(CharacterMotor.CraftType.Torch, value.isPressed);
-	}
-
 	public void OnInteract()
 	{
 		_rseInteract.Call();
@@ -107,13 +100,18 @@ public class CharacterInput : MonoBehaviour
         _rseCancelAction.Call();
     }
 
-    public void OnCraftLadder()
+    public void OnCraftTorch(InputValue value)
     {
-        _rseCraftLadder.Call();
+        _rseCraft.Call(CharacterMotor.CraftType.Torch, value.isPressed);
     }
 
-    public void OnCraftRope()
+    public void OnCraftLadder(InputValue value)
     {
-        _rseCraftRope.Call();
+        _rseCraft.Call(CharacterMotor.CraftType.Ladder, value.isPressed);
+    }
+
+    public void OnCraftRope(InputValue value)
+    {
+        _rseCraft.Call(CharacterMotor.CraftType.Rope, value.isPressed);
     }
 }
