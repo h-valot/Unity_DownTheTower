@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Data;
 using NaughtyAttributes;
 using Obi;
 using UnityEngine;
@@ -12,7 +13,6 @@ public class CharacterMotor : MonoBehaviour
 	[SerializeField] private Transform _cameraDirection;
 	[SerializeField] private Transform _characterDirection;
 	[SerializeField] private Transform _torchParent;
-	public Transform _ropeAttach;
 	public CharacterController _controller;
 	public ConfigurableJoint configurableJoint;
 	public ObiCollider obiCollider;
@@ -621,7 +621,7 @@ public class CharacterMotor : MonoBehaviour
 		if (Input.GetKeyUp(KeyCode.Mouse0))
 		{
 			_lastInstantiatedRope = _currentPreRope.InstantiateRope();
-			_lastInstantiatedRope.Interact(this);
+			_lastInstantiatedRope.Attach(configurableJoint);
 			_equippedRope = _lastInstantiatedRope;
 
 			// destroy rope previsualization
@@ -635,7 +635,7 @@ public class CharacterMotor : MonoBehaviour
 		if (Input.GetKeyDown(KeyCode.L)
 			&& _equippedRope != null)
 		{
-			_equippedRope.Cancel();
+			_equippedRope.Detach();
 			_equippedRope = null;
 		}
 	}
@@ -757,7 +757,11 @@ public class CharacterMotor : MonoBehaviour
 		ApplyGravity();
 		HandleMovement();
 
-		HandleRopeLength();
+		if (_equippedRope)
+		{
+			ForceAnchorPosition();
+			HandleRopeLength();
+		}
 	}
 
 	private void ExitLocomotionState()
@@ -869,42 +873,50 @@ public class CharacterMotor : MonoBehaviour
 
 	private void HandleRopeLength()
 	{
-		// exit, if there is no rope equipped
-		if (_equippedRope == null) return;
-
-		if (Physics.Linecast(_ropeAttach.transform.position, _equippedRope.folds[^1], out var addHit, ~_ropeConfig.foldLayerToIgnore))
+		if (Physics.Linecast(configurableJoint.transform.position, _equippedRope._folds[^1], out var addHit, ~_ropeConfig.foldLayerToIgnore))
 		{
 			Vector3 approximatePoint = addHit.point.CutDigits(2);
 
-			if (_equippedRope.folds.Count >= 2)
+			if (_equippedRope._folds.Count >= 2)
 			{
 				// minimal distance between two fold point to be register
-				if ((_equippedRope.folds[^1] - _equippedRope.folds[^2]).magnitude >= _ropeConfig.foldMinimalDistance)
+				if ((_equippedRope._folds[^1] - _equippedRope._folds[^2]).magnitude >= _ropeConfig.foldMinimalDistance)
 				{
-					_equippedRope.folds.AddUnique(approximatePoint);
+					_equippedRope._folds.AddUnique(approximatePoint);
 				}
 			}
 			else 
 			{
-				_equippedRope.folds.AddUnique(approximatePoint);
+				_equippedRope._folds.AddUnique(approximatePoint);
 			}
 		}
 
-		if (_equippedRope.folds.Count >= 2
-			&& !Physics.Linecast(_ropeAttach.transform.position, _equippedRope.folds[^2], out var removeHit, ~_ropeConfig.foldLayerToIgnore))
+		if (_equippedRope._folds.Count >= 2
+			&& !Physics.Linecast(configurableJoint.transform.position, _equippedRope._folds[^2], out var removeHit, ~_ropeConfig.foldLayerToIgnore))
 		{
-			_equippedRope.folds.Remove(_equippedRope.folds[^1]);
+			_equippedRope._folds.Remove(_equippedRope._folds[^1]);
 		}
 
-		ropeLength = _equippedRope.baseCharaDistance;
+		ropeLength = _equippedRope.GetBaseCharaDistance();
 		if (ropeLength >= _ropeConfig.maxLength)
 		{
 			// reposition the player within the rope radius
-			if (Vector3.Dot(_characterDirection.forward, (_ropeAttach.transform.position - _equippedRope.folds[^1]).normalized) >= 0)
+			if (Vector3.Dot(_characterDirection.forward, (configurableJoint.transform.position - _equippedRope._folds[^1]).normalized) >= 0)
 			{
 				_velocity = Vector3.zero;
 			}
 		}
+	}
+
+	private void ForceAnchorPosition()
+	{
+		Vector3 desiredAnchorPosition =
+			_rsoCharacterPosition.value
+			+ (_rsoCharacterForward.value.normalized * 0.5f)
+			+ (Vector3.up * 0.5f);
+
+		configurableJoint.transform.position = desiredAnchorPosition;
+		configurableJoint.transform.rotation = Quaternion.LookRotation((desiredAnchorPosition - _equippedRope._folds[^1]).normalized);
 	}
 
 	private void ExitRopeState()

@@ -9,6 +9,7 @@ public class RopeConfig : ScriptableObject
 	public RopeSegment pfSegment;
 
 	[Header("Settings")]
+	public int maxSegmentInstantiatedPerFrame = 5;
 	public float maxLength;
 	public LayerMask foldLayerToIgnore;
 	public float foldMinimalDistance = 0.25f;

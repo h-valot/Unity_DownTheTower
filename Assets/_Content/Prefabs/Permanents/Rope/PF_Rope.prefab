@@ -173,8 +173,8 @@ MonoBehaviour:
   _ropeAttach: {fileID: 133874022540041916}
   _firstSegment: {fileID: 8299342719527700264}
   _ropeConfig: {fileID: 11400000, guid: ebd551676fad39148a6ccab29ef4ebce, type: 2}
-  folds: []
-  segments: []
+  _folds: []
+  _segments: []
 --- !u!1 &2990327103290888771
 GameObject:
   m_ObjectHideFlags: 0
@@ -187,7 +187,7 @@ GameObject:
   - component: {fileID: 7469317172419274278}
   - component: {fileID: 806478741275197308}
   m_Layer: 7
-  m_Name: RopeAttach
+  m_Name: RopeBase
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -202,7 +202,7 @@ Transform:
   m_GameObject: {fileID: 2990327103290888771}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1, z: 0}
+  m_LocalPosition: {x: 0, y: 1.15, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -349,8 +349,13 @@ PrefabInstance:
     - target: {fileID: 670588506560083136, guid: 26bb3042c1aa49d4a96697d9f7cd5820,
         type: 3}
       propertyPath: m_Name
-      value: PF_RopeSegment
+      value: PF_RopeSegment_0
       objectReference: {fileID: 0}
+    - target: {fileID: 4419610854046796897, guid: 26bb3042c1aa49d4a96697d9f7cd5820,
+        type: 3}
+      propertyPath: m_ConnectedBody
+      value: 
+      objectReference: {fileID: 7469317172419274278}
     - target: {fileID: 5989266238033513504, guid: 26bb3042c1aa49d4a96697d9f7cd5820,
         type: 3}
       propertyPath: m_LocalPosition.x

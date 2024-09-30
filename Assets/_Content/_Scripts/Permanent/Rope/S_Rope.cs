@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Rope : MonoBehaviour, IInteractable
+public class Rope : MonoBehaviour
 {
 	[Header("Internal references")]
 	[SerializeField] private Transform _ropeAttach;
@@ -9,109 +9,121 @@ public class Rope : MonoBehaviour, IInteractable
 
 	[Header("Scriptable references")]
 	[SerializeField] private RopeConfig _ropeConfig;
+	[SerializeField] private RSO_CharacterPosition _rsoCharacterPosition;
 
 	[Header("debug: length")]
-	public List<Vector3> folds = new List<Vector3>();
-	public List<RopeSegment> segments = new List<RopeSegment>();
+	public List<Vector3> _folds = new List<Vector3>();
+	public List<RopeSegment> _segments = new List<RopeSegment>();
 
 	// ----- PRIVATE VARIABLES -----
-	private CharacterMotor attachedCharacter;
+	private ConfigurableJoint _characterJoint;
 	private bool _isInitialized;
 
-	// ----- PROPRIETIES -----
-	/// <summary>
-	/// 	current distance between the character's position and the base of the rope.
-	/// </summary>
-	public float baseCharaDistance => GetBaseCharaDistance();
+	#region default functions
 
-	/// <summary>
-	/// 	current length of the rope.
-	/// </summary>
-	public float ropeLength => GetRopeLength();
-
-	// ----- DEFAULT FUNCTIONS -----
 	public void Update()
 	{
 		if (!_isInitialized) return;
+		if (_characterJoint == null) return;
 
 		ExtendRope();
 	}
 
+	#endregion
+
+	#region rope managment
+
 	public void Initialize()
 	{
-		folds = new List<Vector3>() { _ropeAttach.position.CutDigits(2) };
-		segments = new List<RopeSegment>() { _firstSegment };
+		_folds = new List<Vector3>() { _ropeAttach.position.CutDigits(2) };
+		_segments = new List<RopeSegment>() { _firstSegment };
 		ExtendRope();
 
 		_isInitialized = true;
 	}
 
+	/// <summary>
+	/// 	instantiate new rope segments if the character is to far away
+	/// </summary>
 	public void ExtendRope()
 	{
-		if (attachedCharacter == null) return;
+		if (GetBaseCharaDistance() >= _ropeConfig.maxLength) 
+		{
+			Detach();
+			return;
+		}
 
-		if (baseCharaDistance >= _ropeConfig.maxLength) return;
-
-		float delta = baseCharaDistance - ropeLength;
+		float delta = GetBaseCharaDistance() - GetRopeLength();
 		float instantiableSegment = delta / GetSegmentLength();
-		int segmentToInstantiate = Mathf.FloorToInt(instantiableSegment);
-
-		if (segmentToInstantiate <= 0) return;
-
+		int segmentToInstantiate = Mathf.Clamp(Mathf.FloorToInt(instantiableSegment), 0, _ropeConfig.maxSegmentInstantiatedPerFrame);
 		for (int i = 0; i < segmentToInstantiate; i++)
 		{
-			Quaternion facingCharacter = Quaternion.LookRotation((segments[^1].top.position - attachedCharacter.transform.position).normalized);
+			Quaternion facingCharacter = Quaternion.LookRotation((_segments[^1].next.position - _rsoCharacterPosition.value).normalized);
 
 			// instantiate a new segment
 			RopeSegment newSegment = Instantiate(
 				_ropeConfig.pfSegment,
-				segments[^1].top.position,
+				_segments[^1].next.position,
 				facingCharacter,
-				segments[^1].transform
+				_segments[^1].transform
 			);
 
 			// connect joints together
-			newSegment.Connect(segments[^1].rb);
-			attachedCharacter.configurableJoint.connectedBody = newSegment.rb;
+			newSegment.Connect(_segments[^1].rb);
+			_characterJoint.connectedBody = newSegment.rb;
+
+			newSegment.name = $"PF_RopeSegment_{_segments.Count}";
+			newSegment.Hide();
+			_segments[^1].Show();
 
 			// store the newly created segment
-			segments.Add(newSegment);
+			_segments.Add(newSegment);
 		}
 	}
 
+	public void Attach(ConfigurableJoint joint)
+	{
+		_characterJoint = joint;
+	}
+
+	public void Detach()
+	{
+		_segments[^1].Disconnect();
+		_characterJoint.connectedBody = null;
+		_characterJoint = null;
+	}
+
 	/// <summary>
-	/// 	attach the character obi collider to the obi particle attachement
+	/// 	current distance between the character's position and the base of the rope.
 	/// </summary>
-	/// <param name="newCharacterMotor">source of the interaction</param>
-	public void Interact(CharacterMotor source)
-	{
-		attachedCharacter = source;
-	}
-
-	public void Cancel()
-	{
-		attachedCharacter = null;
-	}
-
-	private float GetBaseCharaDistance()
+	public float GetBaseCharaDistance()
 	{
 		float output = 0;
 
-		for (int i = 0; i < folds.Count; i++)
-		{
-			Vector3 nextPosition = i + 1 >= folds.Count
-				? attachedCharacter.transform.position
-				: folds[i + 1];
+		// assert: called before folds is initialized
+		if (!_isInitialized) return output;
 
-			output += (folds[i] - nextPosition).magnitude;
+		// assert: character ref null
+		if (_characterJoint == null) return output;
+
+		for (int i = 0; i < _folds.Count; i++)
+		{
+			Vector3 nextPosition = i + 1 >= _folds.Count
+				? _rsoCharacterPosition.value
+				: _folds[i + 1];
+
+			output += (_folds[i] - nextPosition).magnitude;
 		}
 
 		return output;
 	}
 
-	private float GetRopeLength()
+	/// <summary>
+	/// 	current length of the rope.
+	/// </summary>
+	public float GetRopeLength()
 	{
-		return GetSegmentLength() * segments.Count;
+		return GetSegmentLength() * _segments.Count;
 	}
 
 	private float GetSegmentLength()
@@ -119,4 +131,6 @@ public class Rope : MonoBehaviour, IInteractable
 		return _ropeConfig.pfSegment.capsuleCollider.height             // height of the segment collider
 			- (2 * _ropeConfig.pfSegment.capsuleCollider.radius);       // top and bot offset that overlap with other segments
 	}
+
+	#endregion
 }
