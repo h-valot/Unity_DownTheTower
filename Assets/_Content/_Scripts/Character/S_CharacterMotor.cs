@@ -437,7 +437,7 @@ public class CharacterMotor : MonoBehaviour
 	/// <summary>
 	/// 	kill the character
 	/// </summary>
-	private void HandleDeath()
+	public void HandleDeath()
 	{
 		_rsoPlayerDeath.value = true;
 		Destroy(gameObject);

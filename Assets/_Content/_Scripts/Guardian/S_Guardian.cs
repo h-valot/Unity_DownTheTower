@@ -19,6 +19,7 @@ public class Guardian : MonoBehaviour
     public Material _aggroMaterial;
     public Material _scanMaterial;
     public Material _dormantMaterial;
+    public GameObject _colliderDeath;
 
     public GameObject _scanCube;
 
@@ -37,7 +38,7 @@ public class Guardian : MonoBehaviour
         _aggro = false;
 
     }
-
+   
     IEnumerator CheckForXSecond(float X)
     {
         
