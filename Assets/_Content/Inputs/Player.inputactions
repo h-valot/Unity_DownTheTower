@@ -60,15 +60,6 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "Craft",
-                    "type": "Value",
-                    "id": "9222ea07-1cf3-4c6a-ac37-958a110d6c66",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": true
-                },
-                {
                     "name": "Interact",
                     "type": "Button",
                     "id": "b06f1dd3-2960-428d-a8d2-c4d2ca202180",
@@ -87,22 +78,31 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "CraftRope",
-                    "type": "Button",
-                    "id": "51552c63-0e58-4232-b51f-00f86ed22a0b",
-                    "expectedControlType": "Button",
+                    "name": "CraftTorch",
+                    "type": "Value",
+                    "id": "9222ea07-1cf3-4c6a-ac37-958a110d6c66",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
-                    "initialStateCheck": false
+                    "initialStateCheck": true
                 },
                 {
                     "name": "CraftLadder",
-                    "type": "Button",
+                    "type": "Value",
                     "id": "cc11127a-f99c-4390-aa40-34340dd82e11",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "",
-                    "initialStateCheck": false
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "CraftRope",
+                    "type": "Value",
+                    "id": "51552c63-0e58-4232-b51f-00f86ed22a0b",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
                 }
             ],
             "bindings": [
@@ -241,7 +241,7 @@
                 {
                     "name": "",
                     "id": "34adad4f-c8d1-4420-b810-e50b39aadb67",
-                    "path": "<Keyboard>/g",
+                    "path": "<Mouse>/rightButton",
                     "interactions": "",
                     "processors": "",
                     "groups": "KeyboardMouse",
@@ -279,28 +279,6 @@
                     "processors": "",
                     "groups": "Gamepad",
                     "action": "ToggleInHand",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "7be962e4-df27-40c8-a20d-58ec2cdade30",
-                    "path": "<Keyboard>/c",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "KeyboardMouse",
-                    "action": "Craft",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "9b5a708c-2216-4b74-96d6-64974731acd6",
-                    "path": "<Gamepad>/dpad/up",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "Gamepad",
-                    "action": "Craft",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -350,6 +328,17 @@
                 },
                 {
                     "name": "",
+                    "id": "17206964-3db2-44e3-b9fe-ef3538c5733e",
+                    "path": "<Keyboard>/3",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "KeyboardMouse",
+                    "action": "CraftRope",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "3bbb3d11-c9bc-4110-8142-a9304d643e6c",
                     "path": "<Gamepad>/dpad/left",
                     "interactions": "",
@@ -361,12 +350,45 @@
                 },
                 {
                     "name": "",
+                    "id": "da8e4cef-342d-4df0-b724-dfd26b52a2da",
+                    "path": "<Keyboard>/2",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "KeyboardMouse",
+                    "action": "CraftLadder",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "c1f4d18f-ae76-404b-bc37-b5e66feec7fd",
                     "path": "<Gamepad>/dpad/right",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
                     "action": "CraftLadder",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "7be962e4-df27-40c8-a20d-58ec2cdade30",
+                    "path": "<Keyboard>/1",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "KeyboardMouse",
+                    "action": "CraftTorch",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "9b5a708c-2216-4b74-96d6-64974731acd6",
+                    "path": "<Gamepad>/dpad/up",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "CraftTorch",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

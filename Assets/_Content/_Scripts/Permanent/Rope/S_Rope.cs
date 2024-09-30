@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using Obi;
 using UnityEngine;
 
-public class Rope : MonoBehaviour, IInteractable
+public class Rope : MonoBehaviour
 {
 	[Header("Internal references")]
 	[SerializeField] private ObiParticleAttachment _obiParticleCharacterAttachment;

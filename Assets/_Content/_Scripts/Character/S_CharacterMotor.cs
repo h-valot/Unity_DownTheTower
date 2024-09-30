@@ -38,8 +38,6 @@ public class CharacterMotor : MonoBehaviour
 	[SerializeField] private RSE_Craft _rseCraft;
 	[SerializeField] private RSE_Interact _rseInteract;
     [SerializeField] private RSE_CancelAction _rseCancelAction;
-    [SerializeField] private RSE_CraftLadder _rseCraftLadder;
-    [SerializeField] private RSE_CraftRope _rseCraftRope;
 
     #endregion
 
@@ -100,9 +98,7 @@ public class CharacterMotor : MonoBehaviour
     private Interactible _nearestInteractible;
 
     // - permanent -
-    private PreLadder _currentPreLadder;
 	private PreRope _currentPreRope;
-	private Torch _currentTorch;
 	private Coroutine _craftCoroutine;
 
 	// ----- CONST -----
@@ -139,8 +135,6 @@ public class CharacterMotor : MonoBehaviour
 		_rseCraft.action += ToggleCraft;
 		_rseToggleInHand.action += ToggleInHand;
 		_rseCancelAction.action += CancelAction;
-		_rseCraftRope.action += CraftRope;
-		_rseCraftLadder.action += CraftLadder;
         _rseInteract.action += Interact;
     }
 
@@ -153,8 +147,6 @@ public class CharacterMotor : MonoBehaviour
 		_rseCraft.action -= ToggleCraft;
 		_rseToggleInHand.action -= ToggleInHand;
         _rseCancelAction.action -= CancelAction;
-        _rseCraftRope.action -= CraftRope;
-        _rseCraftLadder.action -= CraftLadder;
         _rseInteract.action -= Interact;
     }
 

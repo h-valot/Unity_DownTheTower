@@ -117,7 +117,7 @@ GameObject:
   m_Component:
   - component: {fileID: 49414001897713379}
   m_Layer: 0
-  m_Name: TorchParent
+  m_Name: HandSocket
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -169,6 +169,37 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1227528473670976241}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &5791852302784041933
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6307973222714901695}
+  m_Layer: 0
+  m_Name: RobotHandSocket
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6307973222714901695
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5791852302784041933}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.079787165, y: -0.0069096186, z: 0.08600058, w: 0.9930711}
+  m_LocalPosition: {x: -0.574, y: 1.794, z: -0.102}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1227528473670976241}
+  m_LocalEulerAnglesHint: {x: 9.187, y: 0, z: 9.899}
 --- !u!1 &6258001101675131153
 GameObject:
   m_ObjectHideFlags: 0
@@ -355,9 +386,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 31204da13082dad46ab33612da9f598b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _cameraDirection: {fileID: 1967125294990807407}
+  _cameraTransform: {fileID: 1967125294990807407}
   _characterDirection: {fileID: 1227528473670976241}
-  _torchParent: {fileID: 49414001897713379}
+  _handSocket: {fileID: 49414001897713379}
+  _robotHandSocket: {fileID: 6307973222714901695}
   _ropeAttach: {fileID: 1235578971946886535}
   _controller: {fileID: 8128893969073989014}
   obiCollider: {fileID: 5025025688622371851}
@@ -404,6 +436,7 @@ MonoBehaviour:
   _lastDistanceTravelled: 0
   ropeLength: 0
   _craftInHand: {fileID: 0}
+  _craftInRobot: {fileID: 0}
 --- !u!143 &8128893969073989014
 CharacterController:
   m_ObjectHideFlags: 0
@@ -558,6 +591,7 @@ Transform:
   - {fileID: 8945538698941249951}
   - {fileID: 7936286410388711195}
   - {fileID: 49414001897713379}
+  - {fileID: 6307973222714901695}
   - {fileID: 1235578971946886535}
   m_Father: {fileID: 5678346985046758300}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

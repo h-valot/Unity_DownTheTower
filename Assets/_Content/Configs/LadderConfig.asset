@@ -12,14 +12,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3ddfa79406770074590d7d946a8326ef, type: 3}
   m_Name: LadderConfig
   m_EditorClassIdentifier: 
-  pfPreLadder: {fileID: 7850478884504199545, guid: 7441bac5cc605e2439300dec2eac791b,
+  PF_Ladder: {fileID: 401168901208985354, guid: 9a73e7245eb14214ea1a9c54d6b4099b,
     type: 3}
-  pfLadder: {fileID: 401168901208985354, guid: 9a73e7245eb14214ea1a9c54d6b4099b, type: 3}
   maxHeight: 4
   additionalRaycastHeight: 0.5
   layersToIgnore:
     serializedVersion: 2
     m_Bits: 68
+  minWalkableAngle: 45
   minDistanceFromWall: 0.4
   heightForDistFromWall: 0.25
   maxGroundAngle: 0.6
