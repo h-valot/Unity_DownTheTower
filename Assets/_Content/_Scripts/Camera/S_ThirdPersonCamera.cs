@@ -125,12 +125,12 @@ public class ThirdPersonCamera : MonoBehaviour
 
 		_lookInput = input;
 
-		// don't multiply mouse input by Time.deltaTime;
-		float deltaTimeMultiplier = _rsoControlScheme.value == "KeyboardMouse" ? 1.0f : Time.deltaTime;
+        // don't multiply mouse input by Time.deltaTime;
+        float deltaTimeMultiplier = _rsoControlScheme.value == "KeyboardMouse" ? 1.0f : Time.deltaTime;
 
 		_cinemachineTargetYaw += input.x * deltaTimeMultiplier;
 		_cinemachineTargetPitch += input.y * deltaTimeMultiplier;
-	}
+    }
 
 	private void Move(Vector2 input)
 	{

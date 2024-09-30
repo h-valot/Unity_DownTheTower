@@ -38,6 +38,11 @@ public class CharacterInput : MonoBehaviour
 	private void Update()
 	{
 		UpdateControlScheme();
+
+		if (look != Vector2.zero) 
+		{
+			_rseLook.Call(look);
+		}
 	}
 
 	private void OnApplicationFocus(bool hasFocus)
