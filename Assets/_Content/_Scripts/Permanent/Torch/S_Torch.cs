@@ -36,11 +36,11 @@ public class Torch : Permanent
 		}
     }
 
-    public override void Throw(Vector3 direction)
+    public override bool Throw(Transform _cameraTransform)
     {
         if (!_isActive || !_torchConfig.canThrow) 
 		{
-			return;
+			return false;
 		}
 
         _torchPointLight.SetIsInHand(false);
@@ -48,10 +48,12 @@ public class Torch : Permanent
 
         gameObject.transform.parent = null;
 		_rigidbody.constraints = RigidbodyConstraints.None;
-		_rigidbody.velocity = direction * 10f;
+		_rigidbody.velocity = _cameraTransform.forward * 10f;
 		_isActive = false;
 
 		StartCoroutine(WaitAndDestroyTorch(_torchConfig.groundedLightDuration));
+
+        return true;
     }
 
     private IEnumerator SetMaterial(float duration, Material material)
