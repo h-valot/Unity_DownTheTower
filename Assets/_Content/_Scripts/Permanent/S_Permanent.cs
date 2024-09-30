@@ -4,9 +4,14 @@ public class Permanent : MonoBehaviour
 {
 	public CharacterMotor.CraftType _craftType;
 
-	public virtual void PreviewThrow(Vector3 _cameraForward) { }
+	public virtual void InitializePreview() { }
 
-	public virtual void Throw(Vector3 _cameraForward) { }
+	public virtual void PreviewThrow(Transform _cameraTransform) { }
+
+	public virtual bool Throw(Transform _cameraTransform) 
+	{
+		return false;
+	}
 
 	public virtual void ToggleInHand() { }
 }
