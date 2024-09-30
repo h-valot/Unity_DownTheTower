@@ -16,10 +16,14 @@ public class Guardian : MonoBehaviour
     private Coroutine _coroutineUpdate;
     private bool _aggro;
 
+    public Material _aggroMaterial;
+    public Material _scanMaterial;
+    public Material _dormantMaterial;
+
+    public GameObject _scanCube;
+
     //raycast
-    [SerializeField] private GameObject _raycastHead;
     [SerializeField] private GameObject _raycastEyes;
-    [SerializeField] private GameObject _raycastFeet;
 
     //Height
     float headHeight;
@@ -31,6 +35,7 @@ public class Guardian : MonoBehaviour
     {
         _agent = GetComponent<NavMeshAgent>();
         _aggro = false;
+
     }
 
     IEnumerator CheckForXSecond(float X)
@@ -71,7 +76,7 @@ public class Guardian : MonoBehaviour
                     StopCoroutine(_coroutine);
                     StopCoroutine(_coroutineUpdate);
                 }
-                AgroState();
+                AggroState();
             }
         }
     }
@@ -86,11 +91,37 @@ public class Guardian : MonoBehaviour
         }
     }
 
-    private void AgroState()
+    public void ChangeColor(float X)
+    {
+        MeshRenderer my_renderer = _scanCube.GetComponent<MeshRenderer>();
+        if (my_renderer != null)
+        {
+            Material my_material = my_renderer.material;
+
+            if (X == 1)
+            {
+                my_renderer.material = _aggroMaterial;
+            }
+
+            if (X == 2)
+            {
+                my_renderer.material = _scanMaterial;
+            }
+
+            if (X == 3)
+            {
+                my_renderer.material = _dormantMaterial;
+            }
+        }
+
+        
+    }
+
+    private void AggroState()
     {
         SetDestination();
         _aggro = true;
-
+        ChangeColor(1f);
     }
     private void SetDestination()
     {
@@ -123,6 +154,7 @@ public class Guardian : MonoBehaviour
         _aggro = false;
         _pathPatrol.GoingBackToPatrol();
         StopCoroutine(_coroutineUpdate);
+        ChangeColor(2f);
     }
 
     public bool StateAggro()
@@ -133,12 +165,15 @@ public class Guardian : MonoBehaviour
     bool CheckRaycast()
     {
         CheckPlayerHeight();
-        Physics.Raycast(_raycastHead.transform.position, ((_playerRef.transform.position + new Vector3(0, headHeight, 0)) - _raycastHead.transform.position).normalized, out var hitDataHead);
+        Physics.Raycast(_raycastEyes.transform.position, ((_playerRef.transform.position + new Vector3(0, headHeight, 0)) - _raycastEyes.transform.position).normalized, out var hitDataHead);
         UnityEngine.Debug.DrawRay(_raycastEyes.transform.position, ((_playerRef.transform.position + new Vector3(0, headHeight, 0)) - _raycastEyes.transform.position).normalized, Color.red);
+        Debug.Log(hitDataHead.transform.name);
 
         Physics.Raycast(_raycastEyes.transform.position, ((_playerRef.transform.position + new Vector3(0, eyesHeight, 0)) - _raycastEyes.transform.position).normalized, out var hitDataEyes);
+        UnityEngine.Debug.DrawRay(_raycastEyes.transform.position, ((_playerRef.transform.position + new Vector3(0, eyesHeight, 0)) - _raycastEyes.transform.position).normalized, Color.red);
 
         Physics.Raycast(_raycastEyes.transform.position, ((_playerRef.transform.position + new Vector3(0, feetHeight, 0)) - _raycastEyes.transform.position).normalized, out var hitDataFeet);
+        UnityEngine.Debug.DrawRay(_raycastEyes.transform.position, ((_playerRef.transform.position + new Vector3(0, feetHeight, 0)) - _raycastEyes.transform.position).normalized, Color.red);
 
         if (hitDataHead.transform == _playerRef.transform && hitDataEyes.transform == _playerRef.transform && hitDataFeet.transform == _playerRef.transform)
         {
