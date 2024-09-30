@@ -40,7 +40,8 @@ public class TorchConfig : ScriptableObject
 
 
 	[Header("Aim Preview Variables")]
-	[SerializeField] [Range(10, 100)] public int previewLength = 25;
-	[SerializeField] [Range(0.1f, 0.25f)] public float previewSmoothing = 0.1f;
-	[SerializeField] public LayerMask layersToIgnorePreview;
+	public float throwAngleOffset = 20f;
+	[Range(10, 100)] public int previewLength = 25;
+	[Range(0.1f, 0.25f)] public float previewSmoothing = 0.1f;
+	public LayerMask layersToIgnorePreview;
 }

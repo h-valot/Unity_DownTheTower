@@ -23,6 +23,7 @@ public class Torch : Permanent
         _light.intensity = _torchConfig.lightIntensity;
         _rigidbody.constraints = RigidbodyConstraints.FreezeAll;
         _isActive = true;
+        _aimPreview.useWorldSpace = true;
     }
 
 	public override void ToggleInHand()
@@ -39,6 +40,31 @@ public class Torch : Permanent
 		}
     }
 
+    public override void PreviewThrow(Transform _cameraTransform)
+    {
+        _aimPreview.enabled = true;
+        _aimPreview.positionCount = Mathf.CeilToInt(_torchConfig.previewLength / _torchConfig.previewSmoothing) + 1;
+
+        // set up starting point and velocity
+        Vector3 startPosition = transform.position;
+        Vector3 startVelocity = Quaternion.AngleAxis(-_torchConfig.throwAngleOffset, _cameraTransform.right) * _cameraTransform.forward * _torchConfig.launchForce;
+
+        // placing points along the line renderer
+        int i = 0;
+        _aimPreview.SetPosition(i, startPosition);
+        for (float time = 0; time < _torchConfig.previewLength; time += _torchConfig.previewSmoothing)
+        {
+            i++;
+            Vector3 point = startPosition + time * startVelocity;
+            // defines placement over time using gravity as an accelerator
+            point.y = startPosition.y + startVelocity.y * time + (Physics.gravity.y / 2f * time * time);
+
+            _aimPreview.SetPosition(i, point);
+
+            if (CheckEndOfPreview(i, point)) return;
+        }
+    }
+
     public override bool Throw(Transform _cameraTransform)
     {
         if (!_isActive || !_torchConfig.canThrow) 
@@ -47,11 +73,12 @@ public class Torch : Permanent
 		}
 
         _torchPointLight.SetIsInHand(false);
+        _aimPreview.enabled = false;
 
 
         gameObject.transform.parent = null;
 		_rigidbody.constraints = RigidbodyConstraints.None;
-		_rigidbody.velocity = _cameraTransform.forward * 10f;
+		_rigidbody.velocity = Quaternion.AngleAxis(-_torchConfig.throwAngleOffset, _cameraTransform.right) * _cameraTransform.forward * _torchConfig.launchForce;
 		_isActive = false;
 
 		StartCoroutine(WaitAndDestroyTorch(_torchConfig.groundedLightDuration));
@@ -72,35 +99,10 @@ public class Torch : Permanent
         Destroy(gameObject);
     }
 
-    private void DrawPreview(Vector3 direction)
-    {
-        _aimPreview.enabled = true;
-        _aimPreview.positionCount = Mathf.CeilToInt(_torchConfig.previewLength / _torchConfig.previewSmoothing) + 1;
-
-        // set up starting point and velocity
-        Vector3 startPosition = transform.position;
-        Vector3 startVelocity = direction * _torchConfig.launchForce;
-
-        // placing points along the line renderer
-        int i = 0;
-        _aimPreview.SetPosition(i, startPosition);
-        for (float time = 0; time < _torchConfig.previewLength; time += _torchConfig.previewSmoothing)
-        {
-            i++;
-            Vector3 point = startPosition + time * startVelocity;
-            // defines placement over time using gravity as an accelerator
-            point.y = startPosition.y + startVelocity.y * time + (Physics.gravity.y / 2f * time * time);
-
-            _aimPreview.SetPosition(i, point);
-
-            if(CheckEndOfPreview(i, point)) return;
-        }
-    }
-
     private bool CheckEndOfPreview(int pointNb, Vector3 pointPos)
     {
         Vector3 lastPosition = _aimPreview.GetPosition(pointNb - 1);
-        if(Physics.Raycast(lastPosition, (pointPos - lastPosition).normalized, out var hit, (pointPos - lastPosition).magnitude, _torchConfig.layersToIgnorePreview))
+        if(Physics.Raycast(lastPosition, (pointPos - lastPosition).normalized, out var hit, (pointPos - lastPosition).magnitude, ~(_torchConfig.layersToIgnorePreview)))
         {
             _aimPreview.SetPosition(pointNb, hit.point);
             _aimPreview.positionCount = pointNb + 1;

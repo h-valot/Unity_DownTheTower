@@ -40,7 +40,7 @@ public class Ladder : Permanent
         if (Physics.Raycast(_cameraTransform.position, GetPositionRayDirection(_cameraTransform), out var hit, _ladderConfig.maxDistFromCamera, ~(_ladderConfig.layersToIgnore)))
         {
             if (!_previewLadder.activeSelf) _previewLadder.SetActive(true);
-            _previewLadder.transform.position = hit.point;
+            _previewLadder.transform.position = new Vector3(hit.point.x, hit.point.y + _ladderConfig.maxHeight / 2, hit.point.z);
             UpdateColor(IsGroundFlat(hit) && !IsCeiling(hit) && !IsSpaceInFront(hit, _cameraTransform));
         }
         else
