@@ -39,11 +39,6 @@ public class ThirdPersonCamera : MonoBehaviour
 		Initialize();
 	}
 
-	private void Update()
-	{
-		HandleInputs();
-	}
-
 	private void LateUpdate()
 	{
 		HandleCamera();
@@ -68,13 +63,6 @@ public class ThirdPersonCamera : MonoBehaviour
 	{
 		SwitchCameraStyle(_characterConfig.startingStyle);
 		_cinemachineTargetYaw = _cinemachineCameraTarget.transform.rotation.eulerAngles.y;
-	}
-
-	private void HandleInputs()
-	{
-		// temp
-		if (Input.GetKeyDown(KeyCode.Alpha1)) SwitchCameraStyle(CameraStyle.BASIC);
-		if (Input.GetKeyDown(KeyCode.Alpha2)) SwitchCameraStyle(CameraStyle.AIMING);
 	}
 
 	private void HandleCamera()
