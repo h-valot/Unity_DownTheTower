@@ -38,6 +38,7 @@ public class CharacterMotor : MonoBehaviour
 	[SerializeField] private RSE_Craft _rseCraft;
 	[SerializeField] private RSE_Interact _rseInteract;
     [SerializeField] private RSE_CancelAction _rseCancelAction;
+	[SerializeField] private RSE_CanInteract _rseCanInteract;
 
     #endregion
 
@@ -1171,11 +1172,18 @@ public class CharacterMotor : MonoBehaviour
     public void AddToInteractList(Interactible _interactibleObject)
     {
         _interactables.Add(_interactibleObject);
+		CheckShowInteract();
     }
 
     public void RemoveFromInteractList(Interactible _interactibleObject)
     {
         _interactables.Remove(_interactibleObject);
+		CheckShowInteract();
+    }
+
+	private void CheckShowInteract()
+	{
+		_rseCanInteract.Call(_interactables.Count > 0);
     }
 
     #endregion
