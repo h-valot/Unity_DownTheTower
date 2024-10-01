@@ -1,5 +1,6 @@
 using UnityEngine;
 using NaughtyAttributes;
+using UnityEditor.Rendering;
 
 public class RbBasedCharacter : MonoBehaviour
 {
@@ -33,15 +34,12 @@ public class RbBasedCharacter : MonoBehaviour
 	private Rope _lastInstantiatedRope;
 	private Rope _equippedRope;
 
+	private const float RIGIDBODY_FORCE_SCALAR = 10f;
+
 	private void Update()
 	{
 		// temp
 		HandleInputs();
-
-		// velocity calculations
-		_velocity = Vector3.zero;
-		HandleMovement();
-		Move();
 
 		if (_equippedRope)
 		{
@@ -50,12 +48,17 @@ public class RbBasedCharacter : MonoBehaviour
 		}
 	}
 
+	private void FixedUpdate()
+	{
+		// physics-based calculations
+		HandleMovement();
+	}
+
 	private void OnEnable()
 	{
 		_rseMove.action += Move;
 		_rseJump.action += Jump;
 		_rseSprint.action += Sprint;
-
 	}
 
 	private void OnDisable()
@@ -72,16 +75,10 @@ public class RbBasedCharacter : MonoBehaviour
 
 	private void Jump()
 	{
-		// exit, if the character is already jumping
-		if (_isJumping)
-		{
-			return;
-		}
-
 		// the square root of H * -2 * G = how much velocity needed to reach desired height
-		_velocity.y = Mathf.Sqrt(_characterConfig.jumpHeight * -2f * _characterConfig.gravity);
+		Vector3 verticalForce = new Vector3(0, Mathf.Sqrt(_characterConfig.jumpHeight * -2f * _characterConfig.gravity), 0);
 
-		_isJumping = true;
+		_rb.AddForce(verticalForce * RIGIDBODY_FORCE_SCALAR, ForceMode.Impulse);
 	}
 
 	private void Sprint(bool isSprinting)
@@ -120,13 +117,16 @@ public class RbBasedCharacter : MonoBehaviour
 
 	private void HandleMovement()
 	{
-		Vector3 direction = _cameraDirection.forward * _moveInput.y + _cameraDirection.right * _moveInput.x;
-		_velocity += Time.deltaTime * (direction.normalized * _characterConfig.walkSpeed);
-	}
+		Vector3 direction = (
+			new Vector3(_cameraDirection.forward.x, 0, _cameraDirection.forward.z) * _moveInput.y 
+			+ new Vector3(_cameraDirection.right.x, 0, _cameraDirection.right.z) * _moveInput.x).normalized;
 
-	private void Move()
-	{
-		_rb.AddForce(_velocity, ForceMode.Force);
+		// _rb.AddForce(direction.normalized * _characterConfig.walkSpeed * RIGIDBODY_FORCE_SCALAR, ForceMode.Force);
+
+		Vector3 desiredVelocity = direction * _characterConfig.walkSpeed;
+		_rb.AddForce(desiredVelocity - _rb.velocity, ForceMode.Acceleration);
+		_velocity = _rb.velocity;
+
 
 		// update rso
 		if (_rsoCharacterPosition.value != _characterDirection.position) { _rsoCharacterPosition.value = _characterDirection.position; }
@@ -135,28 +135,28 @@ public class RbBasedCharacter : MonoBehaviour
 
 	private void HandleRopeLength()
 	{
-		if (Physics.Linecast(configurableJoint.transform.position, _equippedRope._folds[^1], out var addHit, ~_ropeConfig.foldLayerToIgnore))
+		if (Physics.Linecast(configurableJoint.transform.position, _equippedRope.folds[^1], out var addHit, ~_ropeConfig.foldLayerToIgnore))
 		{
 			Vector3 approximatePoint = addHit.point.CutDigits(2);
 
-			if (_equippedRope._folds.Count >= 2)
+			if (_equippedRope.folds.Count >= 2)
 			{
 				// minimal distance between two fold point to be register
-				if ((_equippedRope._folds[^1] - _equippedRope._folds[^2]).magnitude >= _ropeConfig.foldMinimalDistance)
+				if ((_equippedRope.folds[^1] - _equippedRope.folds[^2]).magnitude >= _ropeConfig.foldMinimalDistance)
 				{
-					_equippedRope._folds.AddUnique(approximatePoint);
+					_equippedRope.folds.AddUnique(approximatePoint);
 				}
 			}
 			else
 			{
-				_equippedRope._folds.AddUnique(approximatePoint);
+				_equippedRope.folds.AddUnique(approximatePoint);
 			}
 		}
 
-		if (_equippedRope._folds.Count >= 2
-			&& !Physics.Linecast(configurableJoint.transform.position, _equippedRope._folds[^2], out var removeHit, ~_ropeConfig.foldLayerToIgnore))
+		if (_equippedRope.folds.Count >= 2
+			&& !Physics.Linecast(configurableJoint.transform.position, _equippedRope.folds[^2], out var removeHit, ~_ropeConfig.foldLayerToIgnore))
 		{
-			_equippedRope._folds.Remove(_equippedRope._folds[^1]);
+			_equippedRope.folds.Remove(_equippedRope.folds[^1]);
 		}
 	}
 
@@ -168,6 +168,6 @@ public class RbBasedCharacter : MonoBehaviour
 			+ (Vector3.up * 0.5f);
 
 		configurableJoint.transform.position = desiredAnchorPosition;
-		configurableJoint.transform.rotation = Quaternion.LookRotation((desiredAnchorPosition - _equippedRope._folds[^1]).normalized);
+		configurableJoint.transform.rotation = Quaternion.LookRotation((desiredAnchorPosition - _equippedRope.folds[^1]).normalized);
 	}
 }

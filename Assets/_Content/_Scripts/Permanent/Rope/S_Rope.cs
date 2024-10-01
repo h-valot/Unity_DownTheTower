@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -12,7 +13,7 @@ public class Rope : MonoBehaviour
 	[SerializeField] private RSO_CharacterPosition _rsoCharacterPosition;
 
 	[Header("debug: length")]
-	public List<Vector3> _folds = new List<Vector3>();
+	public List<Vector3> folds = new List<Vector3>();
 	public List<RopeSegment> _segments = new List<RopeSegment>();
 
 	// ----- PRIVATE VARIABLES -----
@@ -35,7 +36,7 @@ public class Rope : MonoBehaviour
 
 	public void Initialize()
 	{
-		_folds = new List<Vector3>() { _ropeAttach.position.CutDigits(2) };
+		folds = new List<Vector3>() { _ropeAttach.position.CutDigits(2) };
 		_segments = new List<RopeSegment>() { _firstSegment };
 		ExtendRope();
 
@@ -106,13 +107,13 @@ public class Rope : MonoBehaviour
 		// assert: character ref null
 		if (_characterJoint == null) return output;
 
-		for (int i = 0; i < _folds.Count; i++)
+		for (int i = 0; i < folds.Count; i++)
 		{
-			Vector3 nextPosition = i + 1 >= _folds.Count
+			Vector3 nextPosition = i + 1 >= folds.Count
 				? _rsoCharacterPosition.value
-				: _folds[i + 1];
+				: folds[i + 1];
 
-			output += (_folds[i] - nextPosition).magnitude;
+			output += (folds[i] - nextPosition).magnitude;
 		}
 
 		return output;
@@ -130,6 +131,17 @@ public class Rope : MonoBehaviour
 	{
 		return _ropeConfig.pfSegment.capsuleCollider.height             // height of the segment collider
 			- (2 * _ropeConfig.pfSegment.capsuleCollider.radius);       // top and bot offset that overlap with other segments
+	}
+
+	public float GetLastFoldCharaDistance()
+	{
+		// assert: called before folds is initialized
+		if (!_isInitialized) return 0;
+
+		// assert: character ref null
+		if (_characterJoint == null) return 0;
+
+		return (folds[^1] - _rsoCharacterPosition.value).magnitude;
 	}
 
 	#endregion
