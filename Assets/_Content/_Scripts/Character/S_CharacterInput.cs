@@ -20,7 +20,7 @@ public class CharacterInput : MonoBehaviour
     [SerializeField] private RSE_ToggleInHand _rseToggleInHand;
     [SerializeField] private RSE_Pause _rsePause;
     [SerializeField] private RSE_HideUI _rseHideUI;
-	[SerializeField] private RSO_GamePaused _rsoGamePaused;
+    [SerializeField] private RSO_GamePaused _rsoGamePaused;
 
     [Header("Debugging")]
 	[ReadOnly] public Vector2 move;

@@ -39,6 +39,8 @@ public class CharacterMotor : MonoBehaviour
 	[SerializeField] private RSE_Interact _rseInteract;
     [SerializeField] private RSE_CancelAction _rseCancelAction;
 	[SerializeField] private RSE_CanInteract _rseCanInteract;
+    [SerializeField] private RSE_ToggleInputs _rseToggleInputs;
+	[SerializeField] private RSO_GamePaused _rsoGamePaused;
 
     #endregion
 
@@ -129,26 +131,13 @@ public class CharacterMotor : MonoBehaviour
 
     private void OnEnable()
 	{
-		_rseMove.action += Move;
-		_rseJump.action += Jump;
-		_rseSprint.action += Sprint;
-		_rseThrow.action += ToggleAim;
-		_rseCraft.action += ToggleCraft;
-		_rseToggleInHand.action += ToggleInHand;
-		_rseCancelAction.action += CancelAction;
-        _rseInteract.action += Interact;
+        _rseToggleInputs.action += ToggleInputs;
+        SubscribeInputs();
     }
 
 	private void OnDisable()
 	{
-		_rseMove.action -= Move;
-		_rseJump.action -= Jump;
-		_rseSprint.action -= Sprint;
-		_rseThrow.action -= ToggleAim;
-		_rseCraft.action -= ToggleCraft;
-		_rseToggleInHand.action -= ToggleInHand;
-        _rseCancelAction.action -= CancelAction;
-        _rseInteract.action -= Interact;
+		UnsubscribeInputs();
     }
 
 	#endregion
@@ -691,11 +680,53 @@ public class CharacterMotor : MonoBehaviour
 		}
 	}
 
-	/// <summary>
-	/// 	update the movement input when pressed
-	/// </summary>
-	/// <param name="input">input direction value</param>
-	private void Move(Vector2 input)
+    /// <summary>
+    /// 	add character behavior to player inputs
+    /// </summary>
+    private void SubscribeInputs()
+    {
+        _rseMove.action += Move;
+        _rseJump.action += Jump;
+        _rseSprint.action += Sprint;
+        _rseThrow.action += ToggleAim;
+        _rseCraft.action += ToggleCraft;
+        _rseToggleInHand.action += ToggleInHand;
+        _rseCancelAction.action += CancelAction;
+        _rseInteract.action += Interact;
+    }
+
+    /// <summary>
+    /// 	remove character behavior from player inputs
+    /// </summary>
+    private void UnsubscribeInputs()
+    {
+        _rseMove.action -= Move;
+        _rseJump.action -= Jump;
+        _rseSprint.action -= Sprint;
+        _rseThrow.action -= ToggleAim;
+        _rseCraft.action -= ToggleCraft;
+        _rseToggleInHand.action -= ToggleInHand;
+        _rseCancelAction.action -= CancelAction;
+        _rseInteract.action -= Interact;
+    }
+
+	private void ToggleInputs()
+	{
+		if (_rsoGamePaused.value)
+		{
+			UnsubscribeInputs();
+		}
+		else
+		{
+			SubscribeInputs();
+		}
+	}
+
+    /// <summary>
+    /// 	update the movement input when pressed
+    /// </summary>
+    /// <param name="input">input direction value</param>
+    private void Move(Vector2 input)
 	{
 		_moveInput = input;
 	}

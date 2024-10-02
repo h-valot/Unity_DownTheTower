@@ -9,6 +9,7 @@ public class UIManager : MonoBehaviour
 
     [Header("External References")]
     [SerializeField] private RSE_Pause _rsePause;
+    [SerializeField] private RSE_ToggleInputs _rseToggleInputs;
     [SerializeField] private RSO_GamePaused _rsoGamePaused;
 
     private void OnEnable()
@@ -32,6 +33,7 @@ public class UIManager : MonoBehaviour
         {
             Time.timeScale = 1f;
         }
+        _rseToggleInputs.Call();
         _pausePanel.SetActive(_rsoGamePaused.value);
     }
 }
