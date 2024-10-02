@@ -487,6 +487,8 @@ public class CharacterMotor : MonoBehaviour
 	/// 	(3) stun status,
 	/// 	(4) player's input magnitude - stops the character if the player don't command it to
 	/// </summary>
+	/// 
+
 	private void Accelerate()
 	{
 		// - variables -
@@ -700,7 +702,7 @@ public class CharacterMotor : MonoBehaviour
 		_moveInput = input;
 	}
 
-	private bool _isJumping;
+	public bool _isJumping;
 
 	/// <summary>
 	/// 	add vertical velocity to the gravity modifier to make it jump
