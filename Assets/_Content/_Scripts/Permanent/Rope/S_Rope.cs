@@ -20,6 +20,8 @@ public class Rope : MonoBehaviour
 	private ConfigurableJoint _characterJoint;
 	private bool _isInitialized;
 
+	public bool isConnected;
+
 	#region default functions
 
 	public void Update()
@@ -85,6 +87,7 @@ public class Rope : MonoBehaviour
 	public void Attach(ConfigurableJoint joint)
 	{
 		_characterJoint = joint;
+		isConnected = true;
 	}
 
 	public void Detach()
@@ -92,6 +95,7 @@ public class Rope : MonoBehaviour
 		_segments[^1].Disconnect();
 		_characterJoint.connectedBody = null;
 		_characterJoint = null;
+		isConnected = false;
 	}
 
 	/// <summary>

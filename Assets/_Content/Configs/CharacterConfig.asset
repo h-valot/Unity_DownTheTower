@@ -66,7 +66,7 @@ MonoBehaviour:
   noSlipDistance: 0.5
   edgeFallFactor: 1
   groundCheckY: 0.33
-  raycastLength: 0.75
+  groundRaycastLength: 0.75
   jumpHeight: 0.8
   jumpCooldown: 0.5
   gravity: -15
@@ -147,6 +147,10 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  againstWallRaycastLength: 1
+  againstWallLayerToIgnore:
+    serializedVersion: 2
+    m_Bits: 510
   topClamp: 70
   bottomClamp: -60
   startingStyle: 0

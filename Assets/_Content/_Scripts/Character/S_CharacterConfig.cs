@@ -13,6 +13,7 @@ public class CharacterConfig : ScriptableObject
 	[Tooltip("Acceleration and deceleration rate. The current move speed of the character increases and decreases times this value times time.deltatime.")]
 	public float speedChangeRate = 10.0f;
 
+
 	[Header("Slope")]
 	[Tooltip("Percentage of character speed when ascending. The current move speed is reduced by this value based on the slope angle")]
 	public AnimationCurve uphillDeceleration;
@@ -33,7 +34,7 @@ public class CharacterConfig : ScriptableObject
 	public float groundCheckY = 0.33f;
 
 	[Tooltip("How far raycast moves down from origin point calculate from the groundCheckY value")]
-	public float raycastLength = 0.75f;
+	public float groundRaycastLength = 0.75f;
 
 
 	[Header("Jump")]
@@ -72,6 +73,13 @@ public class CharacterConfig : ScriptableObject
 
 	[Tooltip("Percentage of the target speed reduction while slowed")]
 	public AnimationCurve slowPercentage;
+
+
+	[Header("Rope")]
+	[Tooltip("Length of the character forward raycast from rope attach. If a collider is touched, the character is set as againstWall")]
+	public float againstWallRaycastLength = 1.0f;
+	[Tooltip("Against wall raycast will ignore the referenced layer.")]
+	public LayerMask againstWallLayerToIgnore;
 
 
 	[Header("Camera")]
