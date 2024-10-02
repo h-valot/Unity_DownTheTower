@@ -12,5 +12,15 @@ public class DeathTrigger : MonoBehaviour
         {
             _playerCheckRef.HandleDeath();
         }
+
+        if (other.TryGetComponent<Torch>(out var _torchCheckRef))
+        {
+            if (_torchCheckRef!=null)
+            {
+                Destroy(_torchCheckRef.gameObject);
+            }
+        }
+
+        
     }
 }

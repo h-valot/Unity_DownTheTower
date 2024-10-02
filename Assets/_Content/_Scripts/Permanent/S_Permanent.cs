@@ -14,4 +14,9 @@ public class Permanent : MonoBehaviour
 	}
 
 	public virtual void ToggleInHand() { }
+	
+	public virtual bool StateInHand() 
+	{ 
+		return false; 
+	}
 }
