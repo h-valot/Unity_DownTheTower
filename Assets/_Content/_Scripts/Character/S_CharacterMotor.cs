@@ -714,6 +714,8 @@ public class CharacterMotor : MonoBehaviour
 	{
 		if (_rsoGamePaused.value)
 		{
+			CancelAction();
+			Sprint(false);
 			UnsubscribeInputs();
 		}
 		else
