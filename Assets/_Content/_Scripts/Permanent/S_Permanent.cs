@@ -2,6 +2,16 @@ using UnityEngine;
 
 public class Permanent : MonoBehaviour
 {
-	// empty class for the moment
-	// see Placeable.cs for more informations
+	public CharacterMotor.CraftType _craftType;
+
+	public virtual void InitializePreview() { }
+
+	public virtual void PreviewThrow(Transform _cameraTransform) { }
+
+	public virtual bool Throw(Transform _cameraTransform) 
+	{
+		return false;
+	}
+
+	public virtual void ToggleInHand() { }
 }

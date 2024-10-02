@@ -4,8 +4,7 @@ using UnityEngine;
 public class LadderConfig : ScriptableObject
 {
 	[Header("Prefabs")]
-	public PreLadder pfPreLadder;
-	public Ladder pfLadder;
+	public Ladder PF_Ladder;
 
 	[Header("Deploy")]
 	public float maxHeight = 4f;

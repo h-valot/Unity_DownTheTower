@@ -39,11 +39,6 @@ public class ThirdPersonCamera : MonoBehaviour
 		Initialize();
 	}
 
-	private void Update()
-	{
-		HandleInputs();
-	}
-
 	private void LateUpdate()
 	{
 		HandleCamera();
@@ -68,13 +63,6 @@ public class ThirdPersonCamera : MonoBehaviour
 	{
 		SwitchCameraStyle(_characterConfig.startingStyle);
 		_cinemachineTargetYaw = _cinemachineCameraTarget.transform.rotation.eulerAngles.y;
-	}
-
-	private void HandleInputs()
-	{
-		// temp
-		if (Input.GetKeyDown(KeyCode.Alpha1)) SwitchCameraStyle(CameraStyle.BASIC);
-		if (Input.GetKeyDown(KeyCode.Alpha2)) SwitchCameraStyle(CameraStyle.AIMING);
 	}
 
 	private void HandleCamera()
@@ -116,7 +104,7 @@ public class ThirdPersonCamera : MonoBehaviour
 		_rsoCameraForward.value = _cameraDirection.forward;
 	}
 
-	private void SwitchCameraStyle(CameraStyle newStyle)
+	public void SwitchCameraStyle(CameraStyle newStyle)
 	{
 		_aimingCamera.SetActive(false);
 		_thirdPersonCamera.SetActive(false);
@@ -137,12 +125,12 @@ public class ThirdPersonCamera : MonoBehaviour
 
 		_lookInput = input;
 
-		// don't multiply mouse input by Time.deltaTime;
-		float deltaTimeMultiplier = _rsoControlScheme.value == "KeyboardMouse" ? 1.0f : Time.deltaTime;
+        // don't multiply mouse input by Time.deltaTime;
+        float deltaTimeMultiplier = _rsoControlScheme.value == "KeyboardMouse" ? 1.0f : Time.deltaTime;
 
 		_cinemachineTargetYaw += input.x * deltaTimeMultiplier;
 		_cinemachineTargetPitch += input.y * deltaTimeMultiplier;
-	}
+    }
 
 	private void Move(Vector2 input)
 	{

@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 816ba0c10377e2e4aab515f89adf1bd2, type: 3}
   m_Name: CharacterConfig
   m_EditorClassIdentifier: 
-  walkSpeed: 50
+  walkSpeed: 3
   sprintSpeed: 5
   speedChangeRate: 10
   uphillDeceleration:
@@ -67,10 +67,10 @@ MonoBehaviour:
   edgeFallFactor: 1
   groundCheckY: 0.33
   raycastLength: 0.75
-  jumpHeight: 1.2
+  jumpHeight: 0.8
   jumpCooldown: 0.5
   gravity: -15
-  airControlModifier: 0.2
+  airControlModifier: 0.4
   coyoteTime: 0.25
   lethalHeight: 15
   stunHeight: 9

@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using NaughtyAttributes;
 using Obi;
 using UnityEngine;
@@ -9,14 +10,18 @@ public class CharacterMotor : MonoBehaviour
 	#region exposed variables
 
 	[Header("Internal references")]
-	[SerializeField] private Transform _cameraDirection;
+	[SerializeField] private Transform _cameraTransform;
 	[SerializeField] private Transform _characterDirection;
-	[SerializeField] private Transform _torchParent;
+	[SerializeField] private Transform _handSocket;
+	[SerializeField] private Transform _robotHandSocket;
 	public CharacterController _controller;
 	public ConfigurableJoint configurableJoint;
 	public ObiCollider obiCollider;
-
-	[Header("Scriptable references")]
+	[Space(5)]
+    [Header("External references")]
+	[SerializeField] private ThirdPersonCamera _thirdPersonCamera;
+    [Space(5)]
+    [Header("Scriptable references")]
 	[SerializeField] private CharacterConfig _characterConfig;
 	[SerializeField] private LadderConfig _ladderConfig;
 	[SerializeField] private RopeConfig _ropeConfig;
@@ -29,11 +34,11 @@ public class CharacterMotor : MonoBehaviour
 	[SerializeField] private RSE_Move _rseMove;
 	[SerializeField] private RSE_Jump _rseJump;
 	[SerializeField] private RSE_Throw _rseThrow;
-	[SerializeField] private RSE_ToggleLight _rseToggleLight;
-	[SerializeField] private RSE_CraftTorch _rseCraftTorch;
+	[SerializeField] private RSE_ToggleInHand _rseToggleInHand;
+	[SerializeField] private RSE_Craft _rseCraft;
+	[SerializeField] private RSE_Interact _rseInteract;
     [SerializeField] private RSE_CancelAction _rseCancelAction;
-    [SerializeField] private RSE_CraftLadder _rseCraftLadder;
-    [SerializeField] private RSE_CraftRope _rseCraftRope;
+	[SerializeField] private RSE_CanInteract _rseCanInteract;
 
     #endregion
 
@@ -74,10 +79,12 @@ public class CharacterMotor : MonoBehaviour
 	[Header("debug: permanent")]
 	[ReadOnly] public float _ropeLength;
 	[ReadOnly] public bool _isHolding;
+	[ReadOnly] public Permanent _craftInHand;
+    [ReadOnly] public Permanent _craftInRobot;
 
-	// ----- PRIVATE VARIABLES -----
-	// - status -
-	private float _stunTimer;
+    // ----- PRIVATE VARIABLES -----
+    // - status -
+    private float _stunTimer;
 	private float _slowTimer;
 	private float _slowModifier;
 
@@ -88,16 +95,15 @@ public class CharacterMotor : MonoBehaviour
 	// - jump -
 	private float _jumpTimer;
 
+    // - interact -
+    private List<Interactible> _interactables;
+    private Interactible _nearestInteractible;
+
 	// - permanent -
-	private bool _isCrafting;
-
 	private PreLadder _currentPreLadder;
-
-	private Torch _currentTorch;
-
 	private PreRope _currentPreRope;
-	private Rope _lastInstantiatedRope;
-	private Rope _equippedRope;
+	private Torch _currentTorch;
+	private bool _isCrafting;
 
 	// ----- CONST -----
 	private const float _TERMINAL_VELOCITY = 53.0f;
@@ -109,38 +115,43 @@ public class CharacterMotor : MonoBehaviour
 	private void Start()
 	{
 		SwitchState(AnimationState.LOCOMOTION);
-	}
+
+        // creation of the interaction list
+        _interactables = new List<Interactible>();
+    }
 
 	private void Update()
 	{
 		UpdateCurrentState();
 	}
 
-	private void OnEnable()
+    private void LateUpdate()
+    {
+        LateUpdateCurrentState();
+    }
+
+    private void OnEnable()
 	{
 		_rseMove.action += Move;
 		_rseJump.action += Jump;
 		_rseSprint.action += Sprint;
-		_rseThrow.action += Throw;
-		_rseCraftTorch.action += CraftTorch;
-		_rseToggleLight.action += ToggleLight;
+		_rseThrow.action += ToggleAim;
+		_rseCraft.action += ToggleCraft;
+		_rseToggleInHand.action += ToggleInHand;
 		_rseCancelAction.action += CancelAction;
-		_rseCraftRope.action += CraftRope;
-		_rseCraftLadder.action += CraftLadder;
-
-	}
+        _rseInteract.action += Interact;
+    }
 
 	private void OnDisable()
 	{
 		_rseMove.action -= Move;
 		_rseJump.action -= Jump;
 		_rseSprint.action -= Sprint;
-		_rseThrow.action -= Throw;
-		_rseCraftTorch.action -= CraftTorch;
-		_rseToggleLight.action -= ToggleLight;
+		_rseThrow.action -= ToggleAim;
+		_rseCraft.action -= ToggleCraft;
+		_rseToggleInHand.action -= ToggleInHand;
         _rseCancelAction.action -= CancelAction;
-        _rseCraftRope.action -= CraftRope;
-        _rseCraftLadder.action -= CraftLadder;
+        _rseInteract.action -= Interact;
     }
 
 	#endregion
@@ -177,14 +188,55 @@ public class CharacterMotor : MonoBehaviour
 			case AnimationState.LADDER:
 				UpdateLadderState();
 				break;
-		}
+
+            case AnimationState.AIM:
+                UpdateAimState();
+                break;
+        }
 	}
 
-	/// <summary>
-	/// 	exit current state and enter the given state.
-	/// </summary>
-	/// <param name="newState">state to enter into</param>
-	private void SwitchState(AnimationState newState)
+    /// <summary>
+    /// 	call the late update function of the current state.
+    /// </summary>
+    private void LateUpdateCurrentState()
+	{
+        switch (_currentState)
+        {
+            case AnimationState.LOCOMOTION:
+                LateUpdateLocomotionState();
+                break;
+
+            case AnimationState.JUMP:
+                LateUpdateJumpState();
+                break;
+
+            case AnimationState.FALL:
+                LateUpdateFallState();
+                break;
+
+            case AnimationState.CRAFT:
+                LateUpdateCraftState();
+                break;
+
+            case AnimationState.ROPE:
+                LateUpdateRopeState();
+                break;
+
+            case AnimationState.LADDER:
+                LateUpdateLadderState();
+                break;
+
+            case AnimationState.AIM:
+                LateUpdateAimState();
+                break;
+        }
+    }
+
+    /// <summary>
+    /// 	exit current state and enter the given state.
+    /// </summary>
+    /// <param name="newState">state to enter into</param>
+    private void SwitchState(AnimationState newState)
 	{
 		ExitCurrentState();
 		EnterState(newState);
@@ -220,7 +272,11 @@ public class CharacterMotor : MonoBehaviour
 			case AnimationState.LADDER:
 				ExitLadderState();
 				break;
-		}
+
+            case AnimationState.AIM:
+                ExitAimState();
+                break;
+        }
 	}
 
 	/// <summary>
@@ -254,7 +310,13 @@ public class CharacterMotor : MonoBehaviour
 			case AnimationState.LADDER:
 				EnterLadderState();
 				break;
-		}
+
+            case AnimationState.AIM:
+                EnterAimState();
+                break;
+        }
+
+		_currentState = newState;
 	}
 
 	#endregion
@@ -379,7 +441,7 @@ public class CharacterMotor : MonoBehaviour
 	/// <summary>
 	/// 	kill the character
 	/// </summary>
-	private void HandleDeath()
+	public void HandleDeath()
 	{
 		_rsoPlayerDeath.value = true;
 		Destroy(gameObject);
@@ -528,7 +590,7 @@ public class CharacterMotor : MonoBehaviour
 	private void HandleMovement()
 	{
 		// - variables -
-		Vector3 direction = _cameraDirection.forward * _moveInput.y + _cameraDirection.right * _moveInput.x;
+		Vector3 direction = _cameraTransform.forward * _moveInput.y + _cameraTransform.right * _moveInput.x;
 
 		// - handle slope sliding -
 		if (Physics.SphereCast(transform.position + _controller.center, _controller.radius - _controller.skinWidth, Vector3.down, out var hitInfo, _controller.height * 0.7f))
@@ -544,8 +606,8 @@ public class CharacterMotor : MonoBehaviour
 			}
 		}
 
-		// - grounded -
-		if (_isGrounded)
+        // - grounded -
+        if (_isGrounded)
 		{
 			_controller.Move(Time.deltaTime * (
 				direction.normalized * _moveSpeed
@@ -584,7 +646,7 @@ public class CharacterMotor : MonoBehaviour
 		if (_rsoCharacterForward.value != _characterDirection.forward) { _rsoCharacterForward.value = _characterDirection.forward; }
     }
 
-	#endregion
+    #endregion
 
 	#region inputs
 
@@ -598,29 +660,13 @@ public class CharacterMotor : MonoBehaviour
 		// regroup preladder with prerope to make one modular component that instantiate
 		// either rope or ladder based on player's input
 
-		// - ladder -
-		if (Input.GetKeyDown(KeyCode.Mouse1))
-		{
-			_currentPreLadder = Instantiate(_ladderConfig.pfPreLadder);
-		}
-
-		if (Input.GetKeyUp(KeyCode.Mouse1))
-		{
-			_currentPreLadder.InstantiateLadder();
-			if (_currentPreLadder != null)
-			{
-				Destroy(_currentPreLadder.gameObject);
-				_currentPreLadder = null;
-			}
-		}
-
 		// - rope -
-		if (Input.GetKeyDown(KeyCode.Mouse0))
+		if (Input.GetKeyDown(KeyCode.G))
 		{
 			_currentPreRope = Instantiate(_ropeConfig.pfPreRope);
 		}
 
-		if (Input.GetKeyUp(KeyCode.Mouse0))
+		if (Input.GetKeyUp(KeyCode.G))
 		{
 			_lastInstantiatedRope = _currentPreRope.InstantiateRope();
 			_lastInstantiatedRope.Attach(configurableJoint);
@@ -696,26 +742,11 @@ public class CharacterMotor : MonoBehaviour
 	}
 
 	/// <summary>
-	/// 	(temp) throw the torch towards the camera.
-	/// 	this will change as soon of throw and craft component are ready to use.
-	/// </summary>
-	private void Throw()
-	{
-		if (_currentTorch == null) return;
-
-		Ray ray = new Ray(_cameraDirection.position, _cameraDirection.forward);
-		Vector3 direction = ray.GetPoint(1) - ray.GetPoint(0);
-		_currentTorch?.Throw(direction);
-
-		_currentTorch = null;
-	}
-
-	/// <summary>
 	/// 	lit and unlit the currently equipped torch
 	/// </summary>
-	private void ToggleLight()
+	private void ToggleInHand()
 	{
-		_currentTorch?.ToggleLight();
+		_craftInHand?.ToggleInHand();
 	}
 
 	private void CancelAction()
@@ -725,23 +756,6 @@ public class CharacterMotor : MonoBehaviour
 
 
 	#endregion
-
-	/// <summary>
-	/// 	instantiate the torch prefab after the fixed duration.
-	/// </summary>
-	private IEnumerator SpawnTorch()
-	{
-		_isCrafting = true;
-
-		// wait the crafting duration
-		yield return new WaitForSeconds(_torchConfig.craftingDuration);
-
-		// instantiate the torch in the character's hand
-		_currentTorch = Instantiate(_torchConfig.pfTorch, _torchParent.transform);
-		_currentTorch.transform.position = _torchParent.transform.position;
-
-		_isCrafting = false;
-	}
 
 	#region locomotion state
 
@@ -775,7 +789,13 @@ public class CharacterMotor : MonoBehaviour
 		}
 	}
 
-	private void ExitLocomotionState()
+	private void LateUpdateLocomotionState()
+	{
+
+	}
+
+
+    private void ExitLocomotionState()
 	{
 
 	}
@@ -794,7 +814,13 @@ public class CharacterMotor : MonoBehaviour
 
 	}
 
-	private void ExitJumpState()
+	private void LateUpdateJumpState()
+	{
+
+	}
+
+
+    private void ExitJumpState()
 	{
 
 	}
@@ -813,16 +839,97 @@ public class CharacterMotor : MonoBehaviour
 
 	}
 
-	private void ExitFallState()
+	private void LateUpdateFallState()
 	{
 
 	}
 
-	#endregion
 
-	#region craft state
+    private void ExitFallState()
+	{
 
-	private void EnterCraftState()
+	}
+
+    #endregion
+
+    #region craft state
+
+    private void ToggleCraft(CraftType _craftName, bool _isInputPressed)
+    {
+        //Prevent switching to craft state if not in locomotion or crafting state or already crafting another item
+        if ((_currentState != AnimationState.LOCOMOTION && _currentState != AnimationState.CRAFT) || _craftCoroutine != null)
+        {
+            return;
+        }
+
+        //If craft button is pressed
+        if (_isInputPressed)
+        {
+            SwitchState(AnimationState.CRAFT);
+
+            switch (_craftName)
+            {
+                case CraftType.None:
+                    SwitchState(AnimationState.LOCOMOTION);
+                    break;
+
+                case CraftType.Torch:
+                    if (_craftInHand != null)
+                    {
+                        if (_craftInHand._craftType != CraftType.Torch && _craftInRobot?._craftType != CraftType.Torch)
+                        {
+                            Destroy(_craftInHand.gameObject);
+                            _craftCoroutine = StartCoroutine(Craft(CraftType.Torch, _torchConfig.craftingDuration));
+                        }
+                    }
+                    else
+                    {
+                        _craftCoroutine = StartCoroutine(Craft(CraftType.Torch, _torchConfig.craftingDuration));
+                    }
+                    break;
+
+                case CraftType.Ladder:
+                    if (_craftInHand != null)
+                    {
+                        if (_craftInHand._craftType == CraftType.Torch)
+                        {
+							_craftInHand.transform.SetParent(_robotHandSocket, false);
+							_craftInRobot = _craftInHand;
+							_craftInHand = null;
+                            _craftCoroutine = StartCoroutine(Craft(CraftType.Ladder, _torchConfig.craftingDuration));
+                        }
+						else if (_craftInHand._craftType != CraftType.Ladder)
+						{
+                            Destroy(_craftInHand.gameObject);
+                            _craftCoroutine = StartCoroutine(Craft(CraftType.Ladder, _torchConfig.craftingDuration));
+                        }
+                    }
+                    else
+                    {
+                        _craftCoroutine = StartCoroutine(Craft(CraftType.Ladder, _torchConfig.craftingDuration));
+                    }
+                    break;
+
+                case CraftType.Rope:
+                    break;
+            }
+        }
+        else // if craft button is released
+        {
+            if (_craftCoroutine != null)
+            {
+                StopCoroutine(_craftCoroutine);
+				_craftCoroutine = null;
+            }
+            if (_currentState == AnimationState.CRAFT)
+            {
+                SwitchState(AnimationState.LOCOMOTION);
+            }
+        }
+
+    }
+
+    private void EnterCraftState()
 	{
 
 	}
@@ -840,18 +947,11 @@ public class CharacterMotor : MonoBehaviour
 		ApplyGravity();
 		HandleMovement();
 	}
+	
+	private void LateUpdateCraftState()
+	{
 
-    /// <summary>
-    /// 	start the spawn torch coroutine if (1) there is no torch equiped, (2) another permanent is being crafted
-    /// </summary>
-    private void CraftTorch()
-    {
-        if (_currentTorch == null
-            && !_isCrafting)
-        {
-            StartCoroutine(SpawnTorch());
-        }
-    }
+	}
 
     private void CraftRope()
 	{
@@ -863,16 +963,56 @@ public class CharacterMotor : MonoBehaviour
 
     }
 
+    /// <summary>
+    /// 	instantiate the torch prefab after the fixed duration.
+    /// </summary>
+    private IEnumerator Craft(CraftType _objectToCraft,float _craftDuration)
+    {
+        // wait the crafting duration
+        yield return new WaitForSeconds(_craftDuration);
+
+		// instantiate the crafted object
+		
+		switch (_objectToCraft)
+		{
+            case CraftType.None:
+                break;
+
+            case CraftType.Torch:
+                _craftInHand = Instantiate(_torchConfig.pfTorch, _handSocket.transform);
+                _craftInHand.transform.position = _handSocket.transform.position;
+                break;
+
+			case CraftType.Ladder:
+				_craftInHand = Instantiate(_ladderConfig.PF_Ladder, _handSocket.transform);
+                _craftInHand.transform.position = _handSocket.transform.position;
+                break;
+
+			case CraftType.Rope: 
+				break;
+		}
+
+        _craftCoroutine = null;
+        SwitchState(AnimationState.LOCOMOTION);
+    }
+
     private void ExitCraftState()
 	{
 
 	}
 
-	#endregion
+	public enum CraftType
+	{
+		None,
+		Torch,
+		Ladder,
+		Rope,
+	}
+    #endregion
 
-	#region rope state
+    #region rope state
 
-	private void EnterRopeState()
+    private void EnterRopeState()
 	{
 
 	}
@@ -881,6 +1021,12 @@ public class CharacterMotor : MonoBehaviour
 	{
 
 	}
+
+	private void LateUpdateRopeState()
+	{
+
+	}
+
 
 	private void CheckRopeFolds()
 	{
@@ -974,12 +1120,129 @@ public class CharacterMotor : MonoBehaviour
 	private void UpdateLadderState()
 	{
 
-	}
+    }
 
-	private void ExitLadderState()
+	private void LateUpdateLadderState()
 	{
 
 	}
 
-	#endregion
+
+    private void ExitLadderState()
+	{
+
+	}
+
+    #endregion
+
+    #region aim state
+
+	private void ToggleAim(bool _isPressed)
+	{
+        //Prevent switching to aim state if not in locomotion or no craft in hand
+        if ((_currentState != AnimationState.LOCOMOTION && _currentState != AnimationState.AIM) || _craftInHand == null)
+        {
+            return;
+        }
+
+        if (_isPressed)
+		{
+			SwitchState(AnimationState.AIM);
+            _thirdPersonCamera.SwitchCameraStyle(CameraStyle.AIMING);
+			_craftInHand.InitializePreview();
+        }
+		else
+		{
+            if (_currentState == AnimationState.AIM)
+			{
+                if (_craftInHand.Throw(_thirdPersonCamera.transform))
+				{
+                    _craftInHand = null;
+					if (_craftInRobot != null)
+					{
+                        _craftInRobot.transform.SetParent(_handSocket, false);
+						_craftInHand = _craftInRobot;
+                        _craftInRobot = null;
+                    }
+                }
+
+                _thirdPersonCamera.SwitchCameraStyle(CameraStyle.BASIC);
+                SwitchState(AnimationState.LOCOMOTION);
+            }
+        }
+	}
+
+    private void EnterAimState()
+    {
+
+    }
+
+    private void UpdateAimState()
+    {
+		// temp
+        HandleInputs();
+
+        CheckGround();
+        HandleSlope();
+        HandleStun();
+        HandleSlow();
+        Accelerate();
+        ApplyGravity();
+        HandleMovement();
+    }
+
+	private void LateUpdateAimState()
+	{
+        _craftInHand.PreviewThrow(_thirdPersonCamera.transform);
+    }
+
+    private void ExitAimState()
+    {
+
+    }
+
+    #endregion
+
+    #region interaction
+
+    private void Interact()
+    {
+		if (_interactables.Count >= 1)
+		{
+            for (int i = 0; i < _interactables.Count; i++)
+            {
+                float distance = (_interactables[i].transform.position - this.transform.position).sqrMagnitude;
+
+                if (_nearestInteractible == null)
+                {
+                    _nearestInteractible = _interactables[i];
+                }
+
+                else if (distance < (_nearestInteractible.transform.position - this.transform.position).sqrMagnitude)
+                {
+                    _nearestInteractible = _interactables[i];
+                }
+            }
+            _nearestInteractible.InteractionTrigger();
+        }
+    }
+
+    public void AddToInteractList(Interactible _interactibleObject)
+    {
+        _interactables.Add(_interactibleObject);
+		CheckShowInteract();
+    }
+
+    public void RemoveFromInteractList(Interactible _interactibleObject)
+    {
+        _interactables.Remove(_interactibleObject);
+		CheckShowInteract();
+    }
+
+	private void CheckShowInteract()
+	{
+		_rseCanInteract.Call(_interactables.Count > 0);
+    }
+
+    #endregion
 }

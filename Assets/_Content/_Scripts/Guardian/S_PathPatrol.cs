@@ -14,6 +14,7 @@ public class PathPatrol : MonoBehaviour
     public Transform[] _patrolPoints;
     public int _targetPoint;
     public bool _aggro;
+    public bool dontPatrol;
 
     // Start is called before the first frame update
     void Start()
@@ -25,11 +26,15 @@ public class PathPatrol : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (_guardianRef.IsActif() == true)
+        if ( dontPatrol == false)
         {
-            Patrolling();
-            GetAggro();
+            if (_guardianRef.IsActif() == true)
+            {
+                Patrolling();
+                GetAggro();
+            }
         }
+        
     }
 
     void Patrolling()
@@ -55,8 +60,16 @@ public class PathPatrol : MonoBehaviour
 
     public void GoingBackToPatrol()
     {
-        Debug.Log("retour en patrouille");
-        _agent.destination = _patrolPoints[_targetPoint].transform.position;
+        if (dontPatrol == false)
+        {
+            if (_aggro == false)
+            {
+                Debug.Log("retour en patrouille");
+                _agent.destination = _patrolPoints[_targetPoint].transform.position;
+            }
+        }
+        
+        
     }
 
     void GetAggro()

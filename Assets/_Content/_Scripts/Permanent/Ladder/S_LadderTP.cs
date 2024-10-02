@@ -1,59 +1,36 @@
 using UnityEngine;
 
-public class LadderTP : MonoBehaviour
+public class LadderTP : Interactible
 {
-    private Vector3 _teleportTo;
-    private bool _playerIsIn = false;
+    public Vector3 _teleportTo;
     private CharacterMotor _character;
-    private bool _isBottomTP;
-
-    private void Update()
-    {
-		// temp
-		HandleInputs();
-	}
-
-	private void HandleInputs()
-	{
-		if (!_playerIsIn) return;
-
-		if (_isBottomTP)
-		{
-			if (Input.GetKey(KeyCode.UpArrow))
-			{
-				_character.transform.position = _teleportTo;
-			}
-		}
-		else
-		{
-			if (Input.GetKey(KeyCode.DownArrow))
-			{
-				_character.transform.position = _teleportTo;
-			}
-		}
-	}
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.TryGetComponent<CharacterMotor>(out var character))
+        if (other.TryGetComponent<CharacterMotor>(out _character))
         {
-            _playerIsIn = true;
-            _character = character;
+            _character.AddToInteractList(this);
         }
-    }
-
-    public void SetVariables(Vector3 origin, Vector3 destination, bool isBottomTP)
-    {
-        transform.position = origin;
-        _teleportTo = destination;
-        _isBottomTP = isBottomTP;
     }
 
     private void OnTriggerExit(Collider other)
     {
-        if (other.TryGetComponent<CharacterMotor>(out var character))
+        if (other.TryGetComponent<CharacterMotor>(out _character))
         {
-            _playerIsIn = false;
+            _character.RemoveFromInteractList(this);
         }
+    }
+
+    public override void InteractionTrigger()
+    {
+        _character.transform.position = _teleportTo;
+
+        Physics.SyncTransforms();
+    }
+
+    public void SetVariables(Vector3 _origin, Vector3 _destination)
+    {
+        transform.position = _origin;
+        _teleportTo = _destination;
     }
 }

@@ -2,14 +2,29 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class S_TorchPointLight : MonoBehaviour
+public class TorchPointLight : MonoBehaviour
 {
     [Header("Internal References")]
     [SerializeField] private Rigidbody _rigidbody;
 
+    // ----- PRIVATE VARIABLES -----
+    private bool _isInHand;
+
+    private void Start()
+    {
+        _isInHand = true;
+    }
+
     private void OnCollisionEnter(Collision _collision)
     {
-        Debug.Log("Collision with the light");
-        _rigidbody.constraints = ~RigidbodyConstraints.FreezePosition;
+        if (!_isInHand)
+        {
+            _rigidbody.constraints = ~RigidbodyConstraints.FreezePosition;
+        }
+    }
+
+    public void SetIsInHand(bool _bool)
+    {
+        _isInHand = _bool;
     }
 }
