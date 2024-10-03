@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using static UnityEngine.Rendering.DebugUI;
 
 public class Torch : Permanent
 {
@@ -47,7 +48,7 @@ public class Torch : Permanent
 
         // set up starting point and velocity
         Vector3 startPosition = transform.position;
-        Vector3 startVelocity = Quaternion.AngleAxis(-_torchConfig.throwAngleOffset, _cameraTransform.right) * _cameraTransform.forward * _torchConfig.launchForce;
+        Vector3 startVelocity = Quaternion.AngleAxis(-CalculateThrowAngleOffset(_cameraTransform), _cameraTransform.right) * _cameraTransform.forward * CalculateLaunchForce(_cameraTransform);
 
         // placing points along the line renderer
         int i = 0;
@@ -78,12 +79,39 @@ public class Torch : Permanent
 
         gameObject.transform.parent = null;
 		_rigidbody.constraints = RigidbodyConstraints.None;
-		_rigidbody.velocity = Quaternion.AngleAxis(-_torchConfig.throwAngleOffset, _cameraTransform.right) * _cameraTransform.forward * _torchConfig.launchForce;
+		_rigidbody.velocity = Quaternion.AngleAxis(-CalculateThrowAngleOffset(_cameraTransform), _cameraTransform.right) * _cameraTransform.forward * CalculateLaunchForce(_cameraTransform);
 		_isActive = false;
 
 		StartCoroutine(WaitAndDestroyTorch(_torchConfig.groundedLightDuration));
 
         return true;
+    }
+
+    private float CalculateLaunchForce(Transform _cameraTransform)
+    {
+        return _torchConfig.minLaunchForce + 
+            (SetUpCameraAngle(_cameraTransform) - _torchConfig.minLaunchCameraAngle) * 
+            (_torchConfig.maxLaunchForce - _torchConfig.minLaunchForce) / 
+            (_torchConfig.maxLaunchCameraAngle - _torchConfig.minLaunchCameraAngle);
+    }
+
+    private float CalculateThrowAngleOffset(Transform _cameraTransform)
+    {
+        return _torchConfig.maxThrowAngleOffset + 
+            (Mathf.Clamp(SetUpCameraAngle(_cameraTransform), 60, 130) - 60) * 
+            (_torchConfig.minThrowAngleOffset - _torchConfig.maxThrowAngleOffset) / 
+            (130 - 60);
+    }
+
+
+
+    private float SetUpCameraAngle(Transform _cameraTransform)
+    {
+        // setting up the camera angle from just the eulerAngle from a value going from 0 to the difference between min and max camera angle
+        float cameraAngle = _cameraTransform.rotation.eulerAngles.x + 60;
+        if (cameraAngle > 250) cameraAngle = cameraAngle - 360;
+        // setting the inverse since we want the launch force to be highest when the camera is at its lowest
+        return _torchConfig.maxLaunchCameraAngle - cameraAngle;
     }
 
     private IEnumerator SetMaterial(float duration, Material material)
