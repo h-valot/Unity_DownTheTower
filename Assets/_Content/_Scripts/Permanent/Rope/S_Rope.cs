@@ -11,10 +11,10 @@ public class Rope : Permanent
 
 	[Header("Scriptable references")]
 	[SerializeField] private RopeConfig _ropeConfig;
-	[SerializeField] private RSO_CharacterPosition _rsoCharacterPosition;
 
 	[Header("debug")]
 	public bool isConnected;
+	public float currentLegnth;
 	public List<Vector3> folds = new List<Vector3>();
 
 	private bool _isPlaced;
@@ -24,11 +24,7 @@ public class Rope : Permanent
 
 	public void Update()
 	{
-		// assert: the rope has not been placed
-		if (!_isPlaced) return;
-
-		// assert: there is no character attach to the rope
-		if (_characterJoint == null) return;
+		currentLegnth = GetTotalLength();
 	}
 
 	#endregion
@@ -110,7 +106,6 @@ public class Rope : Permanent
 		transform.DOJump(deployPoint, 1f, 0, 0.3f);
 
 		// rope custom initialization commands 
-		folds = new List<Vector3>() { _ropeAttach.position.CutDigits(2) };
 		_isPlaced = true;
 	}
 
@@ -120,6 +115,8 @@ public class Rope : Permanent
 
 	public void Attach(ConfigurableJoint joint)
 	{
+		folds = new List<Vector3>() { _ropeAttach.position.CutDigits(2) };
+
 		_characterJoint = joint;
 		isConnected = true;
 	}
@@ -134,25 +131,23 @@ public class Rope : Permanent
 	/// <summary>
 	/// 	current distance between the character's position and the base of the rope.
 	/// </summary>
-	public float GetBaseCharaDistance()
+	public float GetTotalLength()
 	{
-		float output = 0;
-
 		// assert: called before folds is initialized
-		if (!_isPlaced) return output;
+		if (!_isPlaced) return 0;
 
 		// assert: character ref null
-		if (_characterJoint == null) return output;
+		if (_characterJoint == null) return 0;
 
+		float output = 0;
 		for (int i = 0; i < folds.Count; i++)
 		{
 			Vector3 nextPosition = i + 1 >= folds.Count
-				? _rsoCharacterPosition.value
+				? _characterJoint.transform.position
 				: folds[i + 1];
 
 			output += (folds[i] - nextPosition).magnitude;
 		}
-
 		return output;
 	}
 
@@ -164,7 +159,22 @@ public class Rope : Permanent
 		// assert: character ref null
 		if (_characterJoint == null) return 0;
 
-		return (folds[^1] - _rsoCharacterPosition.value).magnitude;
+		return (folds[^1] - _characterJoint.transform.position).magnitude;
+	}
+
+	private void OnDrawGizmos()
+	{
+		// assert: called before folds is initialized
+		if (!_isPlaced) return;
+
+		// assert: character ref null
+		if (_characterJoint == null) return;
+
+		Gizmos.color = Color.red;
+		for (int i = 0; i < folds.Count; i++)
+		{
+			Gizmos.DrawLine(folds[i], i + 1 >= folds.Count ? _characterJoint.transform.position : folds[i + 1]);
+		}
 	}
 
 	#endregion

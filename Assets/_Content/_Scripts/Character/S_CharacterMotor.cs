@@ -717,7 +717,11 @@ public class CharacterMotor : MonoBehaviour
 		}
 
 		_isHolding = isHolding;
-		_holdRopeRadius = _rope.GetLastFoldCharaDistance();
+
+		if (_isHolding)
+		{
+			_holdRopeRadius = _rope.GetLastFoldCharaDistance();
+		}
 	}
 
 	/// <summary>
@@ -738,6 +742,7 @@ public class CharacterMotor : MonoBehaviour
 		{
 			_rope.Detach();
 			_rope = null;
+			_isHolding = false;
 		}
 	}
 
@@ -1212,6 +1217,7 @@ public class CharacterMotor : MonoBehaviour
 		if (_rope.folds.Count >= 2
 			&& !Physics.Linecast(_configurableJoint.transform.position, _rope.folds[^2], out var removeHit, ~_ropeConfig.foldLayerToIgnore))
 		{
+			_holdRopeRadius = _rope.GetLastFoldCharaDistance() + (_rope.folds[^2] - _rope.folds[^1]).magnitude;
 			_rope.folds.Remove(_rope.folds[^1]);
 		}
 	}
@@ -1225,7 +1231,7 @@ public class CharacterMotor : MonoBehaviour
 		// assert: player do not command the character to hold the rope
 		if (!_isHolding) return;
 		
-		_holdRopeRadius -= (_rope.folds[^2] - _rope.folds[^1]).magnitude;
+		_holdRopeRadius = _rope.GetLastFoldCharaDistance();
 	}
 
 	/// <summary>
@@ -1285,8 +1291,6 @@ public class CharacterMotor : MonoBehaviour
 		// - character is not holding the rope -
 		if (!_isHolding)
 		{	
-			Debug.Log($"CHARACTER_MOTOR: apply basic gravity forces");
-
 			// apply grounded and falling like forces
 			ApplyGravity();
 
@@ -1310,7 +1314,10 @@ public class CharacterMotor : MonoBehaviour
 		Vector3 attractionPoint = _rope.folds[^1] + Vector3.down * _holdRopeRadius;
 		Vector3 sphereCharaSnapPoint = _rope.folds[^1] + (_rope.folds[^1] - _rsoCharacterPosition.value).normalized * _holdRopeRadius;
 		Vector3 offsetAttractionPoint = _rope.folds[^1] + Vector3.down * (attractionPoint - sphereCharaSnapPoint).magnitude;
-		Vector3 attractionDirection = (sphereCharaSnapPoint - offsetAttractionPoint).normalized;
+		Vector3 attractionDirection = (offsetAttractionPoint - sphereCharaSnapPoint).normalized;
+
+		Debug.Log($"CHARACTER_MOTOR: current rope state = {_ropeState}"
+				+ $"\ncurrent pos = {_rsoCharacterPosition.value} heading towards attraction point = {attractionPoint}");
 
 		// TODO:
 		// (1) makes the character always facing the wall direction then offset the player position off the wall
@@ -1346,6 +1353,14 @@ public class CharacterMotor : MonoBehaviour
 		// update variables
 		if (_rsoCharacterPosition.value != _characterDirection.position) { _rsoCharacterPosition.value = _characterDirection.position; }
 		if (_rsoCharacterForward.value != _characterDirection.forward) { _rsoCharacterForward.value = _characterDirection.forward; }
+	}
+
+	private void OnDrawGizmos()
+	{
+		if (_rope == null) return;
+
+		Gizmos.color = Color.magenta;
+		Gizmos.DrawWireSphere(_rope.folds[^1], _holdRopeRadius);
 	}
 
 	#endregion
