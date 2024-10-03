@@ -920,7 +920,8 @@ public class CharacterMotor : MonoBehaviour
                         {
 							_craftInHand.transform.SetParent(_robotHandSocket, false);
 							_craftInRobot = _craftInHand;
-							_craftInHand = null;
+                            _craftInRobot.transform.rotation = _robotHandSocket.rotation;
+                            _craftInHand = null;
                             _craftCoroutine = StartCoroutine(Craft(CraftType.Ladder, _torchConfig.craftingDuration));
                         }
 						else if (_craftInHand._craftType != CraftType.Ladder)
@@ -1139,6 +1140,7 @@ public class CharacterMotor : MonoBehaviour
 					{
                         _craftInRobot.transform.SetParent(_handSocket, false);
 						_craftInHand = _craftInRobot;
+                        _craftInHand.transform.rotation = _handSocket.transform.rotation;
                         _craftInRobot = null;
                     }
                 }
