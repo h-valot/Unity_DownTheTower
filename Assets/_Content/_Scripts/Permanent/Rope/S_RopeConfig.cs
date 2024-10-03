@@ -4,7 +4,6 @@ using UnityEngine;
 public class RopeConfig : ScriptableObject
 {
 	[Header("Prefabs")]
-	public PreRope pfPreRope;
 	public Rope pfRope;
 	public RopeSegment pfSegment;
 
@@ -12,17 +11,20 @@ public class RopeConfig : ScriptableObject
 	public int maxSegmentInstantiatedPerFrame = 5;
 	public float maxLength;
 	public LayerMask foldLayerToIgnore;
-	public float foldMinimalDistance = 0.25f;
+	public float minFoldDistance = 0.25f;
 
 	[Header("Deploy")]
-	internal float heightLimit = 1f;
+	public float heightLimit = 1f;
 	public LayerMask layersToIgnore;
+	public float craftingDuration = 0f;
 
-	[Header("Placement")]
-	public float minDistFromPlayer = 1f;
-	public float maxDistFromPlayer = 4f;
+	[Header("Check")]
+	public float minDistanceFromWall = 0.4f;
+	[Tooltip("1f = 0 degree ; 0f = 90 degrees ; -1f = 180 degrees")]
+	public float maxGroundAngle = 0.6f;
 
 	[Header("Camera")]
-	public float minCameraAngle = 1f;
-	public float maxCameraAngle = 30f;
+	public float maxDistFromCamera = 8f;
+	public float cameraOffsetAngle = 20f;
+	public float maxCameraDownwardClamp = 45f;
 }

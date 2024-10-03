@@ -40,12 +40,13 @@ public class CharacterMotor : MonoBehaviour
 	[SerializeField] private RSE_Interact _rseInteract;
     [SerializeField] private RSE_CancelAction _rseCancelAction;
 	[SerializeField] private RSE_CanInteract _rseCanInteract;
+	[SerializeField] private RSE_Holding _rseHolding;
 
-    #endregion
+	#endregion
 
-    #region runtime variables
+	#region runtime variables
 
-    [Header("debug: animation")]
+	[Header("debug: animation")]
 	[ReadOnly] public AnimationState _currentState;
 
 	[Header("debug: move")]
@@ -137,7 +138,8 @@ public class CharacterMotor : MonoBehaviour
 		_rseToggleInHand.action += ToggleInHand;
 		_rseCancelAction.action += CancelAction;
         _rseInteract.action += Interact;
-    }
+		_rseHolding.action += Holding;
+	}
 
 	private void OnDisable()
 	{
@@ -149,7 +151,8 @@ public class CharacterMotor : MonoBehaviour
 		_rseToggleInHand.action -= ToggleInHand;
         _rseCancelAction.action -= CancelAction;
         _rseInteract.action -= Interact;
-    }
+		_rseHolding.action -= Holding;
+	}
 
 	#endregion
 
@@ -659,51 +662,6 @@ public class CharacterMotor : MonoBehaviour
 	#region inputs
 
 	/// <summary>
-	/// 	temporary function to handle ladder and rope placement.
-	/// </summary>
-	private void HandleInputs()
-	{
-		// TODO - whenever one of the crafting input are pressed, switch to craft state
-		// reduce the movement, switch to aim camera, disable sprinting, disable jumping
-		// regroup preladder with prerope to make one modular component that instantiate
-		// either rope or ladder based on player's input
-
-		// - rope -
-		if (Input.GetKeyDown(KeyCode.G))
-		{
-			_preRope = Instantiate(_ropeConfig.pfPreRope);
-		}
-
-		if (Input.GetKeyUp(KeyCode.G))
-		{
-			_rope = _preRope.InstantiateRope();
-			_rope.Attach(_configurableJoint);
-
-			// destroy rope previsualization
-			if (_preRope != null)
-			{
-				Destroy(_preRope.gameObject);
-				_preRope = null;
-			}
-		}
-
-		if (Input.GetKeyDown(KeyCode.L)
-			&& _rope != null)
-		{
-			_rope.Detach();
-			_rope = null;
-		}
-
-		// if the character holding its position on the rope
-		_isHolding = Input.GetKey(KeyCode.LeftShift);
-
-		if (Input.GetKeyDown(KeyCode.LeftShift))
-		{
-			_holdRopeRadius = _rope.GetLastFoldCharaDistance();
-		}
-	}
-
-	/// <summary>
 	/// 	update the movement input when pressed
 	/// </summary>
 	/// <param name="input">input direction value</param>
@@ -738,12 +696,28 @@ public class CharacterMotor : MonoBehaviour
 	}
 
 	/// <summary>
-	/// 	update the sprint input value
+	/// 	update the sprint input value.
 	/// </summary>
 	/// <param name="isSprinting">is the input pressed</param>
 	private void Sprint(bool isSprinting)
 	{
 		_isSprinting = isSprinting;
+	}
+
+	/// <summary>
+	/// 	update the holding rope input value.
+	/// </summary>
+	/// <param name="isHolding">is the input pressed</param>
+	private void Holding(bool isHolding)
+	{
+		if (_rope == null)
+		{
+			_isHolding = false;
+			return;
+		}
+
+		_isHolding = isHolding;
+		_holdRopeRadius = _rope.GetLastFoldCharaDistance();
 	}
 
 	/// <summary>
@@ -756,9 +730,16 @@ public class CharacterMotor : MonoBehaviour
 
 	private void CancelAction()
 	{
+		// the cancel action is contextual
+		// do various things based on the context
 
+		// rope context
+		if (_rope != null)
+		{
+			_rope.Detach();
+			_rope = null;
+		}
 	}
-
 
 	#endregion
 
@@ -772,7 +753,6 @@ public class CharacterMotor : MonoBehaviour
 	private void UpdateLocomotionState()
 	{
 		// checks
-		HandleInputs();
 		CheckGround();
 
 		// speed calculations
@@ -914,7 +894,26 @@ public class CharacterMotor : MonoBehaviour
                     break;
 
                 case CraftType.Rope:
-                    break;
+					if (_craftInHand != null)
+					{
+						if (_craftInHand._craftType == CraftType.Torch)
+						{
+							_craftInHand.transform.SetParent(_robotHandSocket, false);
+							_craftInRobot = _craftInHand;
+							_craftInHand = null;
+							_craftCoroutine = StartCoroutine(Craft(CraftType.Rope, _ropeConfig.craftingDuration));
+						}
+						else if (_craftInHand._craftType != CraftType.Rope)
+						{
+							Destroy(_craftInHand.gameObject);
+							_craftCoroutine = StartCoroutine(Craft(CraftType.Rope, _ropeConfig.craftingDuration));
+						}
+					}
+					else
+					{
+						_craftCoroutine = StartCoroutine(Craft(CraftType.Rope, _ropeConfig.craftingDuration));
+					}
+					break;
             }
         }
         else // if craft button is released
@@ -929,19 +928,15 @@ public class CharacterMotor : MonoBehaviour
                 SwitchState(AnimationState.LOCOMOTION);
             }
         }
-
     }
 
-    private void EnterCraftState()
+	private void EnterCraftState()
 	{
 
 	}
 
 	private void UpdateCraftState()
 	{
-		// temp
-		HandleInputs();
-
 		CheckGround();
 		HandleSlope();
 		HandleStun();
@@ -969,13 +964,12 @@ public class CharacterMotor : MonoBehaviour
     /// <summary>
     /// 	instantiate the torch prefab after the fixed duration.
     /// </summary>
-    private IEnumerator Craft(CraftType _objectToCraft,float _craftDuration)
+    private IEnumerator Craft(CraftType _objectToCraft, float _craftDuration)
     {
         // wait the crafting duration
         yield return new WaitForSeconds(_craftDuration);
 
 		// instantiate the crafted object
-		
 		switch (_objectToCraft)
 		{
             case CraftType.None:
@@ -983,19 +977,20 @@ public class CharacterMotor : MonoBehaviour
 
             case CraftType.Torch:
                 _craftInHand = Instantiate(_torchConfig.pfTorch, _handSocket.transform);
-                _craftInHand.transform.position = _handSocket.transform.position;
                 break;
 
 			case CraftType.Ladder:
 				_craftInHand = Instantiate(_ladderConfig.PF_Ladder, _handSocket.transform);
-                _craftInHand.transform.position = _handSocket.transform.position;
                 break;
 
-			case CraftType.Rope: 
+			case CraftType.Rope:
+				_craftInHand = Instantiate(_ropeConfig.pfRope, _handSocket.transform);
 				break;
 		}
 
-        _craftCoroutine = null;
+		_craftInHand.transform.position = _handSocket.transform.position;
+
+		_craftCoroutine = null;
         SwitchState(AnimationState.LOCOMOTION);
     }
 
@@ -1011,6 +1006,7 @@ public class CharacterMotor : MonoBehaviour
 		Ladder,
 		Rope,
 	}
+
     #endregion
 
     #region rope state
@@ -1030,7 +1026,6 @@ public class CharacterMotor : MonoBehaviour
 	[ReadOnly] public bool _isHolding;
 	[ReadOnly] public bool _isAgainstWall;
 
-	private PreRope _preRope;
 	private Rope _rope;
 
 	#endregion
@@ -1045,7 +1040,6 @@ public class CharacterMotor : MonoBehaviour
 	private void UpdateRopeState()
 	{
 		// checks
-		HandleInputs();
 		CheckGround();
 		CheckWall();
 
@@ -1099,7 +1093,7 @@ public class CharacterMotor : MonoBehaviour
 
 	private void ExitRopeState()
 	{
-		_rope = null;
+		
 	}
 
 	#endregion
@@ -1153,12 +1147,8 @@ public class CharacterMotor : MonoBehaviour
 	/// </summary>
 	private void UpdateRopePartialSuspensionState()
 	{
-		// speed calculations
-		Accelerate();
-
 		// velocity calculations
-		ApplyGravity(doAccelerate: false);
-		HandleMovement();
+		HandleRopeMovement();
 	}
 
 	/// <summary>
@@ -1169,13 +1159,8 @@ public class CharacterMotor : MonoBehaviour
 	/// </summary>
 	private void UpdateRopeCompleteSuspensionState()
 	{
-		// speed calculations
-		Accelerate();
-
 		// velocity calculations
-		ApplyGravity(doAccelerate: false);
-		//HandleRopeMovement();
-		HandleMovement();
+		HandleRopeMovement();
 	}
 
 	#endregion
@@ -1199,6 +1184,9 @@ public class CharacterMotor : MonoBehaviour
 	/// </summary>
 	private void HandleRopeFolds()
 	{
+		// assert: there is no equipped rope 
+		if (_rope == null) return;
+
 		// add fold if a collider stands between the character and the last fold
 		if (Physics.Linecast(_configurableJoint.transform.position, _rope.folds[^1], out var addHit, ~_ropeConfig.foldLayerToIgnore))
 		{
@@ -1207,7 +1195,7 @@ public class CharacterMotor : MonoBehaviour
 			if (_rope.folds.Count >= 2)
 			{
 				// minimal distance between two fold point to be register
-				if ((_rope.folds[^1] - _rope.folds[^2]).magnitude >= _ropeConfig.foldMinimalDistance)
+				if ((_rope.folds[^1] - _rope.folds[^2]).magnitude >= _ropeConfig.minFoldDistance)
 				{
 					_rope.folds.AddUnique(approximatePoint);
 					UpdateHoldRopeRadius();
@@ -1286,14 +1274,78 @@ public class CharacterMotor : MonoBehaviour
 		}
 	}
 
-	private Vector3 _suspensionAttractivePoint;
-
 	private void HandleRopeMovement()
 	{
-		// assert: player do not command the character to hold the rope
-		if (!_isHolding) return;
+		// assert: there is no equipped rope 
+		if (_rope == null) return;
 
-		_suspensionAttractivePoint = _rope.folds[^1] + Vector3.down * _holdRopeRadius;
+		// player direction inputs
+		Vector3 inputDirection = _cameraTransform.forward * _moveInput.y + _cameraTransform.right * _moveInput.x;
+
+		// - character is not holding the rope -
+		if (!_isHolding)
+		{	
+			Debug.Log($"CHARACTER_MOTOR: apply basic gravity forces");
+
+			// apply grounded and falling like forces
+			ApplyGravity();
+
+			// move the character with air control scalar
+			_controller.Move(Time.deltaTime * (
+				// last ground direction and speed to keep the inertia going on
+				_lastGroundedDirection.normalized * _lastGroundedSpeed
+				// current direction and speed reduced by the air control modifier to slightly moves while in air
+				+ inputDirection * _targetSpeed * _characterConfig.airControlModifier
+				+ _gravityModifier
+			));
+
+			return;
+		}
+
+		// - character is holding the rope -
+
+		// from the attraction point (which is the lowest point on the sphere)
+		// get the normalized direction towards this point with a down offset
+		// so the direction is more likely to be tangent to the sphere
+		Vector3 attractionPoint = _rope.folds[^1] + Vector3.down * _holdRopeRadius;
+		Vector3 sphereCharaSnapPoint = _rope.folds[^1] + (_rope.folds[^1] - _rsoCharacterPosition.value).normalized * _holdRopeRadius;
+		Vector3 offsetAttractionPoint = _rope.folds[^1] + Vector3.down * (attractionPoint - sphereCharaSnapPoint).magnitude;
+		Vector3 attractionDirection = (sphereCharaSnapPoint - offsetAttractionPoint).normalized;
+
+		// TODO:
+		// (1) makes the character always facing the wall direction then offset the player position off the wall
+		// (2) acceleration movement while against the wall
+		// (3) reduce the character speed to 0 when approching the limit angles of the balancier effect
+		// (4) jump off the wall logic
+		// (5) lerp the speed acceleration when starting going down the rope 
+
+		// - apply movement -
+
+		// partial rope suspension
+		if (_isAgainstWall)
+		{
+			_controller.Move(Time.deltaTime * (
+				// player's inputs
+				inputDirection * _characterConfig.partialSuspensionSpeed
+				// attraction direction is a custom gravity force applied while on the rope
+				+ attractionDirection * _characterConfig.partialSphericalAttractiveForce
+			));
+		}
+
+		// complete rope suspension
+		else
+		{
+			_controller.Move(Time.deltaTime * (
+				// player's inputs
+				inputDirection * _characterConfig.completeSuspensionSpeed
+				// attraction direction is a custom gravity force applied while on the rope
+				+ attractionDirection * _characterConfig.partialSphericalAttractiveForce
+			));
+		}
+
+		// update variables
+		if (_rsoCharacterPosition.value != _characterDirection.position) { _rsoCharacterPosition.value = _characterDirection.position; }
+		if (_rsoCharacterForward.value != _characterDirection.forward) { _rsoCharacterForward.value = _characterDirection.forward; }
 	}
 
 	#endregion
@@ -1347,7 +1399,11 @@ public class CharacterMotor : MonoBehaviour
 			{
                 if (_craftInHand.Throw(_thirdPersonCamera.transform))
 				{
-                    _craftInHand = null;
+					// rope attachment exception
+					_rope = (Rope)_craftInHand;
+					_rope?.Attach(_configurableJoint);
+
+					_craftInHand = null;
 					if (_craftInRobot != null)
 					{
                         _craftInRobot.transform.SetParent(_handSocket, false);
@@ -1369,9 +1425,6 @@ public class CharacterMotor : MonoBehaviour
 
     private void UpdateAimState()
     {
-		// temp
-        HandleInputs();
-
         CheckGround();
         HandleSlope();
         HandleStun();

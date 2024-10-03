@@ -12,20 +12,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7c157d0ef5740a74d8ec4a4c4d788a6e, type: 3}
   m_Name: RopeConfig
   m_EditorClassIdentifier: 
-  pfPreRope: {fileID: 2358750154251858530, guid: 9082f21ef53247342bdb294e0cb2d957,
-    type: 3}
   pfRope: {fileID: 2423774863846630498, guid: fd48698d019dac54c9052c72fb4353f6, type: 3}
   pfSegment: {fileID: 7758333631946860254, guid: 26bb3042c1aa49d4a96697d9f7cd5820,
     type: 3}
+  maxSegmentInstantiatedPerFrame: 5
   maxLength: 20
   foldLayerToIgnore:
     serializedVersion: 2
     m_Bits: 456
-  foldMinimalDistance: 0.25
+  minFoldDistance: 0.25
+  heightLimit: 1
   layersToIgnore:
     serializedVersion: 2
     m_Bits: 0
-  minDistFromPlayer: 1
-  maxDistFromPlayer: 4
-  minCameraAngle: 1
-  maxCameraAngle: 30
+  craftingDuration: 0
+  minDistanceFromWall: 0.4
+  maxGroundAngle: 0.6
+  maxDistFromCamera: 8
+  cameraOffsetAngle: 20
+  maxCameraDownwardClamp: 45

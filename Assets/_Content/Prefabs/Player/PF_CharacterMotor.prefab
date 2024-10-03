@@ -559,6 +559,7 @@ MonoBehaviour:
   _rseInteract: {fileID: 11400000, guid: be798e2f50da79e448b01830a7c3441f, type: 2}
   _rseCancelAction: {fileID: 11400000, guid: f98da23f144768649811d562b2a9d4ad, type: 2}
   _rseCanInteract: {fileID: 11400000, guid: d033d8dff7bb85b4da9d48e829c06002, type: 2}
+  _rseHolding: {fileID: 11400000, guid: c9c94e9e268a50f498d998e18a041543, type: 2}
   _currentState: 0
   _moveInput: {x: 0, y: 0}
   _velocity: {x: 0, y: 0, z: 0}
@@ -580,11 +581,12 @@ MonoBehaviour:
   _lastGroundedPosition: {x: 0, y: 0, z: 0}
   _lastGroundedDirection: {x: 0, y: 0, z: 0}
   _lastDistanceTravelled: 0
-  _ropeLength: 0
-  _isHolding: 0
   _craftInHand: {fileID: 0}
   _craftInRobot: {fileID: 0}
+  _ropeState: 0
   _holdRopeRadius: 0
+  _isHolding: 0
+  _isAgainstWall: 0
 --- !u!143 &8128893969073989014
 CharacterController:
   m_ObjectHideFlags: 0

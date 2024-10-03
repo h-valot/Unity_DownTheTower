@@ -1,88 +1,122 @@
-using System;
 using System.Collections.Generic;
+using DG.Tweening;
 using UnityEngine;
 
-public class Rope : MonoBehaviour
+public class Rope : Permanent
 {
 	[Header("Internal references")]
 	[SerializeField] private Transform _ropeAttach;
-	[SerializeField] private RopeSegment _firstSegment;
+	[SerializeField] private MeshRenderer _previewMeshRendered;
+	[SerializeField] private GameObject _previewGameObject;
 
 	[Header("Scriptable references")]
 	[SerializeField] private RopeConfig _ropeConfig;
 	[SerializeField] private RSO_CharacterPosition _rsoCharacterPosition;
 
-	[Header("debug: length")]
-	public List<Vector3> folds = new List<Vector3>();
-	public List<RopeSegment> _segments = new List<RopeSegment>();
-
-	// ----- PRIVATE VARIABLES -----
-	private ConfigurableJoint _characterJoint;
-	private bool _isInitialized;
-
+	[Header("debug")]
 	public bool isConnected;
+	public List<Vector3> folds = new List<Vector3>();
+
+	private bool _isPlaced;
+	private ConfigurableJoint _characterJoint;
 
 	#region default functions
 
 	public void Update()
 	{
-		if (!_isInitialized) return;
-		if (_characterJoint == null) return;
+		// assert: the rope has not been placed
+		if (!_isPlaced) return;
 
-		ExtendRope();
+		// assert: there is no character attach to the rope
+		if (_characterJoint == null) return;
+	}
+
+	#endregion
+
+	#region permanent & placement functions
+
+	public override void InitializePreview()
+	{
+		_previewGameObject.SetActive(true);
+		_previewGameObject.transform.rotation = Quaternion.identity;
+	}
+
+	public override void PreviewThrow(Transform cameraTransform)
+	{
+		if (Physics.Raycast(
+			cameraTransform.position, 
+			GetPositionRayDirection(cameraTransform, _ropeConfig.cameraOffsetAngle, _ropeConfig.maxCameraDownwardClamp), 
+			out var hitInfo, 
+			_ropeConfig.maxDistFromCamera, 
+			~_ropeConfig.layersToIgnore))
+		{
+			if (!_previewGameObject.activeInHierarchy)
+			{
+				_previewGameObject.SetActive(true);
+			}
+
+			// update preview position
+			_previewGameObject.transform.position = new Vector3(hitInfo.point.x, hitInfo.point.y + _ropeConfig.heightLimit / 2, hitInfo.point.z);
+
+			UpdateColor(isDeployable: 
+				IsGroundFlat(hitInfo, _ropeConfig.maxGroundAngle) 
+				&& !IsCeiling(hitInfo, _ropeConfig.heightLimit) 
+				&& !IsSpaceInFront(hitInfo, cameraTransform, _ropeConfig.minDistanceFromWall)
+			);
+		}
+		else
+		{
+			UpdateColor(isDeployable: false);
+
+			if (_previewGameObject.activeInHierarchy) 
+			{
+				_previewGameObject.SetActive(false);
+			}
+		}
+	}
+
+	private void UpdateColor(bool isDeployable)
+	{
+		_previewMeshRendered.material.SetFloat("_colorSwitch", isDeployable ? 1f : 0f);
+	}
+
+	public override bool Throw(Transform cameraTransform)
+	{
+		_previewGameObject.SetActive(false);
+
+		if (Physics.Raycast(
+			cameraTransform.position,
+			GetPositionRayDirection(cameraTransform, _ropeConfig.cameraOffsetAngle, _ropeConfig.maxCameraDownwardClamp),
+			out var hitInfo,
+			_ropeConfig.maxDistFromCamera,
+			~_ropeConfig.layersToIgnore))
+		{
+			if (IsGroundFlat(hitInfo, _ropeConfig.cameraOffsetAngle) 
+				&& !IsCeiling(hitInfo, _ropeConfig.heightLimit) 
+				&& !IsSpaceInFront(hitInfo, cameraTransform, _ropeConfig.minDistanceFromWall))
+			{
+				transform.SetParent(null, true);
+				Deploy(cameraTransform, hitInfo.point);
+				return true;
+			}
+		}
+		
+		return false;
+	}
+
+	private void Deploy(Transform cameraTransform, Vector3 deployPoint)
+	{
+		transform.eulerAngles = new Vector3(0, cameraTransform.rotation.eulerAngles.y, 0);
+		transform.DOJump(deployPoint, 1f, 0, 0.3f);
+
+		// rope custom initialization commands 
+		folds = new List<Vector3>() { _ropeAttach.position.CutDigits(2) };
+		_isPlaced = true;
 	}
 
 	#endregion
 
 	#region rope managment
-
-	public void Initialize()
-	{
-		folds = new List<Vector3>() { _ropeAttach.position.CutDigits(2) };
-		_segments = new List<RopeSegment>() { _firstSegment };
-		ExtendRope();
-
-		_isInitialized = true;
-	}
-
-	/// <summary>
-	/// 	instantiate new rope segments if the character is to far away
-	/// </summary>
-	public void ExtendRope()
-	{
-		if (GetBaseCharaDistance() >= _ropeConfig.maxLength) 
-		{
-			Detach();
-			return;
-		}
-
-		float delta = GetBaseCharaDistance() - GetRopeLength();
-		float instantiableSegment = delta / GetSegmentLength();
-		int segmentToInstantiate = Mathf.Clamp(Mathf.FloorToInt(instantiableSegment), 0, _ropeConfig.maxSegmentInstantiatedPerFrame);
-		for (int i = 0; i < segmentToInstantiate; i++)
-		{
-			Quaternion facingCharacter = Quaternion.LookRotation((_segments[^1].next.position - _rsoCharacterPosition.value).normalized);
-
-			// instantiate a new segment
-			RopeSegment newSegment = Instantiate(
-				_ropeConfig.pfSegment,
-				_segments[^1].next.position,
-				facingCharacter,
-				_segments[^1].transform
-			);
-
-			// connect joints together
-			newSegment.Connect(_segments[^1].rb);
-			_characterJoint.connectedBody = newSegment.rb;
-
-			newSegment.name = $"PF_RopeSegment_{_segments.Count}";
-			newSegment.Hide();
-			_segments[^1].Show();
-
-			// store the newly created segment
-			_segments.Add(newSegment);
-		}
-	}
 
 	public void Attach(ConfigurableJoint joint)
 	{
@@ -92,7 +126,6 @@ public class Rope : MonoBehaviour
 
 	public void Detach()
 	{
-		_segments[^1].Disconnect();
 		_characterJoint.connectedBody = null;
 		_characterJoint = null;
 		isConnected = false;
@@ -106,7 +139,7 @@ public class Rope : MonoBehaviour
 		float output = 0;
 
 		// assert: called before folds is initialized
-		if (!_isInitialized) return output;
+		if (!_isPlaced) return output;
 
 		// assert: character ref null
 		if (_characterJoint == null) return output;
@@ -123,24 +156,10 @@ public class Rope : MonoBehaviour
 		return output;
 	}
 
-	/// <summary>
-	/// 	current length of the rope.
-	/// </summary>
-	public float GetRopeLength()
-	{
-		return GetSegmentLength() * _segments.Count;
-	}
-
-	private float GetSegmentLength()
-	{
-		return _ropeConfig.pfSegment.capsuleCollider.height             // height of the segment collider
-			- (2 * _ropeConfig.pfSegment.capsuleCollider.radius);       // top and bot offset that overlap with other segments
-	}
-
 	public float GetLastFoldCharaDistance()
 	{
 		// assert: called before folds is initialized
-		if (!_isInitialized) return 0;
+		if (!_isPlaced) return 0;
 
 		// assert: character ref null
 		if (_characterJoint == null) return 0;

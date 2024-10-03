@@ -78,8 +78,21 @@ public class CharacterConfig : ScriptableObject
 	[Header("Rope")]
 	[Tooltip("Length of the character forward raycast from rope attach. If a collider is touched, the character is set as againstWall")]
 	public float againstWallRaycastLength = 1.0f;
+
 	[Tooltip("Against wall raycast will ignore the referenced layer.")]
 	public LayerMask againstWallLayerToIgnore;
+
+	[Tooltip("Scalar that multiply the direction towards the attraction point while on the partial rope suspension (eg. character against a wall)")]
+	public float partialSphericalAttractiveForce = 2.0f;
+
+	[Tooltip("Scalar that multiply the player's input direction while on the partial rope suspension (eg. character against a wall).")]
+	public float partialSuspensionSpeed = 3.0f;
+
+	[Tooltip("Scalar that multiply the direction towards the attraction point while on the complete rope suspension (eg. character in the void).")]
+	public float completeSphericalAttractiveForce = 3.0f;
+
+	[Tooltip("Scalar that multiply the player's input direction while on the complete rope suspension (eg. character in the void).")]
+	public float completeSuspensionSpeed = 4.0f;
 
 
 	[Header("Camera")]
