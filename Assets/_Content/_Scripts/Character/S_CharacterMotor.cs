@@ -120,9 +120,9 @@ public class CharacterMotor : MonoBehaviour
     }
 
 	private void Update()
-	{
+    {
 		UpdateCurrentState();
-	}
+    }
 
     private void LateUpdate()
     {

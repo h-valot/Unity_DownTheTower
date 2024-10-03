@@ -21,6 +21,5 @@ public class S_AnimatorManager : MonoBehaviour
         _animator.SetFloat(_moveSpeedHash, _characterMotor._moveSpeed);
         _animator.SetBool(_isGroundedHash, _characterMotor._isGrounded);
         _animator.SetBool(_isJumpingHash, _characterMotor._isJumping);
-        Debug.Log(_characterMotor._isJumping.ToString());
     }
 }
