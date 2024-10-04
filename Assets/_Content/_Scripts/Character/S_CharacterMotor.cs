@@ -1072,7 +1072,6 @@ public class CharacterMotor : MonoBehaviour
 		// global rope update functions
 		ForceAnchorPosition();
 		HandleRopeFolds();
-		HandleRopeHolding();
 
 		// state machine update rope state
 		switch (_ropeState)
@@ -1089,6 +1088,10 @@ public class CharacterMotor : MonoBehaviour
 				UpdateRopeCompleteSuspensionState();
 				break;
 		}
+
+		// apply rope holding constraint after the input movements
+		// this allow to avoid glitchy movements
+		HandleRopeHolding();
 	}
 
 	private void LateUpdateRopeState()
@@ -1152,8 +1155,8 @@ public class CharacterMotor : MonoBehaviour
 	/// </summary>
 	private void UpdateRopePartialSuspensionState()
 	{
-		// velocity calculations
 		HandleRopeMovement();
+		FaceFoldCenter();
 	}
 
 	/// <summary>
@@ -1164,8 +1167,8 @@ public class CharacterMotor : MonoBehaviour
 	/// </summary>
 	private void UpdateRopeCompleteSuspensionState()
 	{
-		// velocity calculations
 		HandleRopeMovement();
+		FaceFoldCenter();
 	}
 
 	#endregion
@@ -1177,11 +1180,35 @@ public class CharacterMotor : MonoBehaviour
 	/// </summary>
 	private void CheckWall()
 	{
-		_isAgainstWall = Physics.Raycast(
-			_ropeAttach.position,
-			_characterDirection.forward * _characterConfig.againstWallRaycastLength,
+		Vector3 botPoint = new Vector3(
+			transform.position.x,
+			transform.position.y + _controller.height / 4f,
+			transform.position.z
+		);
+
+		Vector3 topPoint = new Vector3(
+			transform.position.x,
+			transform.position.y + 3 * (_controller.height / 4f),
+			transform.position.z
+		);
+
+		_isAgainstWall = Physics.CapsuleCast(
+			botPoint,
+			topPoint,
+			_characterConfig.againstWallRaycastLength,
+			Vector3.up,
+			out var hitInfo,
+			_characterConfig.againstWallRaycastLength + 0.05f,
 			~_characterConfig.againstWallLayerToIgnore
 		);
+
+		if (_isAgainstWall)
+		{
+			Debug.Log("CHARACTER_MOTOR: wall touched");
+			Vector3 hitPoint = new Vector3(hitInfo.point.x, transform.position.y, hitInfo.point.z);
+			Vector3 touchedDirection = hitPoint - transform.position;
+			_characterDirection.forward = touchedDirection.normalized;
+		}
 	}
 
 	/// <summary>
@@ -1202,14 +1229,12 @@ public class CharacterMotor : MonoBehaviour
 				// minimal distance between two fold point to be register
 				if ((_rope.folds[^1] - _rope.folds[^2]).magnitude >= _ropeConfig.minFoldDistance)
 				{
-					_rope.folds.AddUnique(approximatePoint);
-					UpdateHoldRopeRadius();
+					_rope.folds.AddUnique(approximatePoint, UpdateHoldRopeRadius);
 				}
 			}
 			else
 			{
-				_rope.folds.AddUnique(approximatePoint);
-				UpdateHoldRopeRadius();
+				_rope.folds.AddUnique(approximatePoint, UpdateHoldRopeRadius);
 			}
 		}
 
@@ -1223,14 +1248,15 @@ public class CharacterMotor : MonoBehaviour
 	}
 
 	/// <summary>
-	///		reduce the hold rope radius by the distance between the two last folds.
-	/// 	only the distance between the last fold and the character matters
+	/// 	update hold rope radius to be the distance between the character rope attach position and the last fold of the rope.
+	/// 	only if allowed.
 	/// </summary>
-	private void UpdateHoldRopeRadius()
+	/// <param name="isAllowed">is it allowed to update hold rope radius</param>
+	private void UpdateHoldRopeRadius(bool isAllowed)
 	{
-		// assert: player do not command the character to hold the rope
-		if (!_isHolding) return;
-		
+		// assert: is it not allowed
+		if (!isAllowed) return;
+
 		_holdRopeRadius = _rope.GetLastFoldCharaDistance();
 	}
 
@@ -1280,6 +1306,24 @@ public class CharacterMotor : MonoBehaviour
 		}
 	}
 
+	/// <summary>
+	/// 	make the character facing center of the last fold (not with the y-axis).
+	/// </summary>
+	private void FaceFoldCenter()
+	{
+		// assert: player do not command the character to hold the rope
+		if (!_isHolding) return;
+
+		// assert: character is touching a wall
+		if (_isAgainstWall) return;
+ 
+		// assert: center-character distance is greater than the threshold 
+		if (Mathf.Abs(_holdRopeRadius - (_rope.folds[^1] - transform.position).magnitude) > _characterConfig.facingCenterThreshold) return;
+
+		Vector3 towardsCenter = transform.position - new Vector3(_rope.folds[^1].x, transform.position.y, _rope.folds[^1].z);
+		_characterDirection.forward = -towardsCenter.normalized;
+	}
+
 	private void HandleRopeMovement()
 	{
 		// assert: there is no equipped rope 
@@ -1289,6 +1333,7 @@ public class CharacterMotor : MonoBehaviour
 		Vector3 inputDirection = _cameraTransform.forward * _moveInput.y + _cameraTransform.right * _moveInput.x;
 
 		// - character is not holding the rope -
+
 		if (!_isHolding)
 		{	
 			// apply grounded and falling like forces
@@ -1316,18 +1361,13 @@ public class CharacterMotor : MonoBehaviour
 		Vector3 offsetAttractionPoint = _rope.folds[^1] + Vector3.down * (attractionPoint - sphereCharaSnapPoint).magnitude;
 		Vector3 attractionDirection = (offsetAttractionPoint - sphereCharaSnapPoint).normalized;
 
-		Debug.Log($"CHARACTER_MOTOR: current rope state = {_ropeState}"
-				+ $"\ncurrent pos = {_rsoCharacterPosition.value} heading towards attraction point = {attractionPoint}");
-
 		// TODO:
-		// (1) makes the character always facing the wall direction then offset the player position off the wall
 		// (2) acceleration movement while against the wall
 		// (3) reduce the character speed to 0 when approching the limit angles of the balancier effect
 		// (4) jump off the wall logic
 		// (5) lerp the speed acceleration when starting going down the rope 
 
-		// - apply movement -
-
+		// apply movements
 		// partial rope suspension
 		if (_isAgainstWall)
 		{
@@ -1415,7 +1455,7 @@ public class CharacterMotor : MonoBehaviour
                 if (_craftInHand.Throw(_thirdPersonCamera.transform))
 				{
 					// rope attachment exception
-					_rope = (Rope)_craftInHand;
+					if ((Rope)_craftInHand != null) _rope = (Rope)_craftInHand;
 					_rope?.Attach(_configurableJoint);
 
 					_craftInHand = null;

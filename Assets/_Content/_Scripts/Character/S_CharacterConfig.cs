@@ -94,6 +94,9 @@ public class CharacterConfig : ScriptableObject
 	[Tooltip("Scalar that multiply the player's input direction while on the complete rope suspension (eg. character in the void).")]
 	public float completeSuspensionSpeed = 4.0f;
 
+	[Tooltip("Start facing the center when the distance between the character and the hold rope radius is less than this value.")]
+	public float facingCenterThreshold = 0.25f;
+
 
 	[Header("Camera")]
 	[Tooltip("Clamp the camera rotation to this angle when looking down")]

@@ -147,10 +147,16 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  againstWallRaycastLength: 1
+  againstWallRaycastLength: 2
+  againstWallRaycastAngle: 45
   againstWallLayerToIgnore:
     serializedVersion: 2
     m_Bits: 510
+  partialSphericalAttractiveForce: 2
+  partialSuspensionSpeed: 3
+  completeSphericalAttractiveForce: 3
+  completeSuspensionSpeed: 4
+  facingCenterThreshold: 0.25
   topClamp: 70
   bottomClamp: -60
   startingStyle: 0

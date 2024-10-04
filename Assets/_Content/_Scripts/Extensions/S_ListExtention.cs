@@ -35,4 +35,22 @@ public static class ListExtensions
 	{
 		if (!list.Contains(toAdd)) list.Add(toAdd);
 	}
+
+	/// <summary>
+	/// 	add the given object to the list only if it does not already contain it. 
+	/// 	return a bool using a callback that stats if the object has been successfully added to the list or not.
+	/// </summary>
+	/// <param name="toAdd">object that can be added to the list</param>
+	/// <param name="callback">true if the object have been successfully added to the list</param>
+	public static void AddUnique<T>(this IList<T> list, T toAdd, Action<bool> callback)
+	{
+		if (!list.Contains(toAdd))
+		{
+			list.Add(toAdd);
+			callback(true);
+			return;
+		}
+
+		callback(false);
+	}
 }
