@@ -41,6 +41,7 @@ public class Ladder : Permanent
         {
             if (!_previewLadder.activeSelf) _previewLadder.SetActive(true);
             _previewLadder.transform.position = new Vector3(hit.point.x, hit.point.y + _ladderConfig.maxHeight / 2, hit.point.z);
+            _previewLadder.transform.rotation = Quaternion.identity;
             UpdateColor(IsGroundFlat(hit) && !IsCeiling(hit) && !IsSpaceInFront(hit, _cameraTransform));
         }
         else
