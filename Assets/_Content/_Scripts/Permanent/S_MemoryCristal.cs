@@ -9,22 +9,6 @@ public class MemoryCristal : Interactible
 
     private bool _doorOpen;
 
-
-    private void OnTriggerEnter(Collider other)
-    {
-        if (other.TryGetComponent<CharacterMotor>(out var _character))
-        {
-            _character.AddToInteractList(this);
-        }
-    }
-    public void OnTriggerExit(Collider other)
-    {
-        if (other.TryGetComponent<CharacterMotor>(out var _character))
-        {
-            _character.RemoveFromInteractList(this);
-        }
-    }
-
     public override void InteractionTrigger()
     {
         if (_doorOpen == false)

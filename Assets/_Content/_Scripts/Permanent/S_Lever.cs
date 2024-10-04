@@ -24,22 +24,6 @@ public class Lever : Interactible
       
     }
 
-    private void OnTriggerEnter(Collider other)
-    {
-        if (other.TryGetComponent<CharacterMotor>(out CharacterMotor _player))
-        {
-            _player.AddToInteractList(this);
-            Debug.Log(this.name);
-        }
-    }
-    public void OnTriggerExit(Collider other)
-    {
-        if (other.TryGetComponent<CharacterMotor>(out CharacterMotor _player))
-        {
-            _player.RemoveFromInteractList(this);
-        }
-    }
-
     IEnumerator WaitXSeconds(float _time, Action callback)
     {
         yield return new WaitForSeconds(_time);
