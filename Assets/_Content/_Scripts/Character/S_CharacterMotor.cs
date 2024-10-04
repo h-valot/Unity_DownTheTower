@@ -133,6 +133,7 @@ public class CharacterMotor : MonoBehaviour
 	{
         _rseToggleInputs.action += ToggleInputs;
         SubscribeInputs();
+        _rseCraft.action -= ToggleCraft;
     }
 
 	private void OnDisable()
@@ -711,6 +712,12 @@ public class CharacterMotor : MonoBehaviour
         _rseCancelAction.action -= CancelAction;
         _rseInteract.action -= Interact;
     }
+
+	public void ToggleCraftInput(bool isActive)
+	{
+		if(isActive) _rseCraft.action += ToggleCraft;
+		else _rseCraft.action -= ToggleCraft;
+	}
 
 	private void ToggleInputs()
 	{

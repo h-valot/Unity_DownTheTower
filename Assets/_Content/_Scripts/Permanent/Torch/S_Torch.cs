@@ -48,7 +48,6 @@ public class Torch : Permanent
 
         // set up starting point and velocity
         Vector3 startPosition = transform.position;
-        Debug.Log(CalculateLaunchForce(_cameraTransform).ToString());
         Vector3 startVelocity = Quaternion.AngleAxis(-CalculateThrowAngleOffset(_cameraTransform), _cameraTransform.right) * _cameraTransform.forward * CalculateLaunchForce(_cameraTransform);
 
         // placing points along the line renderer
