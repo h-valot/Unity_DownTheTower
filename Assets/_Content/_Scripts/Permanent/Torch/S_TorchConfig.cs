@@ -31,7 +31,6 @@ public class TorchConfig : ScriptableObject
     public bool canThrow;
 
     [Tooltip("Launch force of the throw")]
-    public float launchForce = 10f;
 	public float minLaunchForce = 0.1f;
 	public float maxLaunchForce = 20f;
 	public float minLaunchCameraAngle = 0f;

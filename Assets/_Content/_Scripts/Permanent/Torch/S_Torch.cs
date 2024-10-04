@@ -48,6 +48,7 @@ public class Torch : Permanent
 
         // set up starting point and velocity
         Vector3 startPosition = transform.position;
+        Debug.Log(CalculateLaunchForce(_cameraTransform).ToString());
         Vector3 startVelocity = Quaternion.AngleAxis(-CalculateThrowAngleOffset(_cameraTransform), _cameraTransform.right) * _cameraTransform.forward * CalculateLaunchForce(_cameraTransform);
 
         // placing points along the line renderer
@@ -90,17 +91,20 @@ public class Torch : Permanent
     private float CalculateLaunchForce(Transform _cameraTransform)
     {
         return _torchConfig.minLaunchForce + 
-            (SetUpCameraAngle(_cameraTransform) - _torchConfig.minLaunchCameraAngle) * 
+            (Mathf.Clamp(SetUpCameraAngle(_cameraTransform), 0, _torchConfig.maxLaunchCameraAngle / 2) - _torchConfig.minLaunchCameraAngle) * 
             (_torchConfig.maxLaunchForce - _torchConfig.minLaunchForce) / 
-            (_torchConfig.maxLaunchCameraAngle - _torchConfig.minLaunchCameraAngle);
+            (_torchConfig.maxLaunchCameraAngle / 2 - _torchConfig.minLaunchCameraAngle);
     }
 
     private float CalculateThrowAngleOffset(Transform _cameraTransform)
     {
-        return _torchConfig.maxThrowAngleOffset + 
-            (Mathf.Clamp(SetUpCameraAngle(_cameraTransform), 60, 130) - 60) * 
-            (_torchConfig.minThrowAngleOffset - _torchConfig.maxThrowAngleOffset) / 
-            (130 - 60);
+        // OLD WAY OF CALCULATING ANGLE OFFSET
+        //return _torchConfig.maxThrowAngleOffset + 
+        //    (Mathf.Clamp(SetUpCameraAngle(_cameraTransform), 60, 130) - 60) * 
+        //    (_torchConfig.minThrowAngleOffset - _torchConfig.maxThrowAngleOffset) / 
+        //    (130 - 60);
+        float cameraAngle = SetUpCameraAngle(_cameraTransform);
+        return (-(cameraAngle * cameraAngle) + _torchConfig.maxLaunchCameraAngle * cameraAngle) / 200;
     }
 
 
