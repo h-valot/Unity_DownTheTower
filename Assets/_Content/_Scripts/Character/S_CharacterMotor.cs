@@ -13,10 +13,8 @@ public class CharacterMotor : MonoBehaviour
 	[SerializeField] private Transform _characterDirection;
 	[SerializeField] private Transform _handSocket;
 	[SerializeField] private Transform _robotHandSocket;
-	[SerializeField] private Transform _ropeAttach;
+	[SerializeField] private Transform _harness;
 	[SerializeField] private CharacterController _controller;
-	[SerializeField] private ConfigurableJoint _configurableJoint;
-	[SerializeField] private SphereCollider _ropeSphereCollider;
 
 	[Space(5)]
     [Header("External references")]
@@ -778,7 +776,9 @@ public class CharacterMotor : MonoBehaviour
 		HandleMovement();
 
 		// exit locomotion state
-		if (_rope)
+		if (_rope != null 
+			&& _rope.isPlaced
+			&& _rope.isConnected)
 		{
 			SwitchState(AnimationState.ROPE);
 		}
@@ -963,16 +963,6 @@ public class CharacterMotor : MonoBehaviour
 
 	}
 
-    private void CraftRope()
-	{
-
-	}
-
-    private void CraftLadder()
-    {
-
-    }
-
     /// <summary>
     /// 	instantiate the torch prefab after the fixed duration.
     /// </summary>
@@ -1045,9 +1035,7 @@ public class CharacterMotor : MonoBehaviour
 
 	private void EnterRopeState()
 	{
-		// update rope sphere collider
-		_ropeSphereCollider.radius = _controller.height / 2f;
-		_ropeSphereCollider.center = _controller.center;
+
 	}
 
 	private void UpdateRopeState()
@@ -1061,18 +1049,11 @@ public class CharacterMotor : MonoBehaviour
 			|| _rope != null && !_rope.isConnected)
 		{
 			SwitchState(AnimationState.LOCOMOTION);
-
+			return;
 		}
 
-		// if the state hasn't switch, execute rope related functions
-		// update rope state based on previous checks
-		HandleRopeState();
-
-		// global rope update functions
-		ForceAnchorPosition();
-		_rope.HandleFolds();
-
 		// state machine update rope state
+		HandleRopeState();
 		switch (_ropeState)
 		{
 			case RopeState.GROUNDED:
@@ -1100,7 +1081,7 @@ public class CharacterMotor : MonoBehaviour
 
 	private void ExitRopeState()
 	{
-		
+		_rope = null;
 	}
 
 	#endregion
@@ -1180,12 +1161,12 @@ public class CharacterMotor : MonoBehaviour
 	private void CheckWall()
 	{
 		_isAgainstWall = Physics.SphereCast(
-			_ropeSphereCollider.center,
-			_ropeSphereCollider.radius + 0.1f,
-			Vector3.up,
+			_controller.center,
+			_controller.height / 2f,
+			_characterDirection.forward,
 			out var hitInfo,
-			_characterConfig.againstWallRaycastLength + 0.05f,
-			~_characterConfig.againstWallLayerToIgnore
+			_controller.height / 2f + 0.05f,
+			_characterConfig.againstWallLayerToInclude
 		);
 
 		if (_isAgainstWall)
@@ -1195,23 +1176,6 @@ public class CharacterMotor : MonoBehaviour
 			Vector3 touchedDirection = hitPoint - transform.position;
 			_characterDirection.forward = touchedDirection.normalized;
 		}
-	}
-
-	/// <summary>
-	/// 	forces the graphics rope anchor to be linked to the character's position.
-	/// </summary>
-	private void ForceAnchorPosition()
-	{
-		// assert: there is no equipped rope 
-		if (_rope == null) return;
-
-		Vector3 desiredAnchorPosition =
-			transform.position
-			+ (_characterDirection.forward.normalized * 0.5f)
-			+ (Vector3.up * 0.5f);
-
-		_configurableJoint.transform.position = desiredAnchorPosition;
-		_configurableJoint.transform.rotation = Quaternion.LookRotation((desiredAnchorPosition - _rope.folds[^1]).normalized);
 	}
 
 	/// <summary>
@@ -1226,7 +1190,7 @@ public class CharacterMotor : MonoBehaviour
 		if (!_isHolding) return;
 
 		// get the distance between the current character's position and the position of the last fold
-		Vector3 towardCharacter = _rsoCharacterPosition.value - _rope.folds[^1];
+		Vector3 towardCharacter = transform.position - _rope.folds[^1];
 
 		// re-snap the character's position within the spherical constraint
 		if (towardCharacter.magnitude > _rope.holdLength)
@@ -1335,6 +1299,9 @@ public class CharacterMotor : MonoBehaviour
 		// assert: rope ref is null
 		if (_rope is null) return;
 
+		// assert: rope isn't placed yet
+		if (!_rope.isPlaced) return;
+
 		Gizmos.color = Color.magenta;
 		Gizmos.DrawWireSphere(_rope.folds[^1], _rope.holdLength);
 	}
@@ -1393,7 +1360,7 @@ public class CharacterMotor : MonoBehaviour
 				{
 					// rope attachment exception
 					if ((Rope)_craftInHand != null) _rope = (Rope)_craftInHand;
-					_rope?.Attach(_configurableJoint);
+					_rope?.Attach(_harness);
 
 					_craftInHand = null;
 					if (_craftInRobot != null)

@@ -14,18 +14,22 @@ public class Rope : Permanent
 
 	[Header("debug")]
 	public bool isConnected;
-	public float currentLength;
+	public bool isPlaced;
 	public float holdLength;
 	public List<Vector3> folds = new List<Vector3>();
 
-	private bool _isPlaced;
-	private ConfigurableJoint _characterJoint;
+	private Transform _characterHarness;
 
 	#region default functions
 
 	public void Update()
 	{
-		currentLength = GetTotalLength();
+		// asserts
+		if (!isConnected) return;
+		if (!isPlaced) return;
+
+		HandleFolds();
+		HandleEnd();
 	}
 
 	#endregion
@@ -104,28 +108,27 @@ public class Rope : Permanent
 	private void Deploy(Transform cameraTransform, Vector3 deployPoint)
 	{
 		transform.eulerAngles = new Vector3(0, cameraTransform.rotation.eulerAngles.y, 0);
-		transform.DOJump(deployPoint, 1f, 0, 0.3f);
-
-		// rope custom initialization commands 
-		_isPlaced = true;
+		transform.DOJump(deployPoint, 1f, 0, 0.3f).OnComplete(() =>
+		{
+			// rope custom initialization commands 
+			folds = new List<Vector3>() { _ropeAttach.position.CutDigits(2) };
+			isPlaced = true;
+		});
 	}
 
 	#endregion
 
 	#region rope managment
 
-	public void Attach(ConfigurableJoint joint)
+	public void Attach(Transform harness)
 	{
-		folds = new List<Vector3>() { _ropeAttach.position.CutDigits(2) };
-
-		_characterJoint = joint;
+		_characterHarness = harness;
 		isConnected = true;
 	}
 
 	public void Detach()
 	{
-		_characterJoint.connectedBody = null;
-		_characterJoint = null;
+		_characterHarness = null;
 		isConnected = false;
 	}
 
@@ -135,10 +138,10 @@ public class Rope : Permanent
 	public void HandleFolds()
 	{
 		// assert: character ref null
-		if (_characterJoint == null) return;
+		if (_characterHarness == null) return;
 
 		// add fold if a collider stands between the character and the last fold
-		if (Physics.Linecast(_characterJoint.transform.position, folds[^1], out var addHit, ~_ropeConfig.foldLayerToIgnore))
+		if (Physics.Linecast(_characterHarness.transform.position, folds[^1], out var addHit, ~_ropeConfig.foldLayerToIgnore))
 		{
 			Vector3 approximatePoint = addHit.point.CutDigits(2);
 
@@ -158,11 +161,22 @@ public class Rope : Permanent
 
 		// remove the last fold from the list if there is no collider that stands between the character and the previous last fold
 		if (folds.Count >= 2
-			&& !Physics.Linecast(_characterJoint.transform.position, folds[^2], out var removeHit, ~_ropeConfig.foldLayerToIgnore))
+			&& !Physics.Linecast(_characterHarness.transform.position, folds[^2], out var removeHit, ~_ropeConfig.foldLayerToIgnore))
 		{
 			holdLength = GetLastFoldCharaDistance() + (folds[^2] - folds[^1]).magnitude;
 			folds.Remove(folds[^1]);
 		}
+	}
+
+	/// <summary>
+	/// 	detach the rope from the player if its total length is greater than the limit.
+	/// </summary>
+	private void HandleEnd()
+	{
+		// assert: total rope length is smaller than the max length
+		if (GetTotalLength() <= _ropeConfig.maxLength) return;
+
+		Detach();
 	}
 
 	/// <summary>
@@ -184,16 +198,16 @@ public class Rope : Permanent
 	public float GetTotalLength()
 	{
 		// assert: called before folds is initialized
-		if (!_isPlaced) return 0;
+		if (!isPlaced) return 0;
 
 		// assert: character ref null
-		if (_characterJoint == null) return 0;
+		if (_characterHarness == null) return 0;
 
 		float output = 0;
 		for (int i = 0; i < folds.Count; i++)
 		{
 			Vector3 nextPosition = i + 1 >= folds.Count
-				? _characterJoint.transform.position
+				? _characterHarness.transform.position
 				: folds[i + 1];
 
 			output += (folds[i] - nextPosition).magnitude;
@@ -204,29 +218,27 @@ public class Rope : Permanent
 	public float GetLastFoldCharaDistance()
 	{
 		// assert: called before folds is initialized
-		if (!_isPlaced) return 0;
+		if (!isPlaced) return 0;
 
 		// assert: character ref null
-		if (_characterJoint == null) return 0;
+		if (_characterHarness == null) return 0;
 
-		Debug.Log($"ROPE: folds[^1] = {folds[^1]} - _characterJoint.transform.position = {_characterJoint.transform.position}"
-				+ $"\nrope length = {(folds[^1] - _characterJoint.transform.position).magnitude}");
-		return (folds[^1] - _characterJoint.transform.position).magnitude;
+		return (folds[^1] - _characterHarness.transform.position).magnitude;
 	}
 
 #if UNITY_EDITOR
 	private void OnDrawGizmos()
 	{
 		// assert: called before folds is initialized
-		if (!_isPlaced) return;
+		if (!isPlaced) return;
 
 		// assert: character ref null
-		if (_characterJoint == null) return;
+		if (_characterHarness == null) return;
 
 		Gizmos.color = Color.red;
 		for (int i = 0; i < folds.Count; i++)
 		{
-			Gizmos.DrawLine(folds[i], i + 1 >= folds.Count ? _characterJoint.transform.position : folds[i + 1]);
+			Gizmos.DrawLine(folds[i], i + 1 >= folds.Count ? _characterHarness.transform.position : folds[i + 1]);
 		}
 	}
 #endif

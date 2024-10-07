@@ -76,11 +76,8 @@ public class CharacterConfig : ScriptableObject
 
 
 	[Header("Rope")]
-	[Tooltip("Length of the character forward raycast from rope attach. If a collider is touched, the character is set as againstWall")]
-	public float againstWallRaycastLength = 1.0f;
-
-	[Tooltip("Against wall raycast will ignore the referenced layer.")]
-	public LayerMask againstWallLayerToIgnore;
+	[Tooltip("Against wall raycast will include only referenced layers.")]
+	public LayerMask againstWallLayerToInclude;
 
 	[Tooltip("Scalar that multiply the direction towards the attraction point while on the partial rope suspension (eg. character against a wall)")]
 	public float partialSphericalAttractiveForce = 2.0f;
