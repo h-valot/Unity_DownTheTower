@@ -86,4 +86,7 @@ public class CharacterConfig : ScriptableObject
 	
 	[Tooltip("Slerp the character's graphics to the character's moving direction at this value times time.deltatime")]
 	public float rotationSpeed = 7;
+
+	[Header("Debug")]
+	public bool startWithBag = false;
 }

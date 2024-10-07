@@ -38,8 +38,8 @@ public class GameManager : MonoBehaviour
 	{
 		if (!_rsoPlayerDeath.value) return;
 
-		Restart();
-		// TODO - fade in into ui to quit or restart
+        Restart();
+		// TODO - fade in
 	}
 
 	private void OnEnable()

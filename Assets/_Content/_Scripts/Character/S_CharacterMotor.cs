@@ -133,6 +133,10 @@ public class CharacterMotor : MonoBehaviour
 	{
         _rseToggleInputs.action += ToggleInputs;
         SubscribeInputs();
+
+        // debug
+        if (_characterConfig.startWithBag) return;
+
         _rseCraft.action -= ToggleCraft;
     }
 

@@ -1,15 +1,41 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.TextCore.Text;
 
 public class BackpackPickup : Interactible
 {
+    [Header("Internal Variables")]
+    [SerializeField] private MeshRenderer _mesh;
+
+    [Header("External Variables")]
+    [SerializeField] private RSO_PlayerDeath _rsoPlayerDeath;
+
+    [Header("Scriptable references")]
+    [SerializeField] private CharacterConfig _characterConfig;
+
+    // PRIVATE VARIABLES
     private CharacterMotor _character;
+    private bool _isAvailable = true;
+
+    private void Start()
+    {
+        if (_characterConfig.startWithBag)
+        {
+            gameObject.SetActive(false);
+        }
+    }
+
+    private void OnEnable()
+    {
+        _rsoPlayerDeath.OnChanged += ResetInteraction;
+    }
+
+    private void OnDisable()
+    {
+        _rsoPlayerDeath.OnChanged -= ResetInteraction;
+    }
 
     public override void OnTriggerEnter(Collider other)
     {
-        if (other.TryGetComponent<CharacterMotor>(out _character))
+        if (other.TryGetComponent<CharacterMotor>(out _character) && _isAvailable)
         {
             _character.AddToInteractList(this);
         }
@@ -17,8 +43,18 @@ public class BackpackPickup : Interactible
 
     public override void InteractionTrigger()
     {
+        _isAvailable = false;
         _character.ToggleCraftInput(true);
-        _character.RemoveFromInteractList(this);
-        Destroy(this.gameObject);
+        _mesh.enabled = false;
+    }
+
+    private void ResetInteraction()
+    {
+        if (!_rsoPlayerDeath.value)
+        {
+            _isAvailable = true;
+            _mesh.enabled = true;
+            _character = null;
+        }
     }
 }
