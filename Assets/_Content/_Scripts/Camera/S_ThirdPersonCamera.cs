@@ -90,15 +90,15 @@ public class ThirdPersonCamera : MonoBehaviour
 		{
 			// character is facing the movement direction
 			// but not is the moveInput is null or equals to zero
-			// Vector3 moveDirection = _cameraDirection.forward * _moveInput.y + _cameraDirection.right * _moveInput.x;
-			// if (_moveInput != Vector2.zero)
-			// {
-			// 	_graphicsDirection.forward = Vector3.Slerp(
-			// 		_graphicsDirection.forward, 
-			// 		moveDirection.normalized, 
-			// 		Time.deltaTime * _characterConfig.rotationSpeed
-			// 	);
-			// }
+			Vector3 moveDirection = _cameraDirection.forward * _moveInput.y + _cameraDirection.right * _moveInput.x;
+			if (_moveInput != Vector2.zero)
+			{
+				_graphicsDirection.forward = Vector3.Slerp(
+					_graphicsDirection.forward, 
+					moveDirection.normalized, 
+					Time.deltaTime * _characterConfig.rotationSpeed
+				);
+			}
 		}
 
 		else if (_currentStyle == CameraStyle.AIMING)

@@ -14,7 +14,8 @@ public class Rope : Permanent
 
 	[Header("debug")]
 	public bool isConnected;
-	public float currentLegnth;
+	public float currentLength;
+	public float holdLength;
 	public List<Vector3> folds = new List<Vector3>();
 
 	private bool _isPlaced;
@@ -24,7 +25,7 @@ public class Rope : Permanent
 
 	public void Update()
 	{
-		currentLegnth = GetTotalLength();
+		currentLength = GetTotalLength();
 	}
 
 	#endregion
@@ -129,6 +130,55 @@ public class Rope : Permanent
 	}
 
 	/// <summary>
+	/// 	check rope folding using raycasts
+	/// </summary>
+	public void HandleFolds()
+	{
+		// assert: character ref null
+		if (_characterJoint == null) return;
+
+		// add fold if a collider stands between the character and the last fold
+		if (Physics.Linecast(_characterJoint.transform.position, folds[^1], out var addHit, ~_ropeConfig.foldLayerToIgnore))
+		{
+			Vector3 approximatePoint = addHit.point.CutDigits(2);
+
+			if (folds.Count >= 2)
+			{
+				// minimal distance between two fold point to be register
+				if ((folds[^1] - folds[^2]).magnitude >= _ropeConfig.minFoldDistance)
+				{
+					folds.AddUnique(approximatePoint, UpdateHoldLength);
+				}
+			}
+			else
+			{
+				folds.AddUnique(approximatePoint, UpdateHoldLength);
+			}
+		}
+
+		// remove the last fold from the list if there is no collider that stands between the character and the previous last fold
+		if (folds.Count >= 2
+			&& !Physics.Linecast(_characterJoint.transform.position, folds[^2], out var removeHit, ~_ropeConfig.foldLayerToIgnore))
+		{
+			holdLength = GetLastFoldCharaDistance() + (folds[^2] - folds[^1]).magnitude;
+			folds.Remove(folds[^1]);
+		}
+	}
+
+	/// <summary>
+	/// 	update hold rope radius to be the distance between the character rope attach position and the last fold of the rope.
+	/// 	only if allowed.
+	/// </summary>
+	/// <param name="isAllowed">is it allowed to update hold rope radius</param>
+	public void UpdateHoldLength(bool isAllowed = true)
+	{
+		// assert: is it not allowed
+		if (!isAllowed) return;
+
+		holdLength = GetLastFoldCharaDistance();
+	}
+
+	/// <summary>
 	/// 	current distance between the character's position and the base of the rope.
 	/// </summary>
 	public float GetTotalLength()
@@ -159,9 +209,12 @@ public class Rope : Permanent
 		// assert: character ref null
 		if (_characterJoint == null) return 0;
 
+		Debug.Log($"ROPE: folds[^1] = {folds[^1]} - _characterJoint.transform.position = {_characterJoint.transform.position}"
+				+ $"\nrope length = {(folds[^1] - _characterJoint.transform.position).magnitude}");
 		return (folds[^1] - _characterJoint.transform.position).magnitude;
 	}
 
+#if UNITY_EDITOR
 	private void OnDrawGizmos()
 	{
 		// assert: called before folds is initialized
@@ -176,6 +229,7 @@ public class Rope : Permanent
 			Gizmos.DrawLine(folds[i], i + 1 >= folds.Count ? _characterJoint.transform.position : folds[i + 1]);
 		}
 	}
+#endif
 
 	#endregion
 }
