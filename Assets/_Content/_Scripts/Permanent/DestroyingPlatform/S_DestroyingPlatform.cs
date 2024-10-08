@@ -9,7 +9,6 @@ public class DestroyingPlatform : MonoBehaviour
     {
         if (other.TryGetComponent<CharacterMotor>(out var _playerCheckRef))
         {
-            Debug.Log("Detruit");
             Destroy(this.gameObject);
         }
     }

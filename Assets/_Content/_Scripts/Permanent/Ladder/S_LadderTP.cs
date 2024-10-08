@@ -5,19 +5,11 @@ public class LadderTP : Interactible
     public Vector3 _teleportTo;
     private CharacterMotor _character;
 
-    private void OnTriggerEnter(Collider other)
+    public override void OnTriggerEnter(Collider other)
     {
         if (other.TryGetComponent<CharacterMotor>(out _character))
         {
             _character.AddToInteractList(this);
-        }
-    }
-
-    private void OnTriggerExit(Collider other)
-    {
-        if (other.TryGetComponent<CharacterMotor>(out _character))
-        {
-            _character.RemoveFromInteractList(this);
         }
     }
 

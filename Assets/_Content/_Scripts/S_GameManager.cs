@@ -9,11 +9,13 @@ public class GameManager : MonoBehaviour
 
 	[Header("External references")]
 	[SerializeField] private RSO_PlayerDeath _rsoPlayerDeath;
+	[SerializeField] private RSO_GamePaused _rsoGamePaused;
 
 	private void Start()
 	{
 		Restart();
         Cursor.lockState = CursorLockMode.Locked;
+		_rsoGamePaused.value = false;
     }
 
 	private void Restart()
@@ -36,8 +38,8 @@ public class GameManager : MonoBehaviour
 	{
 		if (!_rsoPlayerDeath.value) return;
 
-		Restart();
-		// TODO - fade in into ui to quit or restart
+        Restart();
+		// TODO - fade in
 	}
 
 	private void OnEnable()

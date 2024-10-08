@@ -105,9 +105,27 @@
                     "initialStateCheck": true
                 },
                 {
+                    "name": "Pause",
+                    "type": "Button",
+                    "id": "df91702a-1f25-4fa5-9fb1-84de7ae636ae",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "HideUI",
+                    "type": "Button",
+                    "id": "0c972322-7ff4-4b3d-9dbb-81c1c709cb45",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
                     "name": "Holding",
                     "type": "Value",
-                    "id": "132088e0-8d2b-43e7-b96d-80ce8d86d7de",
+                    "id": "636c60ef-c8e7-482a-a635-cca84e9a3b0a",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
@@ -403,22 +421,66 @@
                 },
                 {
                     "name": "",
-                    "id": "8d85a972-d9de-4df6-9b71-2b60cb5b5a80",
-                    "path": "<Gamepad>/leftShoulder",
+                    "id": "a762cd4c-2a08-401e-9bb8-c08e76b45093",
+                    "path": "<Gamepad>/start",
                     "interactions": "",
                     "processors": "",
-                    "groups": "Gamepad",
+                    "groups": "",
+                    "action": "Pause",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "f0af1f7b-0f97-46ea-a6b0-3fad47064b1c",
+                    "path": "<Keyboard>/escape",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Pause",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b00588cb-0b4c-46c8-92b0-88b5bc407a81",
+                    "path": "<Keyboard>/tab",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "HideUI",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "790ec946-5a34-48bc-95c1-b84e896d8ace",
+                    "path": "<Gamepad>/select",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "HideUI",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "d213f6e5-5813-4c52-90d5-ba7a4f8d0a0c",
+                    "path": "<Keyboard>/c",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "KeyboardMouse",
                     "action": "Holding",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
                 {
                     "name": "",
-                    "id": "b8544c98-b72f-460b-bfda-b8472273698d",
-                    "path": "<Keyboard>/c",
+                    "id": "bf9ce1b8-b330-4572-a684-25b56db15a92",
+                    "path": "<Gamepad>/leftShoulder",
                     "interactions": "",
                     "processors": "",
-                    "groups": "KeyboardMouse",
+                    "groups": "Gamepad",
                     "action": "Holding",
                     "isComposite": false,
                     "isPartOfComposite": false

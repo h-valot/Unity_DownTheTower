@@ -31,7 +31,10 @@ public class TorchConfig : ScriptableObject
     public bool canThrow;
 
     [Tooltip("Launch force of the throw")]
-    public float launchForce = 10f;
+	public float minLaunchForce = 0.1f;
+	public float maxLaunchForce = 20f;
+	public float minLaunchCameraAngle = 0f;
+	public float maxLaunchCameraAngle = 130f;
 
 
 	[Header("Crafting")]
@@ -40,7 +43,8 @@ public class TorchConfig : ScriptableObject
 
 
 	[Header("Aim Preview Variables")]
-	public float throwAngleOffset = 20f;
+    public float minThrowAngleOffset = 0f;
+    public float maxThrowAngleOffset = 20f;
 	[Range(10, 100)] public int previewLength = 25;
 	[Range(0.1f, 0.25f)] public float previewSmoothing = 0.1f;
 	public LayerMask layersToIgnorePreview;

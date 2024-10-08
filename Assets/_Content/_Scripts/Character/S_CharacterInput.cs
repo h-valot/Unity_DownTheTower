@@ -19,6 +19,9 @@ public class CharacterInput : MonoBehaviour
 	[SerializeField] private RSE_Throw _rseThrow;
     [SerializeField] private RSE_ToggleInHand _rseToggleInHand;
 	[SerializeField] private RSE_Holding _rseHolding;
+    [SerializeField] private RSE_Pause _rsePause;
+    [SerializeField] private RSE_HideUI _rseHideUI;
+    [SerializeField] private RSO_GamePaused _rsoGamePaused;
 
 	[Header("Debugging")]
 	[ReadOnly] public Vector2 move;
@@ -71,9 +74,11 @@ public class CharacterInput : MonoBehaviour
 
 	public void OnLook(InputValue value)
 	{
-		look = value.Get<Vector2>();
-		_rseLook.Call(look);
-	}
+		if (_rsoGamePaused.value) look = Vector2.zero;
+        else look = value.Get<Vector2>();
+
+        _rseLook.Call(look);
+    }
 
 	public void OnJump(InputValue value)
 	{
@@ -87,8 +92,8 @@ public class CharacterInput : MonoBehaviour
 	}
 
 	public void OnThrow(InputValue value)
-	{
-		_rseThrow.Call(value.isPressed);
+    {
+        _rseThrow.Call(value.isPressed);
 	}
 
 	public void OnToggleInHand()
@@ -119,7 +124,7 @@ public class CharacterInput : MonoBehaviour
     public void OnCraftRope(InputValue value)
     {
         _rseCraft.Call(CharacterMotor.CraftType.Rope, value.isPressed);
-    }
+	}
 
 	public void OnHolding(InputValue input)
 	{

@@ -40,6 +40,9 @@ public class CharacterMotor : MonoBehaviour
     [SerializeField] private RSE_CancelAction _rseCancelAction;
 	[SerializeField] private RSE_CanInteract _rseCanInteract;
 	[SerializeField] private RSE_Holding _rseHolding;
+    [SerializeField] private RSE_ToggleInputs _rseToggleInputs;
+	[SerializeField] private RSE_KillCharacter _rseKillCharacter;
+	[SerializeField] private RSO_GamePaused _rsoGamePaused;
 
 	#endregion
 
@@ -119,9 +122,9 @@ public class CharacterMotor : MonoBehaviour
     }
 
 	private void Update()
-	{
+    {
 		UpdateCurrentState();
-	}
+    }
 
     private void LateUpdate()
     {
@@ -130,29 +133,19 @@ public class CharacterMotor : MonoBehaviour
 
     private void OnEnable()
 	{
-		_rseMove.action += Move;
-		_rseJump.action += Jump;
-		_rseSprint.action += Sprint;
-		_rseThrow.action += ToggleAim;
-		_rseCraft.action += ToggleCraft;
-		_rseToggleInHand.action += ToggleInHand;
-		_rseCancelAction.action += CancelAction;
-        _rseInteract.action += Interact;
-		_rseHolding.action += Holding;
-	}
+        _rseToggleInputs.action += ToggleInputs;
+        SubscribeInputs();
+
+        // debug
+        if (_characterConfig.startWithBag) return;
+
+        _rseCraft.action -= ToggleCraft;
+    }
 
 	private void OnDisable()
 	{
-		_rseMove.action -= Move;
-		_rseJump.action -= Jump;
-		_rseSprint.action -= Sprint;
-		_rseThrow.action -= ToggleAim;
-		_rseCraft.action -= ToggleCraft;
-		_rseToggleInHand.action -= ToggleInHand;
-        _rseCancelAction.action -= CancelAction;
-        _rseInteract.action -= Interact;
-		_rseHolding.action -= Holding;
-	}
+		UnsubscribeInputs();
+    }
 
 	#endregion
 
@@ -490,6 +483,8 @@ public class CharacterMotor : MonoBehaviour
 	/// 	(3) stun status,
 	/// 	(4) player's input magnitude - stops the character if the player don't command it to
 	/// </summary>
+	/// 
+
 	private void Accelerate()
 	{
 		// - variables -
@@ -659,13 +654,67 @@ public class CharacterMotor : MonoBehaviour
 
     #endregion
 
-	#region inputs
+    #region inputs
 
-	/// <summary>
-	/// 	update the movement input when pressed
-	/// </summary>
-	/// <param name="input">input direction value</param>
-	private void Move(Vector2 input)
+    /// <summary>
+    /// 	add character behavior to player inputs
+    /// </summary>
+    private void SubscribeInputs()
+    {
+        _rseMove.action += Move;
+        _rseJump.action += Jump;
+        _rseSprint.action += Sprint;
+        _rseThrow.action += ToggleAim;
+        _rseCraft.action += ToggleCraft;
+        _rseToggleInHand.action += ToggleInHand;
+        _rseCancelAction.action += CancelAction;
+        _rseInteract.action += Interact;
+		_rseKillCharacter.action += HandleDeath;
+		_rseHolding.action += Holding;
+    }
+
+    /// <summary>
+    /// 	remove character behavior from player inputs
+    /// </summary>
+    private void UnsubscribeInputs()
+    {
+        _rseMove.action -= Move;
+        _rseJump.action -= Jump;
+        _rseSprint.action -= Sprint;
+        _rseThrow.action -= ToggleAim;
+        _rseCraft.action -= ToggleCraft;
+        _rseToggleInHand.action -= ToggleInHand;
+        _rseCancelAction.action -= CancelAction;
+        _rseInteract.action -= Interact;
+		_rseKillCharacter.action -= HandleDeath;
+		_rseHolding.action -= Holding;
+    }
+
+	public void ToggleCraftInput(bool isActive)
+	{
+		if(isActive) _rseCraft.action += ToggleCraft;
+		else _rseCraft.action -= ToggleCraft;
+	}
+
+	private void ToggleInputs()
+	{
+		if (_rsoGamePaused.value)
+		{
+			CancelAction();
+			Sprint(false);
+			UnsubscribeInputs();
+		}
+		else
+		{
+			SubscribeInputs();
+		}
+	}
+
+    /// <summary>
+    /// 	update the movement input when pressed
+    /// </summary>
+    /// <param name="input">input direction value</param>
+    private void Move(Vector2 input)
 	{
 		_moveInput = input;
 	}
@@ -908,7 +957,8 @@ public class CharacterMotor : MonoBehaviour
                         {
 							_craftInHand.transform.SetParent(_robotHandSocket, false);
 							_craftInRobot = _craftInHand;
-							_craftInHand = null;
+                            _craftInRobot.transform.rotation = _robotHandSocket.rotation;
+                            _craftInHand = null;
                             _craftCoroutine = StartCoroutine(Craft(CraftType.Ladder, _torchConfig.craftingDuration));
                         }
 						else if (_craftInHand._craftType != CraftType.Ladder)
@@ -1422,6 +1472,7 @@ public class CharacterMotor : MonoBehaviour
 					{
                         _craftInRobot.transform.SetParent(_handSocket, false);
 						_craftInHand = _craftInRobot;
+                        _craftInHand.transform.rotation = _handSocket.transform.rotation;
                         _craftInRobot = null;
                     }
                 }
