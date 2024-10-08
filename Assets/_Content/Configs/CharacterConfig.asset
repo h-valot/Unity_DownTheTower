@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 816ba0c10377e2e4aab515f89adf1bd2, type: 3}
   m_Name: CharacterConfig
   m_EditorClassIdentifier: 
-  walkSpeed: 3
-  sprintSpeed: 5
+  walkSpeed: 2.25
+  sprintSpeed: 4
   speedChangeRate: 10
   uphillDeceleration:
     serializedVersion: 2
@@ -72,8 +72,8 @@ MonoBehaviour:
   gravity: -15
   airControlModifier: 0.4
   coyoteTime: 0.25
-  lethalHeight: 15
-  stunHeight: 9
+  lethalHeight: 12
+  stunHeight: 8
   stunDuration:
     serializedVersion: 2
     m_Curve:
@@ -98,7 +98,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  slowHeight: 7
+  slowHeight: 5
   slowDuration:
     serializedVersion: 2
     m_Curve:
