@@ -1464,8 +1464,8 @@ public class CharacterMotor : MonoBehaviour
                 if (_craftInHand.Throw(_thirdPersonCamera.transform))
 				{
 					// rope attachment exception
-					if ((Rope)_craftInHand != null) _rope = (Rope)_craftInHand;
-					_rope?.Attach(_harness);
+					_rope = _craftInHand as Rope;
+					if (_rope != null) _rope?.Attach(_harness);
 
 					_craftInHand = null;
 					if (_craftInRobot != null)
