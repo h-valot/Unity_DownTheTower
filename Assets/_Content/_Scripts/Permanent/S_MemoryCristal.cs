@@ -4,18 +4,30 @@ using UnityEngine;
 public class MemoryCristal : Interactible
 {
 
-    [SerializeField] private GameObject _door;
+    [SerializeField] private GameObject _firstDoor;
+    [SerializeField] private GameObject _secondDoor;
     [SerializeField] private Vector3 _openvector;
 
     private bool _doorOpen;
+    private void Start()
+    {
+        _firstDoor.transform.position += _openvector;
+    }
 
     public override void InteractionTrigger()
     {
-        if (_doorOpen == false)
+        if (!_doorOpen)
         {
-            _door.transform.DOMove(_door.transform.position + _openvector, 3f).SetId("Door");
+            MoveDoor(true, -_openvector);
+            MoveDoor(false, _openvector);
             _doorOpen = true;
         }
+    }
+
+    public void MoveDoor(bool isFirst, Vector3 direction)
+    {
+        if (isFirst) _firstDoor.transform.DOMove(_firstDoor.transform.position + direction, 3f);
+        else _secondDoor.transform.DOMove(_secondDoor.transform.position + direction, 3f);
     }
 
     private void Animation()
