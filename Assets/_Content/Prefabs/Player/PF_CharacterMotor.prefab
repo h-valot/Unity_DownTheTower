@@ -41,7 +41,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1235578971946886535}
   m_Layer: 0
-  m_Name: RopeAttach
+  m_Name: Harness
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -56,7 +56,7 @@ Transform:
   m_GameObject: {fileID: 3746762944583756115}
   serializedVersion: 2
   m_LocalRotation: {x: 0.08936619, y: 0.011019031, z: 0.0018417095, w: 0.9959362}
-  m_LocalPosition: {x: 0.003, y: 0.021, z: 0.18}
+  m_LocalPosition: {x: 0.003, y: 0.118, z: 0.198}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -179,9 +179,8 @@ MonoBehaviour:
   _characterDirection: {fileID: 1227528473670976241}
   _handSocket: {fileID: 49414001897713379}
   _robotHandSocket: {fileID: 6307973222714901695}
-  _ropeAttach: {fileID: 1235578971946886535}
+  _harness: {fileID: 1235578971946886535}
   _controller: {fileID: 8128893969073989014}
-  obiCollider: {fileID: 5025025688622371851}
   _thirdPersonCamera: {fileID: 0}
   _characterConfig: {fileID: 11400000, guid: 1940b106405212f469b44119418b1e43, type: 2}
   _ladderConfig: {fileID: 11400000, guid: 6502514940db9bb4e8194b9e57b509d9, type: 2}
@@ -202,7 +201,9 @@ MonoBehaviour:
   _rseInteract: {fileID: 11400000, guid: be798e2f50da79e448b01830a7c3441f, type: 2}
   _rseCancelAction: {fileID: 11400000, guid: f98da23f144768649811d562b2a9d4ad, type: 2}
   _rseCanInteract: {fileID: 11400000, guid: d033d8dff7bb85b4da9d48e829c06002, type: 2}
+  _rseHolding: {fileID: 11400000, guid: c9c94e9e268a50f498d998e18a041543, type: 2}
   _rseToggleInputs: {fileID: 11400000, guid: 42f42056b3a7bf54a9d3df0551639769, type: 2}
+  _rseKillCharacter: {fileID: 11400000, guid: 38188b704256e78469e87ce8957c4651, type: 2}
   _rsoGamePaused: {fileID: 11400000, guid: faef31959fcedf747aaeb875374bdc6b, type: 2}
   _currentState: 0
   _moveInput: {x: 0, y: 0}
@@ -213,6 +214,7 @@ MonoBehaviour:
   _isSprinting: 0
   _coyoteTimer: 0
   _gravityModifier: {x: 0, y: 0, z: 0}
+  _isJumping: 0
   _slopePercentage: 0
   _slopeAngle: 0
   _slopeDirection: {x: 0, y: 0, z: 0}
@@ -224,10 +226,11 @@ MonoBehaviour:
   _lastGroundedPosition: {x: 0, y: 0, z: 0}
   _lastGroundedDirection: {x: 0, y: 0, z: 0}
   _lastDistanceTravelled: 0
-  ropeLength: 0
   _craftInHand: {fileID: 0}
   _craftInRobot: {fileID: 0}
-  _isJumping: 0
+  _ropeState: 0
+  _isHolding: 0
+  _isAgainstWall: 0
 --- !u!143 &8128893969073989014
 CharacterController:
   m_ObjectHideFlags: 0

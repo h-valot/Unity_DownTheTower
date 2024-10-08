@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using NaughtyAttributes;
-using Obi;
 using UnityEngine;
 
 public class CharacterMotor : MonoBehaviour
@@ -14,12 +13,13 @@ public class CharacterMotor : MonoBehaviour
 	[SerializeField] private Transform _characterDirection;
 	[SerializeField] private Transform _handSocket;
 	[SerializeField] private Transform _robotHandSocket;
-	[SerializeField] private Transform _ropeAttach;
+	[SerializeField] private Transform _harness;
 	[SerializeField] private CharacterController _controller;
-	public ObiCollider obiCollider;
+
 	[Space(5)]
     [Header("External references")]
 	[SerializeField] private ThirdPersonCamera _thirdPersonCamera;
+
     [Space(5)]
     [Header("Scriptable references")]
 	[SerializeField] private CharacterConfig _characterConfig;
@@ -39,14 +39,16 @@ public class CharacterMotor : MonoBehaviour
 	[SerializeField] private RSE_Interact _rseInteract;
     [SerializeField] private RSE_CancelAction _rseCancelAction;
 	[SerializeField] private RSE_CanInteract _rseCanInteract;
+	[SerializeField] private RSE_Holding _rseHolding;
     [SerializeField] private RSE_ToggleInputs _rseToggleInputs;
+	[SerializeField] private RSE_KillCharacter _rseKillCharacter;
 	[SerializeField] private RSO_GamePaused _rsoGamePaused;
 
-    #endregion
+	#endregion
 
-    #region runtime variables
+	#region runtime variables
 
-    [Header("debug: animation")]
+	[Header("debug: animation")]
 	[ReadOnly] public AnimationState _currentState;
 
 	[Header("debug: move")]
@@ -60,6 +62,7 @@ public class CharacterMotor : MonoBehaviour
 
 	[Header("debug: gravity")]
 	[ReadOnly] public Vector3 _gravityModifier;
+	[ReadOnly] public bool _isJumping;
 
 	[Header("debug: slope")]
 	[ReadOnly] public float _slopePercentage;
@@ -78,8 +81,7 @@ public class CharacterMotor : MonoBehaviour
 	[ReadOnly] public Vector3 _lastGroundedDirection;
 	[ReadOnly] public float _lastDistanceTravelled;
 
-	[Header("debug: permanent")]
-	[ReadOnly] public float ropeLength;
+	[Header("debug: craft")]
 	[ReadOnly] public Permanent _craftInHand;
     [ReadOnly] public Permanent _craftInRobot;
 
@@ -100,12 +102,12 @@ public class CharacterMotor : MonoBehaviour
     private List<Interactible> _interactables;
     private Interactible _nearestInteractible;
 
-    // - permanent -
-	private PreRope _currentPreRope;
+	// - craft -
 	private Coroutine _craftCoroutine;
 
 	// ----- CONST -----
 	private const float _TERMINAL_VELOCITY = 53.0f;
+	private const float FIXED_GRAVITY = -2.0f;
 
 	#endregion
 
@@ -322,7 +324,7 @@ public class CharacterMotor : MonoBehaviour
 	private void CheckGround()
 	{
 		Vector3 origin = new Vector3(transform.position.x, transform.position.y + _characterConfig.groundCheckY, transform.position.z);
-		_isGrounded = Physics.Raycast(origin, Vector3.down, out _groundHit, _characterConfig.raycastLength);
+		_isGrounded = Physics.Raycast(origin, Vector3.down, out _groundHit, _characterConfig.groundRaycastLength);
 
 		// - when the character leaves the ground after being grounded-
 		if (!_isGrounded && !_groundedCheckLocked)
@@ -384,7 +386,7 @@ public class CharacterMotor : MonoBehaviour
 			+ Vector3.up * _characterConfig.groundCheckY
 			+ _characterDirection.forward * 0.5f;
 
-		if (Physics.Raycast(originForward, Vector3.down, out var slopeHitForward, _characterConfig.raycastLength))
+		if (Physics.Raycast(originForward, Vector3.down, out var slopeHitForward, _characterConfig.groundRaycastLength))
 		{
 			UnityEngine.Debug.DrawRay(originForward, Vector3.down, Color.white);
 
@@ -396,7 +398,7 @@ public class CharacterMotor : MonoBehaviour
 				+ Vector3.up * _characterConfig.groundCheckY
 				- _characterDirection.forward * 0.5f;
 
-			if (Physics.Raycast(originBackward, Vector3.down, out var slopeHitBackward, _characterConfig.raycastLength))
+			if (Physics.Raycast(originBackward, Vector3.down, out var slopeHitBackward, _characterConfig.groundRaycastLength))
 			{
 				UnityEngine.Debug.DrawRay(originBackward, Vector3.down, Color.white);
 
@@ -541,14 +543,16 @@ public class CharacterMotor : MonoBehaviour
 	}
 
 	/// <summary>
-	/// 	handle gravity modifier, and jump delay
+	/// 	handle gravity modifier, and jump delay.
+	/// 	by default the gravity modifier accelerate over time.
+	///		if we won't it to accelerate (eg. rope suspension gravity) set the param to false.
 	/// </summary>
-	private void ApplyGravity()
+	private void ApplyGravity(bool doAccelerate = true)
 	{
 		if (_isGrounded)
 		{
 			// stop our velocity dropping infinitely when grounded
-			if (_gravityModifier.y < 0.0f) _gravityModifier.y = -2.0f;
+			if (_gravityModifier.y < 0.0f) _gravityModifier.y = FIXED_GRAVITY;
 
 			// runs prevent jump timer
 			if (_jumpTimer >= 0.0f) _jumpTimer -= Time.deltaTime;
@@ -573,7 +577,16 @@ public class CharacterMotor : MonoBehaviour
 		// multiply by delta time twice to linearly speed up over time
 		if (_gravityModifier.y < _TERMINAL_VELOCITY)
 		{
-			_gravityModifier.y += _characterConfig.gravity * Time.deltaTime;
+			if (doAccelerate)
+			{
+				// cumulative gravity acceleration
+				_gravityModifier.y += _characterConfig.gravity * Time.deltaTime;
+			}
+			else 
+			{
+				// lerp towards the constant gravity modifier
+				_gravityModifier.y = Mathf.Lerp(_gravityModifier.y, FIXED_GRAVITY, Time.deltaTime);
+			}
 		}
 	}
 
@@ -643,50 +656,6 @@ public class CharacterMotor : MonoBehaviour
 
     #region inputs
 
-    private Rope _lastInstantiatedRope;
-	private Rope _equippedRope;
-
-	/// <summary>
-	/// 	temporary function to handle ladder and rope placement.
-	/// </summary>
-	private void HandleInputs()
-	{
-		// TODO - whenever one of the crafting input are pressed, switch to craft state
-		// reduce the movement, switch to aim camera, disable sprinting, disable jumping
-		// regroup preladder with prerope to make one modular component that instantiate
-		// either rope or ladder based on player's input
-
-		// - rope -
-		if (Input.GetKeyDown(KeyCode.G))
-		{
-			_currentPreRope = Instantiate(_ropeConfig.pfPreRope);
-		}
-
-		if (Input.GetKeyUp(KeyCode.G))
-		{
-			_lastInstantiatedRope = _currentPreRope.InstantiateRope();
-			if (_currentPreRope != null)
-			{
-				Destroy(_currentPreRope.gameObject);
-				_currentPreRope = null;
-			}
-		}
-
-		if (Input.GetKeyDown(KeyCode.K)
-			&& _lastInstantiatedRope != null)
-		{
-			_lastInstantiatedRope.Interact(this);
-			_equippedRope = _lastInstantiatedRope;
-		}
-
-		if (Input.GetKeyDown(KeyCode.L)
-			&& _equippedRope != null)
-		{
-			_equippedRope.Cancel();
-			_equippedRope = null;
-		}
-	}
-
     /// <summary>
     /// 	add character behavior to player inputs
     /// </summary>
@@ -700,6 +669,8 @@ public class CharacterMotor : MonoBehaviour
         _rseToggleInHand.action += ToggleInHand;
         _rseCancelAction.action += CancelAction;
         _rseInteract.action += Interact;
+		_rseKillCharacter.action += HandleDeath;
+		_rseHolding.action += Holding;
     }
 
     /// <summary>
@@ -715,6 +686,8 @@ public class CharacterMotor : MonoBehaviour
         _rseToggleInHand.action -= ToggleInHand;
         _rseCancelAction.action -= CancelAction;
         _rseInteract.action -= Interact;
+		_rseKillCharacter.action -= HandleDeath;
+		_rseHolding.action -= Holding;
     }
 
 	public void ToggleCraftInput(bool isActive)
@@ -746,8 +719,6 @@ public class CharacterMotor : MonoBehaviour
 		_moveInput = input;
 	}
 
-	public bool _isJumping;
-
 	/// <summary>
 	/// 	add vertical velocity to the gravity modifier to make it jump
 	/// </summary>
@@ -774,12 +745,55 @@ public class CharacterMotor : MonoBehaviour
 	}
 
 	/// <summary>
-	/// 	update the sprint input value
+	/// 	update the sprint input value.
 	/// </summary>
 	/// <param name="isSprinting">is the input pressed</param>
 	private void Sprint(bool isSprinting)
 	{
 		_isSprinting = isSprinting;
+	}
+
+	/// <summary>
+	/// 	update the holding rope input value.
+	/// </summary>
+	/// <param name="isHolding">is the input pressed</param>
+	private void Holding(bool isHolding)
+	{
+		if (_rope == null)
+		{
+			_isHolding = false;
+			return;
+		}
+
+		_isHolding = isHolding;
+
+		// handle both hold methods
+		switch (_characterConfig.ropeHoldingMethod)
+		{
+			case RopeHolding.HOLD_TO_STOP:
+				if (_isHolding)
+				{
+					_rope.UpdateHoldLength();
+				}
+				else
+				{
+					// reset the gravity velocity
+					_gravityModifier = Vector3.zero;
+				}
+				break;
+
+			case RopeHolding.HOLD_TO_LET_GO:
+				if (_isHolding)
+				{
+					// reset the gravity velocity
+					_gravityModifier = Vector3.zero;
+				}
+				else
+				{
+					_rope.UpdateHoldLength();
+				}
+				break;
+		}
 	}
 
 	/// <summary>
@@ -792,9 +806,17 @@ public class CharacterMotor : MonoBehaviour
 
 	private void CancelAction()
 	{
+		// the cancel action is contextual
+		// do various things based on the context
 
+		// rope context
+		if (_rope != null)
+		{
+			_rope.Detach();
+			_rope = null;
+			_isHolding = false;
+		}
 	}
-
 
 	#endregion
 
@@ -807,9 +829,7 @@ public class CharacterMotor : MonoBehaviour
 
 	private void UpdateLocomotionState()
 	{
-		// temp
-		HandleInputs();
-
+		// checks
 		CheckGround();
 
 		// speed calculations
@@ -822,7 +842,13 @@ public class CharacterMotor : MonoBehaviour
 		ApplyGravity();
 		HandleMovement();
 
-		// HandleRopeLength();
+		// exit locomotion state
+		if (_rope != null 
+			&& _rope.isPlaced
+			&& _rope.isConnected)
+		{
+			SwitchState(AnimationState.ROPE);
+		}
 	}
 
 	private void LateUpdateLocomotionState()
@@ -948,7 +974,26 @@ public class CharacterMotor : MonoBehaviour
                     break;
 
                 case CraftType.Rope:
-                    break;
+					if (_craftInHand != null)
+					{
+						if (_craftInHand._craftType == CraftType.Torch)
+						{
+							_craftInHand.transform.SetParent(_robotHandSocket, false);
+							_craftInRobot = _craftInHand;
+							_craftInHand = null;
+							_craftCoroutine = StartCoroutine(Craft(CraftType.Rope, _ropeConfig.craftingDuration));
+						}
+						else if (_craftInHand._craftType != CraftType.Rope)
+						{
+							Destroy(_craftInHand.gameObject);
+							_craftCoroutine = StartCoroutine(Craft(CraftType.Rope, _ropeConfig.craftingDuration));
+						}
+					}
+					else
+					{
+						_craftCoroutine = StartCoroutine(Craft(CraftType.Rope, _ropeConfig.craftingDuration));
+					}
+					break;
             }
         }
         else // if craft button is released
@@ -963,19 +1008,15 @@ public class CharacterMotor : MonoBehaviour
                 SwitchState(AnimationState.LOCOMOTION);
             }
         }
-
     }
 
-    private void EnterCraftState()
+	private void EnterCraftState()
 	{
 
 	}
 
 	private void UpdateCraftState()
 	{
-		// temp
-		HandleInputs();
-
 		CheckGround();
 		HandleSlope();
 		HandleStun();
@@ -990,26 +1031,15 @@ public class CharacterMotor : MonoBehaviour
 
 	}
 
-    private void CraftRope()
-	{
-
-	}
-
-    private void CraftLadder()
-    {
-
-    }
-
     /// <summary>
     /// 	instantiate the torch prefab after the fixed duration.
     /// </summary>
-    private IEnumerator Craft(CraftType _objectToCraft,float _craftDuration)
+    private IEnumerator Craft(CraftType _objectToCraft, float _craftDuration)
     {
         // wait the crafting duration
         yield return new WaitForSeconds(_craftDuration);
 
 		// instantiate the crafted object
-		
 		switch (_objectToCraft)
 		{
             case CraftType.None:
@@ -1017,19 +1047,20 @@ public class CharacterMotor : MonoBehaviour
 
             case CraftType.Torch:
                 _craftInHand = Instantiate(_torchConfig.pfTorch, _handSocket.transform);
-                _craftInHand.transform.position = _handSocket.transform.position;
                 break;
 
 			case CraftType.Ladder:
 				_craftInHand = Instantiate(_ladderConfig.PF_Ladder, _handSocket.transform);
-                _craftInHand.transform.position = _handSocket.transform.position;
                 break;
 
-			case CraftType.Rope: 
+			case CraftType.Rope:
+				_craftInHand = Instantiate(_ropeConfig.pfRope, _handSocket.transform);
 				break;
 		}
 
-        _craftCoroutine = null;
+		_craftInHand.transform.position = _handSocket.transform.position;
+
+		_craftCoroutine = null;
         SwitchState(AnimationState.LOCOMOTION);
     }
 
@@ -1045,18 +1076,70 @@ public class CharacterMotor : MonoBehaviour
 		Ladder,
 		Rope,
 	}
+
     #endregion
 
     #region rope state
 
-    private void EnterRopeState()
+	#region variables
+
+	public enum RopeState
+	{
+		GROUNDED = 0,
+		PARTIAL_SUSPENSION,
+		COMPLETE_SUSPENSION,
+	}
+
+	[Header("debug: rope")]
+	[ReadOnly] public RopeState _ropeState;
+	[ReadOnly] public bool _isHolding;
+	[ReadOnly] public bool _isAgainstWall;
+
+	private Rope _rope;
+
+	#endregion
+
+	#region animation-state-related functions
+
+	private void EnterRopeState()
 	{
 
 	}
 
 	private void UpdateRopeState()
 	{
+		// checks
+		CheckGround();
+		CheckWall();
 
+		// exit rope state
+		if (_rope == null
+			|| _rope != null && !_rope.isConnected)
+		{
+			SwitchState(AnimationState.LOCOMOTION);
+			return;
+		}
+
+		// state machine update rope state
+		HandleRopeState();
+		switch (_ropeState)
+		{
+			case RopeState.GROUNDED:
+				UpdateRopeGroundedState();
+				break;
+
+			case RopeState.PARTIAL_SUSPENSION:
+				UpdateRopePartialSuspensionState();
+				break;
+
+			case RopeState.COMPLETE_SUSPENSION:
+				UpdateRopeCompleteSuspensionState();
+				break;
+		}
+
+		// apply rope holding constraint after the input movements
+		// this allow to avoid glitchy movements
+		HandleRopeHolding();
 	}
 
 	private void LateUpdateRopeState()
@@ -1064,38 +1147,272 @@ public class CharacterMotor : MonoBehaviour
 
 	}
 
-
-    private void HandleRopeLength()
+	private void ExitRopeState()
 	{
-		// exit, if there is no rope equipped
-		if (_equippedRope == null) return;
+		_rope = null;
+	}
 
-		if (Physics.Linecast(_ropeAttach.transform.position, _equippedRope.folds[^1], out var addHit, ~_ropeConfig.foldLayer))
+	#endregion
+
+	#region rope-state-related functions
+
+	/// <summary>
+	/// 	update the current rope state to match the last checks.
+	/// </summary>
+	private void HandleRopeState()
+	{
+		if (_isGrounded)
 		{
-			_equippedRope.folds.Add(addHit.point);
+			_ropeState = RopeState.GROUNDED;
 		}
-
-		if (_equippedRope.folds.Count >= 2
-			&& !Physics.Linecast(_ropeAttach.transform.position, _equippedRope.folds[^2], out var removeHit, ~_ropeConfig.foldLayer))
+		else
 		{
-			_equippedRope.folds.Remove(_equippedRope.folds[^1]);
-		}
-
-		ropeLength = _equippedRope.GetLength();
-		if (ropeLength >= _ropeConfig.maxLength)
-		{
-			// reposition the player within the rope radius
-			if (Vector3.Dot(_characterDirection.forward, (_ropeAttach.transform.position - _equippedRope.folds[^1]).normalized) >= 0)
+			if (_isAgainstWall)
 			{
-				_velocity = Vector3.zero;
+				_ropeState = RopeState.PARTIAL_SUSPENSION;
+			}
+			else
+			{
+				_ropeState = RopeState.COMPLETE_SUSPENSION;
 			}
 		}
 	}
 
-	private void ExitRopeState()
+	/// <summary>
+	/// 	same as the base locomotion update with the rope limitation extra-layer.
+	/// 	this state changes if the characters is no more grounded but still attach to a rope.
+	/// </summary>
+	private void UpdateRopeGroundedState()
 	{
+		// speed calculations
+		HandleSlope();
+		HandleStun();
+		HandleSlow();
+		Accelerate();
 
+		// velocity calculations
+		ApplyGravity();
+		HandleMovement();
 	}
+
+	/// <summary>
+	/// 	handle movement related to the front wall. 
+	/// 	left / right, jump, go down the rope movement.
+	/// 	jumping and falling off the wall on an edge, change from partial to complete suspension state.
+	/// 	touching the ground, change from partial to grounded state.
+	/// </summary>
+	private void UpdateRopePartialSuspensionState()
+	{
+		HandleRopeMovement();
+		FaceFoldCenter();
+	}
+
+	/// <summary>
+	/// 	handle movement in the void suspended to the rope. 
+	/// 	left / right, forward / backward, go down the rope movement.
+	/// 	gain support against a wall, change from complete to partial suspension state.
+	/// 	touching the ground, change from complete to grounded state.
+	/// </summary>
+	private void UpdateRopeCompleteSuspensionState()
+	{
+		HandleRopeMovement();
+		FaceFoldCenter();
+	}
+
+	#endregion
+
+	#region rope functions
+
+	/// <summary>
+	/// 	check if there is a collider in front of the character using a raycast.
+	/// </summary>
+	private void CheckWall()
+	{
+		_isAgainstWall = Physics.SphereCast(
+			_controller.center,
+			_controller.height / 2f,
+			_characterDirection.forward,
+			out var hitInfo,
+			_controller.height / 2f + 0.05f,
+			_characterConfig.againstWallLayerToInclude
+		);
+
+		if (_isAgainstWall)
+		{
+			Debug.Log("CHARACTER_MOTOR: wall touched");
+			Vector3 hitPoint = new Vector3(hitInfo.point.x, transform.position.y, hitInfo.point.z);
+			Vector3 touchedDirection = hitPoint - transform.position;
+			_characterDirection.forward = touchedDirection.normalized;
+		}
+	}
+
+	/// <summary>
+	/// 	add spherical locomotion constraint to the character movement. 
+	/// </summary>
+	private void HandleRopeHolding()
+	{
+		// assert: there is no equipped rope 
+		if (_rope == null) return;
+
+		// assert: holding input method
+		switch (_characterConfig.ropeHoldingMethod)
+		{
+			case RopeHolding.HOLD_TO_STOP:
+				// while hold to stop, we don't constraint the character if the player IS NOT holding the button
+				if (!_isHolding) return;
+				break;
+
+			case RopeHolding.HOLD_TO_LET_GO:
+				// while hold to let go, we don't constraint the character if the player IS holding the button
+				if (_isHolding) return;
+				break;
+		}
+
+		// get the distance between the current character's position and the position of the last fold
+		Vector3 towardCharacter = transform.position - _rope.folds[^1];
+
+		// re-snap the character's position within the spherical constraint
+		if (towardCharacter.magnitude > _rope.holdLength)
+		{
+			transform.position = _rope.folds[^1] + towardCharacter.normalized * _rope.holdLength;
+
+			// transform position of the character controller has been modified outside the movement function
+			// call this unity function to synchronize transform to avoid glitchy movement effects
+			Physics.SyncTransforms();
+		}
+	}
+
+	/// <summary>
+	/// 	make the character facing center of the last fold (not with the y-axis).
+	/// </summary>
+	private void FaceFoldCenter()
+	{
+		// assert: holding input method
+		switch (_characterConfig.ropeHoldingMethod)
+		{
+			case RopeHolding.HOLD_TO_STOP:
+				// while hold to stop, we don't constraint the character if the player IS NOT holding the button
+				if (!_isHolding) return;
+				break;
+
+			case RopeHolding.HOLD_TO_LET_GO:
+				// while hold to let go, we don't constraint the character if the player IS holding the button
+				if (_isHolding) return;
+				break;
+		}
+
+		// assert: character is touching a wall
+		if (_isAgainstWall) return;
+ 
+		// assert: center-character distance is greater than the threshold 
+		if (Mathf.Abs(_rope.holdLength - (_rope.folds[^1] - transform.position).magnitude) > _characterConfig.facingCenterThreshold) return;
+
+		Vector3 towardsCenter = transform.position - new Vector3(_rope.folds[^1].x, transform.position.y, _rope.folds[^1].z);
+		_characterDirection.forward = -towardsCenter.normalized;
+	}
+
+	private void HandleRopeMovement()
+	{
+		// assert: there is no equipped rope 
+		if (_rope == null) return;
+
+		// player direction inputs
+		Vector3 inputDirectionGrounded = _cameraTransform.forward * _moveInput.y + _cameraTransform.right * _moveInput.x;
+		Vector3 inputDirectionWall = _characterDirection.right * _moveInput.x;
+
+		// do the character fall based on the rope holding method
+		bool doFall = false;
+		switch (_characterConfig.ropeHoldingMethod)
+		{
+			case RopeHolding.HOLD_TO_STOP:
+				if (_isHolding) doFall = false;
+				else doFall = true;
+				break;
+
+			case RopeHolding.HOLD_TO_LET_GO:
+				if (_isHolding) doFall = true;
+				else doFall = false;
+				break;
+		}
+
+		// - character is not holding the rope -
+
+		if (doFall)
+		{	
+			// apply grounded and falling like forces
+			ApplyGravity();
+
+			// move the character with air control scalar
+			_controller.Move(Time.deltaTime * (
+				// last ground direction and speed to keep the inertia going on
+				_lastGroundedDirection.normalized * _lastGroundedSpeed
+				// current direction and speed reduced by the air control modifier to slightly moves while in air
+				+ inputDirectionGrounded * _targetSpeed * _characterConfig.airControlModifier
+				+ _gravityModifier
+			));
+
+			return;
+		}
+
+		// - character is holding the rope -
+
+		// from the attraction point (which is the lowest point on the sphere)
+		// get the normalized direction towards this point with a down offset
+		// so the direction is more likely to be tangent to the sphere
+		Vector3 attractionPoint = _rope.folds[^1] + Vector3.down * _rope.holdLength;
+		Vector3 sphereCharaSnapPoint = _rope.folds[^1] + (_rope.folds[^1] - _rsoCharacterPosition.value).normalized * _rope.holdLength;
+		Vector3 offsetAttractionPoint = _rope.folds[^1] + Vector3.down * (attractionPoint - sphereCharaSnapPoint).magnitude;
+		Vector3 attractionDirection = (offsetAttractionPoint - sphereCharaSnapPoint).normalized;
+
+		// TODO:
+		// (1) acceleration movement while against the wall
+		// (2) reduce the character speed to 0 when approching the limit angles of the balancier effect
+		// (3) jump off the wall logic
+		// (4) lerp the speed acceleration when starting going down the rope 
+
+		// apply movements
+		// partial rope suspension
+		if (_isAgainstWall)
+		{
+			_controller.Move(Time.deltaTime * (
+				// player's inputs
+				inputDirectionGrounded * _characterConfig.partialSuspensionSpeed
+				// attraction direction is a custom gravity force applied while on the rope
+				+ attractionDirection * _characterConfig.partialSphericalAttractiveForce
+			));
+		}
+
+		// complete rope suspension
+		else
+		{
+			_controller.Move(Time.deltaTime * (
+				// player's inputs
+				inputDirectionGrounded * _characterConfig.completeSuspensionSpeed
+				// attraction direction is a custom gravity force applied while on the rope
+				+ attractionDirection * _characterConfig.partialSphericalAttractiveForce
+			));
+		}
+
+		// update variables
+		if (_rsoCharacterPosition.value != _characterDirection.position) { _rsoCharacterPosition.value = _characterDirection.position; }
+		if (_rsoCharacterForward.value != _characterDirection.forward) { _rsoCharacterForward.value = _characterDirection.forward; }
+	}
+
+#if UNITY_EDITOR
+	private void OnDrawGizmos()
+	{
+		// assert: rope ref is null
+		if (_rope is null) return;
+
+		// assert: rope isn't placed yet
+		if (!_rope.isPlaced) return;
+
+		Gizmos.color = Color.magenta;
+		Gizmos.DrawWireSphere(_rope.folds[^1], _rope.holdLength);
+	}
+#endif
+
+	#endregion
 
 	#endregion
 
@@ -1146,7 +1463,11 @@ public class CharacterMotor : MonoBehaviour
 			{
                 if (_craftInHand.Throw(_thirdPersonCamera.transform))
 				{
-                    _craftInHand = null;
+					// rope attachment exception
+					if ((Rope)_craftInHand != null) _rope = (Rope)_craftInHand;
+					_rope?.Attach(_harness);
+
+					_craftInHand = null;
 					if (_craftInRobot != null)
 					{
                         _craftInRobot.transform.SetParent(_handSocket, false);
@@ -1169,9 +1490,6 @@ public class CharacterMotor : MonoBehaviour
 
     private void UpdateAimState()
     {
-		// temp
-        HandleInputs();
-
         CheckGround();
         HandleSlope();
         HandleStun();
@@ -1234,5 +1552,5 @@ public class CharacterMotor : MonoBehaviour
 		_rseCanInteract.Call(_interactables.Count > 0);
     }
 
-    #endregion
+	#endregion
 }

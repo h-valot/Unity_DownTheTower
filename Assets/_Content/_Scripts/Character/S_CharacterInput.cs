@@ -18,11 +18,12 @@ public class CharacterInput : MonoBehaviour
     [SerializeField] private RSE_Craft _rseCraft;
 	[SerializeField] private RSE_Throw _rseThrow;
     [SerializeField] private RSE_ToggleInHand _rseToggleInHand;
+	[SerializeField] private RSE_Holding _rseHolding;
     [SerializeField] private RSE_Pause _rsePause;
     [SerializeField] private RSE_HideUI _rseHideUI;
     [SerializeField] private RSO_GamePaused _rsoGamePaused;
 
-    [Header("Debugging")]
+	[Header("Debugging")]
 	[ReadOnly] public Vector2 move;
 	[ReadOnly] public Vector2 look;
 	[ReadOnly] public bool sprint;
@@ -123,15 +124,10 @@ public class CharacterInput : MonoBehaviour
     public void OnCraftRope(InputValue value)
     {
         _rseCraft.Call(CharacterMotor.CraftType.Rope, value.isPressed);
-    }
+	}
 
-	public void OnPause(InputValue value)
+	public void OnHolding(InputValue input)
 	{
-		_rsePause.Call();
-    }
-
-    public void OnHideUI(InputValue value)
-    {
-        _rseHideUI.Call();
-    }
+		_rseHolding.Call(input.isPressed);
+	}
 }

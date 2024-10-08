@@ -34,7 +34,6 @@ public class Ladder : Permanent
         _previewLadder.transform.rotation = Quaternion.identity;
     }
 
-    //Call in Late Update
     public override void PreviewThrow(Transform _cameraTransform)
     {
         if (Physics.Raycast(_cameraTransform.position, GetPositionRayDirection(_cameraTransform), out var hit, _ladderConfig.maxDistFromCamera, ~(_ladderConfig.layersToIgnore)))

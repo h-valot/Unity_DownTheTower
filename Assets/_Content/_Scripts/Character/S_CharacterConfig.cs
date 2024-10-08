@@ -13,6 +13,7 @@ public class CharacterConfig : ScriptableObject
 	[Tooltip("Acceleration and deceleration rate. The current move speed of the character increases and decreases times this value times time.deltatime.")]
 	public float speedChangeRate = 10.0f;
 
+
 	[Header("Slope")]
 	[Tooltip("Percentage of character speed when ascending. The current move speed is reduced by this value based on the slope angle")]
 	public AnimationCurve uphillDeceleration;
@@ -33,7 +34,7 @@ public class CharacterConfig : ScriptableObject
 	public float groundCheckY = 0.33f;
 
 	[Tooltip("How far raycast moves down from origin point calculate from the groundCheckY value")]
-	public float raycastLength = 0.75f;
+	public float groundRaycastLength = 0.75f;
 
 
 	[Header("Jump")]
@@ -72,6 +73,29 @@ public class CharacterConfig : ScriptableObject
 
 	[Tooltip("Percentage of the target speed reduction while slowed")]
 	public AnimationCurve slowPercentage;
+
+
+	[Header("Rope")]
+	[Tooltip("HOLD_TO_STOP: stop the character from getting any further away from the rope base when pressing the corresponding input. HOLD_TO_LET_GO: letting the character getting further from the rope base when pressing the corresponding input.")]
+	public RopeHolding ropeHoldingMethod;
+
+	[Tooltip("Against wall raycast will include only referenced layers.")]
+	public LayerMask againstWallLayerToInclude;
+
+	[Tooltip("Scalar that multiply the direction towards the attraction point while on the partial rope suspension (eg. character against a wall)")]
+	public float partialSphericalAttractiveForce = 2.0f;
+
+	[Tooltip("Scalar that multiply the player's input direction while on the partial rope suspension (eg. character against a wall).")]
+	public float partialSuspensionSpeed = 3.0f;
+
+	[Tooltip("Scalar that multiply the direction towards the attraction point while on the complete rope suspension (eg. character in the void).")]
+	public float completeSphericalAttractiveForce = 3.0f;
+
+	[Tooltip("Scalar that multiply the player's input direction while on the complete rope suspension (eg. character in the void).")]
+	public float completeSuspensionSpeed = 4.0f;
+
+	[Tooltip("Start facing the center when the distance between the character and the hold rope radius is less than this value.")]
+	public float facingCenterThreshold = 0.25f;
 
 
 	[Header("Camera")]

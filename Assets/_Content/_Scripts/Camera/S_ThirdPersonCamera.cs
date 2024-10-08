@@ -93,7 +93,11 @@ public class ThirdPersonCamera : MonoBehaviour
 			Vector3 moveDirection = _cameraDirection.forward * _moveInput.y + _cameraDirection.right * _moveInput.x;
 			if (_moveInput != Vector2.zero)
 			{
-				_graphicsDirection.forward = Vector3.Slerp(_graphicsDirection.forward, moveDirection.normalized, Time.deltaTime * _characterConfig.rotationSpeed);
+				_graphicsDirection.forward = Vector3.Slerp(
+					_graphicsDirection.forward, 
+					moveDirection.normalized, 
+					Time.deltaTime * _characterConfig.rotationSpeed
+				);
 			}
 		}
 

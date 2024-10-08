@@ -17,7 +17,7 @@ public class Torch : Permanent
 
 
     // ----- PRIVATE VARIABLES -----
-    private bool _isActive = false;
+    public bool _isActive = false;
 
     private void Start()
     {

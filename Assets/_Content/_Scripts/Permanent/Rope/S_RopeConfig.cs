@@ -4,23 +4,32 @@ using UnityEngine;
 public class RopeConfig : ScriptableObject
 {
 	[Header("Prefabs")]
-	public PreRope pfPreRope;
 	public Rope pfRope;
+	public RopeSegment pfSegment;
 
 	[Header("Settings")]
+	public int maxSegmentInstantiatedPerFrame = 5;
 	public float maxLength;
-	public LayerMask foldLayer;
+	public LayerMask foldLayerToIgnore;
+	public float minFoldDistance = 0.25f;
+
+	[Header("Color")]
+	public Color safeColor;
+	public Color midColor;
+	public Color dangerColor;
 
 	[Header("Deploy")]
-	public float maxHeight = 4f;
-	public float additionalRaycastHeight = 0.5f;
+	public float heightLimit = 1f;
 	public LayerMask layersToIgnore;
+	public float craftingDuration = 0f;
 
-	[Header("Placement")]
-	public float minDistFromPlayer = 1f;
-	public float maxDistFromPlayer = 4f;
+	[Header("Check")]
+	public float minDistanceFromWall = 0.4f;
+	[Tooltip("1f = 0 degree ; 0f = 90 degrees ; -1f = 180 degrees")]
+	public float maxGroundAngle = 0.6f;
 
 	[Header("Camera")]
-	public float minCameraAngle = 1f;
-	public float maxCameraAngle = 30f;
+	public float maxDistFromCamera = 8f;
+	public float cameraOffsetAngle = 20f;
+	public float maxCameraDownwardClamp = 45f;
 }
