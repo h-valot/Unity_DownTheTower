@@ -9,13 +9,14 @@ public class ToxicGas: MonoBehaviour
     [SerializeField] private GameObject _gaz;
     [SerializeField] private ToxicConfig _toxicConfig;
     [SerializeField] private CharacterMotor _characterMotor;
+    [SerializeField] private RSE_KillCharacter _rseKillCharacter;
 
 
     public void TorchHasEnter(Torch _torch)
     {
         if (_torch._isActive)
         {
-            _characterMotor.HandleDeath();
+            _rseKillCharacter.Call();
         }
 
         else
@@ -29,7 +30,7 @@ public class ToxicGas: MonoBehaviour
 
     public void CharacterHasEnter(CharacterMotor _character)
     {
-        _character.HandleDeath();
+        _rseKillCharacter.Call();
     }
 
     private IEnumerator TimetoRefill(float _cooldown)
