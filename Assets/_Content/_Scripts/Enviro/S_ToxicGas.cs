@@ -8,26 +8,23 @@ public class ToxicGas: MonoBehaviour
     [SerializeField] private List<GameObject> _mushroomsList;
     [SerializeField] private GameObject _gaz;
     [SerializeField] private ToxicConfig _toxicConfig;
+    [SerializeField] private CharacterMotor _characterMotor;
 
-    private void OnTriggerEnter(Collider other)
-    {
-        
-        if (other.TryGetComponent<CharacterMotor>(out var _character))
-        {
-            _character.HandleDeath();
-        }
-
-        if (other.TryGetComponent<Torch>(out var _torch))
-        {
-
-        }
-    }
 
     public void TorchHasEnter(Torch _torch)
     {
-        Destroy(_torch.gameObject);
-        _gaz.SetActive(false);
-        StartCoroutine(TimetoRefill(_toxicConfig.cooldownToRefill));
+        if (_torch._isActive)
+        {
+            _characterMotor.HandleDeath();
+        }
+
+        else
+        {
+            Destroy(_torch.gameObject);
+            _gaz.SetActive(false);
+            StartCoroutine(TimetoRefill(_toxicConfig.cooldownToRefill));
+            Debug.Log("Je tente de détruire le nuage");
+        }
     }
 
     public void CharacterHasEnter(CharacterMotor _character)
