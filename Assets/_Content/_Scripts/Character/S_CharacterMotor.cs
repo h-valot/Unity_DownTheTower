@@ -40,6 +40,7 @@ public class CharacterMotor : MonoBehaviour
     [SerializeField] private RSE_CancelAction _rseCancelAction;
 	[SerializeField] private RSE_CanInteract _rseCanInteract;
     [SerializeField] private RSE_ToggleInputs _rseToggleInputs;
+	[SerializeField] private RSE_KillCharacter _rseKillCharacter;
 	[SerializeField] private RSO_GamePaused _rsoGamePaused;
 
     #endregion
@@ -700,6 +701,7 @@ public class CharacterMotor : MonoBehaviour
         _rseToggleInHand.action += ToggleInHand;
         _rseCancelAction.action += CancelAction;
         _rseInteract.action += Interact;
+		_rseKillCharacter.action += HandleDeath;
     }
 
     /// <summary>
@@ -715,6 +717,7 @@ public class CharacterMotor : MonoBehaviour
         _rseToggleInHand.action -= ToggleInHand;
         _rseCancelAction.action -= CancelAction;
         _rseInteract.action -= Interact;
+		_rseKillCharacter.action -= HandleDeath;
     }
 
 	public void ToggleCraftInput(bool isActive)
