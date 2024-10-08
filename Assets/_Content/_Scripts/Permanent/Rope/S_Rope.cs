@@ -235,7 +235,19 @@ public class Rope : Permanent
 		// assert: character ref null
 		if (_characterHarness == null) return;
 
-		Gizmos.color = Color.red;
+		if (GetTotalLength() <= _ropeConfig.maxLength / 2f)
+		{
+			Gizmos.color = _ropeConfig.safeColor;
+		}
+		else if (GetTotalLength() <= 3 * (_ropeConfig.maxLength / 4f))
+		{
+			Gizmos.color = _ropeConfig.midColor;
+		}
+		else 
+		{
+			Gizmos.color = _ropeConfig.dangerColor;
+		}
+
 		for (int i = 0; i < folds.Count; i++)
 		{
 			Gizmos.DrawLine(folds[i], i + 1 >= folds.Count ? _characterHarness.transform.position : folds[i + 1]);

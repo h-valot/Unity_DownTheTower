@@ -718,14 +718,32 @@ public class CharacterMotor : MonoBehaviour
 
 		_isHolding = isHolding;
 
-		if (_isHolding)
+		// handle both hold methods
+		switch (_characterConfig.ropeHoldingMethod)
 		{
-			_rope.UpdateHoldLength();
-		}
-		else
-		{
-			// reset the gravity velocity
-			_gravityModifier = Vector3.zero;
+			case RopeHolding.HOLD_TO_STOP:
+				if (_isHolding)
+				{
+					_rope.UpdateHoldLength();
+				}
+				else
+				{
+					// reset the gravity velocity
+					_gravityModifier = Vector3.zero;
+				}
+				break;
+
+			case RopeHolding.HOLD_TO_LET_GO:
+				if (_isHolding)
+				{
+					// reset the gravity velocity
+					_gravityModifier = Vector3.zero;
+				}
+				else
+				{
+					_rope.UpdateHoldLength();
+				}
+				break;
 		}
 	}
 
@@ -1186,8 +1204,19 @@ public class CharacterMotor : MonoBehaviour
 		// assert: there is no equipped rope 
 		if (_rope == null) return;
 
-		// assert: player do not command the character to hold the rope
-		if (!_isHolding) return;
+		// assert: holding input method
+		switch (_characterConfig.ropeHoldingMethod)
+		{
+			case RopeHolding.HOLD_TO_STOP:
+				// while hold to stop, we don't constraint the character if the player IS NOT holding the button
+				if (!_isHolding) return;
+				break;
+
+			case RopeHolding.HOLD_TO_LET_GO:
+				// while hold to let go, we don't constraint the character if the player IS holding the button
+				if (_isHolding) return;
+				break;
+		}
 
 		// get the distance between the current character's position and the position of the last fold
 		Vector3 towardCharacter = transform.position - _rope.folds[^1];
@@ -1208,8 +1237,19 @@ public class CharacterMotor : MonoBehaviour
 	/// </summary>
 	private void FaceFoldCenter()
 	{
-		// assert: player do not command the character to hold the rope
-		if (!_isHolding) return;
+		// assert: holding input method
+		switch (_characterConfig.ropeHoldingMethod)
+		{
+			case RopeHolding.HOLD_TO_STOP:
+				// while hold to stop, we don't constraint the character if the player IS NOT holding the button
+				if (!_isHolding) return;
+				break;
+
+			case RopeHolding.HOLD_TO_LET_GO:
+				// while hold to let go, we don't constraint the character if the player IS holding the button
+				if (_isHolding) return;
+				break;
+		}
 
 		// assert: character is touching a wall
 		if (_isAgainstWall) return;
@@ -1230,9 +1270,24 @@ public class CharacterMotor : MonoBehaviour
 		Vector3 inputDirectionGrounded = _cameraTransform.forward * _moveInput.y + _cameraTransform.right * _moveInput.x;
 		Vector3 inputDirectionWall = _characterDirection.right * _moveInput.x;
 
+		// do the character fall based on the rope holding method
+		bool doFall = false;
+		switch (_characterConfig.ropeHoldingMethod)
+		{
+			case RopeHolding.HOLD_TO_STOP:
+				if (_isHolding) doFall = false;
+				else doFall = true;
+				break;
+
+			case RopeHolding.HOLD_TO_LET_GO:
+				if (_isHolding) doFall = true;
+				else doFall = false;
+				break;
+		}
+
 		// - character is not holding the rope -
 
-		if (!_isHolding)
+		if (doFall)
 		{	
 			// apply grounded and falling like forces
 			ApplyGravity();

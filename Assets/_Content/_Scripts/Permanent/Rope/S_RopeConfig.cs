@@ -13,6 +13,11 @@ public class RopeConfig : ScriptableObject
 	public LayerMask foldLayerToIgnore;
 	public float minFoldDistance = 0.25f;
 
+	[Header("Color")]
+	public Color safeColor;
+	public Color midColor;
+	public Color dangerColor;
+
 	[Header("Deploy")]
 	public float heightLimit = 1f;
 	public LayerMask layersToIgnore;
