@@ -1,3 +1,4 @@
+using NaughtyAttributes;
 using System.Collections;
 using UnityEngine;
 using static UnityEngine.Rendering.DebugUI;
@@ -17,6 +18,7 @@ public class Torch : Permanent
 
 
     // ----- PRIVATE VARIABLES -----
+    [ReadOnly] public bool _isActive = false;
     public bool _isActive = false;
 
     private void Start()
@@ -39,6 +41,11 @@ public class Torch : Permanent
 		{
 			StartCoroutine(SetMaterial(_torchConfig.lightStartupDuration, _torchConfig.litMaterial));
 		}
+    }
+
+    public override bool StateInHand()
+    {
+        return _isActive;
     }
 
     public override void PreviewThrow(Transform _cameraTransform)

@@ -1,17 +1,19 @@
 using System.Collections;
-using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
-using UnityEngine.PlayerLoop;
-using UnityEngine.UI;
 
 public class Guardian : MonoBehaviour
 {
     [SerializeField] private PathPatrol _pathPatrol;
     [SerializeField] public bool _isActif;
+
+    [Header("Scriptable references")]
+    [SerializeField] private GuardianConfig _guardianConfig;
+
     private NavMeshAgent _agent;
     private CharacterMotor _playerRef;
+    private Torch _torchRef;
+    private bool _isPlayerTarget;
     private Coroutine _coroutine;
     private Coroutine _coroutineUpdate;
     private bool _aggro;
@@ -64,9 +66,8 @@ public class Guardian : MonoBehaviour
             yield return null;
         }
 
-        // All done!
     }
-    public void PlayerStayIn()
+    public void TargetStayIn()
     {
         if (IsActif() == true)
         {
@@ -83,12 +84,16 @@ public class Guardian : MonoBehaviour
     }
 
 
-    public void PlayerExit()
+    public void TargetExit()
     {
         if (IsActif() == true)
         {
-            Debug.Log("plus devant");
-            ToIdle();
+            if ( _aggro == true)
+            {
+                Debug.Log("plus devant");
+                ToIdle();
+            }
+            
         }
     }
 
@@ -126,7 +131,14 @@ public class Guardian : MonoBehaviour
     }
     private void SetDestination()
     {
-        _agent.destination = _playerRef.transform.position;
+        if (_isPlayerTarget)
+        {
+            _agent.destination = _playerRef.transform.position;
+        }
+        else
+        {
+            _agent.destination = _torchRef.transform.position;
+        }
     }
 
     public bool IsActif()
@@ -144,7 +156,7 @@ public class Guardian : MonoBehaviour
     private void ToIdle()
     {
         Debug.Log("To idle");
-        _coroutine = StartCoroutine(CheckForXSecond(3f));
+        _coroutine = StartCoroutine(CheckForXSecond(1f));
         _coroutineUpdate = StartCoroutine(UpdatePlayerPosition());
     }
 
@@ -165,27 +177,47 @@ public class Guardian : MonoBehaviour
 
     bool CheckRaycast()
     {
-        CheckPlayerHeight();
-        Physics.Raycast(_raycastEyes.transform.position, ((_playerRef.transform.position + new Vector3(0, headHeight, 0)) - _raycastEyes.transform.position).normalized, out var hitDataHead);
-        UnityEngine.Debug.DrawRay(_raycastEyes.transform.position, ((_playerRef.transform.position + new Vector3(0, headHeight, 0)) - _raycastEyes.transform.position).normalized, Color.red);
-        Debug.Log(hitDataHead.transform.name);
-
-        Physics.Raycast(_raycastEyes.transform.position, ((_playerRef.transform.position + new Vector3(0, eyesHeight, 0)) - _raycastEyes.transform.position).normalized, out var hitDataEyes);
-        UnityEngine.Debug.DrawRay(_raycastEyes.transform.position, ((_playerRef.transform.position + new Vector3(0, eyesHeight, 0)) - _raycastEyes.transform.position).normalized, Color.red);
-
-        Physics.Raycast(_raycastEyes.transform.position, ((_playerRef.transform.position + new Vector3(0, feetHeight, 0)) - _raycastEyes.transform.position).normalized, out var hitDataFeet);
-        UnityEngine.Debug.DrawRay(_raycastEyes.transform.position, ((_playerRef.transform.position + new Vector3(0, feetHeight, 0)) - _raycastEyes.transform.position).normalized, Color.red);
-
-        if (hitDataHead.transform == _playerRef.transform && hitDataEyes.transform == _playerRef.transform && hitDataFeet.transform == _playerRef.transform)
+        if (_isPlayerTarget)
         {
-            Debug.Log("pas de mur entre");
-            return true;
+            CheckPlayerHeight();
+            Physics.Raycast(_raycastEyes.transform.position, ((_playerRef.transform.position + new Vector3(0, headHeight, 0)) - _raycastEyes.transform.position).normalized, out var hitDataHead);
+            UnityEngine.Debug.DrawRay(_raycastEyes.transform.position, ((_playerRef.transform.position + new Vector3(0, headHeight, 0)) - _raycastEyes.transform.position).normalized, Color.red);
+            Debug.Log(hitDataHead.transform.name);
+
+            Physics.Raycast(_raycastEyes.transform.position, ((_playerRef.transform.position + new Vector3(0, eyesHeight, 0)) - _raycastEyes.transform.position).normalized, out var hitDataEyes);
+            UnityEngine.Debug.DrawRay(_raycastEyes.transform.position, ((_playerRef.transform.position + new Vector3(0, eyesHeight, 0)) - _raycastEyes.transform.position).normalized, Color.red);
+
+            Physics.Raycast(_raycastEyes.transform.position, ((_playerRef.transform.position + new Vector3(0, feetHeight, 0)) - _raycastEyes.transform.position).normalized, out var hitDataFeet);
+            UnityEngine.Debug.DrawRay(_raycastEyes.transform.position, ((_playerRef.transform.position + new Vector3(0, feetHeight, 0)) - _raycastEyes.transform.position).normalized, Color.red);
+
+            if (hitDataHead.transform == _playerRef.transform || hitDataEyes.transform == _playerRef.transform || hitDataFeet.transform == _playerRef.transform)
+            {
+                Debug.Log("pas de mur entre");
+                return true;
+            }
+            else
+            {
+
+                Debug.Log(" mur entre");
+                return false;
+            }
         }
         else
         {
+            Physics.Linecast(_raycastEyes.transform.position, _torchRef.transform.position, out var hitDatatorch);
+            // UnityEngine.Debug.DrawRay(_raycastEyes.transform.position, (_torchRef.transform.position - _raycastEyes.transform.position).normalized, Color.red);
 
-            Debug.Log(" mur entre");
-            return false;
+            if (hitDatatorch.collider.TryGetComponent<Torch>(out var torch)
+                || hitDatatorch.collider.TryGetComponent<TorchPointLight>(out var torchPointLight))
+            {
+                Debug.Log("pas de mur entre torch");
+                return true;
+            }
+            else
+            {
+                Debug.Log(" mur entre torch");
+                return false;
+            }
         }
     }
     private void CheckPlayerHeight()
@@ -200,6 +232,12 @@ public class Guardian : MonoBehaviour
     public void MakePLayerRef(CharacterMotor Player)
     {
         _playerRef = Player;
+        _isPlayerTarget = true;
     }
 
+    public void MakeTorchRef(Torch torch)
+    {
+        _torchRef = torch;
+        _isPlayerTarget = false;
+    }
 }
