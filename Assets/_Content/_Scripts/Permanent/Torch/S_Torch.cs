@@ -19,7 +19,6 @@ public class Torch : Permanent
 
     // ----- PRIVATE VARIABLES -----
     [ReadOnly] public bool _isActive = false;
-    public bool _isActive = false;
 
     private void Start()
     {
@@ -47,6 +46,7 @@ public class Torch : Permanent
     {
         return _isActive;
     }
+    
 
     public override void PreviewThrow(Transform _cameraTransform)
     {
