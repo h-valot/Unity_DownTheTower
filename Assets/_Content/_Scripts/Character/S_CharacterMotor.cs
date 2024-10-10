@@ -40,6 +40,7 @@ public class CharacterMotor : MonoBehaviour
     [SerializeField] private RSE_CancelAction _rseCancelAction;
 	[SerializeField] private RSE_CanInteract _rseCanInteract;
 	[SerializeField] private RSE_Holding _rseHolding;
+	[SerializeField] private RSE_Recycle _rseRecycle;
     [SerializeField] private RSE_ToggleInputs _rseToggleInputs;
 	[SerializeField] private RSE_KillCharacter _rseKillCharacter;
 	[SerializeField] private RSO_GamePaused _rsoGamePaused;
@@ -140,6 +141,7 @@ public class CharacterMotor : MonoBehaviour
         if (_characterConfig.startWithBag) return;
 
         _rseCraft.action -= ToggleCraft;
+		_rseRecycle.action -= Recycle;
     }
 
 	private void OnDisable()
@@ -671,6 +673,7 @@ public class CharacterMotor : MonoBehaviour
         _rseInteract.action += Interact;
 		_rseKillCharacter.action += HandleDeath;
 		_rseHolding.action += Holding;
+		_rseRecycle.action += Recycle;
     }
 
     /// <summary>
@@ -688,13 +691,22 @@ public class CharacterMotor : MonoBehaviour
         _rseInteract.action -= Interact;
 		_rseKillCharacter.action -= HandleDeath;
 		_rseHolding.action -= Holding;
+        _rseRecycle.action -= Recycle;
     }
 
 	public void ToggleCraftInput(bool isActive)
 	{
-		if(isActive) _rseCraft.action += ToggleCraft;
-		else _rseCraft.action -= ToggleCraft;
-	}
+		if (isActive)
+		{
+			_rseCraft.action += ToggleCraft;
+			_rseRecycle.action += Recycle;
+		}
+		else
+		{
+			_rseCraft.action -= ToggleCraft;
+			_rseRecycle.action -= Recycle;
+		}
+    }
 
 	private void ToggleInputs()
 	{
@@ -817,6 +829,20 @@ public class CharacterMotor : MonoBehaviour
 			_isHolding = false;
 		}
 	}
+
+	private void Recycle()
+	{
+        if (_interactables.Count >= 1)
+        {
+            GetNearestInteractible();
+			if (_nearestInteractible.isRecyclable && _nearestInteractible.objectToRecycle != null)
+			{
+				_interactables.Remove(_nearestInteractible);
+				Destroy(_nearestInteractible.objectToRecycle);
+				CheckShowInteract();
+            }
+        }
+    }
 
 	#endregion
 
@@ -1517,21 +1543,26 @@ public class CharacterMotor : MonoBehaviour
     {
 		if (_interactables.Count >= 1)
 		{
-            for (int i = 0; i < _interactables.Count; i++)
-            {
-                float distance = (_interactables[i].transform.position - this.transform.position).sqrMagnitude;
-
-                if (_nearestInteractible == null)
-                {
-                    _nearestInteractible = _interactables[i];
-                }
-
-                else if (distance < (_nearestInteractible.transform.position - this.transform.position).sqrMagnitude)
-                {
-                    _nearestInteractible = _interactables[i];
-                }
-            }
+			GetNearestInteractible();
             _nearestInteractible.InteractionTrigger();
+        }
+    }
+
+	public void GetNearestInteractible()
+	{
+        for (int i = 0; i < _interactables.Count; i++)
+        {
+            float distance = (_interactables[i].transform.position - this.transform.position).sqrMagnitude;
+
+            if (_nearestInteractible == null)
+            {
+                _nearestInteractible = _interactables[i];
+            }
+
+            else if (distance < (_nearestInteractible.transform.position - this.transform.position).sqrMagnitude)
+            {
+                _nearestInteractible = _interactables[i];
+            }
         }
     }
 

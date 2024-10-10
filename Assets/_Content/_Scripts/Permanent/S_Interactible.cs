@@ -4,7 +4,10 @@ using UnityEngine;
 
 public class Interactible : MonoBehaviour
 {
-   
+
+    public bool isRecyclable = false;
+    public GameObject objectToRecycle;
+
     public virtual void InteractionTrigger()
     {
 
@@ -24,5 +27,4 @@ public class Interactible : MonoBehaviour
             _character.RemoveFromInteractList(this);
         }
     }
-
 }
