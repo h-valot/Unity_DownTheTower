@@ -1,3 +1,4 @@
+using DG.Tweening;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -20,6 +21,7 @@ public class Interactible : MonoBehaviour
             _character.AddToInteractList(this);
         }
     }
+
     public virtual void OnTriggerExit(Collider other)
     {
         if (other.TryGetComponent<CharacterMotor>(out var _character))

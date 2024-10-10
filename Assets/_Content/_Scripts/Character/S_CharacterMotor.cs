@@ -101,7 +101,7 @@ public class CharacterMotor : MonoBehaviour
 
     // - interact -
     private List<Interactible> _interactables;
-    private Interactible _nearestInteractible;
+	private List<Interactible> _validInteractibles;
 
 	// - craft -
 	private Coroutine _craftCoroutine;
@@ -120,6 +120,7 @@ public class CharacterMotor : MonoBehaviour
 
         // creation of the interaction list
         _interactables = new List<Interactible>();
+		_validInteractibles = new List<Interactible>();
     }
 
 	private void Update()
@@ -832,15 +833,16 @@ public class CharacterMotor : MonoBehaviour
 
 	private void Recycle()
 	{
-        if (_interactables.Count >= 1)
-        {
-            GetNearestInteractible();
-			if (_nearestInteractible.isRecyclable && _nearestInteractible.objectToRecycle != null)
-			{
-				_interactables.Remove(_nearestInteractible);
-				Destroy(_nearestInteractible.objectToRecycle);
-				CheckShowInteract();
-            }
+		if (_interactables.Count == 0) return;
+
+        Interactible interactible = GetNearestInteractible();
+		if (interactible == null) return;
+
+		if (interactible.isRecyclable && interactible.objectToRecycle != null)
+		{
+			_interactables.Remove(interactible);
+			Destroy(interactible.objectToRecycle);
+			CheckShowInteract();
         }
     }
 
@@ -857,9 +859,14 @@ public class CharacterMotor : MonoBehaviour
 	{
 		// checks
 		CheckGround();
+		if (_interactables.Count > 0)
+		{
+			_validInteractibles = FilterInteractiblesByAngle();
+			CheckShowInteract();
+		}
 
-		// speed calculations
-		HandleSlope();
+            // speed calculations
+            HandleSlope();
 		HandleStun();
 		HandleSlow();
 		Accelerate();
@@ -1541,29 +1548,51 @@ public class CharacterMotor : MonoBehaviour
 
     private void Interact()
     {
-		if (_interactables.Count >= 1)
-		{
-			GetNearestInteractible();
-            _nearestInteractible.InteractionTrigger();
-        }
+		if (_interactables.Count == 0) return;
+		Interactible nearest = GetNearestInteractible();
+		if (nearest != null) nearest.InteractionTrigger();
+
     }
 
-	public void GetNearestInteractible()
+	private Interactible GetNearestInteractible()
 	{
+		_validInteractibles = FilterInteractiblesByAngle();
+		if (_validInteractibles.Count == 0) return null;
+
+		return FilterInteractiblesByDistance();
+    }
+
+	private List<Interactible> FilterInteractiblesByAngle()
+	{
+		List<Interactible> validInteractibles = new List<Interactible>();
+
         for (int i = 0; i < _interactables.Count; i++)
         {
-            float distance = (_interactables[i].transform.position - this.transform.position).sqrMagnitude;
+			Vector3 towardsInteract = _interactables[i].transform.position - transform.position;
+			if (Vector3.Dot(
+				new Vector3(_characterDirection.transform.forward.x, 0, _characterDirection.transform.forward.z).normalized, 
+				new Vector3(towardsInteract.x, 0, towardsInteract.z).normalized
+				) > 0.5)
+				validInteractibles.Add(_interactables[i]);
+        }
 
-            if (_nearestInteractible == null)
-            {
-                _nearestInteractible = _interactables[i];
-            }
+		return validInteractibles;
+    }
 
-            else if (distance < (_nearestInteractible.transform.position - this.transform.position).sqrMagnitude)
+	private Interactible FilterInteractiblesByDistance()
+	{
+		Interactible nearestInteractible = _validInteractibles[0];
+
+        for (int i = 1; i < _validInteractibles.Count; i++)
+        {
+			if ((_validInteractibles[i].transform.position - this.transform.position).sqrMagnitude <
+                     (nearestInteractible.transform.position - this.transform.position).sqrMagnitude)
             {
-                _nearestInteractible = _interactables[i];
+                nearestInteractible = _validInteractibles[i];
             }
         }
+
+		return nearestInteractible;
     }
 
     public void AddToInteractList(Interactible _interactibleObject)
@@ -1580,7 +1609,7 @@ public class CharacterMotor : MonoBehaviour
 
 	private void CheckShowInteract()
 	{
-		_rseCanInteract.Call(_interactables.Count > 0);
+		_rseCanInteract.Call(_validInteractibles.Count > 0);
     }
 
 	#endregion
