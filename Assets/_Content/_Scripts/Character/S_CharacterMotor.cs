@@ -39,6 +39,7 @@ public class CharacterMotor : MonoBehaviour
 	[SerializeField] private RSE_Interact _rseInteract;
     [SerializeField] private RSE_CancelAction _rseCancelAction;
 	[SerializeField] private RSE_CanInteract _rseCanInteract;
+	[SerializeField] private RSE_CanRecycle _rseCanRecycle;
 	[SerializeField] private RSE_Holding _rseHolding;
 	[SerializeField] private RSE_Recycle _rseRecycle;
     [SerializeField] private RSE_ToggleInputs _rseToggleInputs;
@@ -115,12 +116,13 @@ public class CharacterMotor : MonoBehaviour
 	#region monobehaviour functions
 
 	private void Start()
-	{
-		SwitchState(AnimationState.LOCOMOTION);
-
+    {
         // creation of the interaction list
         _interactables = new List<Interactible>();
-		_validInteractibles = new List<Interactible>();
+        _validInteractibles = new List<Interactible>();
+
+        SwitchState(AnimationState.LOCOMOTION);
+
     }
 
 	private void Update()
@@ -313,6 +315,8 @@ public class CharacterMotor : MonoBehaviour
         }
 
 		_currentState = newState;
+		CheckShowInteract();
+		CheckShowRecycle(false);
 	}
 
 	#endregion
@@ -831,21 +835,6 @@ public class CharacterMotor : MonoBehaviour
 		}
 	}
 
-	private void Recycle()
-	{
-		if (_interactables.Count == 0) return;
-
-        Interactible interactible = GetNearestInteractible();
-		if (interactible == null) return;
-
-		if (interactible.isRecyclable && interactible.objectToRecycle != null)
-		{
-			_interactables.Remove(interactible);
-			Destroy(interactible.objectToRecycle);
-			CheckShowInteract();
-        }
-    }
-
 	#endregion
 
 	#region locomotion state
@@ -861,8 +850,10 @@ public class CharacterMotor : MonoBehaviour
 		CheckGround();
 		if (_interactables.Count > 0)
 		{
-			_validInteractibles = FilterInteractiblesByAngle();
+			Interactible nearest = GetNearestInteractible();
 			CheckShowInteract();
+			if (nearest != null) CheckShowRecycle(nearest.isRecyclable);
+			else CheckShowRecycle(false);
 		}
 
             // speed calculations
@@ -1548,13 +1539,34 @@ public class CharacterMotor : MonoBehaviour
 
     private void Interact()
     {
-		if (_interactables.Count == 0) return;
+		if (_interactables.Count == 0
+			|| _currentState != AnimationState.LOCOMOTION) return;
+
 		Interactible nearest = GetNearestInteractible();
 		if (nearest != null) nearest.InteractionTrigger();
 
     }
 
-	private Interactible GetNearestInteractible()
+    private void Recycle()
+    {
+        if (_interactables.Count == 0
+            || _currentState != AnimationState.LOCOMOTION) return;
+
+        Interactible interactible = GetNearestInteractible();
+        if (interactible == null) return;
+
+        if (interactible.isRecyclable
+            && interactible.objectToRecycle != null)
+        {
+            _interactables.Remove(interactible);
+            _validInteractibles.Remove(interactible);
+            Destroy(interactible.objectToRecycle);
+            CheckShowInteract();
+            CheckShowRecycle(false);
+        }
+    }
+
+    private Interactible GetNearestInteractible()
 	{
 		_validInteractibles = FilterInteractiblesByAngle();
 		if (_validInteractibles.Count == 0) return null;
@@ -1598,19 +1610,24 @@ public class CharacterMotor : MonoBehaviour
     public void AddToInteractList(Interactible _interactibleObject)
     {
         _interactables.Add(_interactibleObject);
-		CheckShowInteract();
     }
 
     public void RemoveFromInteractList(Interactible _interactibleObject)
     {
         _interactables.Remove(_interactibleObject);
+		_validInteractibles.Remove(_interactibleObject);
 		CheckShowInteract();
+		CheckShowRecycle(false);
     }
 
 	private void CheckShowInteract()
 	{
-		_rseCanInteract.Call(_validInteractibles.Count > 0);
+		_rseCanInteract.Call(_validInteractibles.Count > 0 && _currentState == AnimationState.LOCOMOTION);
     }
 
+	private void CheckShowRecycle(bool isRecyclable)
+	{ 
+		_rseCanRecycle.Call(isRecyclable && _currentState == AnimationState.LOCOMOTION);
+	}
 	#endregion
 }
