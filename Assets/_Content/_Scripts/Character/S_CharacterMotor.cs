@@ -1318,7 +1318,6 @@ public class CharacterMotor : MonoBehaviour
 
 		// player direction inputs
 		Vector3 inputDirectionGrounded = _cameraTransform.forward * _moveInput.y + _cameraTransform.right * _moveInput.x;
-		Vector3 inputDirectionWall = _characterDirection.right * _moveInput.x;
 
 		// do the character fall based on the rope holding method
 		bool doFall = false;
@@ -1335,7 +1334,7 @@ public class CharacterMotor : MonoBehaviour
 				break;
 		}
 
-		// - character is not holding the rope -
+		// -- CHARACTER IS NOT HOLDING THE ROPE --
 
 		if (doFall)
 		{	
@@ -1354,8 +1353,9 @@ public class CharacterMotor : MonoBehaviour
 			return;
 		}
 
-		// - character is holding the rope -
+		// -- CHARACTER IS HOLDING THE ROPE --
 
+		// - Get attraction direction -
 		// from the attraction point (which is the lowest point on the sphere)
 		// get the normalized direction towards this point with a down offset
 		// so the direction is more likely to be tangent to the sphere
@@ -1363,6 +1363,35 @@ public class CharacterMotor : MonoBehaviour
 		Vector3 sphereCharaSnapPoint = _rope.folds[^1] + (_rope.folds[^1] - _rsoCharacterPosition.value).normalized * _rope.holdLength;
 		Vector3 offsetAttractionPoint = _rope.folds[^1] + Vector3.down * (attractionPoint - sphereCharaSnapPoint).magnitude;
 		Vector3 attractionDirection = (offsetAttractionPoint - sphereCharaSnapPoint).normalized;
+
+		// - Get desired position on the cercle offset by given angle -
+		Vector3 completeDirection = 
+			(Vector3Extention.GetPositionOnCercle(
+				angle: _characterConfig.ropeOffsetAngle,
+				axis: _cameraTransform.forward,
+				direction: _cameraTransform.right,
+				origin: _rope.folds[^1],
+				radius: _rope.holdLength,
+				starting: _rsoCharacterPosition.value
+			) - _rsoCharacterPosition.value).normalized * _moveInput.x +
+			(Vector3Extention.GetPositionOnCercle(
+				angle: _characterConfig.ropeOffsetAngle,
+				axis: _cameraTransform.right,
+				direction: _cameraTransform.forward,
+				origin: _rope.folds[^1],
+				radius: _rope.holdLength,
+				starting: _rsoCharacterPosition.value
+			) - _rsoCharacterPosition.value).normalized * _moveInput.y;
+
+		Vector3 partialDirection =
+			(Vector3Extention.GetPositionOnCercle(
+				angle: _characterConfig.ropeOffsetAngle,
+				axis: _cameraTransform.forward,
+				direction: _cameraTransform.right,
+				origin: _rope.folds[^1],
+				radius: _rope.holdLength,
+				starting: _rsoCharacterPosition.value
+			) - _rsoCharacterPosition.value).normalized * _moveInput.x;
 
 		// TODO:
 		// (1) acceleration movement while against the wall
@@ -1376,7 +1405,7 @@ public class CharacterMotor : MonoBehaviour
 		{
 			_controller.Move(Time.deltaTime * (
 				// player's inputs
-				inputDirectionGrounded * _characterConfig.partialSuspensionSpeed
+				partialDirection * _characterConfig.partialSuspensionSpeed
 				// attraction direction is a custom gravity force applied while on the rope
 				+ attractionDirection * _characterConfig.partialSphericalAttractiveForce
 			));
@@ -1387,7 +1416,7 @@ public class CharacterMotor : MonoBehaviour
 		{
 			_controller.Move(Time.deltaTime * (
 				// player's inputs
-				inputDirectionGrounded * _characterConfig.completeSuspensionSpeed
+				completeDirection * _characterConfig.completeSuspensionSpeed
 				// attraction direction is a custom gravity force applied while on the rope
 				+ attractionDirection * _characterConfig.partialSphericalAttractiveForce
 			));

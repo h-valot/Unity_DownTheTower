@@ -97,6 +97,9 @@ public class CharacterConfig : ScriptableObject
 	[Tooltip("Start facing the center when the distance between the character and the hold rope radius is less than this value.")]
 	public float facingCenterThreshold = 0.25f;
 
+	public float maxPartialSideAngle = 60;
+	public float ropeOffsetAngle = 5f;
+
 
 	[Header("Camera")]
 	[Tooltip("Clamp the camera rotation to this angle when looking down")]
