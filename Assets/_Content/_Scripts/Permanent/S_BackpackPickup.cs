@@ -44,7 +44,7 @@ public class BackpackPickup : Interactible
     public override void InteractionTrigger()
     {
         _isAvailable = false;
-        _character.ToggleCraftInput(true);
+        _character.PickupBackpack();
         _mesh.enabled = false;
     }
 

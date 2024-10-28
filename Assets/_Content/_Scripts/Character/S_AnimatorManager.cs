@@ -18,8 +18,8 @@ public class S_AnimatorManager : MonoBehaviour
 
     void LateUpdate()
     {
-        _animator.SetFloat(_moveSpeedHash, _characterMotor._moveSpeed);
+        _animator.SetFloat(_moveSpeedHash, _characterMotor._planarSpeed);
         _animator.SetBool(_isGroundedHash, _characterMotor._isGrounded);
-        _animator.SetBool(_isJumpingHash, _characterMotor._isJumping);
+        _animator.SetBool(_isJumpingHash, _characterMotor._currentState == AnimationState.JUMP);
     }
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using NaughtyAttributes;
 using UnityEngine;
 
@@ -51,11 +52,11 @@ public class CharacterMotor : MonoBehaviour
 	#region runtime variables
 
     [Header("debug: animation")]
-	private AnimationState _currentState;
+	[HideInInspector] public AnimationState _currentState;
 
 	[Header("debug: move")]
 	private Vector2 _moveInput;
-	private float _planarSpeed;
+    [HideInInspector] public float _planarSpeed;
 	private float _targetPlanarSpeed;
 	private float _gravitySpeed;
 	private Vector3 _movement;
@@ -66,7 +67,7 @@ public class CharacterMotor : MonoBehaviour
 	private float _slopePercentage;
 
 	[Header("debug: fall")]
-	private bool _isGrounded;
+    [HideInInspector] public bool _isGrounded;
     private bool[] _groundChecks = new bool[5];
 	private bool _isStunned = false;
 	private bool _isSlowed = false;
@@ -78,6 +79,7 @@ public class CharacterMotor : MonoBehaviour
 	private float _fallHeight;
 
 	[Header("debug: permanent")]
+	[HideInInspector] public bool _hasBackpack;
 	[ReadOnly] public float ropeLength;
 	[HideInInspector] public Permanent _craftInHand;
     [HideInInspector] public Permanent _craftInRobot;
@@ -127,7 +129,6 @@ public class CharacterMotor : MonoBehaviour
 		_raycastLayerMask |= (1 << LayerMask.NameToLayer("Default"));
 
         SwitchState(AnimationState.LOCOMOTION);
-
     }
 
 	private void Update()
@@ -152,11 +153,12 @@ public class CharacterMotor : MonoBehaviour
         _rseToggleInputs.action += ToggleInputs;
         SubscribeInputs();
 
-        // debug
-        if (_characterConfig.startWithBag) return;
-
-        _rseCraft.action -= ToggleCraft;
-		_rseRecycle.action -= Recycle;
+		// debug
+		if (_characterConfig.startWithBag)
+		{
+            _hasBackpack = true;
+			ToggleCraftInput(_hasBackpack);
+        }
     }
 
 	private void OnDisable()
@@ -164,7 +166,9 @@ public class CharacterMotor : MonoBehaviour
 		UnsubscribeInputs();
     }
 
-    private void OnDrawGizmos()
+#if UNITY_EDITOR
+
+	private void OnDrawGizmos()
     {
         if (_characterConfig.showGroundedDebug)
         {
@@ -197,16 +201,27 @@ public class CharacterMotor : MonoBehaviour
 				Gizmos.DrawSphere(_hit.point, 0.05f);
             }
         }
+
+        if (_rope)
+        {
+            if (_rope.isPlaced)
+            {
+                Gizmos.color = Color.magenta;
+                Gizmos.DrawWireSphere(_rope.folds[^1], _rope.holdLength);
+            }
+        }
     }
 
-    #endregion
+#endif
 
-    #region animation state switch
-    /// <summary>
-    /// 	exit current state and enter the given state.
-    /// </summary>
-    /// <param name="newState">state to enter into</param>
-    private void SwitchState(AnimationState newState)
+#endregion
+
+	#region animation state switch
+	/// <summary>
+	/// 	exit current state and enter the given state.
+	/// </summary>
+	/// <param name="newState">state to enter into</param>
+	private void SwitchState(AnimationState newState)
 	{
 		ExitCurrentState();
 		Debug.Log(newState.ToString());
@@ -368,16 +383,22 @@ public class CharacterMotor : MonoBehaviour
 	}
 	#endregion
 
-    #region death
+    #region misc
 
 	/// <summary>
 	/// 	kill the character
 	/// </summary>
-    private void HandleDeath()
+    public void HandleDeath()
 	{
 		_rsoPlayerDeath.value = true;
 		Destroy(gameObject);
 	}
+
+	public void PickupBackpack()
+	{
+        _hasBackpack = true;
+        ToggleCraftInput(_hasBackpack);
+    }
 
 	#endregion
 
@@ -491,7 +512,7 @@ public class CharacterMotor : MonoBehaviour
         }
         else if (!_isGrounded && _currentState != AnimationState.FALL && _gravitySpeed <= 0)
 		{
-			if(_currentState != AnimationState.FALL) _coyoteTime = _characterConfig.coyoteTime; 
+			if(_isGroundedLastFrame) _coyoteTime = _characterConfig.coyoteTime; 
             SwitchState(AnimationState.FALL);
         }
 		else if (_isGrounded && !_isGroundedLastFrame)
@@ -837,21 +858,81 @@ public class CharacterMotor : MonoBehaviour
     #region inputs
 
     /// <summary>
-    /// 	add character behavior to player inputs
+    /// 	Add character behavior to player inputs based on animation state
     /// </summary>
     private void SubscribeInputs()
     {
-        _rseMove.action += Move;
-        _rseJump.action += Jump;
-        _rseSprint.action += Sprint;
-        _rseThrow.action += ToggleAim;
-        _rseCraft.action += ToggleCraft;
-        _rseToggleInHand.action += ToggleInHand;
-        _rseCancelAction.action += CancelAction;
-        _rseInteract.action += Interact;
-		_rseKillCharacter.action += HandleDeath;
-		_rseHolding.action += Holding;
-		_rseRecycle.action += Recycle;
+        switch (_currentState)
+        {
+            case AnimationState.LOCOMOTION:
+                _rseMove.action += Move;
+				_rseRun.action += Run;
+                _rseJump.action += Jump;
+                _rseThrow.action += ToggleAim;
+                _rseCraft.action += ToggleCraft;
+                _rseToggleInHand.action += ToggleInHand;
+                _rseCancelAction.action += CancelAction;
+                _rseInteract.action += Interact;
+                _rseKillCharacter.action += HandleDeath;
+				ToggleCraftInput(_hasBackpack);
+                break;
+            case AnimationState.JUMP:
+                _rseMove.action += Move;
+                _rseRun.action += Run;
+                _rseThrow.action += ToggleAim;
+                _rseToggleInHand.action += ToggleInHand;
+                _rseCancelAction.action += CancelAction;
+                _rseInteract.action += Interact;
+                _rseKillCharacter.action += HandleDeath;
+                break;
+            case AnimationState.FALL:
+                _rseMove.action += Move;
+                _rseRun.action += Run;
+                _rseJump.action += Jump;
+                _rseThrow.action += ToggleAim;
+                _rseToggleInHand.action += ToggleInHand;
+                _rseCancelAction.action += CancelAction;
+                _rseInteract.action += Interact;
+                _rseKillCharacter.action += HandleDeath;
+                
+                break;
+            case AnimationState.CRAFT:
+                _rseRun.action += Run;
+                _rseCraft.action += ToggleCraft;
+                _rseCancelAction.action += CancelAction;
+                _rseKillCharacter.action += HandleDeath;
+                break;
+            case AnimationState.ROPE:
+                _rseMove.action += Move;
+                _rseRun.action += Run;
+                _rseJump.action += Jump;
+                _rseThrow.action += ToggleAim;
+                _rseCraft.action += ToggleCraft;
+                _rseToggleInHand.action += ToggleInHand;
+                _rseCancelAction.action += CancelAction;
+                _rseInteract.action += Interact;
+                _rseKillCharacter.action += HandleDeath;
+                break;
+            case AnimationState.LADDER:
+                _rseMove.action += Move;
+                _rseRun.action += Run;
+                _rseJump.action += Jump;
+                _rseThrow.action += ToggleAim;
+                _rseCraft.action += ToggleCraft;
+                _rseToggleInHand.action += ToggleInHand;
+                _rseCancelAction.action += CancelAction;
+                _rseInteract.action += Interact;
+                _rseKillCharacter.action += HandleDeath;
+                break;
+            case AnimationState.AIM:
+                _rseMove.action += Move;
+                _rseRun.action += Run;
+                _rseJump.action += Jump;
+                _rseThrow.action += ToggleAim;
+                _rseCancelAction.action += CancelAction;
+                _rseKillCharacter.action += HandleDeath;
+                break;
+        }
     }
 
     /// <summary>
@@ -860,8 +941,8 @@ public class CharacterMotor : MonoBehaviour
     private void UnsubscribeInputs()
     {
         _rseMove.action -= Move;
+        _rseRun.action -= Run;
         _rseJump.action -= Jump;
-        _rseSprint.action -= Sprint;
         _rseThrow.action -= ToggleAim;
         _rseCraft.action -= ToggleCraft;
         _rseToggleInHand.action -= ToggleInHand;
@@ -872,9 +953,9 @@ public class CharacterMotor : MonoBehaviour
         _rseRecycle.action -= Recycle;
     }
 
-	public void ToggleCraftInput(bool isActive)
+	public void ToggleCraftInput(bool _isActive)
 	{
-		if (isActive)
+		if (_isActive)
 		{
 			_rseCraft.action += ToggleCraft;
 			_rseRecycle.action += Recycle;
@@ -891,7 +972,6 @@ public class CharacterMotor : MonoBehaviour
 		if (_rsoGamePaused.value)
 		{
 			CancelAction();
-			Sprint(false);
 			UnsubscribeInputs();
 		}
 		else
@@ -952,54 +1032,16 @@ public class CharacterMotor : MonoBehaviour
 				else
 				{
 					// reset the gravity velocity
-					_gravityModifier = Vector3.zero;
-				}
-				break;
-
-	/// <summary>
-	/// 	Update the sprint input value.
-	/// </summary>
-	/// <param name="isRunning">is the input pressed</param>
-	private void Run(bool isRunning)
-	{
-		_isRunning = isRunning;
-	}
-
-	/// <summary>
-	/// 	update the holding rope input value.
-	/// </summary>
-	/// <param name="isHolding">is the input pressed</param>
-	private void Holding(bool isHolding)
-	{
-		if (_rope == null)
-		{
-			_isHolding = false;
-			return;
-		}
-
-		_isHolding = isHolding;
-
-		// handle both hold methods
-		switch (_characterConfig.ropeHoldingMethod)
-		{
-			case RopeHolding.HOLD_TO_STOP:
-				if (_isHolding)
-				{
-					_rope.UpdateHoldLength();
-				}
-				else
-				{
-					// reset the gravity velocity
-					_gravityModifier = Vector3.zero;
+					_gravitySpeed = 0f;
 				}
 				break;
 
 			case RopeHolding.HOLD_TO_LET_GO:
 				if (_isHolding)
 				{
-					// reset the gravity velocity
-					_gravityModifier = Vector3.zero;
-				}
+                    // reset the gravity velocity
+                    _gravitySpeed = 0f;
+                }
 				else
 				{
 					_rope.UpdateHoldLength();
@@ -1041,8 +1083,6 @@ public class CharacterMotor : MonoBehaviour
 
 	private void UpdateLocomotionState()
 	{
-		// temp
-		HandleInputs();
 		if (_interactables.Count > 0)
 		{
 			Interactible nearest = GetNearestInteractible();
@@ -1051,8 +1091,6 @@ public class CharacterMotor : MonoBehaviour
 			else CheckShowRecycle(false);
 		}
 
-
-		CheckGround();
 
 		// speed calculations
 		CheckWalkRun();
@@ -1275,11 +1313,7 @@ public class CharacterMotor : MonoBehaviour
 
 	private void UpdateCraftState()
 	{
-		// temp
-		HandleInputs();
 		ApplySlope();
-		// HandleStun();
-		// HandleSlow();
 		ApplyAcceleration();
 		ApplyGravity();
 		HandleMovement();
@@ -1447,16 +1481,18 @@ public class CharacterMotor : MonoBehaviour
 	/// </summary>
 	private void UpdateRopeGroundedState()
 	{
-		// speed calculations
-		HandleSlope();
-		HandleStun();
-		HandleSlow();
-		Accelerate();
+        // speed calculations
+        CheckWalkRun();
+        ApplySlope();
+        ApplyInputs();
+        ApplyAcceleration();
+        CreateMovement();
+        ApplyStatus();
+        ApplySnapGravity();
 
-		// velocity calculations
-		ApplyGravity();
-		HandleMovement();
-	}
+        // move controller
+        HandleMovement();
+    }
 
 	/// <summary>
 	/// 	handle movement related to the front wall. 
@@ -1601,20 +1637,14 @@ public class CharacterMotor : MonoBehaviour
 		// - character is not holding the rope -
 
 		if (doFall)
-		{	
-			// apply grounded and falling like forces
-			ApplyGravity();
+		{
+            //ApplyAirControl();
+            ApplyDrag();
+            CreateMovementFall();
+            ApplyGravity();
 
-			// move the character with air control scalar
-			_controller.Move(Time.deltaTime * (
-				// last ground direction and speed to keep the inertia going on
-				_lastGroundedDirection.normalized * _lastGroundedSpeed
-				// current direction and speed reduced by the air control modifier to slightly moves while in air
-				+ inputDirectionGrounded * _targetSpeed * _characterConfig.airControlModifier
-				+ _gravityModifier
-			));
-
-			return;
+            HandleMovement();
+            return;
 		}
 
 		// - character is holding the rope -
@@ -1660,20 +1690,6 @@ public class CharacterMotor : MonoBehaviour
 		if (_rsoCharacterPosition.value != _characterDirection.position) { _rsoCharacterPosition.value = _characterDirection.position; }
 		if (_rsoCharacterForward.value != _characterDirection.forward) { _rsoCharacterForward.value = _characterDirection.forward; }
 	}
-
-#if UNITY_EDITOR
-	private void OnDrawGizmos()
-	{
-		// assert: rope ref is null
-		if (_rope is null) return;
-
-		// assert: rope isn't placed yet
-		if (!_rope.isPlaced) return;
-
-		Gizmos.color = Color.magenta;
-		Gizmos.DrawWireSphere(_rope.folds[^1], _rope.holdLength);
-	}
-#endif
 
 	#endregion
 
@@ -1756,12 +1772,7 @@ public class CharacterMotor : MonoBehaviour
 
     private void UpdateAimState()
     {
-		// temp
-        HandleInputs();
-
         ApplySlope();
-        // HandleStun();
-        // HandleSlow();
         ApplyAcceleration();
         ApplyGravity();
         HandleMovement();
@@ -1875,5 +1886,5 @@ public class CharacterMotor : MonoBehaviour
 	{ 
 		_rseCanRecycle.Call(isRecyclable && _currentState == AnimationState.LOCOMOTION);
 	}
-	#endregion
+    #endregion
 }
