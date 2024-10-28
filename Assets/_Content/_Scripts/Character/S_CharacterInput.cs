@@ -21,6 +21,7 @@ public class CharacterInput : MonoBehaviour
 	[SerializeField] private RSE_Holding _rseHolding;
     [SerializeField] private RSE_Pause _rsePause;
     [SerializeField] private RSE_HideUI _rseHideUI;
+    [SerializeField] private RSE_Recycle _rseRecycle;
     [SerializeField] private RSO_GamePaused _rsoGamePaused;
 
 	[Header("Debugging")]
@@ -130,4 +131,9 @@ public class CharacterInput : MonoBehaviour
 	{
 		_rseHolding.Call(input.isPressed);
 	}
+
+    public void OnRecycle()
+    {
+        _rseRecycle.Call();
+    }
 }

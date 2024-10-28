@@ -39,7 +39,9 @@ public class CharacterMotor : MonoBehaviour
 	[SerializeField] private RSE_Interact _rseInteract;
     [SerializeField] private RSE_CancelAction _rseCancelAction;
 	[SerializeField] private RSE_CanInteract _rseCanInteract;
+	[SerializeField] private RSE_CanRecycle _rseCanRecycle;
 	[SerializeField] private RSE_Holding _rseHolding;
+	[SerializeField] private RSE_Recycle _rseRecycle;
     [SerializeField] private RSE_ToggleInputs _rseToggleInputs;
 	[SerializeField] private RSE_KillCharacter _rseKillCharacter;
 	[SerializeField] private RSO_GamePaused _rsoGamePaused;
@@ -100,7 +102,7 @@ public class CharacterMotor : MonoBehaviour
 
     // - interact -
     private List<Interactible> _interactables;
-    private Interactible _nearestInteractible;
+	private List<Interactible> _validInteractibles;
 
 	// - craft -
 	private Coroutine _craftCoroutine;
@@ -114,11 +116,13 @@ public class CharacterMotor : MonoBehaviour
 	#region monobehaviour functions
 
 	private void Start()
-	{
-		SwitchState(AnimationState.LOCOMOTION);
-
+    {
         // creation of the interaction list
         _interactables = new List<Interactible>();
+        _validInteractibles = new List<Interactible>();
+
+        SwitchState(AnimationState.LOCOMOTION);
+
     }
 
 	private void Update()
@@ -140,6 +144,7 @@ public class CharacterMotor : MonoBehaviour
         if (_characterConfig.startWithBag) return;
 
         _rseCraft.action -= ToggleCraft;
+		_rseRecycle.action -= Recycle;
     }
 
 	private void OnDisable()
@@ -310,6 +315,8 @@ public class CharacterMotor : MonoBehaviour
         }
 
 		_currentState = newState;
+		CheckShowInteract();
+		CheckShowRecycle(false);
 	}
 
 	#endregion
@@ -671,6 +678,7 @@ public class CharacterMotor : MonoBehaviour
         _rseInteract.action += Interact;
 		_rseKillCharacter.action += HandleDeath;
 		_rseHolding.action += Holding;
+		_rseRecycle.action += Recycle;
     }
 
     /// <summary>
@@ -688,13 +696,22 @@ public class CharacterMotor : MonoBehaviour
         _rseInteract.action -= Interact;
 		_rseKillCharacter.action -= HandleDeath;
 		_rseHolding.action -= Holding;
+        _rseRecycle.action -= Recycle;
     }
 
 	public void ToggleCraftInput(bool isActive)
 	{
-		if(isActive) _rseCraft.action += ToggleCraft;
-		else _rseCraft.action -= ToggleCraft;
-	}
+		if (isActive)
+		{
+			_rseCraft.action += ToggleCraft;
+			_rseRecycle.action += Recycle;
+		}
+		else
+		{
+			_rseCraft.action -= ToggleCraft;
+			_rseRecycle.action -= Recycle;
+		}
+    }
 
 	private void ToggleInputs()
 	{
@@ -831,9 +848,16 @@ public class CharacterMotor : MonoBehaviour
 	{
 		// checks
 		CheckGround();
+		if (_interactables.Count > 0)
+		{
+			Interactible nearest = GetNearestInteractible();
+			CheckShowInteract();
+			if (nearest != null) CheckShowRecycle(nearest.isRecyclable);
+			else CheckShowRecycle(false);
+		}
 
-		// speed calculations
-		HandleSlope();
+            // speed calculations
+            HandleSlope();
 		HandleStun();
 		HandleSlow();
 		Accelerate();
@@ -1515,42 +1539,95 @@ public class CharacterMotor : MonoBehaviour
 
     private void Interact()
     {
-		if (_interactables.Count >= 1)
-		{
-            for (int i = 0; i < _interactables.Count; i++)
-            {
-                float distance = (_interactables[i].transform.position - this.transform.position).sqrMagnitude;
+		if (_interactables.Count == 0
+			|| _currentState != AnimationState.LOCOMOTION) return;
 
-                if (_nearestInteractible == null)
-                {
-                    _nearestInteractible = _interactables[i];
-                }
+		Interactible nearest = GetNearestInteractible();
+		if (nearest != null) nearest.InteractionTrigger();
 
-                else if (distance < (_nearestInteractible.transform.position - this.transform.position).sqrMagnitude)
-                {
-                    _nearestInteractible = _interactables[i];
-                }
-            }
-            _nearestInteractible.InteractionTrigger();
+    }
+
+    private void Recycle()
+    {
+        if (_interactables.Count == 0
+            || _currentState != AnimationState.LOCOMOTION) return;
+
+        Interactible interactible = GetNearestInteractible();
+        if (interactible == null) return;
+
+        if (interactible.isRecyclable
+            && interactible.objectToRecycle != null)
+        {
+            _interactables.Remove(interactible);
+            _validInteractibles.Remove(interactible);
+            Destroy(interactible.objectToRecycle);
+            CheckShowInteract();
+            CheckShowRecycle(false);
         }
+    }
+
+    private Interactible GetNearestInteractible()
+	{
+		_validInteractibles = FilterInteractiblesByAngle();
+		if (_validInteractibles.Count == 0) return null;
+
+		return FilterInteractiblesByDistance();
+    }
+
+	private List<Interactible> FilterInteractiblesByAngle()
+	{
+		List<Interactible> validInteractibles = new List<Interactible>();
+
+        for (int i = 0; i < _interactables.Count; i++)
+        {
+			Vector3 towardsInteract = _interactables[i].transform.position - transform.position;
+			if (Vector3.Dot(
+				new Vector3(_characterDirection.transform.forward.x, 0, _characterDirection.transform.forward.z).normalized, 
+				new Vector3(towardsInteract.x, 0, towardsInteract.z).normalized
+				) > 0.5)
+				validInteractibles.Add(_interactables[i]);
+        }
+
+		return validInteractibles;
+    }
+
+	private Interactible FilterInteractiblesByDistance()
+	{
+		Interactible nearestInteractible = _validInteractibles[0];
+
+        for (int i = 1; i < _validInteractibles.Count; i++)
+        {
+			if ((_validInteractibles[i].transform.position - this.transform.position).sqrMagnitude <
+                     (nearestInteractible.transform.position - this.transform.position).sqrMagnitude)
+            {
+                nearestInteractible = _validInteractibles[i];
+            }
+        }
+
+		return nearestInteractible;
     }
 
     public void AddToInteractList(Interactible _interactibleObject)
     {
         _interactables.Add(_interactibleObject);
-		CheckShowInteract();
     }
 
     public void RemoveFromInteractList(Interactible _interactibleObject)
     {
         _interactables.Remove(_interactibleObject);
+		_validInteractibles.Remove(_interactibleObject);
 		CheckShowInteract();
+		CheckShowRecycle(false);
     }
 
 	private void CheckShowInteract()
 	{
-		_rseCanInteract.Call(_interactables.Count > 0);
+		_rseCanInteract.Call(_validInteractibles.Count > 0 && _currentState == AnimationState.LOCOMOTION);
     }
 
+	private void CheckShowRecycle(bool isRecyclable)
+	{ 
+		_rseCanRecycle.Call(isRecyclable && _currentState == AnimationState.LOCOMOTION);
+	}
 	#endregion
 }

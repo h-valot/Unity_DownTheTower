@@ -11,6 +11,7 @@ public class Ladder : Permanent
     [SerializeField] private GameObject _TPTriggerTop;
     [SerializeField] private GameObject _TPTriggerBottom;
 	[SerializeField] private GameObject _tippyTop;
+    [SerializeField] private GameObject _noTPInteractible;
 
     [Header("Scriptable references")]
 	[SerializeField] private LadderConfig _ladderConfig;
@@ -147,6 +148,7 @@ public class Ladder : Permanent
             {
                 SetUpTP();
             }
+            else EnableRecycling();
         }
     }
 
@@ -215,5 +217,10 @@ public class Ladder : Permanent
             }
         }
         return shortest;
+    }
+
+    private void EnableRecycling()
+    {
+        _noTPInteractible.SetActive(true);
     }
 }
