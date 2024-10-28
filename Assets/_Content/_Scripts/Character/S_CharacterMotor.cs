@@ -127,8 +127,9 @@ public class CharacterMotor : MonoBehaviour
         _validInteractibles = new List<Interactible>();
 
 		_raycastLayerMask |= (1 << LayerMask.NameToLayer("Default"));
+		_raycastLayerMask |= (1 << LayerMask.NameToLayer("Collision_NoRaycast"));
 
-        SwitchState(AnimationState.LOCOMOTION);
+		SwitchState(AnimationState.LOCOMOTION);
     }
 
 	private void Update()
@@ -166,8 +167,7 @@ public class CharacterMotor : MonoBehaviour
 		UnsubscribeInputs();
     }
 
-#if UNITY_EDITOR
-
+	#if UNITY_EDITOR
 	private void OnDrawGizmos()
     {
         if (_characterConfig.showGroundedDebug)
@@ -211,10 +211,9 @@ public class CharacterMotor : MonoBehaviour
             }
         }
     }
+	#endif
 
-#endif
-
-#endregion
+	#endregion
 
 	#region animation state switch
 	/// <summary>
@@ -1772,9 +1771,16 @@ public class CharacterMotor : MonoBehaviour
 
     private void UpdateAimState()
     {
+        // speed calculations
+        CheckWalkRun();
         ApplySlope();
+        ApplyInputs();
         ApplyAcceleration();
-        ApplyGravity();
+        CreateMovement();
+        ApplyStatus();
+        ApplySnapGravity();
+
+        // move controller
         HandleMovement();
     }
 

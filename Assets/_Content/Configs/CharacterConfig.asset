@@ -103,7 +103,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  coyoteTime: 2
+  coyoteTime: 0.25
   lethalHeight: 15
   stunHeight: 9
   stunDuration:
@@ -181,8 +181,18 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   slowTimePostStun: 1
+  ropeHoldingMethod: 0
+  againstWallLayerToInclude:
+    serializedVersion: 2
+    m_Bits: 1
+  partialSphericalAttractiveForce: 2
+  partialSuspensionSpeed: 3
+  completeSphericalAttractiveForce: 3
+  completeSuspensionSpeed: 4
+  facingCenterThreshold: 0.25
   topClamp: 70
   bottomClamp: -60
   startingStyle: 0
   rotationSpeed: 7
   showGroundedDebug: 1
+  startWithBag: 0
