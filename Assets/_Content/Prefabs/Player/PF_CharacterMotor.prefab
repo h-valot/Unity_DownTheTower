@@ -29,7 +29,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0.9, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1, y: 0.9, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1227528473670976241}
@@ -403,7 +403,7 @@ MonoBehaviour:
   _rsoCharacterPosition: {fileID: 11400000, guid: 7cfc39952cca0d6478396ad49ab9e0db,
     type: 2}
   _rsoPlayerDeath: {fileID: 11400000, guid: faee3d4fb6d36d5439a3b69f5e064b1e, type: 2}
-  _rseSprint: {fileID: 11400000, guid: c137e572374debb4488914fb65cbdf94, type: 2}
+  _rseRun: {fileID: 11400000, guid: c137e572374debb4488914fb65cbdf94, type: 2}
   _rseLook: {fileID: 11400000, guid: 96e37ccd82d6cfd43bade6f66c27a479, type: 2}
   _rseMove: {fileID: 11400000, guid: 4c899dda7396ed24c8e3d098dfe89471, type: 2}
   _rseJump: {fileID: 11400000, guid: d6896f12727744441bfeccf04390e194, type: 2}
@@ -412,28 +412,6 @@ MonoBehaviour:
   _rseCraft: {fileID: 11400000, guid: a5a67e5b9e43b3e47b905af27b5b8657, type: 2}
   _rseInteract: {fileID: 11400000, guid: be798e2f50da79e448b01830a7c3441f, type: 2}
   _rseCancelAction: {fileID: 11400000, guid: f98da23f144768649811d562b2a9d4ad, type: 2}
-  _rseCraftLadder: {fileID: 11400000, guid: a0e0cc689b3d96a4ebde351834033a41, type: 2}
-  _rseCraftRope: {fileID: 11400000, guid: 57c4f3a5e1cd588409d1310d9aa40dd3, type: 2}
-  _currentState: 0
-  _moveInput: {x: 0, y: 0}
-  _velocity: {x: 0, y: 0, z: 0}
-  _targetSpeed: 0
-  _currentSpeed: 0
-  _moveSpeed: 0
-  _isSprinting: 0
-  _coyoteTimer: 0
-  _gravityModifier: {x: 0, y: 0, z: 0}
-  _slopePercentage: 0
-  _slopeAngle: 0
-  _slopeDirection: {x: 0, y: 0, z: 0}
-  _isGrounded: 0
-  _isStunned: 0
-  _isSlowed: 0
-  _inAir: 0
-  _lastGroundedSpeed: 0
-  _lastGroundedPosition: {x: 0, y: 0, z: 0}
-  _lastGroundedDirection: {x: 0, y: 0, z: 0}
-  _lastDistanceTravelled: 0
   ropeLength: 0
   _craftInHand: {fileID: 0}
   _craftInRobot: {fileID: 0}
@@ -460,8 +438,8 @@ CharacterController:
   m_Radius: 0.5
   m_SlopeLimit: 45
   m_StepOffset: 0.5
-  m_SkinWidth: 0.08
-  m_MinMoveDistance: 0.001
+  m_SkinWidth: 0.0001
+  m_MinMoveDistance: 0
   m_Center: {x: 0, y: 0.9, z: 0}
 --- !u!114 &102844715671480840
 MonoBehaviour:
