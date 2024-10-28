@@ -12,7 +12,7 @@ public class CharacterInput : MonoBehaviour
 	[SerializeField] private RSE_Move _rseMove;
 	[SerializeField] private RSE_Look _rseLook;
 	[SerializeField] private RSE_Jump _rseJump;
-	[SerializeField] private RSE_Sprint _rseSprint;
+	[SerializeField] private RSE_Run _rseRun;
 	[SerializeField] private RSE_Interact _rseInteract;
 	[SerializeField] private RSE_CancelAction _rseCancelAction;
     [SerializeField] private RSE_Craft _rseCraft;
@@ -27,7 +27,7 @@ public class CharacterInput : MonoBehaviour
 	[Header("Debugging")]
 	[ReadOnly] public Vector2 move;
 	[ReadOnly] public Vector2 look;
-	[ReadOnly] public bool sprint;
+	[ReadOnly] public bool run;
 
 	private float _controlSchemeCheckTimer;
 
@@ -36,8 +36,8 @@ public class CharacterInput : MonoBehaviour
 	private void Start()
 	{
 		// reset the sprint value
-		sprint = false;
-		_rseSprint.Call(false);
+		run = false;
+		_rseRun.Call(false);
 	}
 
 	private void Update()
@@ -86,10 +86,10 @@ public class CharacterInput : MonoBehaviour
 		_rseJump.Call();
 	}
 
-	public void OnSprint(InputValue value)
+	public void OnRun(InputValue value)
 	{
-		sprint = value.isPressed;
-		_rseSprint.Call(sprint);
+		run = value.isPressed;
+		_rseRun.Call(run);
 	}
 
 	public void OnThrow(InputValue value)

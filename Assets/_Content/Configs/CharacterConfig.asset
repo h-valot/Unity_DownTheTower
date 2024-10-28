@@ -12,68 +12,100 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 816ba0c10377e2e4aab515f89adf1bd2, type: 3}
   m_Name: CharacterConfig
   m_EditorClassIdentifier: 
-  walkSpeed: 2.25
-  sprintSpeed: 4
-  speedChangeRate: 10
-  uphillDeceleration:
+  walkSpeed: 3
+  runSpeed: 6
+  groundAcceleration: 10
+  groundDecceleration: 20
+  slopeSpeedModifier:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0.49859548
-      outSlope: 0.49859548
+      time: -1
+      value: 1.5
+      inSlope: -1.5394262
+      outSlope: -1.5394262
       tangentMode: 0
       weightedMode: 0
       inWeight: 0
-      outWeight: 1
+      outWeight: 0.06197682
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
     - serializedVersion: 3
       time: 1
-      value: 1
-      inSlope: 2
-      outSlope: 2
+      value: 0.49793166
+      inSlope: -1.5764601
+      outSlope: -1.5764601
       tangentMode: 0
       weightedMode: 0
-      inWeight: 0
+      inWeight: 0.0559884
       outWeight: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  downhillAcceleration:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0.5014124
-      outSlope: 0.5014124
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0.9971831
-    - serializedVersion: 3
-      time: 1
-      value: 1
-      inSlope: 2
-      outSlope: 2
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
+  SnapGravity: -20
   noSlipDistance: 0.5
   edgeFallFactor: 1
-  groundCheckY: 0.33
-  groundRaycastLength: 0.75
-  jumpHeight: 0.8
-  jumpCooldown: 0.5
-  gravity: -15
-  airControlModifier: 0.4
-  coyoteTime: 0.25
-  lethalHeight: 12
-  stunHeight: 8
+  edgeMaxClimbingHeight: 1.5
+  groundCheckYFactor: 2.5
+  skinWidth: 0.1
+  jumpMinimalPlanarVelocity: 1.5
+  jumpHeight: 1
+  jumpCooldown: 0
+  gravity: -9.8
+  dragDecceleration: 1.5
+  airControlAngularSpeed: 30
+  airControlInputFactor:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: -1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 136
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: -0.1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 136
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 136
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 136
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  coyoteTime: 2
+  lethalHeight: 15
+  stunHeight: 9
   stunDuration:
     serializedVersion: 2
     m_Curve:
@@ -98,7 +130,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  slowHeight: 5
+  slowHeight: 7
   slowDuration:
     serializedVersion: 2
     m_Curve:
@@ -123,6 +155,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  maxSlowTime: 3
   slowPercentage:
     serializedVersion: 2
     m_Curve:
@@ -147,17 +180,9 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  ropeHoldingMethod: 1
-  againstWallLayerToInclude:
-    serializedVersion: 2
-    m_Bits: 1
-  partialSphericalAttractiveForce: 2
-  partialSuspensionSpeed: 3
-  completeSphericalAttractiveForce: 5
-  completeSuspensionSpeed: 6
-  facingCenterThreshold: 0.25
+  slowTimePostStun: 1
   topClamp: 70
   bottomClamp: -60
   startingStyle: 0
   rotationSpeed: 7
-  startWithBag: 1
+  showGroundedDebug: 1
