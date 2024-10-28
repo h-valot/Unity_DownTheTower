@@ -12,11 +12,10 @@ public class Rope : Permanent
 	[Header("Scriptable references")]
 	[SerializeField] private RopeConfig _ropeConfig;
 
-	[Header("debug")]
-	public bool isConnected;
-	public bool isPlaced;
-	public float holdLength;
-	public List<Vector3> folds = new List<Vector3>();
+	[HideInInspector] public bool isConnected;
+	[HideInInspector] public bool isPlaced;
+	[HideInInspector] public float holdLength;
+	[HideInInspector] public List<Vector3> folds = new List<Vector3>();
 
 	private Transform _characterHarness;
 
@@ -223,7 +222,7 @@ public class Rope : Permanent
 		// assert: character ref null
 		if (_characterHarness == null) return 0;
 
-		return (folds[^1] - _characterHarness.transform.position).magnitude;
+		return (folds[^1] - _characterHarness.position).magnitude;
 	}
 
 #if UNITY_EDITOR

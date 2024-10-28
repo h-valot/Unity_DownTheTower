@@ -1311,15 +1311,17 @@ public class CharacterMotor : MonoBehaviour
 		_characterDirection.forward = -towardsCenter.normalized;
 	}
 
+	private float ropeAcceleration;
+	private bool canStartRopeAcceleration;
 	private void HandleRopeMovement()
 	{
-		// assert: there is no equipped rope 
+		// Assert: there is no equipped rope 
 		if (_rope == null) return;
 
-		// player direction inputs
+		// Player direction inputs
 		Vector3 inputDirectionGrounded = _cameraTransform.forward * _moveInput.y + _cameraTransform.right * _moveInput.x;
 
-		// do the character fall based on the rope holding method
+		// Do the character fall based on the rope holding method
 		bool doFall = false;
 		switch (_characterConfig.ropeHoldingMethod)
 		{
@@ -1334,8 +1336,9 @@ public class CharacterMotor : MonoBehaviour
 				break;
 		}
 
-		// -- CHARACTER IS NOT HOLDING THE ROPE --
+		// -- CHARACTER IS FALLING DOWN THE ROPE --
 
+		// Regular falling functions
 		if (doFall)
 		{	
 			// apply grounded and falling like forces
@@ -1355,14 +1358,70 @@ public class CharacterMotor : MonoBehaviour
 
 		// -- CHARACTER IS HOLDING THE ROPE --
 
+		float MAX_ROPE_LINEAR_ACCELERATION = 10f;
+		float TOWARDS_VERTICAL_THRESHOLD = 0.75f;
+		float LINEAR_ACCELERATION_VALUE = 2f;
+
+		Vector3 verticalPoint = _rope.folds[^1] + Vector3.down * _rope.holdLength;
+		Vector3 towardsVertical = (_rsoCharacterPosition.value - verticalPoint).normalized;
+
 		// - Get attraction direction -
-		// from the attraction point (which is the lowest point on the sphere)
-		// get the normalized direction towards this point with a down offset
-		// so the direction is more likely to be tangent to the sphere
-		Vector3 attractionPoint = _rope.folds[^1] + Vector3.down * _rope.holdLength;
-		Vector3 sphereCharaSnapPoint = _rope.folds[^1] + (_rope.folds[^1] - _rsoCharacterPosition.value).normalized * _rope.holdLength;
-		Vector3 offsetAttractionPoint = _rope.folds[^1] + Vector3.down * (attractionPoint - sphereCharaSnapPoint).magnitude;
-		Vector3 attractionDirection = (offsetAttractionPoint - sphereCharaSnapPoint).normalized;
+		// From the attraction point (which is the lowest point on the sphere)
+		// Get the normalized direction towards this point with a down offset
+		// So the direction is more likely to be tangent to the sphere
+		// Vector3 sphereCharaSnapPoint = _rope.folds[^1] + (_rope.folds[^1] - _rsoCharacterPosition.value).normalized * _rope.holdLength;
+		// Vector3 offsetAttractionPoint = _rope.folds[^1] + Vector3.down * (verticalPoint - sphereCharaSnapPoint).magnitude;
+		// Vector3 attractionDirection = (offsetAttractionPoint - sphereCharaSnapPoint).normalized;
+
+		Vector3 attractionDirection =
+			(Vector3Extention.GetPositionOnCercle(
+				angle: _characterConfig.ropeOffsetAngle,
+				axis: _characterDirection.forward,
+				direction: _characterDirection.right,
+				origin: _rope.folds[^1],
+				radius: _rope.holdLength,
+				starting: _rsoCharacterPosition.value
+			) - _rsoCharacterPosition.value).normalized * towardsVertical.x +
+			(Vector3Extention.GetPositionOnCercle(
+				angle: _characterConfig.ropeOffsetAngle,
+				axis: _characterDirection.right,
+				direction: _characterDirection.forward,
+				origin: _rope.folds[^1],
+				radius: _rope.holdLength,
+				starting: _rsoCharacterPosition.value
+			) - _rsoCharacterPosition.value).normalized * towardsVertical.y;
+
+		UnityEngine.Debug.DrawRay(_harness.position, attractionDirection);
+
+		// - Get attraction velocity using a simple pendulum effect -
+		// float angleFinal = Vector3.Angle(verticalPoint, _rsoCharacterPosition.value) - _characterConfig.ropeOffsetAngle * 3;
+		// float heightInitial = Mathf.Cos(_characterConfig.maxPartialSideAngle) * _rope.holdLength;
+		// float heightFinal = Mathf.Cos(angleFinal) * _rope.holdLength;
+		// float deltaPotentialEnergy = -_characterConfig.mass * _characterConfig.gravity * (heightFinal - heightInitial);
+		// float pendulumVelocity = Mathf.Sqrt(Mathf.Abs(deltaPotentialEnergy) / (float)(0.5f * _characterConfig.mass));
+
+		// If there is no inputs or the input direction is a same as the vertical point of the circle
+		if (inputDirectionGrounded.magnitude <= 0
+			|| Vector3.Dot(inputDirectionGrounded, towardsVertical) >= TOWARDS_VERTICAL_THRESHOLD)
+		{
+			if (!canStartRopeAcceleration)
+			{
+				ropeAcceleration = 0;
+				canStartRopeAcceleration = false;
+			}
+
+			ropeAcceleration += LINEAR_ACCELERATION_VALUE;
+			if (ropeAcceleration >= MAX_ROPE_LINEAR_ACCELERATION) ropeAcceleration = MAX_ROPE_LINEAR_ACCELERATION;
+		}
+		else 
+		{
+			ropeAcceleration -= LINEAR_ACCELERATION_VALUE;
+			if (ropeAcceleration <= 0)
+			{
+				ropeAcceleration = 0;
+				canStartRopeAcceleration = true;
+			}
+		}
 
 		// - Get desired position on the cercle offset by given angle -
 		Vector3 completeDirection = 
@@ -1394,35 +1453,35 @@ public class CharacterMotor : MonoBehaviour
 			) - _rsoCharacterPosition.value).normalized * _moveInput.x;
 
 		// TODO:
-		// (1) acceleration movement while against the wall
-		// (2) reduce the character speed to 0 when approching the limit angles of the balancier effect
-		// (3) jump off the wall logic
-		// (4) lerp the speed acceleration when starting going down the rope 
+		// (1) Acceleration movement while against the wall
+		// (2) Reduce the character speed to 0 when approching the limit angles of the balancier effect => Done by using the pendulum effect
+		// (3) Jump off the wall logic
+		// (4) Lerp the speed acceleration when starting going down the rope 
 
-		// apply movements
-		// partial rope suspension
+		// - Apply movements -
+		// Partial rope suspension
 		if (_isAgainstWall)
 		{
 			_controller.Move(Time.deltaTime * (
 				// player's inputs
 				partialDirection * _characterConfig.partialSuspensionSpeed
 				// attraction direction is a custom gravity force applied while on the rope
-				+ attractionDirection * _characterConfig.partialSphericalAttractiveForce
+				+ attractionDirection * ropeAcceleration
 			));
 		}
 
-		// complete rope suspension
+		// Complete rope suspension
 		else
 		{
 			_controller.Move(Time.deltaTime * (
 				// player's inputs
 				completeDirection * _characterConfig.completeSuspensionSpeed
 				// attraction direction is a custom gravity force applied while on the rope
-				+ attractionDirection * _characterConfig.partialSphericalAttractiveForce
+				+ attractionDirection * ropeAcceleration
 			));
 		}
 
-		// update variables
+		// - Update variables -
 		if (_rsoCharacterPosition.value != _characterDirection.position) { _rsoCharacterPosition.value = _characterDirection.position; }
 		if (_rsoCharacterForward.value != _characterDirection.forward) { _rsoCharacterForward.value = _characterDirection.forward; }
 	}

@@ -5,7 +5,6 @@ public class RopeConfig : ScriptableObject
 {
 	[Header("Prefabs")]
 	public Rope pfRope;
-	public RopeSegment pfSegment;
 
 	[Header("Settings")]
 	public int maxSegmentInstantiatedPerFrame = 5;

@@ -48,6 +48,8 @@ public class CharacterConfig : ScriptableObject
 	[Header("Gravity")]
 	[Tooltip("The character uses its own gravity value. The engine default is -9.8f")]
 	public float gravity = -15f;
+	[Tooltip("The mass of the character. Used for rope pendulum effect calculations")]
+	public float mass = 70f;
 	[Tooltip("Multiply this value by the player's directional inputs while in the air.")]
 	[Range(0f, 1f)] public float airControlModifier;
 
