@@ -1,6 +1,8 @@
+using DG.Tweening;
 using NaughtyAttributes;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Rendering;
 using static UnityEngine.Rendering.DebugUI;
 
 public class Torch : Permanent
@@ -14,21 +16,50 @@ public class Torch : Permanent
 
     [Header("Scriptable References")]
 	[SerializeField] private TorchConfig _torchConfig;
+    [SerializeField] private CharacterConfig _characterConfig;
+    [SerializeField] private RopeConfig _ropeConfig;
 
-
+    // ----- PUBLIC VARIABLES -----
+    [ReadOnly] public bool _isActive = false;
 
     // ----- PRIVATE VARIABLES -----
-    [ReadOnly] public bool _isActive = false;
+    private bool _isFalling = false;
+    private bool _changedColor = false;
+    private float _throwStartPoint;
+    private float _landedHeight = 9999999;
+
+    #region monobehavior functions
 
     private void Start()
     {
+        _light.color = _torchConfig.lightColor;
         _light.intensity = _torchConfig.lightIntensity;
         _rigidbody.constraints = RigidbodyConstraints.FreezeAll;
         _isActive = true;
         _aimPreview.useWorldSpace = true;
     }
 
-	public override void ToggleInHand()
+    private void Update()
+    {
+        if (_isFalling && !_changedColor)
+        {
+            CheckLethalHeight();
+        }
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (!_isFalling) return;
+        _landedHeight = transform.position.y;
+        CheckLethalRopeHeight();
+    }
+
+    #endregion
+
+    #region light
+
+    /// <summary> Activate/Deactivate light on the torch </summary>
+    public override void ToggleLight()
     {
         if (!_isActive) return;
 
@@ -42,12 +73,19 @@ public class Torch : Permanent
 		}
     }
 
-    public override bool StateInHand()
+    /// <summary> Change the material from lit to unlit </summary>
+    private IEnumerator SetMaterial(float duration, Material material)
     {
-        return _isActive;
+        yield return new WaitForSeconds(duration);
+        _light.enabled = !_light.enabled;
+        _meshRenderer.material = material;
     }
-    
 
+    #endregion
+
+    #region preview
+
+    /// <summary> Torch previsualisation with the camera's transform for the direction </summary>
     public override void PreviewThrow(Transform _cameraTransform)
     {
         _aimPreview.enabled = true;
@@ -73,6 +111,23 @@ public class Torch : Permanent
         }
     }
 
+
+    /// <summary> Stop the curve of the previsualisation if it collides with an object </summary>
+    private bool CheckEndOfPreview(int pointNb, Vector3 pointPos)
+    {
+        Vector3 lastPosition = _aimPreview.GetPosition(pointNb - 1);
+        if (Physics.Raycast(lastPosition, (pointPos - lastPosition).normalized, out var hit, (pointPos - lastPosition).magnitude, ~(_torchConfig.layersToIgnorePreview)))
+        {
+            _aimPreview.SetPosition(pointNb, hit.point);
+            _aimPreview.positionCount = pointNb + 1;
+            return true;
+        }
+        return false;
+    }
+
+    #endregion
+
+    #region throwing
     public override bool Throw(Transform _cameraTransform)
     {
         if (!_isActive || !_torchConfig.canThrow) 
@@ -88,19 +143,14 @@ public class Torch : Permanent
 		_rigidbody.constraints = RigidbodyConstraints.None;
 		_rigidbody.velocity = Quaternion.AngleAxis(-CalculateThrowAngleOffset(_cameraTransform), _cameraTransform.right) * _cameraTransform.forward * CalculateLaunchForce(_cameraTransform);
 		_isActive = false;
+        _isFalling = true;
+        _throwStartPoint = transform.position.y;
 
 		StartCoroutine(WaitAndDestroyTorch(_torchConfig.groundedLightDuration));
 
         return true;
     }
 
-    private float CalculateLaunchForce(Transform _cameraTransform)
-    {
-        return _torchConfig.minLaunchForce + 
-            (Mathf.Clamp(SetUpCameraAngle(_cameraTransform), 0, _torchConfig.maxLaunchCameraAngle / 2) - _torchConfig.minLaunchCameraAngle) * 
-            (_torchConfig.maxLaunchForce - _torchConfig.minLaunchForce) / 
-            (_torchConfig.maxLaunchCameraAngle / 2 - _torchConfig.minLaunchCameraAngle);
-    }
 
     private float CalculateThrowAngleOffset(Transform _cameraTransform)
     {
@@ -113,8 +163,6 @@ public class Torch : Permanent
         return (-(cameraAngle * cameraAngle) + _torchConfig.maxLaunchCameraAngle * cameraAngle) / 200;
     }
 
-
-
     private float SetUpCameraAngle(Transform _cameraTransform)
     {
         // setting up the camera angle from just the eulerAngle from a value going from 0 to the difference between min and max camera angle
@@ -124,11 +172,12 @@ public class Torch : Permanent
         return _torchConfig.maxLaunchCameraAngle - cameraAngle;
     }
 
-    private IEnumerator SetMaterial(float duration, Material material)
+    private float CalculateLaunchForce(Transform _cameraTransform)
     {
-        yield return new WaitForSeconds(duration);
-        _light.enabled = !_light.enabled;
-        _meshRenderer.material = material;
+        return _torchConfig.minLaunchForce +
+            (Mathf.Clamp(SetUpCameraAngle(_cameraTransform), 0, _torchConfig.maxLaunchCameraAngle / 2) - _torchConfig.minLaunchCameraAngle) *
+            (_torchConfig.maxLaunchForce - _torchConfig.minLaunchForce) /
+            (_torchConfig.maxLaunchCameraAngle / 2 - _torchConfig.minLaunchCameraAngle);
     }
 
     private IEnumerator WaitAndDestroyTorch(float duration)
@@ -137,15 +186,34 @@ public class Torch : Permanent
         Destroy(gameObject);
     }
 
-    private bool CheckEndOfPreview(int pointNb, Vector3 pointPos)
+    public override bool StateInHand()
     {
-        Vector3 lastPosition = _aimPreview.GetPosition(pointNb - 1);
-        if(Physics.Raycast(lastPosition, (pointPos - lastPosition).normalized, out var hit, (pointPos - lastPosition).magnitude, ~(_torchConfig.layersToIgnorePreview)))
-        {
-            _aimPreview.SetPosition(pointNb, hit.point);
-            _aimPreview.positionCount = pointNb + 1;
-            return true;
-        }
-        return false;
+        return _isActive;
     }
+
+    #endregion
+
+    #region fall feedback
+
+    private void CheckLethalHeight()
+    {
+        if (transform.position.y > _throwStartPoint ||
+            (_landedHeight != 9999999 && Mathf.Round(_landedHeight) == Mathf.Round(transform.position.y))) return;
+
+        if (_throwStartPoint - transform.position.y > _characterConfig.lethalHeight)
+        {
+            _light.DOColor(_torchConfig.deathColor, 0.5f);
+            _changedColor = true;
+        }
+    }
+
+    private void CheckLethalRopeHeight()
+    {
+        if (transform.position.y > _throwStartPoint) return;
+
+        if (_throwStartPoint - transform.position.y > (_characterConfig.lethalHeight + _ropeConfig.maxLength)) Destroy(gameObject);
+    }
+
+    #endregion
+
 }

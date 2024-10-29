@@ -34,7 +34,7 @@ public class Permanent : MonoBehaviour
 		return false;
 	}
 
-	public virtual void ToggleInHand() 
+	public virtual void ToggleLight() 
 	{ 
 
 	}

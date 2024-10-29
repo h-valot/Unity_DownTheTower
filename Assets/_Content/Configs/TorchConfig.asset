@@ -15,10 +15,12 @@ MonoBehaviour:
   pfTorch: {fileID: 4567227452422965972, guid: c06366f12c0c9ff4db3b81d641d4173b, type: 3}
   lightIntensity: 5
   groundedLightDuration: 120
-  litMaterial: {fileID: 2100000, guid: 48499840755e5e14dbae8eb3a7c9fca6, type: 2}
   lightStartupDuration: 0
-  unlitMaterial: {fileID: 2100000, guid: 6556fddf40050d74f8b9ca072c9b26e0, type: 2}
   extinguishDuration: 0
+  litMaterial: {fileID: 2100000, guid: 48499840755e5e14dbae8eb3a7c9fca6, type: 2}
+  unlitMaterial: {fileID: 2100000, guid: 6556fddf40050d74f8b9ca072c9b26e0, type: 2}
+  lightColor: {r: 1, g: 0.6666667, b: 0.33333334, a: 1}
+  deathColor: {r: 1, g: 0.2028302, b: 0.2028302, a: 1}
   canThrow: 1
   minLaunchForce: 0.1
   maxLaunchForce: 15
@@ -27,7 +29,7 @@ MonoBehaviour:
   craftingDuration: 0
   minThrowAngleOffset: 0
   maxThrowAngleOffset: 30
-  previewLength: 30
+  previewLength: 10
   previewSmoothing: 0.1
   layersToIgnorePreview:
     serializedVersion: 2
