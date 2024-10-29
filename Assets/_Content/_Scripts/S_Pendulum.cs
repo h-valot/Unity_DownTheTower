@@ -5,7 +5,7 @@ public class Pendulum : MonoBehaviour
 	[Header("Tweakable values")]
 	public float m_Mass = 1f;
 	public float m_GravityMagnitude = 9.81f;
-	public float m_Drag = 1f;
+	public float m_Drag = 0.03f;
 
 	[Header("Internal references")]
 	public Transform m_Pivot;
@@ -56,9 +56,9 @@ public class Pendulum : MonoBehaviour
 
 			// The nearest the bob is from the vertical point, the greatest the tension force will be.
 			float inclinationAngle = Vector3.Angle(bobPositionCache - pivotPositionCache, Vector3.down);
-			m_TensionForce = m_Mass * Physics.gravity.magnitude * Mathf.Cos(Mathf.Deg2Rad * inclinationAngle);
+			m_TensionForce = m_GravityForce * Mathf.Cos(Mathf.Deg2Rad * inclinationAngle);
 
-			// Generate the counter force to make the bob stay within the circle : centripetal force
+			// Generate the counter force to make the bob stay within the circle: centripetal force
 			float centripetalForce = m_Mass * Mathf.Pow(m_Velocity.magnitude, 2) / m_RopeLength;
 			m_TensionForce += centripetalForce;
 
@@ -66,6 +66,10 @@ public class Pendulum : MonoBehaviour
 			m_Velocity += m_TensionDirection * m_TensionForce * m_FIXED_DELTA_TIME;
 		}
 
+		// Apply a counter velocity force: a drag
+		m_Velocity -= m_Velocity * (m_Drag / m_GravityForce);
+
+		// Apply velocity
 		m_Bob.Move(m_Velocity * m_FIXED_DELTA_TIME);
 	}
 
