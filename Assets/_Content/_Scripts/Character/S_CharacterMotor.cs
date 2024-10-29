@@ -52,13 +52,13 @@ public class CharacterMotor : MonoBehaviour
 	#region runtime variables
 
     [Header("debug: animation")]
-	[HideInInspector] public AnimationState _currentState;
+	public AnimationState _currentState;
 
 	[Header("debug: move")]
 	private Vector2 _moveInput;
     [HideInInspector] public float _planarSpeed;
 	private float _targetPlanarSpeed;
-	private float _gravitySpeed;
+	public float _gravitySpeed;
 	private Vector3 _movement;
 	private bool _isRunning;
 	private float _coyoteTime;
@@ -67,7 +67,7 @@ public class CharacterMotor : MonoBehaviour
 	private float _slopePercentage;
 
 	[Header("debug: fall")]
-    [HideInInspector] public bool _isGrounded;
+    public bool _isGrounded;
     private bool[] _groundChecks = new bool[5];
 	private bool _isStunned = false;
 	private bool _isSlowed = false;
@@ -100,8 +100,8 @@ public class CharacterMotor : MonoBehaviour
     private float _discriminantRight;
 
     // - jump -
-    private bool _isJumping;
-	private float _jumpTimer;
+    private bool _wantJump;
+	private bool _isJumping;
 	private RaycastHit[] _edgeHits;
 	private RaycastHit _edgeHit;
 
@@ -216,6 +216,7 @@ public class CharacterMotor : MonoBehaviour
 	#endregion
 
 	#region animation state switch
+
 	/// <summary>
 	/// 	exit current state and enter the given state.
 	/// </summary>
@@ -498,6 +499,10 @@ public class CharacterMotor : MonoBehaviour
                 }
             }
         }
+		if (_isJumping && _gravitySpeed <= 0)
+		{
+			_isJumping = false;
+		}
     }
 
     /// <summary>
@@ -505,23 +510,24 @@ public class CharacterMotor : MonoBehaviour
     /// </summary>
     private void VerifyState()
 	{
-		if (_isJumping && (_isGrounded || _coyoteTime > 0f) && _currentState != AnimationState.JUMP)
+		if (_wantJump && (_isGrounded || _coyoteTime > 0f) && _currentState != AnimationState.JUMP)
         {
             SwitchState(AnimationState.JUMP);
+			_isJumping = true;
         }
         else if (!_isGrounded && _currentState != AnimationState.FALL && _gravitySpeed <= 0)
 		{
 			if(_isGroundedLastFrame) _coyoteTime = _characterConfig.coyoteTime; 
             SwitchState(AnimationState.FALL);
         }
-		else if (_isGrounded && !_isGroundedLastFrame)
+		else if (_isGrounded && !_isJumping && _currentState != AnimationState.LOCOMOTION)
 		{
 			ApplyFallHeight();
             SwitchState(AnimationState.LOCOMOTION); 
 		}
 
 		//Reset Jump if it is not possible to jump
-		_isJumping = false;
+		_wantJump = false;
 	}
 
 	/// <summary>
@@ -780,12 +786,13 @@ public class CharacterMotor : MonoBehaviour
 	{
 		Vector3 _start = new Vector3(transform.position.x, transform.position.y + _controller.height - _controller.radius, transform.position.z);
 		float _radius = _controller.radius + _characterConfig.skinWidth;
-		float _distance = _controller.height - 2 * _controller.radius;
-        _edgeHits = Physics.SphereCastAll(_start, _radius, Vector3.down, _distance, _raycastLayerMask);
+		float _distance = _controller.height - 2 * _controller.radius + _characterConfig.skinWidth;
+        _edgeHits = Physics.SphereCastAll(_start, _controller.radius, Vector3.down, _distance, _raycastLayerMask);
 
 		if (_edgeHits.Length > 0 )
 		{
             _edgeHit = _edgeHits[0];
+			if(_edgeHit.normal == Vector3.up) _edgeHit = new RaycastHit();
         }
 		else
 		{
@@ -832,7 +839,7 @@ public class CharacterMotor : MonoBehaviour
         Vector3 _edgeSlopeSlideLeft = Vector3.Cross(_edgeHit.normal, Vector3.up).normalized;
         Vector3 _edgeSlopeSlideDown = Vector3.Cross(_edgeHit.normal, _edgeSlopeSlideLeft).normalized;
 
-        UnityEngine.Debug.DrawRay(transform.position, _edgeHit.normal, Color.blue);
+        //UnityEngine.Debug.DrawRay(transform.position, _edgeHit.normal, Color.blue);
 
         _movement += -_edgeSlopeSlideDown.normalized * _gravitySpeed;
 
@@ -994,7 +1001,7 @@ public class CharacterMotor : MonoBehaviour
 	/// </summary>
 	private void Jump()
 	{
-        _isJumping = true;
+        _wantJump = true;
 	}
 
 	/// <summary>
