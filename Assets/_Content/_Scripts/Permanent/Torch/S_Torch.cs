@@ -58,6 +58,7 @@ public class Torch : Permanent
 
     #region light
 
+    /// <summary> Activate/Deactivate light on the torch </summary>
     public override void ToggleLight()
     {
         if (!_isActive) return;
@@ -71,6 +72,8 @@ public class Torch : Permanent
 			StartCoroutine(SetMaterial(_torchConfig.lightStartupDuration, _torchConfig.litMaterial));
 		}
     }
+
+    /// <summary> Change the material from lit to unlit </summary>
     private IEnumerator SetMaterial(float duration, Material material)
     {
         yield return new WaitForSeconds(duration);
@@ -81,6 +84,8 @@ public class Torch : Permanent
     #endregion
 
     #region preview
+
+    /// <summary> Torch previsualisation with the camera's transform for the direction </summary>
     public override void PreviewThrow(Transform _cameraTransform)
     {
         _aimPreview.enabled = true;
@@ -106,6 +111,8 @@ public class Torch : Permanent
         }
     }
 
+
+    /// <summary> Stop the curve of the previsualisation if it collides with an object </summary>
     private bool CheckEndOfPreview(int pointNb, Vector3 pointPos)
     {
         Vector3 lastPosition = _aimPreview.GetPosition(pointNb - 1);
@@ -143,6 +150,7 @@ public class Torch : Permanent
 
         return true;
     }
+
 
     private float CalculateThrowAngleOffset(Transform _cameraTransform)
     {
