@@ -1,6 +1,8 @@
+using DG.Tweening;
 using NaughtyAttributes;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Rendering;
 using static UnityEngine.Rendering.DebugUI;
 
 public class Torch : Permanent
@@ -14,21 +16,36 @@ public class Torch : Permanent
 
     [Header("Scriptable References")]
 	[SerializeField] private TorchConfig _torchConfig;
+    [SerializeField] private CharacterConfig _characterConfig;
+    [SerializeField] private RopeConfig _ropeConfig;
 
-
+    // ----- PUBLIC VARIABLES -----
+    [ReadOnly] public bool _isActive = false;
 
     // ----- PRIVATE VARIABLES -----
-    [ReadOnly] public bool _isActive = false;
+    private bool _isFalling = false;
+    private bool _changedColor = false;
+    private float _throwStartPoint;
+    private float _landedHeight = 9999999;
 
     private void Start()
     {
+        _light.color = _torchConfig.lightColor;
         _light.intensity = _torchConfig.lightIntensity;
         _rigidbody.constraints = RigidbodyConstraints.FreezeAll;
         _isActive = true;
         _aimPreview.useWorldSpace = true;
     }
 
-	public override void ToggleInHand()
+    private void Update()
+    {
+        if (_isFalling && !_changedColor)
+        {
+            CheckLethalHeight();
+        }
+    }
+
+    public override void ToggleInHand()
     {
         if (!_isActive) return;
 
@@ -88,6 +105,8 @@ public class Torch : Permanent
 		_rigidbody.constraints = RigidbodyConstraints.None;
 		_rigidbody.velocity = Quaternion.AngleAxis(-CalculateThrowAngleOffset(_cameraTransform), _cameraTransform.right) * _cameraTransform.forward * CalculateLaunchForce(_cameraTransform);
 		_isActive = false;
+        _isFalling = true;
+        _throwStartPoint = transform.position.y;
 
 		StartCoroutine(WaitAndDestroyTorch(_torchConfig.groundedLightDuration));
 
@@ -147,5 +166,31 @@ public class Torch : Permanent
             return true;
         }
         return false;
+    }
+
+    private void CheckLethalHeight()
+    {
+        if (transform.position.y > _throwStartPoint ||
+            (_landedHeight != 9999999 && Mathf.Round(_landedHeight) == Mathf.Round(transform.position.y))) return;
+
+        if (_throwStartPoint - transform.position.y > _characterConfig.lethalHeight)
+        {
+            _light.DOColor(_torchConfig.deathColor, 0.5f);
+            _changedColor = true;
+        }
+    }
+
+    private void CheckLethalRopeHeight()
+    {
+        if (transform.position.y > _throwStartPoint) return;
+
+        if (_throwStartPoint - transform.position.y > (_characterConfig.lethalHeight + _ropeConfig.maxLength)) Destroy(gameObject);
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if(!_isFalling) return;
+        _landedHeight = transform.position.y;
+        CheckLethalRopeHeight();
     }
 }

@@ -1,3 +1,4 @@
+using DG.Tweening;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "TorchConfig", menuName = "Configs/Torch")]
@@ -15,16 +16,17 @@ public class TorchConfig : ScriptableObject
 	[Tooltip("Lit duration when on ground")]
 	public float groundedLightDuration;
 
-	public Material litMaterial;
-
 	[Tooltip("Time to light the torch")]
 	public float lightStartupDuration;
-
-	public Material unlitMaterial;
 
     [Tooltip("Time to extinguish the torch")]
     public float extinguishDuration;
 
+    public Material litMaterial;
+    public Material unlitMaterial;
+
+	public Color lightColor = new Color(255, 170, 85, 255);
+	public Color deathColor = new Color(255, 52, 52, 255);
 
 	[Header("Throw")]
 	[Tooltip("Can throw the torch when handled")]
@@ -45,7 +47,7 @@ public class TorchConfig : ScriptableObject
 	[Header("Aim Preview Variables")]
     public float minThrowAngleOffset = 0f;
     public float maxThrowAngleOffset = 20f;
-	[Range(10, 100)] public int previewLength = 25;
+	[Range(0.1f, 10f)] public float previewLength = 10f;
 	[Range(0.1f, 0.25f)] public float previewSmoothing = 0.1f;
 	public LayerMask layersToIgnorePreview;
 }
