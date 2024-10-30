@@ -5,7 +5,7 @@ using UnityEngine.TextCore.Text;
 
 public class ToxicGas: MonoBehaviour
 {
-    [SerializeField] private List<GameObject> _mushroomsList;
+    [SerializeField] private List<ExplosiveMushroom> _mushroomsList;
     [SerializeField] private GameObject _gaz;
     [SerializeField] private ToxicConfig _toxicConfig;
     [SerializeField] private CharacterMotor _characterMotor;
@@ -23,8 +23,12 @@ public class ToxicGas: MonoBehaviour
         {
             Destroy(_torch.gameObject);
             _gaz.SetActive(false);
+            foreach (var mushroom in _mushroomsList)
+            {
+                mushroom.Explode();
+            }
             StartCoroutine(TimetoRefill(_toxicConfig.cooldownToRefill));
-            Debug.Log("Je tente de détruire le nuage");
+
         }
     }
 
@@ -37,5 +41,10 @@ public class ToxicGas: MonoBehaviour
     {
         yield return new WaitForSeconds(_cooldown);
         _gaz.SetActive(true);
+
+        foreach (var mushroom in _mushroomsList)
+        {
+            mushroom.Refilled();
+        }
     }
 }

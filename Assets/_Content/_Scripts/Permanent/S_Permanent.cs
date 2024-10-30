@@ -34,19 +34,24 @@ public class Permanent : MonoBehaviour
 		return false;
 	}
 
-	public virtual void ToggleInHand() 
+	public virtual void ToggleLight() 
 	{ 
 
 	}
 
-	/// <summary>
-	/// 	
-	/// </summary>
-	/// <param name="cameraTransform"></param>
-	/// <param name="cameraOffsetAngle"></param>
-	/// <param name="maxCameraDownwardClamp"></param>
-	/// <returns></returns>
-	protected Vector3 GetPositionRayDirection(Transform cameraTransform, float cameraOffsetAngle, float maxCameraDownwardClamp)
+    public virtual bool StateInHand()
+    {
+		return false;
+    }
+
+    /// <summary>
+    /// 	
+    /// </summary>
+    /// <param name="cameraTransform"></param>
+    /// <param name="cameraOffsetAngle"></param>
+    /// <param name="maxCameraDownwardClamp"></param>
+    /// <returns></returns>
+    protected Vector3 GetPositionRayDirection(Transform cameraTransform, float cameraOffsetAngle, float maxCameraDownwardClamp)
 	{
 		Vector3 offsetRay = Quaternion.AngleAxis(cameraOffsetAngle, cameraTransform.right) * cameraTransform.forward;
 

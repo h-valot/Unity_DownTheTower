@@ -8,18 +8,19 @@ public class CharacterConfig : ScriptableObject
 	public float walkSpeed;
 	
 	[Tooltip("Sprint speed of the character")]
-	public float sprintSpeed;
+	public float runSpeed;
 	
-	[Tooltip("Acceleration and deceleration rate. The current move speed of the character increases and decreases times this value times time.deltatime.")]
-	public float speedChangeRate = 10.0f;
+	[Tooltip("Acceleration rate.")]
+	public float groundAcceleration = 10.0f;
 
+	[Tooltip("Deceleration rate.")]
+	public float groundDecceleration = 20.0f;
 
-	[Header("Slope")]
-	[Tooltip("Percentage of character speed when ascending. The current move speed is reduced by this value based on the slope angle")]
-	public AnimationCurve uphillDeceleration;
+	[Tooltip("Percentage of character speed when on a slope. The current move speed is multiply by this value based on the slope angle.")]
+	public AnimationCurve slopeSpeedModifier;
 
-	[Tooltip("Percentage of character speed when descending. The current move speed is increased by this value based on the slope angle")]
-	public AnimationCurve downhillAcceleration;
+	[Tooltip("Used to snap the character to the floor when going down stairs and slopes.")]
+	public float SnapGravity = -2f;
 
 
 	[Header("Edge")]
@@ -28,17 +29,19 @@ public class CharacterConfig : ScriptableObject
 
 	[Tooltip("Speed scalar when the character is on an edge.")]
 	public float edgeFallFactor = 1f;
+    [Tooltip("Edge height that the character climb into.")]
+    public float edgeMaxClimbingHeight = 1.5f;
 
 
-	[Header("Ground")]
-	[Tooltip("Ground check raycast is cast from character's position plus this value times up vector")]
-	public float groundCheckY = 0.33f;
-
-	[Tooltip("How far raycast moves down from origin point calculate from the groundCheckY value")]
-	public float groundRaycastLength = 0.75f;
-
-
+    [Header("Ground")]
+	[Tooltip("How far raycast moves down from origin point multiply by the capsule radius")]
+	public float groundCheckYFactor = 2.5f;
+	[Tooltip("Used to enlarge character capsule to approximate ground detection")]
+	public float skinWidth = 0.1f;
+	
 	[Header("Jump")]
+	[Tooltip("Speed added when using the jump button.")]
+	public float jumpMinimalPlanarVelocity = 1.5f;
 	[Tooltip("When jumping, the character reaches this height")]
 	public float jumpHeight;
 
@@ -48,11 +51,13 @@ public class CharacterConfig : ScriptableObject
 
 	[Header("Gravity")]
 	[Tooltip("The character uses its own gravity value. The engine default is -9.8f")]
-	public float gravity = -15f;
-
-	[Tooltip("Multiply this value by the player's directional inputs while in the air.")]
-	[Range(0f, 1f)] public float airControlModifier;
-
+	public float gravity = -9.8f;
+	[Tooltip("Acceleration remove from character speed per second while falling.")]
+	public float dragDecceleration = 1f;
+	[Tooltip("Angular speed per second the character can turn while falling. Will be effective if character has a speed.")]
+	public float airControlAngularSpeed = 30f;
+	[Tooltip("Transform the dot product between character forward and input to a factor that multiply the air control angular speed.")]
+	public AnimationCurve airControlInputFactor;
 
 	[Header("Fall")]
 	[Tooltip("Whenever the character leaves a plateform, the coyote time counter starts. During this periode of time, the character can still jump.")]
@@ -73,8 +78,14 @@ public class CharacterConfig : ScriptableObject
 	[Tooltip("Duration of the slow based on the distance travelled")]
 	public AnimationCurve slowDuration;
 
+	[Tooltip("Max duration for slow, multiply the sowduration curve.")]
+	public float maxSlowTime = 3f;
+
 	[Tooltip("Percentage of the target speed reduction while slowed")]
 	public AnimationCurve slowPercentage;
+
+	[Tooltip("Duration of the slow after a stun.")]
+	public float slowTimePostStun = 1f;
 
 
 	[Header("Rope")]
@@ -127,5 +138,7 @@ public class CharacterConfig : ScriptableObject
 
 
 	[Header("Debug")]
+	[Tooltip("Show debug ray used to determine grounded state")]
+	public bool showGroundedDebug = false;
 	public bool startWithBag = false;
 }

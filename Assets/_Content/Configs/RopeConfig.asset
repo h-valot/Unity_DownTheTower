@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: RopeConfig
   m_EditorClassIdentifier: 
   pfRope: {fileID: 2423774863846630498, guid: fd48698d019dac54c9052c72fb4353f6, type: 3}
-  pfSegment: {fileID: 7758333631946860254, guid: 26bb3042c1aa49d4a96697d9f7cd5820,
+  pfRopeLine: {fileID: 8916413712567154838, guid: 08059428aa4d4934bb46b2f7e68db13b,
     type: 3}
   maxSegmentInstantiatedPerFrame: 5
   maxLength: 20
@@ -21,9 +21,9 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 456
   minFoldDistance: 0.25
-  safeColor: {r: 0.5149194, g: 1, b: 0, a: 1}
-  midColor: {r: 1, g: 0.7263848, b: 0, a: 1}
-  dangerColor: {r: 1, g: 0, b: 0, a: 1}
+  safeMaterial: {fileID: 2100000, guid: ba23822fb6a3b364099a36e0afdebbeb, type: 2}
+  midMaterial: {fileID: 2100000, guid: 366714ebc99d310499c50f72b93c87e1, type: 2}
+  dangerMaterial: {fileID: 2100000, guid: 550f01c26defd7e48adfe4458382316d, type: 2}
   heightLimit: 1
   layersToIgnore:
     serializedVersion: 2

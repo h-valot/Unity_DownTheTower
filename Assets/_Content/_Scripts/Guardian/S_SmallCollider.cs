@@ -11,16 +11,18 @@ public class SmallCollider : MonoBehaviour
     {
         if (other.TryGetComponent<CharacterMotor>(out var _playerCheckRef))
         {
+            if (_playerCheckRef._craftInHand && _playerCheckRef._craftInRobot) { }
             _guardianRef.MakePLayerRef(_playerCheckRef);
-            _guardianRef.PlayerStayIn();
+            _guardianRef.TargetStayIn();
         }
+
     }
 
     private void OnTriggerExit(Collider other)
     {
-        if (other.TryGetComponent<CharacterMotor>(out var _playerCheckRef))
+        if (other.TryGetComponent<CharacterMotor>(out var _playerCheckRef) )
         {
-            _guardianRef.PlayerExit();
+            _guardianRef.TargetExit();
         }
     }
 }

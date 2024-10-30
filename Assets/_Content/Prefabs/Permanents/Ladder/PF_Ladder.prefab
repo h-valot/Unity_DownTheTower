@@ -1,5 +1,73 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &971427169114264168
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7762639157703278863}
+  - component: {fileID: 6791479123004349621}
+  - component: {fileID: 1260578355337629130}
+  m_Layer: 7
+  m_Name: NoTPInteractible
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!4 &7762639157703278863
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 971427169114264168}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7874597281801129275}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!135 &6791479123004349621
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 971427169114264168}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Radius: 1
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &1260578355337629130
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 971427169114264168}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fb279576b33499e49ad4ce12b53e105c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isRecyclable: 1
+  objectToRecycle: {fileID: 7852830467894126418}
 --- !u!1 &1405004917174353549
 GameObject:
   m_ObjectHideFlags: 0
@@ -11,7 +79,7 @@ GameObject:
   - component: {fileID: 5716568214845695531}
   - component: {fileID: 1952193011092604048}
   - component: {fileID: 3271160489323295554}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: TeleportTriggerTop
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -66,6 +134,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8eb9daa02bad9de418962b4b2005e291, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isRecyclable: 1
+  objectToRecycle: {fileID: 7852830467894126418}
   _teleportTo: {x: 0, y: 0, z: 0}
 --- !u!1 &1809890234750479058
 GameObject:
@@ -79,7 +149,7 @@ GameObject:
   - component: {fileID: 3506237401480794667}
   - component: {fileID: 1984501088880653309}
   - component: {fileID: 8174691267914324826}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: LadderMesh
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -183,7 +253,7 @@ GameObject:
   - component: {fileID: 6481429343032634344}
   - component: {fileID: 5717587426070379790}
   - component: {fileID: 7461152827009846868}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: TeleportTriggerBottom
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -238,6 +308,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8eb9daa02bad9de418962b4b2005e291, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isRecyclable: 1
+  objectToRecycle: {fileID: 7852830467894126418}
   _teleportTo: {x: 0, y: 0, z: 0}
 --- !u!1 &5264941065734889905
 GameObject:
@@ -248,7 +320,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3953888267565371105}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: TippyTop
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -281,7 +353,7 @@ GameObject:
   - component: {fileID: 7265827077093265114}
   - component: {fileID: 8869549185582506295}
   - component: {fileID: 3086255435021717960}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: PreviewMesh
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -363,7 +435,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7874597281801129275}
   - component: {fileID: 401168901208985354}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: PF_Ladder
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -383,6 +455,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 7762639157703278863}
   - {fileID: 6926773669229438041}
   - {fileID: 6481429343032634344}
   - {fileID: 5716568214845695531}
@@ -409,4 +482,5 @@ MonoBehaviour:
   _TPTriggerTop: {fileID: 1405004917174353549}
   _TPTriggerBottom: {fileID: 4001296393094293437}
   _tippyTop: {fileID: 5264941065734889905}
+  _noTPInteractible: {fileID: 971427169114264168}
   _ladderConfig: {fileID: 11400000, guid: 6502514940db9bb4e8194b9e57b509d9, type: 2}

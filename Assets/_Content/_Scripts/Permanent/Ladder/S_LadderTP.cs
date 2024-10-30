@@ -2,6 +2,7 @@ using UnityEngine;
 
 public class LadderTP : Interactible
 {
+
     public Vector3 _teleportTo;
     private CharacterMotor _character;
 

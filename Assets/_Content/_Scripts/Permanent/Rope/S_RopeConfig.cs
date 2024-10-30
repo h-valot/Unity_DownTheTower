@@ -5,6 +5,7 @@ public class RopeConfig : ScriptableObject
 {
 	[Header("Prefabs")]
 	public Rope pfRope;
+	public RopeLine pfRopeLine;
 
 	[Header("Settings")]
 	public int maxSegmentInstantiatedPerFrame = 5;
@@ -13,9 +14,9 @@ public class RopeConfig : ScriptableObject
 	public float minFoldDistance = 0.25f;
 
 	[Header("Color")]
-	public Color safeColor;
-	public Color midColor;
-	public Color dangerColor;
+	public Material safeMaterial;
+	public Material midMaterial;
+	public Material dangerMaterial;
 
 	[Header("Deploy")]
 	public float heightLimit = 1f;

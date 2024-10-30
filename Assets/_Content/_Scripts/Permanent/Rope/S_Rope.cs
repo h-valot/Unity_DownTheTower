@@ -17,6 +17,7 @@ public class Rope : Permanent
 	[HideInInspector] public float holdLength;
 	[HideInInspector] public List<Vector3> folds = new List<Vector3>();
 
+	private List<RopeLine> _ropeLines = new List<RopeLine>();
 	private Transform _characterHarness;
 
 	#region default functions
@@ -29,6 +30,7 @@ public class Rope : Permanent
 
 		HandleFolds();
 		HandleEnd();
+		DrawLines();
 	}
 
 	#endregion
@@ -140,7 +142,7 @@ public class Rope : Permanent
 		if (_characterHarness == null) return;
 
 		// add fold if a collider stands between the character and the last fold
-		if (Physics.Linecast(_characterHarness.transform.position, folds[^1], out var addHit, ~_ropeConfig.foldLayerToIgnore))
+		if (Physics.Linecast(_characterHarness.position, folds[^1], out var addHit, ~_ropeConfig.foldLayerToIgnore))
 		{
 			Vector3 approximatePoint = addHit.point.CutDigits(2);
 
@@ -160,7 +162,7 @@ public class Rope : Permanent
 
 		// remove the last fold from the list if there is no collider that stands between the character and the previous last fold
 		if (folds.Count >= 2
-			&& !Physics.Linecast(_characterHarness.transform.position, folds[^2], out var removeHit, ~_ropeConfig.foldLayerToIgnore))
+			&& !Physics.Linecast(_characterHarness.position, folds[^2], out var removeHit, ~_ropeConfig.foldLayerToIgnore))
 		{
 			holdLength = GetLastFoldCharaDistance() + (folds[^2] - folds[^1]).magnitude;
 			folds.Remove(folds[^1]);
@@ -196,17 +198,15 @@ public class Rope : Permanent
 	/// </summary>
 	public float GetTotalLength()
 	{
-		// assert: called before folds is initialized
+		// Assertions
 		if (!isPlaced) return 0;
-
-		// assert: character ref null
 		if (_characterHarness == null) return 0;
 
 		float output = 0;
 		for (int i = 0; i < folds.Count; i++)
 		{
 			Vector3 nextPosition = i + 1 >= folds.Count
-				? _characterHarness.transform.position
+				? _characterHarness.position
 				: folds[i + 1];
 
 			output += (folds[i] - nextPosition).magnitude;
@@ -216,43 +216,49 @@ public class Rope : Permanent
 
 	public float GetLastFoldCharaDistance()
 	{
-		// assert: called before folds is initialized
+		// Assertions
 		if (!isPlaced) return 0;
-
-		// assert: character ref null
 		if (_characterHarness == null) return 0;
 
 		return (folds[^1] - _characterHarness.position).magnitude;
 	}
 
-#if UNITY_EDITOR
-	private void OnDrawGizmos()
+	private void DrawLines()
 	{
-		// assert: called before folds is initialized
+		// Assertions
 		if (!isPlaced) return;
-
-		// assert: character ref null
 		if (_characterHarness == null) return;
 
+		// Clear lists
+		if (_ropeLines.Count >= 1)
+		{
+			for (int i = _ropeLines.Count - 1; i >= 0; i--)
+			{
+				Destroy(_ropeLines[i].gameObject);
+			}
+			_ropeLines = new List<RopeLine>();
+		}
+
+		// Get material based in the total distance
+		Material material = _ropeConfig.dangerMaterial;
 		if (GetTotalLength() <= _ropeConfig.maxLength / 2f)
 		{
-			Gizmos.color = _ropeConfig.safeColor;
+			material = _ropeConfig.safeMaterial;
 		}
 		else if (GetTotalLength() <= 3 * (_ropeConfig.maxLength / 4f))
 		{
-			Gizmos.color = _ropeConfig.midColor;
-		}
-		else 
-		{
-			Gizmos.color = _ropeConfig.dangerColor;
+			material = _ropeConfig.midMaterial;
 		}
 
+		// Draw lines 
 		for (int i = 0; i < folds.Count; i++)
 		{
-			Gizmos.DrawLine(folds[i], i + 1 >= folds.Count ? _characterHarness.transform.position : folds[i + 1]);
+			RopeLine newRopeLine = Instantiate(_ropeConfig.pfRopeLine);
+			newRopeLine.SetPositions(folds[i], i + 1 >= folds.Count ? _characterHarness.position : folds[i + 1]);
+			newRopeLine.SetColor(material);
+			_ropeLines.Add(newRopeLine);
 		}
 	}
-#endif
 
 	#endregion
 }

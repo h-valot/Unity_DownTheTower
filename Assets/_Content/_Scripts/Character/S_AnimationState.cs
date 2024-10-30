@@ -6,5 +6,4 @@ public enum AnimationState
 	CRAFT,
 	ROPE,
 	LADDER,
-	AIM,
 }
