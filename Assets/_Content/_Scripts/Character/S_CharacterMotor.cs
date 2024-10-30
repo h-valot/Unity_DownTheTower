@@ -381,13 +381,41 @@ public class CharacterMotor : MonoBehaviour
                 break;
         }
 	}
-	#endregion
+
+    /// <summary>
+    /// 	Check variable of player to determine new player state.
+    /// </summary>
+    private void VerifyState()
+    {
+		if (_currentState == AnimationState.AIM || _currentState == AnimationState.CRAFT) return;
+
+        if (_wantJump && (_isGrounded || _coyoteTime > 0f) && _currentState != AnimationState.JUMP)
+        {
+            SwitchState(AnimationState.JUMP);
+            _isJumping = true;
+        }
+        else if (!_isGrounded && _currentState != AnimationState.FALL && _gravitySpeed <= 0)
+        {
+            if (_isGroundedLastFrame) _coyoteTime = _characterConfig.coyoteTime;
+            SwitchState(AnimationState.FALL);
+        }
+        else if (_isGrounded && !_isJumping && _currentState != AnimationState.LOCOMOTION)
+        {
+            ApplyFallHeight();
+            SwitchState(AnimationState.LOCOMOTION);
+        }
+
+        //Reset Jump if it is not possible to jump
+        _wantJump = false;
+    }
+
+    #endregion
 
     #region misc
 
-	/// <summary>
-	/// 	kill the character
-	/// </summary>
+    /// <summary>
+    /// 	kill the character
+    /// </summary>
     public void HandleDeath()
 	{
 		_rsoPlayerDeath.value = true;
@@ -504,31 +532,6 @@ public class CharacterMotor : MonoBehaviour
 			_isJumping = false;
 		}
     }
-
-    /// <summary>
-    /// 	Check variable of player to determine new player state.
-    /// </summary>
-    private void VerifyState()
-	{
-		if (_wantJump && (_isGrounded || _coyoteTime > 0f) && _currentState != AnimationState.JUMP)
-        {
-            SwitchState(AnimationState.JUMP);
-			_isJumping = true;
-        }
-        else if (!_isGrounded && _currentState != AnimationState.FALL && _gravitySpeed <= 0)
-		{
-			if(_isGroundedLastFrame) _coyoteTime = _characterConfig.coyoteTime; 
-            SwitchState(AnimationState.FALL);
-        }
-		else if (_isGrounded && !_isJumping && _currentState != AnimationState.LOCOMOTION)
-		{
-			ApplyFallHeight();
-            SwitchState(AnimationState.LOCOMOTION); 
-		}
-
-		//Reset Jump if it is not possible to jump
-		_wantJump = false;
-	}
 
 	/// <summary>
 	///		Check fall height and kill/stun/slow player if necessary
