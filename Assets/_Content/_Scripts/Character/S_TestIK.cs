@@ -93,7 +93,7 @@ public class TestIk : MonoBehaviour
             _ikLiftTorch = false;
         }
 
-        if (_characterMotor._currentState == AnimationState.AIM)
+        if (_characterMotor._aiming)
         {
             _ikAimTorch = true;
         }
