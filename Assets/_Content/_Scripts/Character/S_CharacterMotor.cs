@@ -1366,13 +1366,6 @@ public class CharacterMotor : MonoBehaviour
 		Vector3 towardsVertical = (_rsoCharacterPosition.value - verticalPoint).normalized;
 
 		// - Get attraction direction -
-		// From the attraction point (which is the lowest point on the sphere)
-		// Get the normalized direction towards this point with a down offset
-		// So the direction is more likely to be tangent to the sphere
-		// Vector3 sphereCharaSnapPoint = _rope.folds[^1] + (_rope.folds[^1] - _rsoCharacterPosition.value).normalized * _rope.holdLength;
-		// Vector3 offsetAttractionPoint = _rope.folds[^1] + Vector3.down * (verticalPoint - sphereCharaSnapPoint).magnitude;
-		// Vector3 attractionDirection = (offsetAttractionPoint - sphereCharaSnapPoint).normalized;
-
 		Vector3 attractionDirection =
 			(Vector3Extention.GetPositionOnCercle(
 				angle: _characterConfig.ropeOffsetAngle,
@@ -1390,16 +1383,9 @@ public class CharacterMotor : MonoBehaviour
 				radius: _rope.holdLength,
 				starting: _rsoCharacterPosition.value
 			) - _rsoCharacterPosition.value).normalized * towardsVertical.y;
-
 		UnityEngine.Debug.DrawRay(_harness.position, attractionDirection);
 
 		// - Get attraction velocity using a simple pendulum effect -
-		// float angleFinal = Vector3.Angle(verticalPoint, _rsoCharacterPosition.value) - _characterConfig.ropeOffsetAngle * 3;
-		// float heightInitial = Mathf.Cos(_characterConfig.maxPartialSideAngle) * _rope.holdLength;
-		// float heightFinal = Mathf.Cos(angleFinal) * _rope.holdLength;
-		// float deltaPotentialEnergy = -_characterConfig.mass * _characterConfig.gravity * (heightFinal - heightInitial);
-		// float pendulumVelocity = Mathf.Sqrt(Mathf.Abs(deltaPotentialEnergy) / (float)(0.5f * _characterConfig.mass));
-
 		// If there is no inputs or the input direction is a same as the vertical point of the circle
 		if (inputDirectionGrounded.magnitude <= 0
 			|| Vector3.Dot(inputDirectionGrounded, towardsVertical) >= TOWARDS_VERTICAL_THRESHOLD)
@@ -1486,56 +1472,58 @@ public class CharacterMotor : MonoBehaviour
 		if (_rsoCharacterForward.value != _characterDirection.forward) { _rsoCharacterForward.value = _characterDirection.forward; }
 	}
 
-	[Header("Tweakable values")]
-	public float m_Drag = 1f;
-
-	private Vector3 m_TensionDirection;
-	private float m_TensionForce = 0f;
-	private Vector3 m_Velocity = new Vector3();
-	private Vector3 m_BobStartingPosition;
-	private float m_GravityForce = 0f;
+	// gizmos debug
+	private Vector3 _pendulumVelocity = new Vector3();
+	private Vector3 _tensionDirection;
+	private Vector3 _bobStartingPosition;
+	private float _tensionForce = 0f;
+	private float _gravityForce = 0f;
 
 	private void PendulumStart()
 	{
-		m_BobStartingPosition = _rsoCharacterPosition.value;
-		m_Velocity = Vector3.zero;
+		_bobStartingPosition = _rsoCharacterPosition.value;
+		_pendulumVelocity = Vector3.zero;
 	}
 
 	private void PendulumUpdate()
 	{
 		// Add gravity free fall
-		m_GravityForce = _characterConfig.mass * _characterConfig.gravity;
+		_gravityForce = _characterConfig.mass * _characterConfig.gravity;
 
 		// Apply the gravity to `m_CurrentVelocity`
-		m_Velocity += Vector3.down * m_GravityForce * Time.fixedDeltaTime;
+		_pendulumVelocity += Vector3.down * _gravityForce * Time.fixedDeltaTime;
 
 		// Cache pivot and bob positions
 		Vector3 pivotPositionCache = _rope.folds[^1];
 		Vector3 bobPositionCache = _rsoCharacterPosition.value;
 
 		// Get bob's position after applying gravity force
-		Vector3 auxiliaryMovementDelta = m_Velocity * Time.fixedDeltaTime;
+		Vector3 auxiliaryMovementDelta = _pendulumVelocity * Time.fixedDeltaTime;
 		float distanceAfterGravity = Vector3.Distance(pivotPositionCache, bobPositionCache + auxiliaryMovementDelta);
 
 		// The bob acceleration is mesured in this statement. Returning an updated `m_CurrentVelocity`
 		if (distanceAfterGravity > _rope.holdLength
 		|| Mathf.Approximately(distanceAfterGravity, _rope.holdLength))
 		{
-			m_TensionDirection = (pivotPositionCache - bobPositionCache).normalized;
+			_tensionDirection = (pivotPositionCache - bobPositionCache).normalized;
 
 			// The nearest the bob is from the vertical point, the greatest the tension force will be.
 			float inclinationAngle = Vector3.Angle(bobPositionCache - pivotPositionCache, Vector3.down);
-			m_TensionForce = m_GravityForce * Mathf.Cos(Mathf.Deg2Rad * inclinationAngle);
+			_tensionForce = _gravityForce * Mathf.Cos(Mathf.Deg2Rad * inclinationAngle);
 
 			// Generate the counter force to make the bob stay within the circle : centripetal force
-			float centripetalForce = _characterConfig.mass * Mathf.Pow(m_Velocity.magnitude, 2) / _rope.holdLength;
-			m_TensionForce += centripetalForce;
+			float centripetalForce = _characterConfig.mass * Mathf.Pow(_pendulumVelocity.magnitude, 2) / _rope.holdLength;
+			_tensionForce += centripetalForce;
 
 			// Apply the tension to `m_CurrentVelocity`
-			m_Velocity += m_TensionDirection * m_TensionForce * Time.fixedDeltaTime;
+			_pendulumVelocity += _tensionDirection * _tensionForce * Time.fixedDeltaTime;
 		}
 
-		_controller.Move(m_Velocity * Time.fixedDeltaTime);
+		// Apply a counter velocity force: a drag
+		_pendulumVelocity -= _pendulumVelocity * (_characterConfig.drag / _gravityForce);
+
+		// Apply velocity
+		_controller.Move(_pendulumVelocity * Time.fixedDeltaTime);
 	}
 
 
@@ -1552,23 +1540,23 @@ public class CharacterMotor : MonoBehaviour
 		// Purple: Bob & Pivot
 		Gizmos.color = new Color(.5f, 0f, .5f);
 		Gizmos.DrawWireSphere(_rope.folds[^1], _rope.holdLength);
-		Gizmos.DrawWireCube(m_BobStartingPosition, new Vector3(.5f, .5f, .5f));
+		Gizmos.DrawWireCube(_bobStartingPosition, new Vector3(.5f, .5f, .5f));
 
 		// Blue: Auxilary
 		Gizmos.color = new Color(.3f, .3f, 1f);
-		Vector3 auxilaryVelocity = .3f * m_Velocity;
+		Vector3 auxilaryVelocity = .3f * _pendulumVelocity;
 		Gizmos.DrawRay(_rsoCharacterPosition.value, auxilaryVelocity);
 		Gizmos.DrawSphere(_rsoCharacterPosition.value + auxilaryVelocity, .2f);
 
 		// Yellow: Gravity
 		Gizmos.color = new Color(1f, 1f, .2f);
-		Vector3 gravity = .3f * m_GravityForce * Vector3.down;
+		Vector3 gravity = .3f * _gravityForce * Vector3.down;
 		Gizmos.DrawRay(_rsoCharacterPosition.value, gravity);
 		Gizmos.DrawSphere(_rsoCharacterPosition.value + gravity, .2f);
 
 		// Orange: Tension
 		Gizmos.color = new Color(1f, .5f, .2f);
-		Vector3 tension = .3f * m_TensionForce * m_TensionDirection;
+		Vector3 tension = .3f * _tensionForce * _tensionDirection;
 		Gizmos.DrawRay(_rsoCharacterPosition.value, tension);
 		Gizmos.DrawSphere(_rsoCharacterPosition.value + tension, .2f);
 

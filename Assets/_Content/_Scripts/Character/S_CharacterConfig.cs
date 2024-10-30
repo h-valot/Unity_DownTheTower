@@ -25,6 +25,7 @@ public class CharacterConfig : ScriptableObject
 	[Header("Edge")]
 	[Tooltip("")]
 	public float noSlipDistance = 0.5f;
+
 	[Tooltip("Speed scalar when the character is on an edge.")]
 	public float edgeFallFactor = 1f;
 
@@ -48,9 +49,6 @@ public class CharacterConfig : ScriptableObject
 	[Header("Gravity")]
 	[Tooltip("The character uses its own gravity value. The engine default is -9.8f")]
 	public float gravity = -15f;
-
-	[Tooltip("The mass of the character. Used for rope pendulum effect calculations")]
-	public float mass = 1f;
 
 	[Tooltip("Multiply this value by the player's directional inputs while in the air.")]
 	[Range(0f, 1f)] public float airControlModifier;
@@ -101,8 +99,17 @@ public class CharacterConfig : ScriptableObject
 	[Tooltip("Start facing the center when the distance between the character and the hold rope radius is less than this value.")]
 	public float facingCenterThreshold = 0.25f;
 
+	[Tooltip("")]
 	public float maxPartialSideAngle = 60;
+
+	[Tooltip("")]
 	public float ropeOffsetAngle = 5f;
+
+	[Tooltip("The mass of the character. Used for rope pendulum effect calculations")]
+	public float mass = 1f;
+
+	[Tooltip("")]
+	public float drag;
 
 
 	[Header("Camera")]
@@ -117,6 +124,7 @@ public class CharacterConfig : ScriptableObject
 	
 	[Tooltip("Slerp the character's graphics to the character's moving direction at this value times time.deltatime")]
 	public float rotationSpeed = 7;
+
 
 	[Header("Debug")]
 	public bool startWithBag = false;
