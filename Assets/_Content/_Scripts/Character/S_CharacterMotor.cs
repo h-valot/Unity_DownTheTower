@@ -1720,28 +1720,32 @@ public class CharacterMotor : MonoBehaviour
 
 	private void ToggleAim(bool _isPressed)
 	{
-        if (_isPressed)
+        if (_isPressed && _craftInHand != null)
 		{
             _aiming = true;
             _thirdPersonCamera.SwitchCameraStyle(CameraStyle.AIMING);
             _craftInHand.InitializePreview();
         }
-		else
+		else if (_craftInHand != null)
 		{
             _aiming = false;
-            if (_craftInHand.Throw(_thirdPersonCamera.transform))
-            {
-                // rope attachment exception
-                _rope = _craftInHand as Rope;
-                if (_rope != null) _rope?.Attach(_harness);
 
-                _craftInHand = null;
-                if (_craftInRobot != null)
+			if (_craftInHand != null)
+			{
+                if (_craftInHand.Throw(_thirdPersonCamera.transform))
                 {
-                    _craftInRobot.transform.SetParent(_handSocket, false);
-                    _craftInHand = _craftInRobot;
-                    _craftInHand.transform.rotation = _handSocket.transform.rotation;
-                    _craftInRobot = null;
+                    // rope attachment exception
+                    _rope = _craftInHand as Rope;
+                    if (_rope != null) _rope?.Attach(_harness);
+
+                    _craftInHand = null;
+                    if (_craftInRobot != null)
+                    {
+                        _craftInRobot.transform.SetParent(_handSocket, false);
+                        _craftInHand = _craftInRobot;
+                        _craftInHand.transform.rotation = _handSocket.transform.rotation;
+                        _craftInRobot = null;
+                    }
                 }
             }
 
