@@ -325,6 +325,7 @@ GameObject:
   - component: {fileID: 5666824575402529614}
   - component: {fileID: 4147390464001591799}
   - component: {fileID: 2398609788582600357}
+  - component: {fileID: 8403776274971889588}
   m_Layer: 8
   m_Name: PF_Torch
   m_TagString: Untagged
@@ -367,6 +368,7 @@ MonoBehaviour:
   _meshRenderer: {fileID: 4883872469197812161}
   _torchPointLight: {fileID: 5619154307499889882}
   _aimPreview: {fileID: 2398609788582600357}
+  _brokenLightAnim: {fileID: 8403776274971889588}
   _torchConfig: {fileID: 11400000, guid: 0c5c3bc89382c9e439e0ef105c99e62b, type: 2}
   _characterConfig: {fileID: 11400000, guid: 1940b106405212f469b44119418b1e43, type: 2}
   _ropeConfig: {fileID: 11400000, guid: ebd551676fad39148a6ccab29ef4ebce, type: 2}
@@ -528,6 +530,28 @@ LineRenderer:
   m_UseWorldSpace: 1
   m_Loop: 0
   m_ApplyActiveColorSpace: 1
+--- !u!95 &8403776274971889588
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4724440229257307352}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: e1201a529aefb5e45aad845ad58ea8da, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &8129817620367253673
 GameObject:
   m_ObjectHideFlags: 0

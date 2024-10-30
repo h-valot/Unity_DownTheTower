@@ -13,6 +13,7 @@ public class Torch : Permanent
     [SerializeField] private MeshRenderer _meshRenderer;
     [SerializeField] private TorchPointLight _torchPointLight;
     [SerializeField] private LineRenderer _aimPreview;
+    [SerializeField] private Animator _brokenLightAnim;
 
     [Header("Scriptable References")]
 	[SerializeField] private TorchConfig _torchConfig;
@@ -20,15 +21,13 @@ public class Torch : Permanent
     [SerializeField] private RopeConfig _ropeConfig;
     [SerializeField] private RSO_CharacterPosition _characterPosition;
 
-    [Header("External References")]
-    [SerializeField] private GameObject _torchBreakSFX;
-
     // ----- PUBLIC VARIABLES -----
     [ReadOnly] public bool _isActive = false;
 
     // ----- PRIVATE VARIABLES -----
     private bool _isFalling = false;
     private bool _changedColor = false;
+    private bool _isBroken = false;
     private float _throwStartPoint;
     private float _landedHeight = 9999999;
 
@@ -213,12 +212,19 @@ public class Torch : Permanent
 
     private void CheckLethalRopeHeight()
     {
-        if (transform.position.y > _throwStartPoint) return;
+        if (transform.position.y > _throwStartPoint || _isBroken) return;
 
         if (_throwStartPoint - transform.position.y > (_characterConfig.lethalHeight + _ropeConfig.maxLength))
         {
-            Instantiate(_torchBreakSFX, transform.position, Quaternion.identity);
-            Destroy(gameObject);
+            _isBroken = true;
+            Instantiate(_torchConfig.torchBreakSFX, transform.position, Quaternion.identity);
+
+            if (_torchConfig.activateBreakAnim)
+            {
+                _brokenLightAnim.SetBool("isBroken", true);
+                Destroy(gameObject, 3);
+            }
+            else Destroy(gameObject);
         }
     }
 

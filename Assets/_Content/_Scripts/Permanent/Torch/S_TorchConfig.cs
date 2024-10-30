@@ -50,4 +50,8 @@ public class TorchConfig : ScriptableObject
 	[Range(0.1f, 10f)] public float previewLength = 10f;
 	[Range(0.1f, 0.25f)] public float previewSmoothing = 0.1f;
 	public LayerMask layersToIgnorePreview;
+
+	[Header("Debug")]
+	public bool activateBreakAnim = true;
+    public GameObject torchBreakSFX;
 }
