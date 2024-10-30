@@ -232,7 +232,6 @@ public class CharacterMotor : MonoBehaviour
 	private void SwitchState(AnimationState newState)
 	{
 		ExitCurrentState();
-		print($"new state {newState}");
 		EnterState(newState);
 	}
 
@@ -379,35 +378,55 @@ public class CharacterMotor : MonoBehaviour
     /// </summary>
     private void VerifyState()
     {
-		if (_rope != null && _rope.isPlaced && _rope.isConnected && _currentState != AnimationState.ROPE)
-		{
-			SwitchState(AnimationState.ROPE);
-		}
-		else if (_crafting && _currentState == AnimationState.LOCOMOTION)
+		// - CRAFT - from locomotion
+		if (_crafting && _currentState == AnimationState.LOCOMOTION)
 		{
             SwitchState(AnimationState.CRAFT);
-        }
+		}
+
+		// - LOCOMOTION - from crafting
 		else if (!_crafting && _currentState == AnimationState.CRAFT)
 		{
             SwitchState(AnimationState.LOCOMOTION);
-        }
+		}
+
+		// - JUMP -
 		else if (_wantJump && (_isGrounded || _coyoteTime > 0f) && _currentState != AnimationState.JUMP)
         {
             SwitchState(AnimationState.JUMP);
             _isJumping = true;
-        }
-        else if (!_isGrounded && _currentState != AnimationState.FALL && _gravitySpeed <= 0)
+		}
+
+		// - FALL & ROPE -
+		else if (!_isGrounded && _gravitySpeed <= 0 && (_currentState != AnimationState.FALL || _currentState != AnimationState.ROPE))
         {
+			// Reset coyote time
             if (_isGroundedLastFrame) _coyoteTime = _characterConfig.coyoteTime;
-            SwitchState(AnimationState.FALL);
-        }
-        else if (_isGrounded && !_isJumping && _currentState != AnimationState.LOCOMOTION && !_crafting && _rope == null)
+
+			// If the character is attached to a rope, switch to Rope state instead
+			// This state handles free fall and rope-attached fall.
+			if (_rope != null && _rope.isPlaced && _rope.isConnected 
+			&& _currentState != AnimationState.ROPE && _currentState != AnimationState.FALL)
+			{
+				SwitchState(AnimationState.ROPE);
+			}
+
+			// Handle default fall state
+			else if (_currentState != AnimationState.FALL && _currentState != AnimationState.ROPE 
+			|| (_currentState == AnimationState.ROPE && _rope == null))
+			{
+				SwitchState(AnimationState.FALL);
+			}
+		}
+
+		// - LOCOMOTION - default state back up
+		else if (_isGrounded && !_isJumping && _currentState != AnimationState.LOCOMOTION && !_crafting)
         {
             ApplyFallHeight();
             SwitchState(AnimationState.LOCOMOTION);
         }
 
-        //Reset Jump if it is not possible to jump
+        // Reset Jump if it is not possible to jump
         _wantJump = false;
     }
 
@@ -1065,15 +1084,13 @@ public class CharacterMotor : MonoBehaviour
 
 	private void CancelAction()
 	{
-		// the cancel action is contextual
-		// do various things based on the context
+		// The cancel action is contextual
+		// Do various things based on the context
 
-		// rope context
+		// Rope context
 		if (_rope != null)
 		{
-			_rope.Detach();
-			_rope = null;
-			_isHolding = false;
+			DesequipRope();
 		}
 	}
 
@@ -1096,7 +1113,6 @@ public class CharacterMotor : MonoBehaviour
 			else CheckShowRecycle(false);
 		}
 
-
 		// speed calculations
 		CheckWalkRun();
 		ApplySlope();
@@ -1108,14 +1124,6 @@ public class CharacterMotor : MonoBehaviour
 
 		// move controller
 		HandleMovement();
-
-		// exit locomotion state
-		if (_rope != null 
-			&& _rope.isPlaced
-			&& _rope.isConnected)
-		{
-			SwitchState(AnimationState.ROPE);
-		}
 	}
 
 	private void LateUpdateLocomotionState()
@@ -1382,8 +1390,7 @@ public class CharacterMotor : MonoBehaviour
 
 	public enum RopeState
 	{
-		GROUNDED = 0,
-		PARTIAL_SUSPENSION,
+		PARTIAL_SUSPENSION = 0,
 		COMPLETE_SUSPENSION,
 	}
 
@@ -1416,26 +1423,20 @@ public class CharacterMotor : MonoBehaviour
 
 	private void UpdateRopeState()
 	{
+		// assert: there is no equipped rope 
+		if (_rope == null) return;
+
 		// checks
 		CheckGround();
 		CheckWall();
 
-		// exit rope state
-		if (_rope == null
-			|| _rope != null && !_rope.isConnected)
-		{
-			SwitchState(AnimationState.LOCOMOTION);
-			return;
-		}
+		DetectEdges();
+		ApplyEdgesSpeed();
 
 		// state machine update rope state
 		HandleRopeState();
 		switch (_ropeState)
 		{
-			case RopeState.GROUNDED:
-				UpdateRopeGroundedState();
-				break;
-
 			case RopeState.PARTIAL_SUSPENSION:
 				UpdateRopePartialSuspensionState();
 				break;
@@ -1448,6 +1449,7 @@ public class CharacterMotor : MonoBehaviour
 		// apply rope holding constraint after the input movements
 		// this allow to avoid glitchy movements
 		HandleRopeHolding();
+		HandleMovement();
 	}
 
 	private void LateUpdateRopeState()
@@ -1458,9 +1460,7 @@ public class CharacterMotor : MonoBehaviour
 	private void ExitRopeState()
 	{
 		_rseHolding.action -= Holding;
-
-		// Detach the rope from the character
-		_rope = null;
+		_isHolding = false;
 	}
 
 	#endregion
@@ -1472,41 +1472,10 @@ public class CharacterMotor : MonoBehaviour
 	/// </summary>
 	private void HandleRopeState()
 	{
-		if (_isGrounded)
-		{
-			_ropeState = RopeState.GROUNDED;
-		}
-		else
-		{
-			if (_isAgainstWall)
-			{
-				_ropeState = RopeState.PARTIAL_SUSPENSION;
-			}
-			else
-			{
-				_ropeState = RopeState.COMPLETE_SUSPENSION;
-			}
-		}
+		_ropeState = _isAgainstWall 
+			? RopeState.PARTIAL_SUSPENSION 
+			: RopeState.COMPLETE_SUSPENSION;
 	}
-
-	/// <summary>
-	/// 	same as the base locomotion update with the rope limitation extra-layer.
-	/// 	this state changes if the characters is no more grounded but still attach to a rope.
-	/// </summary>
-	private void UpdateRopeGroundedState()
-	{
-        // speed calculations
-        CheckWalkRun();
-        ApplySlope();
-        ApplyInputs();
-        ApplyAcceleration();
-        CreateMovement();
-        ApplyStatus();
-        ApplySnapGravity();
-
-        // move controller
-        HandleMovement();
-    }
 
 	/// <summary>
 	/// 	handle movement related to the front wall. 
@@ -1516,8 +1485,8 @@ public class CharacterMotor : MonoBehaviour
 	/// </summary>
 	private void UpdateRopePartialSuspensionState()
 	{
-		HandleRopeMovement();
-		FaceFoldCenter();
+		// Temporary shortcut
+		UpdateRopeCompleteSuspensionState();
 	}
 
 	/// <summary>
@@ -1530,6 +1499,7 @@ public class CharacterMotor : MonoBehaviour
 	{
 		HandleRopeMovement();
 		FaceFoldCenter();
+		HandleRopeLength();
 	}
 
 	#endregion
@@ -1622,6 +1592,24 @@ public class CharacterMotor : MonoBehaviour
 
 		Vector3 towardsCenter = transform.position - new Vector3(_rope.folds[^1].x, transform.position.y, _rope.folds[^1].z);
 		_characterDirection.forward = -towardsCenter.normalized;
+	}
+
+	private void HandleRopeLength()
+	{
+		// assert: total rope length is smaller than the max length
+		if (_rope.GetTotalLength() <= _ropeConfig.maxLength) return;
+
+		DesequipRope();
+	}
+
+	/// <summary>
+	/// 	Detach the rope from the character.
+	/// </summary>
+	private void DesequipRope()
+	{
+		_rope.Detach();
+		_rope = null;
+		_isHolding = false;
 	}
 
 	private void HandleRopeMovement()

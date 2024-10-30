@@ -13,8 +13,8 @@ public class Rope : Permanent
 	[SerializeField] private RopeConfig _ropeConfig;
 
 	[Header("Debug")]
-	[HideInInspector] public bool isConnected;
-	[HideInInspector] public bool isPlaced;
+	public bool isConnected;
+	public bool isPlaced;
 	[HideInInspector] public float holdLength;
 	[HideInInspector] public List<Vector3> folds = new List<Vector3>();
 
