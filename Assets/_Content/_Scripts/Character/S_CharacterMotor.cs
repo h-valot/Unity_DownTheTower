@@ -720,7 +720,7 @@ public class CharacterMotor : MonoBehaviour
 			}
 			else
 			{
-				_movement *= _characterConfig.slowDuration.Evaluate((_characterConfig.slowTimePostStun - _slowTimer)/_characterConfig.slowTimePostStun);
+				_movement *= _characterConfig.slowPercentage.Evaluate((_characterConfig.slowTimePostStun - _slowTimer)/_characterConfig.slowTimePostStun);
 			}
 		}
 	}
