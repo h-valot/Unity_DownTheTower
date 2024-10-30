@@ -18,6 +18,10 @@ public class Torch : Permanent
 	[SerializeField] private TorchConfig _torchConfig;
     [SerializeField] private CharacterConfig _characterConfig;
     [SerializeField] private RopeConfig _ropeConfig;
+    [SerializeField] private RSO_CharacterPosition _characterPosition;
+
+    [Header("External References")]
+    [SerializeField] private GameObject _torchBreakSFX;
 
     // ----- PUBLIC VARIABLES -----
     [ReadOnly] public bool _isActive = false;
@@ -144,7 +148,7 @@ public class Torch : Permanent
 		_rigidbody.velocity = Quaternion.AngleAxis(-CalculateThrowAngleOffset(_cameraTransform), _cameraTransform.right) * _cameraTransform.forward * CalculateLaunchForce(_cameraTransform);
 		_isActive = false;
         _isFalling = true;
-        _throwStartPoint = transform.position.y;
+        _throwStartPoint = _characterPosition.value.y;
 
 		StartCoroutine(WaitAndDestroyTorch(_torchConfig.groundedLightDuration));
 
@@ -211,7 +215,11 @@ public class Torch : Permanent
     {
         if (transform.position.y > _throwStartPoint) return;
 
-        if (_throwStartPoint - transform.position.y > (_characterConfig.lethalHeight + _ropeConfig.maxLength)) Destroy(gameObject);
+        if (_throwStartPoint - transform.position.y > (_characterConfig.lethalHeight + _ropeConfig.maxLength))
+        {
+            Instantiate(_torchBreakSFX, transform.position, Quaternion.identity);
+            Destroy(gameObject);
+        }
     }
 
     #endregion
