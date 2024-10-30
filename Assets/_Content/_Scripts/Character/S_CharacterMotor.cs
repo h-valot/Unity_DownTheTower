@@ -109,7 +109,12 @@ public class CharacterMotor : MonoBehaviour
     private List<Interactible> _interactables;
 	private List<Interactible> _validInteractibles;
 
+	// - throw -
+	[HideInInspector] public bool _aiming;
+	
 	// - craft -
+	public bool _crafting = false;
+	private CraftType _objectToCraft = CraftType.None;
 	private Coroutine _craftCoroutine;
 
 	// ----- CONST -----
@@ -147,6 +152,10 @@ public class CharacterMotor : MonoBehaviour
     private void LateUpdate()
     {
         LateUpdateCurrentState();
+		if (_aiming)
+		{
+            _craftInHand.PreviewThrow(_thirdPersonCamera.transform);
+        }
     }
 
     private void OnEnable()
@@ -224,7 +233,6 @@ public class CharacterMotor : MonoBehaviour
 	private void SwitchState(AnimationState newState)
 	{
 		ExitCurrentState();
-		Debug.Log(newState.ToString());
 		EnterState(newState);
 	}
 
@@ -259,10 +267,6 @@ public class CharacterMotor : MonoBehaviour
 			case AnimationState.LADDER:
 				EnterLadderState();
 				break;
-
-            case AnimationState.AIM:
-                EnterAimState();
-                break;
         }
 
 		_currentState = newState;
@@ -301,10 +305,6 @@ public class CharacterMotor : MonoBehaviour
 			case AnimationState.LADDER:
 				UpdateLadderState();
 				break;
-
-            case AnimationState.AIM:
-                UpdateAimState();
-                break;
         }
 	}
 
@@ -337,10 +337,6 @@ public class CharacterMotor : MonoBehaviour
 
             case AnimationState.LADDER:
                 LateUpdateLadderState();
-                break;
-
-            case AnimationState.AIM:
-                LateUpdateAimState();
                 break;
         }
     }
@@ -375,10 +371,6 @@ public class CharacterMotor : MonoBehaviour
 			case AnimationState.LADDER:
 				ExitLadderState();
 				break;
-
-            case AnimationState.AIM:
-                ExitAimState();
-                break;
         }
 	}
 
@@ -387,9 +379,15 @@ public class CharacterMotor : MonoBehaviour
     /// </summary>
     private void VerifyState()
     {
-		if (_currentState == AnimationState.AIM || _currentState == AnimationState.CRAFT) return;
-
-        if (_wantJump && (_isGrounded || _coyoteTime > 0f) && _currentState != AnimationState.JUMP)
+		if (_crafting && _currentState == AnimationState.LOCOMOTION)
+		{
+            SwitchState(AnimationState.CRAFT);
+        }
+		else if (!_crafting && _currentState == AnimationState.CRAFT)
+		{
+            SwitchState(AnimationState.LOCOMOTION);
+        }
+		else if (_wantJump && (_isGrounded || _coyoteTime > 0f) && _currentState != AnimationState.JUMP)
         {
             SwitchState(AnimationState.JUMP);
             _isJumping = true;
@@ -399,7 +397,7 @@ public class CharacterMotor : MonoBehaviour
             if (_isGroundedLastFrame) _coyoteTime = _characterConfig.coyoteTime;
             SwitchState(AnimationState.FALL);
         }
-        else if (_isGrounded && !_isJumping && _currentState != AnimationState.LOCOMOTION)
+        else if (_isGrounded && !_isJumping && _currentState != AnimationState.LOCOMOTION && !_crafting)
         {
             ApplyFallHeight();
             SwitchState(AnimationState.LOCOMOTION);
@@ -933,14 +931,6 @@ public class CharacterMotor : MonoBehaviour
                 _rseInteract.action += Interact;
                 _rseKillCharacter.action += HandleDeath;
                 break;
-            case AnimationState.AIM:
-                _rseMove.action += Move;
-                _rseRun.action += Run;
-                _rseJump.action += Jump;
-                _rseThrow.action += ToggleAim;
-                _rseCancelAction.action += CancelAction;
-                _rseKillCharacter.action += HandleDeath;
-                break;
         }
     }
 
@@ -1171,8 +1161,8 @@ public class CharacterMotor : MonoBehaviour
     private void ExitJumpState()
 	{
 		_rseJump.action += Jump;
-        _rseCraft.action += ToggleCraft;
-	}
+        ToggleCraftInput(_hasBackpack);
+    }
 
 	#endregion
 
@@ -1210,7 +1200,7 @@ public class CharacterMotor : MonoBehaviour
 
     private void ExitFallState()
 	{
-		_rseCraft.action += ToggleCraft;
+		ToggleCraftInput(_hasBackpack);
 	}
 
     #endregion
@@ -1220,95 +1210,21 @@ public class CharacterMotor : MonoBehaviour
     private void ToggleCraft(CraftType _craftName, bool _isInputPressed)
     {
         //Prevent switching to craft state if not in locomotion or crafting state or already crafting another item
-        if ((_currentState != AnimationState.LOCOMOTION && _currentState != AnimationState.CRAFT) || _craftCoroutine != null)
+        if (_currentState != AnimationState.LOCOMOTION || _currentState != AnimationState.CRAFT)
         {
-            return;
-        }
-
-        //If craft button is pressed
-        if (_isInputPressed)
-        {
-            SwitchState(AnimationState.CRAFT);
-
-            switch (_craftName)
+            //If craft button is pressed
+            if (_isInputPressed)
             {
-                case CraftType.None:
-                    SwitchState(AnimationState.LOCOMOTION);
-                    break;
-
-                case CraftType.Torch:
-                    if (_craftInHand != null)
-                    {
-                        if (_craftInHand._craftType != CraftType.Torch && _craftInRobot?._craftType != CraftType.Torch)
-                        {
-                            Destroy(_craftInHand.gameObject);
-                            _craftCoroutine = StartCoroutine(Craft(CraftType.Torch, _torchConfig.craftingDuration));
-                        }
-                    }
-                    else
-                    {
-                        _craftCoroutine = StartCoroutine(Craft(CraftType.Torch, _torchConfig.craftingDuration));
-                    }
-                    break;
-
-                case CraftType.Ladder:
-                    if (_craftInHand != null)
-                    {
-                        if (_craftInHand._craftType == CraftType.Torch)
-                        {
-							_craftInHand.transform.SetParent(_robotHandSocket, false);
-							_craftInRobot = _craftInHand;
-                            _craftInRobot.transform.rotation = _robotHandSocket.rotation;
-                            _craftInHand = null;
-                            _craftCoroutine = StartCoroutine(Craft(CraftType.Ladder, _torchConfig.craftingDuration));
-                        }
-						else if (_craftInHand._craftType != CraftType.Ladder)
-						{
-                            Destroy(_craftInHand.gameObject);
-                            _craftCoroutine = StartCoroutine(Craft(CraftType.Ladder, _torchConfig.craftingDuration));
-                        }
-                    }
-                    else
-                    {
-                        _craftCoroutine = StartCoroutine(Craft(CraftType.Ladder, _torchConfig.craftingDuration));
-                    }
-                    break;
-
-                case CraftType.Rope:
-					if (_craftInHand != null)
-					{
-						if (_craftInHand._craftType == CraftType.Torch)
-						{
-							_craftInHand.transform.SetParent(_robotHandSocket, false);
-							_craftInRobot = _craftInHand;
-							_craftInHand = null;
-							_craftCoroutine = StartCoroutine(Craft(CraftType.Rope, _ropeConfig.craftingDuration));
-						}
-						else if (_craftInHand._craftType != CraftType.Rope)
-						{
-							Destroy(_craftInHand.gameObject);
-							_craftCoroutine = StartCoroutine(Craft(CraftType.Rope, _ropeConfig.craftingDuration));
-						}
-					}
-					else
-					{
-						_craftCoroutine = StartCoroutine(Craft(CraftType.Rope, _ropeConfig.craftingDuration));
-					}
-					break;
+                _objectToCraft = _craftName;
+                _crafting = true;
+            }
+            else // if craft button is released
+            {
+                _crafting = false;
             }
         }
-        else // if craft button is released
-        {
-            if (_craftCoroutine != null)
-            {
-                StopCoroutine(_craftCoroutine);
-				_craftCoroutine = null;
-            }
-            if (_currentState == AnimationState.CRAFT)
-            {
-                SwitchState(AnimationState.LOCOMOTION);
-            }
-        }
+
+        
     }
 
 	private void EnterCraftState()
@@ -1318,7 +1234,73 @@ public class CharacterMotor : MonoBehaviour
         _rseThrow.action -= ToggleAim;
 		_rseToggleInHand.action -= ToggleInHand;
         _rseInteract.action -= Interact;
-	}
+
+        switch (_objectToCraft)
+        {
+            case CraftType.None:
+                break;
+
+            case CraftType.Torch:
+                if (_craftInHand != null)
+                {
+                    if (_craftInHand._craftType != CraftType.Torch && _craftInRobot?._craftType != CraftType.Torch)
+                    {
+                        Destroy(_craftInHand.gameObject);
+                        _craftCoroutine = StartCoroutine(Craft(CraftType.Torch, _torchConfig.craftingDuration));
+                    }
+                }
+                else
+                {
+                    _craftCoroutine = StartCoroutine(Craft(CraftType.Torch, _torchConfig.craftingDuration));
+                }
+                break;
+
+            case CraftType.Ladder:
+                if (_craftInHand != null)
+                {
+                    if (_craftInHand._craftType == CraftType.Torch)
+                    {
+                        _craftInHand.transform.SetParent(_robotHandSocket, false);
+                        _craftInRobot = _craftInHand;
+                        _craftInRobot.transform.rotation = _robotHandSocket.rotation;
+                        _craftInHand = null;
+                        _craftCoroutine = StartCoroutine(Craft(CraftType.Ladder, _torchConfig.craftingDuration));
+                    }
+                    else if (_craftInHand._craftType != CraftType.Ladder)
+                    {
+                        Destroy(_craftInHand.gameObject);
+                        _craftCoroutine = StartCoroutine(Craft(CraftType.Ladder, _torchConfig.craftingDuration));
+                    }
+                }
+                else
+                {
+                    _craftCoroutine = StartCoroutine(Craft(CraftType.Ladder, _torchConfig.craftingDuration));
+                }
+                break;
+
+            case CraftType.Rope:
+                if (_craftInHand != null)
+                {
+                    if (_craftInHand._craftType == CraftType.Torch)
+                    {
+                        _craftInHand.transform.SetParent(_robotHandSocket, false);
+                        _craftInRobot = _craftInHand;
+                        _craftInHand = null;
+                        _craftCoroutine = StartCoroutine(Craft(CraftType.Rope, _ropeConfig.craftingDuration));
+                    }
+                    else if (_craftInHand._craftType != CraftType.Rope)
+                    {
+                        Destroy(_craftInHand.gameObject);
+                        _craftCoroutine = StartCoroutine(Craft(CraftType.Rope, _ropeConfig.craftingDuration));
+                    }
+                }
+                else
+                {
+                    _craftCoroutine = StartCoroutine(Craft(CraftType.Rope, _ropeConfig.craftingDuration));
+                }
+                break;
+        }
+    }
 
 	private void UpdateCraftState()
 	{
@@ -1363,12 +1345,17 @@ public class CharacterMotor : MonoBehaviour
 		_craftInHand.transform.position = _handSocket.transform.position;
 
 		_craftCoroutine = null;
-        SwitchState(AnimationState.LOCOMOTION);
     }
 
     private void ExitCraftState()
 	{
-		_rseMove.action += Move;
+        if (_craftCoroutine != null)
+        {
+            StopCoroutine(_craftCoroutine);
+            _craftCoroutine = null;
+        }
+
+        _rseMove.action += Move;
 		_rseJump.action += Jump;
         _rseThrow.action += ToggleAim;
 		_rseToggleInHand.action += ToggleInHand;
@@ -1729,83 +1716,38 @@ public class CharacterMotor : MonoBehaviour
 
     #endregion
 
-    #region aim state
+    #region aiming/throwing
 
 	private void ToggleAim(bool _isPressed)
 	{
-        //Prevent switching to aim state if not in locomotion or no craft in hand
-        if ((_currentState != AnimationState.LOCOMOTION && _currentState != AnimationState.AIM) || _craftInHand == null)
-        {
-            return;
-        }
-
         if (_isPressed)
 		{
-			SwitchState(AnimationState.AIM);
+            _aiming = true;
             _thirdPersonCamera.SwitchCameraStyle(CameraStyle.AIMING);
-			_craftInHand.InitializePreview();
+            _craftInHand.InitializePreview();
         }
 		else
 		{
-            if (_currentState == AnimationState.AIM)
-			{
-                if (_craftInHand.Throw(_thirdPersonCamera.transform))
-				{
-					// rope attachment exception
-					_rope = _craftInHand as Rope;
-					if (_rope != null) _rope?.Attach(_harness);
+            _aiming = false;
+            if (_craftInHand.Throw(_thirdPersonCamera.transform))
+            {
+                // rope attachment exception
+                _rope = _craftInHand as Rope;
+                if (_rope != null) _rope?.Attach(_harness);
 
-					_craftInHand = null;
-					if (_craftInRobot != null)
-					{
-                        _craftInRobot.transform.SetParent(_handSocket, false);
-						_craftInHand = _craftInRobot;
-                        _craftInHand.transform.rotation = _handSocket.transform.rotation;
-                        _craftInRobot = null;
-                    }
+                _craftInHand = null;
+                if (_craftInRobot != null)
+                {
+                    _craftInRobot.transform.SetParent(_handSocket, false);
+                    _craftInHand = _craftInRobot;
+                    _craftInHand.transform.rotation = _handSocket.transform.rotation;
+                    _craftInRobot = null;
                 }
-
-                _thirdPersonCamera.SwitchCameraStyle(CameraStyle.BASIC);
-                SwitchState(AnimationState.LOCOMOTION);
             }
+
+            _thirdPersonCamera.SwitchCameraStyle(CameraStyle.BASIC);
         }
 	}
-
-    private void EnterAimState()
-    {
-		_rseJump.action -= Jump;
-        _rseCraft.action -= ToggleCraft;
-		_rseToggleInHand.action -= ToggleInHand;
-        _rseInteract.action -= Interact;
-    }
-
-    private void UpdateAimState()
-    {
-        // speed calculations
-        CheckWalkRun();
-        ApplySlope();
-        ApplyInputs();
-        ApplyAcceleration();
-        CreateMovement();
-        ApplyStatus();
-        ApplySnapGravity();
-
-        // move controller
-        HandleMovement();
-    }
-
-	private void LateUpdateAimState()
-	{
-        _craftInHand.PreviewThrow(_thirdPersonCamera.transform);
-    }
-
-    private void ExitAimState()
-    {
-		_rseJump.action += Jump;
-        _rseCraft.action += ToggleCraft;
-		_rseToggleInHand.action += ToggleInHand;
-        _rseInteract.action += Interact;
-    }
 
     #endregion
 	
