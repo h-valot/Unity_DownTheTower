@@ -111,7 +111,7 @@ public class CharacterConfig : ScriptableObject
 	public float facingCenterThreshold = 0.25f;
 
 	[Tooltip("")]
-	public float maxPartialSideAngle = 60;
+	public float maxSideAngle = 45f;
 
 	[Tooltip("")]
 	public float ropeOffsetAngle = 5f;

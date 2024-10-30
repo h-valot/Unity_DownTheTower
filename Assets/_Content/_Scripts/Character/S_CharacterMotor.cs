@@ -1,8 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
-using NaughtyAttributes;
 using UnityEngine;
 
 public class CharacterMotor : MonoBehaviour
@@ -51,42 +49,27 @@ public class CharacterMotor : MonoBehaviour
 
 	#region runtime variables
 
-    [Header("debug: animation")]
+	// Debug header to separate possible private variables set public to be debugged
+	[Header("Debug")]
+
+	// ----- PRIVATE VARIABLES -----
+	// - animation -
 	public AnimationState _currentState;
 
-	[Header("debug: move")]
+	// - move -
 	private Vector2 _moveInput;
-    [HideInInspector] public float _planarSpeed;
+	[HideInInspector] public float _planarSpeed;
 	private float _targetPlanarSpeed;
 	public float _gravitySpeed;
 	private Vector3 _movement;
 	private bool _isRunning;
 	private float _coyoteTime;
 
-	[Header("debug: slope")]
+	// - slope -
 	private float _slopePercentage;
 
-	[Header("debug: fall")]
-    public bool _isGrounded;
-    private bool[] _groundChecks = new bool[5];
-	private bool _isStunned = false;
-	private bool _isSlowed = false;
-	private bool _isSlowedPostStun = false;
-
-	[Header("debug: momentum")]
-	private Vector3 _positionStartFall;
-	private Vector3 _lastGroundedPlanarForward;
-	private float _fallHeight;
-
-	[Header("debug: permanent")]
-	[HideInInspector] public bool _hasBackpack;
-	[ReadOnly] public float ropeLength;
-	[HideInInspector] public Permanent _craftInHand;
-    [HideInInspector] public Permanent _craftInRobot;
-
-    // ----- PRIVATE VARIABLES -----
-    // - status -
-    private float _stunTimer;
+	// - status -
+	private float _stunTimer;
 	private float _slowTimer;
 
 	// - ground -
@@ -105,8 +88,20 @@ public class CharacterMotor : MonoBehaviour
 	private RaycastHit[] _edgeHits;
 	private RaycastHit _edgeHit;
 
-    // - interact -
-    private List<Interactible> _interactables;
+	// - fall -
+	public bool _isGrounded;
+	private bool[] _groundChecks = new bool[5];
+	private bool _isStunned = false;
+	private bool _isSlowed = false;
+	private bool _isSlowedPostStun = false;
+
+	// - momentum - 
+	private Vector3 _positionStartFall;
+	private Vector3 _lastGroundedPlanarForward;
+	private float _fallHeight;
+
+	// - interact -
+	private List<Interactible> _interactables;
 	private List<Interactible> _validInteractibles;
 
 	// - throw -
@@ -117,9 +112,11 @@ public class CharacterMotor : MonoBehaviour
 	private CraftType _objectToCraft = CraftType.None;
 	private Coroutine _craftCoroutine;
 
-	// ----- CONST -----
-	private const float _TERMINAL_VERTICAL_VELOCITY = 53.0f;
-	private const float FIXED_GRAVITY = -2.0f;
+	// - permanent -
+	[HideInInspector] public bool _hasBackpack;
+	[HideInInspector] public float ropeLength;
+	[HideInInspector] public Permanent _craftInHand;
+	[HideInInspector] public Permanent _craftInRobot;
 
 	#endregion
 
@@ -215,9 +212,11 @@ public class CharacterMotor : MonoBehaviour
         {
             if (_rope.isPlaced)
             {
+				// Magenta: rope limit & start position
                 Gizmos.color = Color.magenta;
                 Gizmos.DrawWireSphere(_rope.folds[^1], _rope.holdLength);
-            }
+				Gizmos.DrawWireCube(_bobStartingPosition, new Vector3(.5f, .5f, .5f));
+			}
         }
     }
 	#endif
@@ -233,6 +232,7 @@ public class CharacterMotor : MonoBehaviour
 	private void SwitchState(AnimationState newState)
 	{
 		ExitCurrentState();
+		print($"new state {newState}");
 		EnterState(newState);
 	}
 
@@ -379,7 +379,11 @@ public class CharacterMotor : MonoBehaviour
     /// </summary>
     private void VerifyState()
     {
-		if (_crafting && _currentState == AnimationState.LOCOMOTION)
+		if (_rope != null && _rope.isPlaced && _rope.isConnected && _currentState != AnimationState.ROPE)
+		{
+			SwitchState(AnimationState.ROPE);
+		}
+		else if (_crafting && _currentState == AnimationState.LOCOMOTION)
 		{
             SwitchState(AnimationState.CRAFT);
         }
@@ -397,7 +401,7 @@ public class CharacterMotor : MonoBehaviour
             if (_isGroundedLastFrame) _coyoteTime = _characterConfig.coyoteTime;
             SwitchState(AnimationState.FALL);
         }
-        else if (_isGrounded && !_isJumping && _currentState != AnimationState.LOCOMOTION && !_crafting)
+        else if (_isGrounded && !_isJumping && _currentState != AnimationState.LOCOMOTION && !_crafting && _rope == null)
         {
             ApplyFallHeight();
             SwitchState(AnimationState.LOCOMOTION);
@@ -901,7 +905,6 @@ public class CharacterMotor : MonoBehaviour
                 _rseCancelAction.action += CancelAction;
                 _rseInteract.action += Interact;
                 _rseKillCharacter.action += HandleDeath;
-                
                 break;
             case AnimationState.CRAFT:
                 _rseRun.action += Run;
@@ -919,6 +922,7 @@ public class CharacterMotor : MonoBehaviour
                 _rseCancelAction.action += CancelAction;
                 _rseInteract.action += Interact;
                 _rseKillCharacter.action += HandleDeath;
+				_rseHolding.action += Holding;
                 break;
             case AnimationState.LADDER:
                 _rseMove.action += Move;
@@ -1031,6 +1035,7 @@ public class CharacterMotor : MonoBehaviour
 				else
 				{
 					// reset the gravity velocity
+					_positionStartFall = _rsoCharacterPosition.value;
 					_gravitySpeed = 0f;
 				}
 				break;
@@ -1039,8 +1044,9 @@ public class CharacterMotor : MonoBehaviour
 				if (_isHolding)
 				{
                     // reset the gravity velocity
+					_positionStartFall = _rsoCharacterPosition.value;
                     _gravitySpeed = 0f;
-                }
+				}
 				else
 				{
 					_rope.UpdateHoldLength();
@@ -1223,8 +1229,6 @@ public class CharacterMotor : MonoBehaviour
                 _crafting = false;
             }
         }
-
-        
     }
 
 	private void EnterCraftState()
@@ -1384,11 +1388,22 @@ public class CharacterMotor : MonoBehaviour
 	}
 
 	[Header("debug: rope")]
-	[ReadOnly] public RopeState _ropeState;
-	[ReadOnly] public bool _isHolding;
-	[ReadOnly] public bool _isAgainstWall;
+	public RopeState _ropeState;
+	public bool _isHolding;
+	public bool _isAgainstWall;
+	public bool _canStartSwinging = true;
+	public Vector3 _inputDirectionGrounded;
+	public float _verticalForce;
+	public float _totalForces;
+	public float _angleCharacterVertical;
+	public Rope _rope;
 
-	private Rope _rope;
+	// ---- PRIVATE VARIABLES ----
+	private Vector3 _pendulumVelocity = new Vector3();
+	private Vector3 _bobStartingPosition;
+
+	// ---- CONST ----
+	private const float _TOWARDS_VERTICAL_THRESHOLD = 0.75f;
 
 	#endregion
 
@@ -1396,7 +1411,7 @@ public class CharacterMotor : MonoBehaviour
 
 	private void EnterRopeState()
 	{
-
+		_rseHolding.action += Holding;
 	}
 
 	private void UpdateRopeState()
@@ -1442,6 +1457,9 @@ public class CharacterMotor : MonoBehaviour
 
 	private void ExitRopeState()
 	{
+		_rseHolding.action -= Holding;
+
+		// Detach the rope from the character
 		_rope = null;
 	}
 
@@ -1606,20 +1624,13 @@ public class CharacterMotor : MonoBehaviour
 		_characterDirection.forward = -towardsCenter.normalized;
 	}
 
-	[Header("DEBUG: ROPE")]
-	public bool canStartSwinging = true;
-	public Vector3 inputDirectionGrounded;
-	public float verticalForce;
-	public float totalForces;
-	public float angleCharacterVertical;
-
 	private void HandleRopeMovement()
 	{
 		// Assert: there is no equipped rope 
 		if (_rope == null) return;
 
 		// Get player input
-		inputDirectionGrounded = _cameraTransform.forward * _moveInput.y + _cameraTransform.right * _moveInput.x;
+		_inputDirectionGrounded = _cameraTransform.forward * _moveInput.y + _cameraTransform.right * _moveInput.x;
 
 		// Do the character fall based on the rope holding method
 		bool doFall = false;
@@ -1652,31 +1663,28 @@ public class CharacterMotor : MonoBehaviour
 
 		// -- CHARACTER IS HOLDING THE ROPE --
 
-		float TOWARDS_VERTICAL_THRESHOLD = 0.75f;
-		float ANGLE_CV_MAX = 45f; 
-
 		Vector3 verticalPoint = _rope.folds[^1] + Vector3.down * _rope.holdLength;
 		Vector3 towardsVertical = (_rsoCharacterPosition.value - verticalPoint).normalized;
 		Vector3 towardsCharacter = (_rsoCharacterPosition.value - _rope.folds[^1]).normalized;
 
-		bool inputsTowardsVertical = Vector3.Dot(inputDirectionGrounded, towardsVertical) <= TOWARDS_VERTICAL_THRESHOLD;
-		bool inputsPressed = inputDirectionGrounded.magnitude > 0;
+		bool inputsTowardsVertical = Vector3.Dot(_inputDirectionGrounded, towardsVertical) <= _TOWARDS_VERTICAL_THRESHOLD;
+		bool inputsPressed = _inputDirectionGrounded.magnitude > 0;
 
 		// - Get velocity from a simple pendulum effect -
 		if (!inputsPressed
 		|| inputsTowardsVertical)
 		{
-			if (canStartSwinging)
+			if (_canStartSwinging)
 			{
 				ResetPendulumVelocity();
-				canStartSwinging = false;
+				_canStartSwinging = false;
 			}
 
 			UpdatePendulumVelocity();
 		}
 		else
 		{
-			canStartSwinging = true;
+			_canStartSwinging = true;
 			ResetPendulumVelocity();
 		}
 
@@ -1715,9 +1723,9 @@ public class CharacterMotor : MonoBehaviour
 		Vector3 suspensionVelocity = suspensionDirection * suspensionForce;
 
 		// - Attraction towards vertical -
-		float angleCharacterVertical = Mathf.Clamp(Vector3.Angle(Vector3.down, towardsCharacter), 0, ANGLE_CV_MAX);
+		float angleCharacterVertical = Mathf.Clamp(Vector3.Angle(Vector3.down, towardsCharacter), 0, _characterConfig.maxSideAngle);
 		Vector3 totalForces = -(_pendulumVelocity + suspensionVelocity);
-		Vector3 verticalVelocity = angleCharacterVertical * totalForces / ANGLE_CV_MAX;
+		Vector3 verticalVelocity = angleCharacterVertical * totalForces / _characterConfig.maxSideAngle;
 		if (!inputsPressed) verticalVelocity = Vector3.zero;
 
 		// TODO:
@@ -1739,10 +1747,6 @@ public class CharacterMotor : MonoBehaviour
 		if (_rsoCharacterPosition.value != _characterDirection.position) { _rsoCharacterPosition.value = _characterDirection.position; }
 		if (_rsoCharacterForward.value != _characterDirection.forward) { _rsoCharacterForward.value = _characterDirection.forward; }
 	}
-
-	// gizmos debug
-	private Vector3 _pendulumVelocity = new Vector3();
-	private Vector3 _bobStartingPosition;
 
 	private void ResetPendulumVelocity()
 	{
@@ -1787,23 +1791,6 @@ public class CharacterMotor : MonoBehaviour
 		// Apply a counter velocity force: a drag
 		_pendulumVelocity -= _pendulumVelocity * (_characterConfig.drag / gravityForce);
 	}
-
-
-#if UNITY_EDITOR
-	private void OnDrawGizmos()
-	{
-		if (_rope == null) return;
-		if (!_rope.isPlaced) return;
-
-		// Magenta: rope limit
-		Gizmos.color = Color.magenta;
-		Gizmos.DrawWireSphere(_rope.folds[^1], _rope.holdLength);
-
-		// Purple: start position
-		Gizmos.color = new Color(.5f, 0f, .5f);
-		Gizmos.DrawWireCube(_bobStartingPosition, new Vector3(.5f, .5f, .5f));
-	}
-#endif
 
 	#endregion
 

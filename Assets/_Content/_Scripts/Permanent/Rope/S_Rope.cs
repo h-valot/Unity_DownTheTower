@@ -12,6 +12,7 @@ public class Rope : Permanent
 	[Header("Scriptable references")]
 	[SerializeField] private RopeConfig _ropeConfig;
 
+	[Header("Debug")]
 	[HideInInspector] public bool isConnected;
 	[HideInInspector] public bool isPlaced;
 	[HideInInspector] public float holdLength;
