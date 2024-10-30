@@ -1311,15 +1311,20 @@ public class CharacterMotor : MonoBehaviour
 		_characterDirection.forward = -towardsCenter.normalized;
 	}
 
-	private float ropeAcceleration;
-	private bool canStartRopeAcceleration;
+	[Header("DEBUG: ROPE")]
+	public bool canStartSwinging = true;
+	public Vector3 inputDirectionGrounded;
+	public float verticalForce;
+	public float totalForces;
+	public float angleCharacterVertical;
+
 	private void HandleRopeMovement()
 	{
 		// Assert: there is no equipped rope 
 		if (_rope == null) return;
 
-		// Player direction inputs
-		Vector3 inputDirectionGrounded = _cameraTransform.forward * _moveInput.y + _cameraTransform.right * _moveInput.x;
+		// Get player input
+		inputDirectionGrounded = _cameraTransform.forward * _moveInput.y + _cameraTransform.right * _moveInput.x;
 
 		// Do the character fall based on the rope holding method
 		bool doFall = false;
@@ -1358,58 +1363,36 @@ public class CharacterMotor : MonoBehaviour
 
 		// -- CHARACTER IS HOLDING THE ROPE --
 
-		float MAX_ROPE_LINEAR_ACCELERATION = 10f;
 		float TOWARDS_VERTICAL_THRESHOLD = 0.75f;
-		float LINEAR_ACCELERATION_VALUE = 2f;
+		float ANGLE_CV_MAX = 45f; 
 
 		Vector3 verticalPoint = _rope.folds[^1] + Vector3.down * _rope.holdLength;
 		Vector3 towardsVertical = (_rsoCharacterPosition.value - verticalPoint).normalized;
+		Vector3 towardsCharacter = (_rsoCharacterPosition.value - _rope.folds[^1]).normalized;
 
-		// - Get attraction direction -
-		Vector3 attractionDirection =
-			(Vector3Extention.GetPositionOnCercle(
-				angle: _characterConfig.ropeOffsetAngle,
-				axis: _characterDirection.forward,
-				direction: _characterDirection.right,
-				origin: _rope.folds[^1],
-				radius: _rope.holdLength,
-				starting: _rsoCharacterPosition.value
-			) - _rsoCharacterPosition.value).normalized * towardsVertical.x +
-			(Vector3Extention.GetPositionOnCercle(
-				angle: _characterConfig.ropeOffsetAngle,
-				axis: _characterDirection.right,
-				direction: _characterDirection.forward,
-				origin: _rope.folds[^1],
-				radius: _rope.holdLength,
-				starting: _rsoCharacterPosition.value
-			) - _rsoCharacterPosition.value).normalized * towardsVertical.y;
-		UnityEngine.Debug.DrawRay(_harness.position, attractionDirection);
+		bool inputsTowardsVertical = Vector3.Dot(inputDirectionGrounded, towardsVertical) <= TOWARDS_VERTICAL_THRESHOLD;
+		bool inputsPressed = inputDirectionGrounded.magnitude > 0;
 
-		// - Get attraction velocity using a simple pendulum effect -
-		// If there is no inputs or the input direction is a same as the vertical point of the circle
-		if (inputDirectionGrounded.magnitude <= 0
-			|| Vector3.Dot(inputDirectionGrounded, towardsVertical) >= TOWARDS_VERTICAL_THRESHOLD)
+		// - Get velocity from a simple pendulum effect -
+		if (!inputsPressed
+		|| inputsTowardsVertical)
 		{
-			if (!canStartRopeAcceleration)
+			if (canStartSwinging)
 			{
-				ropeAcceleration = 0;
-				canStartRopeAcceleration = false;
+				ResetPendulumVelocity();
+				canStartSwinging = false;
 			}
 
-			ropeAcceleration += LINEAR_ACCELERATION_VALUE;
-			if (ropeAcceleration >= MAX_ROPE_LINEAR_ACCELERATION) ropeAcceleration = MAX_ROPE_LINEAR_ACCELERATION;
+			UpdatePendulumVelocity();
 		}
-		else 
+		else
 		{
-			ropeAcceleration -= LINEAR_ACCELERATION_VALUE;
-			if (ropeAcceleration <= 0)
-			{
-				ropeAcceleration = 0;
-				canStartRopeAcceleration = true;
-			}
+			canStartSwinging = true;
+			ResetPendulumVelocity();
 		}
 
-		// - Get desired position on the cercle offset by given angle -
+		// - Suspension velocity -
+		// Get desired position on the cercle offset by given angle
 		Vector3 completeDirection = 
 			(Vector3Extention.GetPositionOnCercle(
 				angle: _characterConfig.ropeOffsetAngle,
@@ -1437,35 +1420,31 @@ public class CharacterMotor : MonoBehaviour
 				radius: _rope.holdLength,
 				starting: _rsoCharacterPosition.value
 			) - _rsoCharacterPosition.value).normalized * _moveInput.x;
+	
+		float suspensionForce = _isAgainstWall ? _characterConfig.partialSuspensionSpeed : _characterConfig.completeSuspensionSpeed;
+		Vector3 suspensionDirection = _isAgainstWall ? partialDirection : completeDirection;
+		Vector3 suspensionVelocity = suspensionDirection * suspensionForce;
+
+		// - Attraction towards vertical -
+		float angleCharacterVertical = Mathf.Clamp(Vector3.Angle(Vector3.down, towardsCharacter), 0, ANGLE_CV_MAX);
+		Vector3 totalForces = -(_pendulumVelocity + suspensionVelocity);
+		Vector3 verticalVelocity = angleCharacterVertical * totalForces / ANGLE_CV_MAX;
+		if (!inputsPressed) verticalVelocity = Vector3.zero;
 
 		// TODO:
-		// (1) Acceleration movement while against the wall
-		// (2) Reduce the character speed to 0 when approching the limit angles of the balancier effect => Done by using the pendulum effect
+		// (1) Reduce the character speed to 0 when approching the limit angles of the balancier effect => Done by using the pendulum effect
+		// (2) Lerp the speed acceleration when starting going down the rope 
 		// (3) Jump off the wall logic
-		// (4) Lerp the speed acceleration when starting going down the rope 
 
 		// - Apply movements -
-		// Partial rope suspension
-		if (_isAgainstWall)
-		{
-			_controller.Move(Time.deltaTime * (
-				// player's inputs
-				partialDirection * _characterConfig.partialSuspensionSpeed
-				// attraction direction is a custom gravity force applied while on the rope
-				+ attractionDirection * ropeAcceleration
-			));
-		}
-
-		// Complete rope suspension
-		else
-		{
-			_controller.Move(Time.deltaTime * (
-				// player's inputs
-				completeDirection * _characterConfig.completeSuspensionSpeed
-				// attraction direction is a custom gravity force applied while on the rope
-				+ attractionDirection * ropeAcceleration
-			));
-		}
+		_controller.Move(Time.deltaTime * (
+			// Apply suspension velocity find using player's movements
+			suspensionVelocity
+			// Apply a force towards the vertical point
+			+ verticalVelocity
+			// Apply pendulum velocity if player doesn't enters any inputs or moves towards the center
+			+ _pendulumVelocity
+		));
 
 		// - Update variables -
 		if (_rsoCharacterPosition.value != _characterDirection.position) { _rsoCharacterPosition.value = _characterDirection.position; }
@@ -1474,24 +1453,22 @@ public class CharacterMotor : MonoBehaviour
 
 	// gizmos debug
 	private Vector3 _pendulumVelocity = new Vector3();
-	private Vector3 _tensionDirection;
 	private Vector3 _bobStartingPosition;
-	private float _tensionForce = 0f;
-	private float _gravityForce = 0f;
 
-	private void PendulumStart()
+	private void ResetPendulumVelocity()
 	{
 		_bobStartingPosition = _rsoCharacterPosition.value;
 		_pendulumVelocity = Vector3.zero;
 	}
 
-	private void PendulumUpdate()
+	private void UpdatePendulumVelocity()
 	{
 		// Add gravity free fall
-		_gravityForce = _characterConfig.mass * _characterConfig.gravity;
+		// Character gravity force is negative so we reverse it
+		float gravityForce = _characterConfig.mass * -_characterConfig.gravity;
 
 		// Apply the gravity to `m_CurrentVelocity`
-		_pendulumVelocity += Vector3.down * _gravityForce * Time.fixedDeltaTime;
+		_pendulumVelocity += Vector3.down * gravityForce * Time.fixedDeltaTime;
 
 		// Cache pivot and bob positions
 		Vector3 pivotPositionCache = _rope.folds[^1];
@@ -1505,25 +1482,21 @@ public class CharacterMotor : MonoBehaviour
 		if (distanceAfterGravity > _rope.holdLength
 		|| Mathf.Approximately(distanceAfterGravity, _rope.holdLength))
 		{
-			_tensionDirection = (pivotPositionCache - bobPositionCache).normalized;
+			Vector3 tensionDirection = (pivotPositionCache - bobPositionCache).normalized;
 
 			// The nearest the bob is from the vertical point, the greatest the tension force will be.
 			float inclinationAngle = Vector3.Angle(bobPositionCache - pivotPositionCache, Vector3.down);
-			_tensionForce = _gravityForce * Mathf.Cos(Mathf.Deg2Rad * inclinationAngle);
+			float tensionForce = gravityForce * Mathf.Cos(Mathf.Deg2Rad * inclinationAngle);
 
 			// Generate the counter force to make the bob stay within the circle : centripetal force
-			float centripetalForce = _characterConfig.mass * Mathf.Pow(_pendulumVelocity.magnitude, 2) / _rope.holdLength;
-			_tensionForce += centripetalForce;
+			tensionForce += _characterConfig.mass * Mathf.Pow(_pendulumVelocity.magnitude, 2) / _rope.holdLength;
 
 			// Apply the tension to `m_CurrentVelocity`
-			_pendulumVelocity += _tensionDirection * _tensionForce * Time.fixedDeltaTime;
+			_pendulumVelocity += tensionDirection * tensionForce * Time.fixedDeltaTime;
 		}
 
 		// Apply a counter velocity force: a drag
-		_pendulumVelocity -= _pendulumVelocity * (_characterConfig.drag / _gravityForce);
-
-		// Apply velocity
-		_controller.Move(_pendulumVelocity * Time.fixedDeltaTime);
+		_pendulumVelocity -= _pendulumVelocity * (_characterConfig.drag / gravityForce);
 	}
 
 
@@ -1537,34 +1510,9 @@ public class CharacterMotor : MonoBehaviour
 		Gizmos.color = Color.magenta;
 		Gizmos.DrawWireSphere(_rope.folds[^1], _rope.holdLength);
 
-		// Purple: Bob & Pivot
+		// Purple: start position
 		Gizmos.color = new Color(.5f, 0f, .5f);
-		Gizmos.DrawWireSphere(_rope.folds[^1], _rope.holdLength);
 		Gizmos.DrawWireCube(_bobStartingPosition, new Vector3(.5f, .5f, .5f));
-
-		// Blue: Auxilary
-		Gizmos.color = new Color(.3f, .3f, 1f);
-		Vector3 auxilaryVelocity = .3f * _pendulumVelocity;
-		Gizmos.DrawRay(_rsoCharacterPosition.value, auxilaryVelocity);
-		Gizmos.DrawSphere(_rsoCharacterPosition.value + auxilaryVelocity, .2f);
-
-		// Yellow: Gravity
-		Gizmos.color = new Color(1f, 1f, .2f);
-		Vector3 gravity = .3f * _gravityForce * Vector3.down;
-		Gizmos.DrawRay(_rsoCharacterPosition.value, gravity);
-		Gizmos.DrawSphere(_rsoCharacterPosition.value + gravity, .2f);
-
-		// Orange: Tension
-		Gizmos.color = new Color(1f, .5f, .2f);
-		Vector3 tension = .3f * _tensionForce * _tensionDirection;
-		Gizmos.DrawRay(_rsoCharacterPosition.value, tension);
-		Gizmos.DrawSphere(_rsoCharacterPosition.value + tension, .2f);
-
-		// Red: Resultant
-		Gizmos.color = new Color(1f, .3f, .3f);
-		Vector3 resultant = gravity + tension;
-		Gizmos.DrawRay(_rsoCharacterPosition.value, resultant);
-		Gizmos.DrawSphere(_rsoCharacterPosition.value + resultant, .2f);
 	}
 #endif
 
