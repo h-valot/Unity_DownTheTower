@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine;
@@ -19,6 +18,7 @@ public class Rope : Permanent
 	public float holdLength;
 	public List<Vector3> folds = new List<Vector3>();
 
+	private List<RopeLine> _ropeLines = new List<RopeLine>();
 	private Transform _characterHarness;
 
 	#region default functions
@@ -231,10 +231,13 @@ public class Rope : Permanent
 		if (_characterHarness == null) return;
 
 		// Clear lists
-		List<RopeLine> ropeLines = new List<RopeLine>();
-		for (int i = ropeLines.Count - 1; i >= 0; i--)
+		if (_ropeLines.Count >= 1)
 		{
-			Destroy(ropeLines[i].gameObject);
+			for (int i = _ropeLines.Count - 1; i >= 0; i--)
+			{
+				Destroy(_ropeLines[i].gameObject);
+			}
+			_ropeLines = new List<RopeLine>();
 		}
 
 		// Get material based in the total distance
@@ -254,7 +257,7 @@ public class Rope : Permanent
 			RopeLine newRopeLine = Instantiate(_ropeConfig.pfRopeLine);
 			newRopeLine.SetPositions(folds[i], i + 1 >= folds.Count ? _characterHarness.position : folds[i + 1]);
 			newRopeLine.SetColor(material);
-			ropeLines.Add(newRopeLine);
+			_ropeLines.Add(newRopeLine);
 		}
 	}
 
