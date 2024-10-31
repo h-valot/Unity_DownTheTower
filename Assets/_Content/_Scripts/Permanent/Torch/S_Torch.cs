@@ -28,6 +28,7 @@ public class Torch : Permanent
     private bool _isFalling = false;
     private bool _changedColor = false;
     private bool _isBroken = false;
+    private bool _isHit = false;
     private float _throwStartPoint;
     private float _landedHeight = 9999999;
 
@@ -55,6 +56,14 @@ public class Torch : Permanent
         if (!_isFalling) return;
         _landedHeight = transform.position.y;
         CheckLethalRopeHeight();
+        if (_changedColor && 
+            !_isBroken &&
+            !_isHit &&
+            Vector3.Dot(collision.contacts[0].normal, new Vector3(0,1,0)) >= 0.8)
+        {
+            Instantiate(_torchConfig.torchHitSFX, transform.position, Quaternion.identity);
+            _isHit = true;
+        }
     }
 
     #endregion

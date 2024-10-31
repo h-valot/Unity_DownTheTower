@@ -54,4 +54,5 @@ public class TorchConfig : ScriptableObject
 	[Header("Debug")]
 	public bool activateBreakAnim = true;
     public GameObject torchBreakSFX;
+	public GameObject torchHitSFX;
 }
