@@ -215,7 +215,7 @@ public class CharacterMotor : MonoBehaviour
 				// Magenta: rope limit & start position
                 Gizmos.color = Color.magenta;
                 Gizmos.DrawWireSphere(_rope.folds[^1], _rope.holdLength);
-				Gizmos.DrawWireCube(_bobStartingPosition, new Vector3(.5f, .5f, .5f));
+				Gizmos.DrawWireCube(_gizmoStartPendulumPosition, new Vector3(.5f, .5f, .5f));
 			}
         }
     }
@@ -1394,20 +1394,32 @@ public class CharacterMotor : MonoBehaviour
 		COMPLETE_SUSPENSION,
 	}
 
-	[Header("debug: rope")]
+	[Header("Rope")]
 	public RopeState _ropeState;
 	public bool _isHolding;
 	public bool _isAgainstWall;
 	public bool _canStartSwinging = true;
-	public Vector3 _inputDirectionGrounded;
+	public Vector3 _ropeInputDirection;
 	public float _verticalForce;
 	public float _totalForces;
 	public float _angleCharacterVertical;
 	public Rope _rope;
 
 	// ---- PRIVATE VARIABLES ----
-	private Vector3 _pendulumVelocity = new Vector3();
-	private Vector3 _bobStartingPosition;
+	// Velocities
+	private Vector3 _pendulumVelocity;
+	private Vector3 _verticalVelocity;
+	private Vector3 _suspensionVelocity;
+
+	// Inputs
+	private bool _inputsPressed;
+	private bool _inputsTowardsVertical;
+
+	// Mics
+	private Vector3 _towardsCharacter;
+
+	// Gizmos
+	private Vector3 _gizmoStartPendulumPosition;
 
 	// ---- CONST ----
 	private const float _TOWARDS_VERTICAL_THRESHOLD = 0.75f;
@@ -1423,17 +1435,16 @@ public class CharacterMotor : MonoBehaviour
 
 	private void UpdateRopeState()
 	{
-		// assert: there is no equipped rope 
+		// Assert: there is no equipped rope 
 		if (_rope == null) return;
 
-		// checks
+		// Checks
 		CheckGround();
 		CheckWall();
-
 		DetectEdges();
 		ApplyEdgesSpeed();
 
-		// state machine update rope state
+		// State machine update rope state
 		HandleRopeState();
 		switch (_ropeState)
 		{
@@ -1446,10 +1457,11 @@ public class CharacterMotor : MonoBehaviour
 				break;
 		}
 
-		// apply rope holding constraint after the input movements
-		// this allow to avoid glitchy movements
-		HandleRopeHolding();
 		HandleMovement();
+
+		// Apply rope holding constraint after the input movements.
+		// This allow to avoid glitchy movements.
+		HandleRopeHolding();
 	}
 
 	private void LateUpdateRopeState()
@@ -1529,74 +1541,42 @@ public class CharacterMotor : MonoBehaviour
 		}
 	}
 
-	/// <summary>
-	/// 	add spherical locomotion constraint to the character movement. 
-	/// </summary>
-	private void HandleRopeHolding()
-	{
-		// assert: there is no equipped rope 
-		if (_rope == null) return;
-
-		// assert: holding input method
-		switch (_characterConfig.ropeHoldingMethod)
-		{
-			case RopeHolding.HOLD_TO_STOP:
-				// while hold to stop, we don't constraint the character if the player IS NOT holding the button
-				if (!_isHolding) return;
-				break;
-
-			case RopeHolding.HOLD_TO_LET_GO:
-				// while hold to let go, we don't constraint the character if the player IS holding the button
-				if (_isHolding) return;
-				break;
-		}
-
-		// get the distance between the current character's position and the position of the last fold
-		Vector3 towardCharacter = transform.position - _rope.folds[^1];
-
-		// re-snap the character's position within the spherical constraint
-		if (towardCharacter.magnitude > _rope.holdLength)
-		{
-			transform.position = _rope.folds[^1] + towardCharacter.normalized * _rope.holdLength;
-
-			// transform position of the character controller has been modified outside the movement function
-			// call this unity function to synchronize transform to avoid glitchy movement effects
-			Physics.SyncTransforms();
-		}
-	}
 
 	/// <summary>
-	/// 	make the character facing center of the last fold (not with the y-axis).
+	/// 	Make the character facing center of the last fold (not with the y-axis).
 	/// </summary>
 	private void FaceFoldCenter()
 	{
-		// assert: holding input method
+		// Assert: holding input method
 		switch (_characterConfig.ropeHoldingMethod)
 		{
 			case RopeHolding.HOLD_TO_STOP:
-				// while hold to stop, we don't constraint the character if the player IS NOT holding the button
+				// While hold to stop, we don't constraint the character if the player IS NOT holding the button
 				if (!_isHolding) return;
 				break;
 
 			case RopeHolding.HOLD_TO_LET_GO:
-				// while hold to let go, we don't constraint the character if the player IS holding the button
+				// While hold to let go, we don't constraint the character if the player IS holding the button
 				if (_isHolding) return;
 				break;
 		}
 
-		// assert: character is touching a wall
+		// Assert: character is touching a wall
 		if (_isAgainstWall) return;
- 
-		// assert: center-character distance is greater than the threshold 
+
+		// Assert: center-character distance is greater than the threshold 
 		if (Mathf.Abs(_rope.holdLength - (_rope.folds[^1] - transform.position).magnitude) > _characterConfig.facingCenterThreshold) return;
 
 		Vector3 towardsCenter = transform.position - new Vector3(_rope.folds[^1].x, transform.position.y, _rope.folds[^1].z);
 		_characterDirection.forward = -towardsCenter.normalized;
 	}
-
+	
+	/// <summary>
+	/// 	Desequip the rope from the character is total length is exceeded.
+	/// </summary>
 	private void HandleRopeLength()
 	{
-		// assert: total rope length is smaller than the max length
+		// Assert: total rope length is smaller than the max length
 		if (_rope.GetTotalLength() <= _ropeConfig.maxLength) return;
 
 		DesequipRope();
@@ -1614,53 +1594,71 @@ public class CharacterMotor : MonoBehaviour
 
 	private void HandleRopeMovement()
 	{
-		// Assert: there is no equipped rope 
-		if (_rope == null) return;
+		// ---- CHARACTER IS FALLING WITH THE ROPE ----
 
-		// Get player input
-		_inputDirectionGrounded = _cameraTransform.forward * _moveInput.y + _cameraTransform.right * _moveInput.x;
-
-		// Do the character fall based on the rope holding method
-		bool doFall = false;
-		switch (_characterConfig.ropeHoldingMethod)
+		if (IsFallingWithRope())
 		{
-			case RopeHolding.HOLD_TO_STOP:
-				if (_isHolding) doFall = false;
-				else doFall = true;
-				break;
-
-			case RopeHolding.HOLD_TO_LET_GO:
-				if (_isHolding) doFall = true;
-				else doFall = false;
-				break;
-		}
-
-		// -- CHARACTER IS FALLING DOWN THE ROPE --
-
-		// Regular falling functions
-		if (doFall)
-		{
-            //ApplyAirControl();
-            ApplyDrag();
+			// Apply regular falling functions
+			// ApplyAirControl();
+			ApplyDrag();
             CreateMovementFall();
             ApplyGravity();
-
-            HandleMovement();
             return;
 		}
 
-		// -- CHARACTER IS HOLDING THE ROPE --
+		// ---- CHARACTER IS HOLDING THE ROPE ----
 
+		// Populate useful varaibles
 		Vector3 verticalPoint = _rope.folds[^1] + Vector3.down * _rope.holdLength;
 		Vector3 towardsVertical = (_rsoCharacterPosition.value - verticalPoint).normalized;
-		Vector3 towardsCharacter = (_rsoCharacterPosition.value - _rope.folds[^1]).normalized;
+		_towardsCharacter = (_rsoCharacterPosition.value - _rope.folds[^1]).normalized;
 
-		bool inputsTowardsVertical = Vector3.Dot(_inputDirectionGrounded, towardsVertical) <= _TOWARDS_VERTICAL_THRESHOLD;
-		bool inputsPressed = _inputDirectionGrounded.magnitude > 0;
+		// Get input related data
+		_ropeInputDirection = _cameraTransform.forward * _moveInput.y + _cameraTransform.right * _moveInput.x;
+		_inputsTowardsVertical = Vector3.Dot(_ropeInputDirection, towardsVertical) <= _TOWARDS_VERTICAL_THRESHOLD;
+		_inputsPressed = _ropeInputDirection.magnitude > 0;
 
-		// - Get velocity from a simple pendulum effect -
-		if (!inputsPressed
-		|| inputsTowardsVertical)
+		// Calculate different velocities to apply to the `_controller`
+		HandlePendulum();
+		HandleSuspension();
+		HandleVertical();
+
+		// TODO:
+		// (1) Lerp the speed acceleration when starting going down the rope 
+		// (2) Make the character able to climp the rope
+		// (3) Jump off the wall logic
+
+		// Apply velocities
+		_movement += _suspensionVelocity + _verticalVelocity + _pendulumVelocity;
+	}
+
+	/// <summary>
+	/// 	Is the character falling based on the rope holding method.
+	/// </summary>
+	private bool IsFallingWithRope()
+	{
+		bool isFalling = false;
+		switch (_characterConfig.ropeHoldingMethod)
+		{
+			case RopeHolding.HOLD_TO_STOP:
+				if (_isHolding) isFalling = false;
+				else isFalling = true;
+				break;
+
+			case RopeHolding.HOLD_TO_LET_GO:
+				if (_isHolding) isFalling = true;
+				else isFalling = false;
+				break;
+		}
+		return isFalling;
+	}
+
+	/// <summary>
+	/// 	Get velocity from a simple pendulum effect.
+	/// </summary>
+	private void HandlePendulum()
+	{
+		if (!_inputsPressed || _inputsTowardsVertical)
 		{
 			if (_canStartSwinging)
 			{
@@ -1675,70 +1673,14 @@ public class CharacterMotor : MonoBehaviour
 			_canStartSwinging = true;
 			ResetPendulumVelocity();
 		}
-
-		// - Suspension velocity -
-		// Get desired position on the cercle offset by given angle
-		Vector3 completeDirection = 
-			(Vector3Extention.GetPositionOnCercle(
-				angle: _characterConfig.ropeOffsetAngle,
-				axis: _cameraTransform.forward,
-				direction: _cameraTransform.right,
-				origin: _rope.folds[^1],
-				radius: _rope.holdLength,
-				starting: _rsoCharacterPosition.value
-			) - _rsoCharacterPosition.value).normalized * _moveInput.x +
-			(Vector3Extention.GetPositionOnCercle(
-				angle: _characterConfig.ropeOffsetAngle,
-				axis: _cameraTransform.right,
-				direction: _cameraTransform.forward,
-				origin: _rope.folds[^1],
-				radius: _rope.holdLength,
-				starting: _rsoCharacterPosition.value
-			) - _rsoCharacterPosition.value).normalized * _moveInput.y;
-
-		Vector3 partialDirection =
-			(Vector3Extention.GetPositionOnCercle(
-				angle: _characterConfig.ropeOffsetAngle,
-				axis: _cameraTransform.forward,
-				direction: _cameraTransform.right,
-				origin: _rope.folds[^1],
-				radius: _rope.holdLength,
-				starting: _rsoCharacterPosition.value
-			) - _rsoCharacterPosition.value).normalized * _moveInput.x;
-	
-		float suspensionForce = _isAgainstWall ? _characterConfig.partialSuspensionSpeed : _characterConfig.completeSuspensionSpeed;
-		Vector3 suspensionDirection = _isAgainstWall ? partialDirection : completeDirection;
-		Vector3 suspensionVelocity = suspensionDirection * suspensionForce;
-
-		// - Attraction towards vertical -
-		float angleCharacterVertical = Mathf.Clamp(Vector3.Angle(Vector3.down, towardsCharacter), 0, _characterConfig.maxSideAngle);
-		Vector3 totalForces = -(_pendulumVelocity + suspensionVelocity);
-		Vector3 verticalVelocity = angleCharacterVertical * totalForces / _characterConfig.maxSideAngle;
-		if (!inputsPressed) verticalVelocity = Vector3.zero;
-
-		// TODO:
-		// (1) Reduce the character speed to 0 when approching the limit angles of the balancier effect => Done by using the pendulum effect
-		// (2) Lerp the speed acceleration when starting going down the rope 
-		// (3) Jump off the wall logic
-
-		// - Apply movements -
-		_controller.Move(Time.deltaTime * (
-			// Apply suspension velocity find using player's movements
-			suspensionVelocity
-			// Apply a force towards the vertical point
-			+ verticalVelocity
-			// Apply pendulum velocity if player doesn't enters any inputs or moves towards the center
-			+ _pendulumVelocity
-		));
-
-		// - Update variables -
-		if (_rsoCharacterPosition.value != _characterDirection.position) { _rsoCharacterPosition.value = _characterDirection.position; }
-		if (_rsoCharacterForward.value != _characterDirection.forward) { _rsoCharacterForward.value = _characterDirection.forward; }
 	}
 
+	/// <summary>
+	/// 	Reset `_pendulumVelocity` which makes the acceleration process start over.
+	/// </summary>
 	private void ResetPendulumVelocity()
 	{
-		_bobStartingPosition = _rsoCharacterPosition.value;
+		_gizmoStartPendulumPosition = _rsoCharacterPosition.value;
 		_pendulumVelocity = Vector3.zero;
 	}
 
@@ -1778,6 +1720,93 @@ public class CharacterMotor : MonoBehaviour
 
 		// Apply a counter velocity force: a drag
 		_pendulumVelocity -= _pendulumVelocity * (_characterConfig.drag / gravityForce);
+	}
+
+	/// <summary>
+	/// 	Calculate the suspension velocity based on the player's inputs.
+	/// </summary>
+	private void HandleSuspension()
+	{
+		// Get desired position on the cercle offset by given angle
+		Vector3 completeDirection =
+			(Vector3Extention.GetPositionOnCercle(
+				angle: _characterConfig.ropeOffsetAngle,
+				axis: _cameraTransform.forward,
+				direction: _cameraTransform.right,
+				origin: _rope.folds[^1],
+				radius: _rope.holdLength,
+				starting: _rsoCharacterPosition.value
+			) - _rsoCharacterPosition.value).normalized * _moveInput.x +
+			(Vector3Extention.GetPositionOnCercle(
+				angle: _characterConfig.ropeOffsetAngle,
+				axis: _cameraTransform.right,
+				direction: _cameraTransform.forward,
+				origin: _rope.folds[^1],
+				radius: _rope.holdLength,
+				starting: _rsoCharacterPosition.value
+			) - _rsoCharacterPosition.value).normalized * _moveInput.y;
+
+		Vector3 partialDirection =
+			(Vector3Extention.GetPositionOnCercle(
+				angle: _characterConfig.ropeOffsetAngle,
+				axis: _cameraTransform.forward,
+				direction: _cameraTransform.right,
+				origin: _rope.folds[^1],
+				radius: _rope.holdLength,
+				starting: _rsoCharacterPosition.value
+			) - _rsoCharacterPosition.value).normalized * _moveInput.x;
+
+		float suspensionForce = _isAgainstWall ? _characterConfig.partialSuspensionSpeed : _characterConfig.completeSuspensionSpeed;
+		Vector3 suspensionDirection = _isAgainstWall ? partialDirection : completeDirection;
+		_suspensionVelocity = suspensionDirection * suspensionForce;
+	}
+
+	/// <summary>
+	/// 	Calculate the attraction velocity towards vertical.
+	/// </summary>
+	public void HandleVertical()
+	{
+		float angleCharacterVertical = Mathf.Clamp(Vector3.Angle(Vector3.down, _towardsCharacter), 0, _characterConfig.maxSideAngle);
+		Vector3 totalForces = -(_pendulumVelocity + _suspensionVelocity);
+		_verticalVelocity = angleCharacterVertical * totalForces / _characterConfig.maxSideAngle;
+
+		if (!_inputsPressed)
+		{
+			_verticalVelocity = Vector3.zero;
+		}
+	}
+
+	/// <summary>
+	/// 	Add spherical locomotion constraint to the character movement. 
+	/// </summary>
+	private void HandleRopeHolding()
+	{
+		// Assert: holding input method
+		switch (_characterConfig.ropeHoldingMethod)
+		{
+			case RopeHolding.HOLD_TO_STOP:
+				// While hold to stop, we don't constraint the character if the player IS NOT holding the button
+				if (!_isHolding) return;
+				break;
+
+			case RopeHolding.HOLD_TO_LET_GO:
+				// While hold to let go, we don't constraint the character if the player IS holding the button
+				if (_isHolding) return;
+				break;
+		}
+
+		// Get the distance between the current character's position and the position of the last fold
+		Vector3 towardCharacter = transform.position - _rope.folds[^1];
+
+		// Re-snap the character's position within the spherical constraint
+		if (towardCharacter.magnitude > _rope.holdLength)
+		{
+			transform.position = _rope.folds[^1] + towardCharacter.normalized * _rope.holdLength;
+
+			// Transform position of the character controller has been modified outside the movement function
+			// Call this unity function to synchronize transform to avoid glitchy movement effects
+			Physics.SyncTransforms();
+		}
 	}
 
 	#endregion
