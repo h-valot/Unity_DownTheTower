@@ -11,6 +11,7 @@ public class Rope : Permanent
 
 	[Header("Scriptable references")]
 	[SerializeField] private RopeConfig _ropeConfig;
+	[SerializeField] private RSO_CharacterPosition _rsoCharacterPosition;
 
 	[Header("Debug")]
 	public bool isConnected;
@@ -161,9 +162,10 @@ public class Rope : Permanent
 			}
 		}
 
-		// remove the last fold from the list if there is no collider that stands between the character and the previous last fold
+		// Remove the last fold from the list if there is no collider 
+		// that stands between the character and the previous last fold.
 		if (folds.Count >= 2
-			&& !Physics.Linecast(_characterHarness.position, folds[^2], out var removeHit, ~_ropeConfig.foldLayerToIgnore))
+		&& !Physics.Linecast(_characterHarness.position, folds[^2], out var removeHit, ~_ropeConfig.foldLayerToIgnore))
 		{
 			holdLength = GetLastFoldCharaDistance() + (folds[^2] - folds[^1]).magnitude;
 			folds.Remove(folds[^1]);

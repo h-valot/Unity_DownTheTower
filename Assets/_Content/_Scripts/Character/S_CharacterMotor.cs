@@ -1519,28 +1519,57 @@ public class CharacterMotor : MonoBehaviour
 	#region rope functions
 
 	/// <summary>
-	/// 	check if there is a collider in front of the character using a raycast.
+	/// 	Check if there is a collider in front of the character using a raycast.
 	/// </summary>
 	private void CheckWall()
 	{
-		_isAgainstWall = Physics.SphereCast(
-			_controller.center,
-			_controller.height / 2f,
-			_characterDirection.forward,
-			out var hitInfo,
-			_controller.height / 2f + 0.05f,
-			_characterConfig.againstWallLayerToInclude
-		);
+		// Lisibility varaibles
+		Vector3 origin = _rsoCharacterPosition.value + new Vector3(0, 0.5f, 0);
+		float length = _characterConfig.againstWallRayCastLength;
+		LayerMask layerMask = _characterConfig.againstWallLayerToInclude;
+
+		// Raycasts variables
+		bool[] raycastHits = new bool[8];
+		RaycastHit[] raycastInfos = new RaycastHit[8];
+
+		// Raycasts
+		raycastHits[0] = Physics.Raycast(origin, Vector3.forward, out raycastInfos[0], length, layerMask);	// Forward
+		raycastHits[1] = Physics.Raycast(origin, Vector3.right, out raycastInfos[1], length, layerMask);	// Right
+		raycastHits[2] = Physics.Raycast(origin, -Vector3.forward, out raycastInfos[2], length, layerMask);	// Backward
+		raycastHits[3] = Physics.Raycast(origin, -Vector3.right, out raycastInfos[3], length, layerMask);	// Left
+		raycastHits[4] = Physics.Raycast(origin, (Vector3.forward + Vector3.right).normalized, out raycastInfos[4], length, layerMask);	// Forward-Right
+		raycastHits[5] = Physics.Raycast(origin, (Vector3.forward - Vector3.right).normalized, out raycastInfos[5], length, layerMask);	// Forward-Left
+		raycastHits[6] = Physics.Raycast(origin, (-Vector3.forward + Vector3.right).normalized, out raycastInfos[6], length, layerMask);// Backward-Right
+		raycastHits[7] = Physics.Raycast(origin, (-Vector3.forward - Vector3.right).normalized, out raycastInfos[7], length, layerMask);// Backward-Left
+
+		// Check if a raycast is touching a valid collider
+		_isAgainstWall = false;
+		List<RaycastHit> hitInfos = new List<RaycastHit>();
+		for (int i = 0; i < raycastHits.Length; i++)
+		{
+			if (raycastHits[i])
+			{
+				_isAgainstWall = true;
+				hitInfos.Add(raycastInfos[i]);
+			}
+		}
+
+		// Average the position from all valid raycasts
+		Vector3 averagedPosition = new Vector3();
+		for (int i = 0; i < hitInfos.Count; i++)
+		{
+			averagedPosition += hitInfos[i].point;
+		}
+		averagedPosition /= hitInfos.Count;
 
 		if (_isAgainstWall)
 		{
-			Debug.Log("CHARACTER_MOTOR: wall touched");
-			Vector3 hitPoint = new Vector3(hitInfo.point.x, transform.position.y, hitInfo.point.z);
+			// Simple re-direction
+			Vector3 hitPoint = new Vector3(averagedPosition.x, transform.position.y, averagedPosition.z);
 			Vector3 touchedDirection = hitPoint - transform.position;
 			_characterDirection.forward = touchedDirection.normalized;
 		}
 	}
-
 
 	/// <summary>
 	/// 	Make the character facing center of the last fold (not with the y-axis).
@@ -1567,8 +1596,8 @@ public class CharacterMotor : MonoBehaviour
 		// Assert: center-character distance is greater than the threshold 
 		if (Mathf.Abs(_rope.holdLength - (_rope.folds[^1] - transform.position).magnitude) > _characterConfig.facingCenterThreshold) return;
 
-		Vector3 towardsCenter = transform.position - new Vector3(_rope.folds[^1].x, transform.position.y, _rope.folds[^1].z);
-		_characterDirection.forward = -towardsCenter.normalized;
+		Vector3 towardsCenter = new Vector3(_rope.folds[^1].x, transform.position.y, _rope.folds[^1].z) - transform.position;
+		_characterDirection.forward = towardsCenter.normalized;
 	}
 	
 	/// <summary>
@@ -1624,9 +1653,14 @@ public class CharacterMotor : MonoBehaviour
 		HandleVertical();
 
 		// TODO:
-		// (1) Lerp the speed acceleration when starting going down the rope 
-		// (2) Make the character able to climp the rope
-		// (3) Jump off the wall logic
+		// [ ] Fix free holding into hold it back again snap
+		// [ ] Fix unwrapping rope malfunction
+		// [ ] Jump off the rope on motion
+		// [x] Detect partial suspension
+		// [ ] Jump off the wall
+		// [ ] Climb the rope
+		// [ ] Lerp the vertical movement speed acceleration 
+		// [ ] In complete suspension, make the character pivot with the rope inclination
 
 		// Apply velocities
 		_movement += _suspensionVelocity + _verticalVelocity + _pendulumVelocity;

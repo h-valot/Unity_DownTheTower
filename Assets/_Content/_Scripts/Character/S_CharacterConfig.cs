@@ -92,8 +92,11 @@ public class CharacterConfig : ScriptableObject
 	[Tooltip("HOLD_TO_STOP: stop the character from getting any further away from the rope base when pressing the corresponding input. HOLD_TO_LET_GO: letting the character getting further from the rope base when pressing the corresponding input.")]
 	public RopeHolding ropeHoldingMethod;
 
-	[Tooltip("Against wall raycast will include only referenced layers.")]
+	[Tooltip("Against wall raycasts will include only referenced layers.")]
 	public LayerMask againstWallLayerToInclude;
+
+	[Tooltip("Against wall raycasts will be this length.")]
+	public float againstWallRayCastLength = 1f;
 
 	[Tooltip("Scalar that multiply the direction towards the attraction point while on the partial rope suspension (eg. character against a wall)")]
 	public float partialSphericalAttractiveForce = 2.0f;
