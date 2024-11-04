@@ -25,9 +25,10 @@ public class CharacterInput : MonoBehaviour
     [SerializeField] private RSO_GamePaused _rsoGamePaused;
 
 	[Header("Debugging")]
-	[ReadOnly] public Vector2 move;
-	[ReadOnly] public Vector2 look;
-	[ReadOnly] public bool run;
+	[ReadOnly] public Vector2 _move;
+	[ReadOnly] public Vector2 _look;
+	[ReadOnly] public bool _run;
+	[ReadOnly] public bool _throw;
 
 	private float _controlSchemeCheckTimer;
 
@@ -36,17 +37,20 @@ public class CharacterInput : MonoBehaviour
 	private void Start()
 	{
 		// reset the sprint value
-		run = false;
+		_run = false;
 		_rseRun.Call(false);
+
+		_throw = false;
+		_rseThrow.Call(false);
 	}
 
 	private void Update()
 	{
 		UpdateControlScheme();
 
-		if (look != Vector2.zero) 
+		if (_look != Vector2.zero) 
 		{
-			_rseLook.Call(look);
+			_rseLook.Call(_look);
 		}
 	}
 
@@ -69,16 +73,16 @@ public class CharacterInput : MonoBehaviour
 
 	public void OnMove(InputValue value)
 	{
-		move = value.Get<Vector2>();
-		_rseMove.Call(move);
+		_move = value.Get<Vector2>();
+		_rseMove.Call(_move);
 	}
 
 	public void OnLook(InputValue value)
 	{
-		if (_rsoGamePaused.value) look = Vector2.zero;
-        else look = value.Get<Vector2>();
+		if (_rsoGamePaused.value) _look = Vector2.zero;
+        else _look = value.Get<Vector2>();
 
-        _rseLook.Call(look);
+        _rseLook.Call(_look);
     }
 
 	public void OnJump(InputValue value)
@@ -88,13 +92,29 @@ public class CharacterInput : MonoBehaviour
 
 	public void OnRun(InputValue value)
 	{
-		run = value.isPressed;
-		_rseRun.Call(run);
+		_run = value.isPressed;
+		_rseRun.Call(_run);
 	}
 
 	public void OnThrow(InputValue value)
     {
-        _rseThrow.Call(value.isPressed);
+		if (value.Get<float>() >= 0.05f)
+		{
+			if (!_throw)
+			{
+                _throw = true;
+                _rseThrow.Call(_throw);
+            }
+		}
+		else
+		{
+            if (_throw)
+            {
+                _throw = false;
+                _rseThrow.Call(_throw);
+            }
+        }
+        
 	}
 
 	public void OnToggleInHand()
