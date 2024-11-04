@@ -1653,8 +1653,8 @@ public class CharacterMotor : MonoBehaviour
 		HandleVertical();
 
 		// TODO:
-		// [ ] Fix free holding into hold it back again snap
-		// [ ] Fix unwrapping rope malfunction
+		// [x] Fix free holding into hold it back again snap
+		// [x] Fix unwrapping rope malfunction
 		// [ ] Jump off the rope on motion
 		// [x] Detect partial suspension
 		// [ ] Jump off the wall

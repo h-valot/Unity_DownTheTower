@@ -167,7 +167,7 @@ public class Rope : Permanent
 		if (folds.Count >= 2
 		&& !Physics.Linecast(_characterHarness.position, folds[^2], out var removeHit, ~_ropeConfig.foldLayerToIgnore))
 		{
-			holdLength = GetLastFoldCharaDistance() + (folds[^2] - folds[^1]).magnitude;
+			holdLength = GetLastFoldHarnessDistance() + (folds[^2] - folds[^1]).magnitude;
 			folds.Remove(folds[^1]);
 		}
 	}
@@ -190,10 +190,10 @@ public class Rope : Permanent
 	/// <param name="isAllowed">is it allowed to update hold rope radius</param>
 	public void UpdateHoldLength(bool isAllowed = true)
 	{
-		// assert: is it not allowed
+		// Assert: is it not allowed
 		if (!isAllowed) return;
 
-		holdLength = GetLastFoldCharaDistance();
+		holdLength = GetLastFoldHarnessDistance();
 	}
 
 	/// <summary>
@@ -217,13 +217,16 @@ public class Rope : Permanent
 		return output;
 	}
 
-	public float GetLastFoldCharaDistance()
+	public float GetLastFoldHarnessDistance()
 	{
 		// Assertions
 		if (!isPlaced) return 0;
 		if (_characterHarness == null) return 0;
 
-		return (folds[^1] - _characterHarness.position).magnitude;
+		// Note that we do not connect the last fold to the harness
+		// but the character's current position. This avoids re-centering
+		// issue if spamming holding rope key
+		return (folds[^1] - _rsoCharacterPosition.value).magnitude;
 	}
 
 	private void DrawLines()
