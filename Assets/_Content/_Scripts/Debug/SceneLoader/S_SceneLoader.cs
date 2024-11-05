@@ -25,7 +25,7 @@ public class SceneLoader : MonoBehaviour
 
 		if (sceneCount <= 0)
 		{
-			Debug.LogError($"SCENE_LOADER: no scenes in-built settings. adds scenes to it. ");
+			Debug.LogError($"SCENE_LOADER: No scenes in-built settings. Adds scenes to it.");
 			return;
 		}
 
@@ -39,7 +39,7 @@ public class SceneLoader : MonoBehaviour
 	private void CreateButtons()
 	{
 		if (_scenes is null
-			|| _scenes.Length <= 0)
+		|| _scenes.Length <= 0)
 		{
 			GetAllScenes();
 		}
@@ -95,7 +95,7 @@ public class SceneLoader : MonoBehaviour
 		}
 	}
 
-	private void Hide()
+	public void Hide()
 	{
 		_rseToggleCursor.Call(false);
 		_graphicsParent.SetActive(false);
