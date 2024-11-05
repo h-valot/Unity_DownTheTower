@@ -56,7 +56,7 @@ MonoBehaviour:
   groundCheckYFactor: 2.5
   skinWidth: 0.1
   jumpMinimalPlanarVelocity: 1.5
-  jumpHeight: 1
+  jumpHeight: 0.5
   jumpCooldown: 0
   gravity: -9.8
   dragDecceleration: 1.5
@@ -104,8 +104,8 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   coyoteTime: 0.25
-  lethalHeight: 15
-  stunHeight: 9
+  lethalHeight: 8
+  stunHeight: 6
   stunDuration:
     serializedVersion: 2
     m_Curve:
@@ -130,7 +130,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  slowHeight: 7
+  slowHeight: 8
   slowDuration:
     serializedVersion: 2
     m_Curve:
