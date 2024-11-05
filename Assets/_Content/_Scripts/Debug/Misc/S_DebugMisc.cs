@@ -57,7 +57,7 @@ public class DebugMisc : MonoBehaviour
         }
     }
 
-    private void Hide()
+	public void Hide()
 	{
 		_rseToggleCursor.Call(false);
 		_graphicsParent.SetActive(false);

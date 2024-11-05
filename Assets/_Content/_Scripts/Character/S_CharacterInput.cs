@@ -29,10 +29,6 @@ public class CharacterInput : MonoBehaviour
 	public Vector2 _look;
 	public bool _run;
 	public bool _throw;
-	private float _controlSchemeCheckTimer;
-
-	// ---- CONST ----
-    private const float _CONTROL_SCHEME_CHECK_DELAY = 1f;
 
 	private void Start()
 	{
@@ -46,8 +42,6 @@ public class CharacterInput : MonoBehaviour
 
 	private void Update()
 	{
-		UpdateControlScheme();
-
 		if (_look != Vector2.zero) 
 		{
 			_rseLook.Call(_look);
@@ -62,13 +56,9 @@ public class CharacterInput : MonoBehaviour
 
 	private void UpdateControlScheme()
 	{
-		// Check if the control scheme has changed every _CONTROL_SCHEME_CHECK_DELAY seconds
-		_controlSchemeCheckTimer += Time.deltaTime;
-		if (_controlSchemeCheckTimer >= _CONTROL_SCHEME_CHECK_DELAY)
-		{
-			_controlSchemeCheckTimer = 0;
-			_rsoControlScheme.value = _playerInput.currentControlScheme;
-		}
+		if (_look == Vector2.zero) return;
+
+		_rsoControlScheme.value = _playerInput.currentControlScheme;
 	}
 
 	private void OnEnable()
@@ -92,7 +82,8 @@ public class CharacterInput : MonoBehaviour
 		if (_rsoGamePaused.value) _look = Vector2.zero;
         else _look = value.Get<Vector2>();
 
-        _rseLook.Call(_look);
+		UpdateControlScheme();
+		_rseLook.Call(_look);
     }
 
 	public void OnJump(InputValue value)
