@@ -14,10 +14,12 @@ public class CharacterMotor : MonoBehaviour
 	[SerializeField] private Transform _robotHandSocket;
 	[SerializeField] private Transform _harness;
 	[SerializeField] private CharacterController _controller;
+	[SerializeField] private GameObject _backpackAnchor;
 
 	[Space(5)]
     [Header("External references")]
 	[SerializeField] private ThirdPersonCamera _thirdPersonCamera;
+	[SerializeField] private GameObject _PF_backpack;
 
     [Space(5)]
     [Header("Scriptable references")]
@@ -114,6 +116,7 @@ public class CharacterMotor : MonoBehaviour
 
 	// - permanent -
 	[HideInInspector] public bool _hasBackpack;
+	[HideInInspector] public Backpack _backpack;
 	[HideInInspector] public float ropeLength;
 	[HideInInspector] public Permanent _craftInHand;
 	[HideInInspector] public Permanent _craftInRobot;
@@ -132,6 +135,16 @@ public class CharacterMotor : MonoBehaviour
 		_raycastLayerMask |= (1 << LayerMask.NameToLayer("Collision_NoRaycast"));
 
 		SwitchState(AnimationState.LOCOMOTION);
+
+        if (_characterConfig.startWithBag)
+        {
+			_backpack = FindAnyObjectByType<Backpack>();
+            if (_backpack == null)
+            {
+                _backpack = Instantiate(_PF_backpack, new Vector3(0, 0, 0), Quaternion.identity).GetComponent<Backpack>(); 
+            }
+            _backpack.ForceSetupBackpack(this);
+        }
     }
 
 	private void Update()
@@ -159,13 +172,6 @@ public class CharacterMotor : MonoBehaviour
 	{
         _rseToggleInputs.action += ToggleInputs;
         SubscribeInputs();
-
-		// debug
-		if (_characterConfig.startWithBag)
-		{
-            _hasBackpack = true;
-			ToggleCraftInput(_hasBackpack);
-        }
     }
 
 	private void OnDisable()
@@ -455,10 +461,20 @@ public class CharacterMotor : MonoBehaviour
 		Destroy(gameObject);
 	}
 
-	public void PickupBackpack()
+	/// <summary>
+	/// Put the backpack on player back.
+	/// </summary>
+	/// <param name="_skipAnim">Prevent grab backpack animation from playing.</param>
+	public void PickupBackpack(bool _skipAnim, Backpack _newBackpack)
 	{
+		_backpack = _newBackpack;
         _hasBackpack = true;
         ToggleCraftInput(_hasBackpack);
+		_backpack.transform.SetParent(_backpackAnchor.transform, false);
+		_backpack.transform.localPosition = Vector3.zero;
+		_backpack.transform.localRotation = Quaternion.identity;
+		_backpack.transform.localScale = Vector3.one;
+		RemoveFromInteractList(_backpack);
     }
 
 	#endregion
@@ -1330,7 +1346,12 @@ public class CharacterMotor : MonoBehaviour
     /// </summary>
     private IEnumerator Craft(CraftType _objectToCraft, float _craftDuration)
     {
-        // wait the crafting duration
+		// wait the crafting duration
+		if(_backpack != null)
+		{
+			_backpack.StartCrafting(_craftDuration);
+		}
+
         yield return new WaitForSeconds(_craftDuration);
 
 		// instantiate the crafted object
@@ -1352,7 +1373,9 @@ public class CharacterMotor : MonoBehaviour
 				break;
 		}
 
-		_craftInHand.transform.position = _handSocket.transform.position;
+        _backpack.EndCrafting();
+
+        _craftInHand.transform.position = _handSocket.transform.position;
 
 		_craftCoroutine = null;
     }
@@ -1363,6 +1386,10 @@ public class CharacterMotor : MonoBehaviour
         {
             StopCoroutine(_craftCoroutine);
             _craftCoroutine = null;
+			if(_backpack != null)
+			{
+				_backpack.EndCrafting();
+			}
         }
 
         _rseMove.action += Move;
