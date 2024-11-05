@@ -17,6 +17,9 @@ public class Guardian : MonoBehaviour
     private Coroutine _coroutine;
     private Coroutine _coroutineUpdate;
     private bool _aggro;
+    private GameObject _actualTarget;
+    private float _playerDistance;
+    private float _torchDistance;
 
     public Material _aggroMaterial;
     public Material _scanMaterial;
@@ -38,6 +41,7 @@ public class Guardian : MonoBehaviour
     {
         _agent = GetComponent<NavMeshAgent>();
         _aggro = false;
+        //_actualTarget = _playerRef.gameObject;
 
     }
    
@@ -140,6 +144,8 @@ public class Guardian : MonoBehaviour
         {
             _agent.destination = _torchRef.transform.position;
         }
+
+        //_agent.destination = _actualTarget.transform.position;
     }
 
     public bool IsActif()
@@ -241,5 +247,25 @@ public class Guardian : MonoBehaviour
     {
         _torchRef = torch;
         _isPlayerTarget = false;
+    }
+
+
+    // WIP
+    public void CheckDistancePlayer (CharacterMotor _playerRef)
+    {
+        _playerDistance = Vector3.Distance(this.transform.position,_playerRef.transform.position);
+    }
+
+    public void CheckDistanceTorch(Torch _torchRef)
+    {
+        _torchDistance = Vector3.Distance(this.transform.position, _torchRef.transform.position);
+    }
+
+    public void SelectTarget()
+    {
+        if (_torchDistance < _playerDistance)
+        {
+            _actualTarget = _torchRef;
+        }
     }
 }
