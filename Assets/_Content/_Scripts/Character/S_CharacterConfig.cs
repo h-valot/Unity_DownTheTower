@@ -1,8 +1,16 @@
+using System;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "CharacterConfig", menuName = "Configs/character")]
 public class CharacterConfig : ScriptableObject
 {
+	/// <summary>
+	/// 	Unity in-built editor function called whenever the scriptable object is updated.
+	/// </summary>
+	public void OnValidate() => OnHierarchyChanged?.Invoke();
+	public Action OnHierarchyChanged;
+
+
 	[Header("Move")]
 	[Tooltip("Walk speed of the character")]
 	public float walkSpeed;
@@ -141,6 +149,20 @@ public class CharacterConfig : ScriptableObject
 	
 	[Tooltip("Slerp the character's graphics to the character's moving direction at this value times time.deltatime")]
 	public float rotationSpeed = 7;
+
+
+	[Header("Self-glow")]
+	[Tooltip("Radius of the self glow capsule")]
+	public float glowRadius = 2f;
+
+	[Tooltip("Height of the self glow capsule")]
+	public float glowHeight = 1f;
+
+	[Tooltip("Strength of the glow")]
+	public float glowStrength = 0.1f;
+
+	[Tooltip("Tint of the glow")]
+	public Color glowColor = new Color(1f, 0.8196079f, 0.6666667f, 1f);
 
 
 	[Header("Debug")]

@@ -7,31 +7,32 @@ public class GameManager : MonoBehaviour
 	[Required("A Game Start must be assigned to start the game. If there is no in the scene, you can find the prefab here: Content/Prefabs/LevelDesign")]
 	[SerializeField] private GameStart _gameStart;
 
-	[Header("External references")]
+	[Header("Scriptables references")]
 	[SerializeField] private RSO_PlayerDeath _rsoPlayerDeath;
 	[SerializeField] private RSO_GamePaused _rsoGamePaused;
 
 	private void Start()
 	{
 		Restart();
-        Cursor.lockState = CursorLockMode.Locked;
 		_rsoGamePaused.value = false;
     }
 
+	/// <summary>
+	/// 	Can be used to start or restart a run.
+	///		Reload the game level without resetting custom items placement.
+	/// </summary>
 	private void Restart()
 	{
-		// can be used to start or restart a run
-		// reload the game level without resetting custom items placement
-
 		_gameStart.SpawnCharacter();
 	}
 
+	/// <summary>
+	/// 	Reload the game level by resetting all data (custom items placement).
+	/// </summary>
 	private void Reset()
 	{
-		// reload the game level by resetting all data (custom items placement)
-
 		Restart();
-		// TODO - handle game data reset
+		// TODO - Handle game data reset
 	}
 
 	private void HandleDeath()
@@ -39,7 +40,6 @@ public class GameManager : MonoBehaviour
 		if (!_rsoPlayerDeath.value) return;
 
         Restart();
-		// TODO - fade in
 	}
 
 	private void OnEnable()

@@ -1,28 +1,23 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class CharacterGlow : MonoBehaviour
 {
-    [Header("External references")]
+    [Header("Scriptables references")]
     [SerializeField] private RSO_CharacterPosition _rsoCharacterPosition;
-    [SerializeField] private FormerCharacterConfig _characterConfig;
+    [SerializeField] private CharacterConfig _characterConfig;
 
     private void OnEnable()
     {
-        _rsoCharacterPosition.OnChanged += UpdateCharPositionShaderGlobalParameter;
-        _characterConfig.OnValueChanged += UpdateGlowGlobalParameters;
+		UpdateGlowGlobalParameters();
 
-        Shader.SetGlobalFloat("_GlowHeight", _characterConfig.glowHeight);
-        Shader.SetGlobalFloat("_GlowRadius", _characterConfig.glowRadius);
-        Shader.SetGlobalFloat("_GlowStrength", _characterConfig.glowStrength);
-        Shader.SetGlobalColor("_GlowColor", _characterConfig.glowColor);
-    }
+        _rsoCharacterPosition.OnChanged += UpdateCharPositionShaderGlobalParameter;
+        _characterConfig.OnHierarchyChanged += UpdateGlowGlobalParameters;
+	}
 
     private void OnDisable()
     {
         _rsoCharacterPosition.OnChanged -= UpdateCharPositionShaderGlobalParameter;
-        _characterConfig.OnValueChanged -= UpdateGlowGlobalParameters;
+        _characterConfig.OnHierarchyChanged -= UpdateGlowGlobalParameters;
     }
 
     private void UpdateCharPositionShaderGlobalParameter()

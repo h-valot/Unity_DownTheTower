@@ -18,8 +18,8 @@ public class BigCollider : MonoBehaviour
         else if (other.TryGetComponent<CharacterMotor>(out var _playerCheckRef))
         {
             Debug.Log("joueur");
-            if ((_playerCheckRef._craftInHand._craftType == CraftType.Torch && _playerCheckRef._craftInHand.StateInHand())
-                || (_playerCheckRef._craftInRobot._craftType == CraftType.Torch && _playerCheckRef._craftInRobot.StateInHand()))
+            if ((_playerCheckRef._craftInHand._craftType == CraftType.TORCH && _playerCheckRef._craftInHand.StateInHand())
+                || (_playerCheckRef._craftInRobot._craftType == CraftType.TORCH && _playerCheckRef._craftInRobot.StateInHand()))
             {
                 Debug.Log("detecte torchonplayer");
                 _guardianRef.MakePLayerRef(_playerCheckRef);

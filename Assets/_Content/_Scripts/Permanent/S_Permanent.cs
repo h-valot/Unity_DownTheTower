@@ -3,7 +3,7 @@ using UnityEngine;
 public class Permanent : MonoBehaviour
 {
 	[Header("Permanent settings")]
-	public CharacterMotor.CraftType _craftType;
+	public CraftType _craftType;
 
 	private Vector3 GROUND_RAY_OFFSET = new Vector3(0.0f, 0.25f, 0.0f);
 

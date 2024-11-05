@@ -35,7 +35,7 @@ public class CharacterInput : MonoBehaviour
 
 	private void Start()
 	{
-		// reset the sprint value
+		// Reset the sprint value
 		_run = false;
 		_rseRun.Call(false);
 	}
@@ -52,13 +52,13 @@ public class CharacterInput : MonoBehaviour
 
 	private void OnApplicationFocus(bool hasFocus)
 	{
-		// set cursor state
+		// Set cursor state
 		Cursor.lockState = hasFocus ? CursorLockMode.Locked : CursorLockMode.None;
 	}
 
 	private void UpdateControlScheme()
 	{
-		// check if the control scheme has changed every _CONTROL_SCHEME_CHECK_DELAY seconds
+		// Check if the control scheme has changed every _CONTROL_SCHEME_CHECK_DELAY seconds
 		_controlSchemeCheckTimer += Time.deltaTime;
 		if (_controlSchemeCheckTimer >= _CONTROL_SCHEME_CHECK_DELAY)
 		{
@@ -124,17 +124,17 @@ public class CharacterInput : MonoBehaviour
 
     public void OnCraftTorch(InputValue value)
     {
-        _rseCraft.Call(CharacterMotor.CraftType.Torch, value.isPressed);
+        _rseCraft.Call(CraftType.TORCH, value.isPressed);
     }
 
     public void OnCraftLadder(InputValue value)
     {
-        _rseCraft.Call(CharacterMotor.CraftType.Ladder, value.isPressed);
+        _rseCraft.Call(CraftType.LADDER, value.isPressed);
     }
 
     public void OnCraftRope(InputValue value)
     {
-        _rseCraft.Call(CharacterMotor.CraftType.Rope, value.isPressed);
+        _rseCraft.Call(CraftType.ROPE, value.isPressed);
 	}
 
 	public void OnHolding(InputValue input)

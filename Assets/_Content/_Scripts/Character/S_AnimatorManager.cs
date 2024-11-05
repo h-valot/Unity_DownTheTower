@@ -1,17 +1,12 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class S_AnimatorManager : MonoBehaviour
+public class AnimatorManager : MonoBehaviour
 {
-    
-    // ---- External References ----
-
+	[Header("External references")]
     [SerializeField] private Animator _animator;
     [SerializeField] private CharacterMotor _characterMotor;
 
-    // ---- Private variables ----
-
+    // ---- PRIVATE VARIABLES ----
     private int _moveSpeedHash = Animator.StringToHash("MoveSpeed");
     private int _isGroundedHash = Animator.StringToHash("IsGrounded");
     private int _isJumpingHash = Animator.StringToHash("IsJumping");

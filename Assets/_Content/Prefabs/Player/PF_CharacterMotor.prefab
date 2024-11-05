@@ -420,6 +420,7 @@ MonoBehaviour:
   _currentState: 0
   _planarSpeed: 0
   _gravitySpeed: 0
+  _isJumping: 0
   _isGrounded: 0
   _aiming: 0
   _crafting: 0
@@ -431,13 +432,7 @@ MonoBehaviour:
   _isHolding: 0
   _isAgainstWall: 0
   _canStartSwinging: 1
-  _ropeInputDirection: {x: 0, y: 0, z: 0}
-  _verticalForce: 0
-  _totalForces: 0
-  _angleCharacterVertical: 0
   _rope: {fileID: 0}
-  debugSphere1: {fileID: 0}
-  debugSphere2: {fileID: 0}
 --- !u!143 &8128893969073989014
 CharacterController:
   m_ObjectHideFlags: 0
@@ -478,7 +473,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _rsoCharacterPosition: {fileID: 11400000, guid: 7cfc39952cca0d6478396ad49ab9e0db,
     type: 2}
-  _characterConfig: {fileID: 11400000, guid: f1b21fa5f2a5d0942b63889e748851ad, type: 2}
+  _characterConfig: {fileID: 11400000, guid: 1940b106405212f469b44119418b1e43, type: 2}
 --- !u!1 &8035248599218380277
 GameObject:
   m_ObjectHideFlags: 0
