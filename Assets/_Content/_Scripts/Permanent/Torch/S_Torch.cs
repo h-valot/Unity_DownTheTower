@@ -14,6 +14,7 @@ public class Torch : Permanent
     [SerializeField] private TorchPointLight _torchPointLight;
     [SerializeField] private LineRenderer _aimPreview;
     [SerializeField] private Animator _brokenLightAnim;
+    [SerializeField] private Transform _torchTop;
 
     [Header("Scriptable References")]
 	[SerializeField] private TorchConfig _torchConfig;
@@ -25,6 +26,7 @@ public class Torch : Permanent
     [ReadOnly] public bool _isActive = false;
 
     // ----- PRIVATE VARIABLES -----
+    private bool _islit = true;
     private bool _isFalling = false;
     private bool _changedColor = false;
     private bool _isBroken = false;
@@ -36,11 +38,15 @@ public class Torch : Permanent
 
     private void Start()
     {
+        _islit = true;
         _light.color = _torchConfig.lightColor;
+        _meshRenderer.material.SetColor("_lightColor", _torchConfig.lightColor);
         _light.intensity = _torchConfig.lightIntensity;
         _rigidbody.constraints = RigidbodyConstraints.FreezeAll;
         _isActive = true;
         _aimPreview.useWorldSpace = true;
+        _meshRenderer.material.SetFloat("_lightPercent", 1f);
+        _torchTop.transform.localPosition = new Vector3(_torchTop.transform.localPosition.x, _torchConfig.deployDistance, _torchTop.transform.localPosition.z);
     }
 
     private void Update()
@@ -71,26 +77,31 @@ public class Torch : Permanent
     #region light
 
     /// <summary> Activate/Deactivate light on the torch </summary>
-    public override void ToggleLight()
+    public override void ToggleInHand()
     {
         if (!_isActive) return;
 
-		if (_light.enabled) 
+		if (_islit) 
 		{
-			StartCoroutine(SetMaterial(_torchConfig.extinguishDuration, _torchConfig.unlitMaterial));
-		}
+            _islit = false;
+            DOTween.Kill(gameObject.GetInstanceID() + "lightPercent");
+            DOTween.Kill(gameObject.GetInstanceID() + "lightIntensity");
+            DOTween.Kill(gameObject.GetInstanceID() + "lightDeploy");
+            _meshRenderer.material.DOFloat(0f, "_lightPercent", _torchConfig.extinguishDuration).SetEase(Ease.Linear).SetId(gameObject.GetInstanceID()+"lightPercent");
+            _light.DOIntensity(0f, _torchConfig.extinguishDuration).SetEase(Ease.Linear).SetId(gameObject.GetInstanceID()+"lightIntensity");
+            _torchTop.DOLocalMoveY(0f, _torchConfig.extinguishDuration).SetEase(Ease.Linear).SetId(gameObject.GetInstanceID() + "lightDeploy").OnComplete(() => { _light.enabled = false; });
+        }
 		else
 		{
-			StartCoroutine(SetMaterial(_torchConfig.lightStartupDuration, _torchConfig.litMaterial));
-		}
-    }
-
-    /// <summary> Change the material from lit to unlit </summary>
-    private IEnumerator SetMaterial(float duration, Material material)
-    {
-        yield return new WaitForSeconds(duration);
-        _light.enabled = !_light.enabled;
-        _meshRenderer.material = material;
+            _islit = true;
+            _light.enabled = true;
+            DOTween.Kill(gameObject.GetInstanceID() + "lightPercent");
+            DOTween.Kill(gameObject.GetInstanceID() + "lightIntensity");
+            DOTween.Kill(gameObject.GetInstanceID() + "lightDeploy");
+            _meshRenderer.material.DOFloat(1f, "_lightPercent", _torchConfig.lightStartupDuration).SetEase(Ease.Linear).SetId(gameObject.GetInstanceID() + "lightPercent");
+            _light.DOIntensity(_torchConfig.lightIntensity, _torchConfig.lightStartupDuration).SetEase(Ease.Linear).SetId(gameObject.GetInstanceID() + "lightIntensity");
+            _torchTop.DOLocalMoveY(_torchConfig.deployDistance, _torchConfig.lightStartupDuration).SetEase(Ease.Linear).SetId(gameObject.GetInstanceID() + "lightDeploy");
+        }
     }
 
     #endregion
@@ -215,6 +226,7 @@ public class Torch : Permanent
         if (_throwStartPoint - transform.position.y > _characterConfig.lethalHeight)
         {
             _light.DOColor(_torchConfig.deathColor, 0.5f);
+            _meshRenderer.material.DOColor(_torchConfig.deathColor, 0.5f);
             _changedColor = true;
         }
     }
@@ -231,6 +243,7 @@ public class Torch : Permanent
             if (_torchConfig.activateBreakAnim)
             {
                 _brokenLightAnim.SetBool("isBroken", true);
+                _meshRenderer.material.SetFloat("_lightPercent", 0f);
                 Destroy(gameObject, 3);
             }
             else Destroy(gameObject);

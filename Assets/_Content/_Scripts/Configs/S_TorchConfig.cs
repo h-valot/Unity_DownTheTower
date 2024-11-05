@@ -22,10 +22,10 @@ public class TorchConfig : ScriptableObject
     [Tooltip("Time to extinguish the torch")]
     public float extinguishDuration;
 
-    public Material litMaterial;
-    public Material unlitMaterial;
+    [Tooltip("Deploy distance of the top part when lit")]
+    public float deployDistance = 0.14f;
 
-	public Color lightColor = new Color(255, 170, 85, 255);
+    public Color lightColor = new Color(255, 170, 85, 255);
 	public Color deathColor = new Color(255, 52, 52, 255);
 
 	[Header("Throw")]
