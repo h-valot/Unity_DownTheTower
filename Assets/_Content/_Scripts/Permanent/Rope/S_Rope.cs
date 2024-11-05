@@ -220,8 +220,8 @@ public class Rope : Permanent
 	public float GetLastFoldHarnessDistance()
 	{
 		// Assertions
-		if (!isPlaced) return 0;
-		if (_characterHarness == null) return 0;
+		if (!isPlaced) return -1;
+		if (_characterHarness == null) return -1;
 
 		// Note that we do not connect the last fold to the harness
 		// but the character's current position. This avoids re-centering

@@ -587,8 +587,8 @@ public class CharacterMotor : MonoBehaviour
 	/// </summary>
 	private void ApplyFallHeight()
 	{
-        _fallHeight = Math.Abs(transform.position.y - _positionStartFall.y);
-        if (_fallHeight >= _characterConfig.lethalHeight)
+        _fallHeight = Math.Abs(_rsoCharacterPosition.value.y - _positionStartFall.y);
+		if (_fallHeight >= _characterConfig.lethalHeight)
         {
             HandleDeath();
         }
@@ -891,11 +891,11 @@ public class CharacterMotor : MonoBehaviour
         Vector3 _edgeSlopeSlideLeft = Vector3.Cross(_edgeHit.normal, Vector3.up).normalized;
         Vector3 _edgeSlopeSlideDown = Vector3.Cross(_edgeHit.normal, _edgeSlopeSlideLeft).normalized;
 
-        //UnityEngine.Debug.DrawRay(transform.position, _edgeHit.normal, Color.blue);
+		// UnityEngine.Debug.DrawRay(_rsoCharacterPosition.value, _edgeHit.normal, Color.blue);
 
-        _movement += -_edgeSlopeSlideDown.normalized * _gravitySpeed;
+		_movement += -_edgeSlopeSlideDown.normalized * _gravitySpeed;
 
-        UnityEngine.Debug.DrawRay(transform.position, - _edgeSlopeSlideDown * _gravitySpeed, Color.cyan);
+        UnityEngine.Debug.DrawRay(_rsoCharacterPosition.value, - _edgeSlopeSlideDown * _gravitySpeed, Color.cyan);
     }
 
 	/// <summary>
@@ -1064,10 +1064,13 @@ public class CharacterMotor : MonoBehaviour
 				if (_isHolding)
 				{
 					_rope.UpdateHoldLength();
+					
+					// Handle error code
+					if (_rope.holdLength == -1) DesequipRope();
 				}
 				else
 				{
-					// reset the gravity velocity
+					// Reset the gravity velocity
 					_positionStartFall = _rsoCharacterPosition.value;
 					_gravitySpeed = 0f;
 				}
@@ -1076,13 +1079,16 @@ public class CharacterMotor : MonoBehaviour
 			case RopeHolding.HOLD_TO_LET_GO:
 				if (_isHolding)
 				{
-                    // reset the gravity velocity
+                    // Reset the gravity velocity
 					_positionStartFall = _rsoCharacterPosition.value;
                     _gravitySpeed = 0f;
 				}
 				else
 				{
 					_rope.UpdateHoldLength();
+
+					// Handle error code
+					if (_rope.holdLength == -1) DesequipRope();
 				}
 				break;
 		}
@@ -1200,7 +1206,7 @@ public class CharacterMotor : MonoBehaviour
 	{
 		_rseCraft.action -= ToggleCraft;
 
-        _positionStartFall = transform.position;
+        _positionStartFall = _rsoCharacterPosition.value;
 
         if (_isGroundedLastFrame) { CheckWalkRun(); }
         if (_isGroundedLastFrame) { ApplyInputs(); };
@@ -1568,8 +1574,8 @@ public class CharacterMotor : MonoBehaviour
 		if (_isAgainstWall)
 		{
 			// Simple re-direction
-			Vector3 hitPoint = new Vector3(averagedPosition.x, transform.position.y, averagedPosition.z);
-			Vector3 touchedDirection = hitPoint - transform.position;
+			Vector3 hitPoint = new Vector3(averagedPosition.x, _rsoCharacterPosition.value.y, averagedPosition.z);
+			Vector3 touchedDirection = hitPoint - _rsoCharacterPosition.value;
 			_characterDirection.forward = touchedDirection.normalized;
 		}
 
@@ -1627,9 +1633,9 @@ public class CharacterMotor : MonoBehaviour
 		if (_isAgainstWall) return;
 
 		// Assert: center-character distance is greater than the threshold 
-		if (Mathf.Abs(_rope.holdLength - (_rope.folds[^1] - transform.position).magnitude) > _characterConfig.facingCenterThreshold) return;
+		if (Mathf.Abs(_rope.holdLength - (_rope.folds[^1] - _rsoCharacterPosition.value).magnitude) > _characterConfig.facingCenterThreshold) return;
 
-		Vector3 towardsCenter = new Vector3(_rope.folds[^1].x, transform.position.y, _rope.folds[^1].z) - transform.position;
+		Vector3 towardsCenter = new Vector3(_rope.folds[^1].x, _rsoCharacterPosition.value.y, _rope.folds[^1].z) - _rsoCharacterPosition.value;
 		_characterDirection.forward = towardsCenter.normalized;
 	}
 	
@@ -1863,7 +1869,7 @@ public class CharacterMotor : MonoBehaviour
 		}
 
 		// Get the distance between the current character's position and the position of the last fold
-		Vector3 towardCharacter = transform.position - _rope.folds[^1];
+		Vector3 towardCharacter = _rsoCharacterPosition.value - _rope.folds[^1];
 
 		// Re-snap the character's position within the spherical constraint
 		if (towardCharacter.magnitude > _rope.holdLength)
