@@ -84,7 +84,7 @@ public class CharacterMotor : MonoBehaviour
 
     // - jump -
     private bool _wantJump;
-	private bool _isJumping;
+	public bool _isJumping;
 	private RaycastHit[] _edgeHits;
 	private RaycastHit _edgeHit;
 
@@ -424,10 +424,22 @@ public class CharacterMotor : MonoBehaviour
         {
             ApplyFallHeight();
             SwitchState(AnimationState.LOCOMOTION);
-        }
+		}
 
-        // Reset Jump if it is not possible to jump
-        _wantJump = false;
+		// - SUB-ROPE - defines if the rope suspension is partial or complete
+		if (_currentState == AnimationState.ROPE)
+		{
+			// Update sub-rope state
+			_ropeState = CheckWall()
+				? RopeState.PARTIAL_SUSPENSION
+				: RopeState.COMPLETE_SUSPENSION;
+
+			// Simulate rope sub-jump state by directly calling the rope jump function
+			if (_wantJump) JumpOffWall();
+		}
+
+		// Reset Jump if it is not possible to jump
+		_wantJump = false;
     }
 
     #endregion
@@ -891,68 +903,54 @@ public class CharacterMotor : MonoBehaviour
     /// 	Add character behavior to player inputs based on animation state
     /// </summary>
     private void SubscribeInputs()
-    {
-        switch (_currentState)
+	{
+		_rseRun.action += Run;
+		_rseCancelAction.action += CancelAction;
+		_rseKillCharacter.action += HandleDeath;
+
+		switch (_currentState)
         {
             case AnimationState.LOCOMOTION:
                 _rseMove.action += Move;
-				_rseRun.action += Run;
                 _rseJump.action += Jump;
                 _rseThrow.action += ToggleAim;
                 _rseCraft.action += ToggleCraft;
                 _rseToggleInHand.action += ToggleInHand;
-                _rseCancelAction.action += CancelAction;
                 _rseInteract.action += Interact;
-                _rseKillCharacter.action += HandleDeath;
 				ToggleCraftInput(_hasBackpack);
                 break;
             case AnimationState.JUMP:
                 _rseMove.action += Move;
-                _rseRun.action += Run;
                 _rseThrow.action += ToggleAim;
                 _rseToggleInHand.action += ToggleInHand;
-                _rseCancelAction.action += CancelAction;
                 _rseInteract.action += Interact;
-                _rseKillCharacter.action += HandleDeath;
                 break;
             case AnimationState.FALL:
                 _rseMove.action += Move;
-                _rseRun.action += Run;
                 _rseJump.action += Jump;
                 _rseThrow.action += ToggleAim;
                 _rseToggleInHand.action += ToggleInHand;
-                _rseCancelAction.action += CancelAction;
                 _rseInteract.action += Interact;
-                _rseKillCharacter.action += HandleDeath;
                 break;
             case AnimationState.CRAFT:
-                _rseRun.action += Run;
                 _rseCraft.action += ToggleCraft;
-                _rseCancelAction.action += CancelAction;
-                _rseKillCharacter.action += HandleDeath;
                 break;
             case AnimationState.ROPE:
                 _rseMove.action += Move;
-                _rseRun.action += Run;
                 _rseJump.action += Jump;
                 _rseThrow.action += ToggleAim;
                 _rseCraft.action += ToggleCraft;
                 _rseToggleInHand.action += ToggleInHand;
-                _rseCancelAction.action += CancelAction;
                 _rseInteract.action += Interact;
-                _rseKillCharacter.action += HandleDeath;
 				_rseHolding.action += Holding;
                 break;
             case AnimationState.LADDER:
                 _rseMove.action += Move;
-                _rseRun.action += Run;
                 _rseJump.action += Jump;
                 _rseThrow.action += ToggleAim;
                 _rseCraft.action += ToggleCraft;
                 _rseToggleInHand.action += ToggleInHand;
-                _rseCancelAction.action += CancelAction;
-                _rseInteract.action += Interact;
-                _rseKillCharacter.action += HandleDeath;
+				_rseInteract.action += Interact;
                 break;
         }
     }
@@ -1012,7 +1010,7 @@ public class CharacterMotor : MonoBehaviour
 	}
 
 	/// <summary>
-	/// 	Set _isJumping to true.
+	/// 	Set `_wantJump` to true.
 	/// 	Subscribed to RSE_Jump only in locomotion State.
 	/// </summary>
 	private void Jump()
@@ -1399,10 +1397,6 @@ public class CharacterMotor : MonoBehaviour
 	public bool _isHolding;
 	public bool _isAgainstWall;
 	public bool _canStartSwinging = true;
-	public Vector3 _ropeInputDirection;
-	public float _verticalForce;
-	public float _totalForces;
-	public float _angleCharacterVertical;
 	public Rope _rope;
 
 	// ---- PRIVATE VARIABLES ----
@@ -1412,6 +1406,7 @@ public class CharacterMotor : MonoBehaviour
 	private Vector3 _suspensionVelocity;
 
 	// Inputs
+	private Vector3 _ropeInputDirection;
 	private bool _inputsPressed;
 	private bool _inputsTowardsVertical;
 
@@ -1440,12 +1435,10 @@ public class CharacterMotor : MonoBehaviour
 
 		// Checks
 		CheckGround();
-		CheckWall();
 		DetectEdges();
 		ApplyEdgesSpeed();
 
 		// State machine update rope state
-		HandleRopeState();
 		switch (_ropeState)
 		{
 			case RopeState.PARTIAL_SUSPENSION:
@@ -1480,20 +1473,10 @@ public class CharacterMotor : MonoBehaviour
 	#region rope-state-related functions
 
 	/// <summary>
-	/// 	update the current rope state to match the last checks.
-	/// </summary>
-	private void HandleRopeState()
-	{
-		_ropeState = _isAgainstWall 
-			? RopeState.PARTIAL_SUSPENSION 
-			: RopeState.COMPLETE_SUSPENSION;
-	}
-
-	/// <summary>
-	/// 	handle movement related to the front wall. 
-	/// 	left / right, jump, go down the rope movement.
-	/// 	jumping and falling off the wall on an edge, change from partial to complete suspension state.
-	/// 	touching the ground, change from partial to grounded state.
+	/// 	Handle movement related to the front wall. 
+	/// 	Left / right, jump, go down the rope movement.
+	/// 	Jumping and falling off the wall on an edge, change from partial to complete suspension state.
+	/// 	Touching the ground, change from partial to grounded state.
 	/// </summary>
 	private void UpdateRopePartialSuspensionState()
 	{
@@ -1502,10 +1485,10 @@ public class CharacterMotor : MonoBehaviour
 	}
 
 	/// <summary>
-	/// 	handle movement in the void suspended to the rope. 
-	/// 	left / right, forward / backward, go down the rope movement.
-	/// 	gain support against a wall, change from complete to partial suspension state.
-	/// 	touching the ground, change from complete to grounded state.
+	/// 	Handle movement in the void suspended to the rope. 
+	/// 	Left / right, forward / backward, go down the rope movement.
+	/// 	Gain support against a wall, change from complete to partial suspension state.
+	/// 	Touching the ground, change from complete to grounded state.
 	/// </summary>
 	private void UpdateRopeCompleteSuspensionState()
 	{
@@ -1521,7 +1504,7 @@ public class CharacterMotor : MonoBehaviour
 	/// <summary>
 	/// 	Check if there is a collider in front of the character using a raycast.
 	/// </summary>
-	private void CheckWall()
+	private bool CheckWall()
 	{
 		// Lisibility varaibles
 		Vector3 origin = _rsoCharacterPosition.value + new Vector3(0, 0.5f, 0);
@@ -1569,6 +1552,36 @@ public class CharacterMotor : MonoBehaviour
 			Vector3 touchedDirection = hitPoint - transform.position;
 			_characterDirection.forward = touchedDirection.normalized;
 		}
+
+		return _isAgainstWall;
+	}
+
+	/// <summary>
+	/// 	Apply a force to `_movement` backward the character.
+	/// 	Called from the switch state fonction.
+	/// </summary>
+	private void JumpOffWall()
+	{
+		// Assert: the character can only jump off the wall in the partial suspension state
+		if (_ropeState != RopeState.PARTIAL_SUSPENSION) return;
+
+		// Reset velocities
+		_verticalVelocity = Vector3.zero;
+		_pendulumVelocity = Vector3.zero;
+		_suspensionVelocity = Vector3.zero;
+
+		// Get jump direction
+		Vector3 direction = Vector3Extention.GetPositionOnCercle(
+			angle: _characterConfig.ropeOffsetAngle,
+			axis: _characterDirection.right,
+			direction: -_characterDirection.forward,
+			origin: _rope.folds[^1],
+			radius: _rope.holdLength,
+			starting: _rsoCharacterPosition.value
+		);
+
+		// Apply force
+		_movement += direction * _characterConfig.jumpOffWallForce;
 	}
 
 	/// <summary>
@@ -1657,9 +1670,9 @@ public class CharacterMotor : MonoBehaviour
 		// [x] Fix unwrapping rope malfunction
 		// [ ] Jump off the rope on motion
 		// [x] Detect partial suspension
-		// [ ] Jump off the wall
+		// [ ] In partial suspension, make the character unable to move off the wall except by jumping off the wall
 		// [ ] Climb the rope
-		// [ ] Lerp the vertical movement speed acceleration 
+		// [x] Lerp the vertical movement speed acceleration 
 		// [ ] In complete suspension, make the character pivot with the rope inclination
 
 		// Apply velocities

@@ -125,6 +125,9 @@ public class CharacterConfig : ScriptableObject
 	[Tooltip("")]
 	public float drag;
 
+	[Tooltip("")]
+	public float jumpOffWallForce;
+
 
 	[Header("Camera")]
 	[Tooltip("Clamp the camera rotation to this angle when looking down")]
