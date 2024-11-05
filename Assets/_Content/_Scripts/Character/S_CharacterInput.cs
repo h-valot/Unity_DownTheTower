@@ -1,14 +1,14 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
-using NaughtyAttributes;
 
 public class CharacterInput : MonoBehaviour
 {
 	[Header("Internal references")]
 	[SerializeField] private PlayerInput _playerInput;
 
-	[Header("External references")]
+	[Header("Scriptable references")]
 	[SerializeField] private RSO_ControlScheme _rsoControlScheme;
+	[SerializeField] private RSO_GamePaused _rsoGamePaused;
 	[SerializeField] private RSE_Move _rseMove;
 	[SerializeField] private RSE_Look _rseLook;
 	[SerializeField] private RSE_Jump _rseJump;
@@ -22,21 +22,21 @@ public class CharacterInput : MonoBehaviour
     [SerializeField] private RSE_Pause _rsePause;
     [SerializeField] private RSE_HideUI _rseHideUI;
     [SerializeField] private RSE_Recycle _rseRecycle;
-    [SerializeField] private RSO_GamePaused _rsoGamePaused;
+	[SerializeField] private RSE_ToggleCursor _rseToggleCursor;
 
-	[Header("Debugging")]
-	[ReadOnly] public Vector2 move;
-	[ReadOnly] public Vector2 look;
-	[ReadOnly] public bool run;
-
+	// ---- PRIVATE VARIABLES ----
+	private Vector2 _move;
+	private Vector2 _look;
+	private bool _run;
 	private float _controlSchemeCheckTimer;
 
+	// ---- CONST ----
     private const float _CONTROL_SCHEME_CHECK_DELAY = 1f;
 
 	private void Start()
 	{
 		// reset the sprint value
-		run = false;
+		_run = false;
 		_rseRun.Call(false);
 	}
 
@@ -44,9 +44,9 @@ public class CharacterInput : MonoBehaviour
 	{
 		UpdateControlScheme();
 
-		if (look != Vector2.zero) 
+		if (_look != Vector2.zero) 
 		{
-			_rseLook.Call(look);
+			_rseLook.Call(_look);
 		}
 	}
 
@@ -67,18 +67,28 @@ public class CharacterInput : MonoBehaviour
 		}
 	}
 
+	private void OnEnable()
+	{
+		_rseToggleCursor.action += OnEnableCursor;
+	}
+
+	private void OnDisable()
+	{
+		_rseToggleCursor.action -= OnEnableCursor;
+	}
+
 	public void OnMove(InputValue value)
 	{
-		move = value.Get<Vector2>();
-		_rseMove.Call(move);
+		_move = value.Get<Vector2>();
+		_rseMove.Call(_move);
 	}
 
 	public void OnLook(InputValue value)
 	{
-		if (_rsoGamePaused.value) look = Vector2.zero;
-        else look = value.Get<Vector2>();
+		if (_rsoGamePaused.value) _look = Vector2.zero;
+        else _look = value.Get<Vector2>();
 
-        _rseLook.Call(look);
+        _rseLook.Call(_look);
     }
 
 	public void OnJump(InputValue value)
@@ -88,8 +98,8 @@ public class CharacterInput : MonoBehaviour
 
 	public void OnRun(InputValue value)
 	{
-		run = value.isPressed;
-		_rseRun.Call(run);
+		_run = value.isPressed;
+		_rseRun.Call(_run);
 	}
 
 	public void OnThrow(InputValue value)
@@ -136,4 +146,10 @@ public class CharacterInput : MonoBehaviour
     {
         _rseRecycle.Call();
     }
+
+	public void OnEnableCursor(bool value)
+	{
+		Cursor.visible = value;
+		Cursor.lockState = value ? CursorLockMode.None : CursorLockMode.Locked;
+	}
 }

@@ -8,6 +8,7 @@ public class SceneLoader : MonoBehaviour
 
 	[Header("External references")]
 	[SerializeField] private SceneButton _pfSceneButton;
+	[SerializeField] private RSE_ToggleCursor _rseToggleCursor;
 
 	private bool _isPressed;
 	private bool _isEnabled;
@@ -96,6 +97,7 @@ public class SceneLoader : MonoBehaviour
 
 	private void Hide()
 	{
+		_rseToggleCursor.Call(false);
 		_graphicsParent.SetActive(false);
 		_isEnabled = false;
 		RemoveButtons();
@@ -103,6 +105,7 @@ public class SceneLoader : MonoBehaviour
 
 	private void Show()
 	{
+		_rseToggleCursor.Call(true);
 		_graphicsParent.SetActive(true);
 		_isEnabled = true;
 		CreateButtons();

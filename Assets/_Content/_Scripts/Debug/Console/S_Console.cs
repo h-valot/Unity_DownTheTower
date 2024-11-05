@@ -15,14 +15,15 @@ public class Console : MonoBehaviour
 
 	[Header("External references")]
 	[SerializeField] private GameConfig _gameConfig;
-	
-	private StringBuilder logBuilder;
+	[SerializeField] private RSE_ToggleCursor _rseToggleCursor;
+
+	private StringBuilder _logBuilder;
 	private bool _isPressed;
 	private bool _isEnabled;
 
 	private void Start()
 	{
-		logBuilder = new StringBuilder();
+		_logBuilder = new StringBuilder();
 		Hide();
 	}
 
@@ -32,8 +33,8 @@ public class Console : MonoBehaviour
 		if (!_gameConfig.enableConsoleLogging) return;
 	
 		var sentence = new Sentence(input, _colorCodeBase);
-		logBuilder.Append($"\n[{System.DateTime.UtcNow.ToString("HH:mm:ss")}] {sentence.GetStylizedSentence()}");
-		_output.text = logBuilder.ToString();
+		_logBuilder.Append($"\n[{System.DateTime.UtcNow.ToString("HH:mm:ss")}] {sentence.GetStylizedSentence()}");
+		_output.text = _logBuilder.ToString();
 	}
 
 	public void LogWarning(string input)
@@ -42,8 +43,8 @@ public class Console : MonoBehaviour
 		if (!_gameConfig.enableConsoleLogging) return;
 
 		var sentence = new Sentence(input, _colorCodeWarning);
-		logBuilder.Append($"\n[{System.DateTime.UtcNow.ToString("HH:mm:ss")}] {sentence.GetStylizedSentence()}");
-		_output.text = logBuilder.ToString();
+		_logBuilder.Append($"\n[{System.DateTime.UtcNow.ToString("HH:mm:ss")}] {sentence.GetStylizedSentence()}");
+		_output.text = _logBuilder.ToString();
 	}
 
 	public void LogError(string input)
@@ -52,16 +53,13 @@ public class Console : MonoBehaviour
 		if (!_gameConfig.enableConsoleLogging) return;
 
 		var sentence = new Sentence(input, _colorCodeError);
-		logBuilder.Append($"\n[{System.DateTime.UtcNow.ToString("HH:mm:ss")}] {sentence.GetStylizedSentence()}");
-		_output.text = logBuilder.ToString();
+		_logBuilder.Append($"\n[{System.DateTime.UtcNow.ToString("HH:mm:ss")}] {sentence.GetStylizedSentence()}");
+		_output.text = _logBuilder.ToString();
 	}
 
 	private void Update()
 	{
 		HandleShortcut();
-
-		// debug
-		// if (Input.GetKey(KeyCode.Space)) Debug.Log($"GAME_START: debug");
 	}
 
 	private void HandleShortcut()
@@ -97,12 +95,14 @@ public class Console : MonoBehaviour
 
 	private void Hide()
 	{
+		_rseToggleCursor.Call(false);
 		_graphicsParent.SetActive(false);
 		_isEnabled = false;
 	}
 
 	private void Show()
 	{
+		_rseToggleCursor.Call(true);
 		_graphicsParent.SetActive(true);
 		_isEnabled = true;
 	}
