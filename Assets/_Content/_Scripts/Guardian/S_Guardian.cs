@@ -128,6 +128,7 @@ public class Guardian : MonoBehaviour
         SetDestination();
         _aggro = true;
         ChangeColor(1f);
+        _agent.speed = 7f;
     }
     private void SetDestination()
     {
@@ -163,6 +164,7 @@ public class Guardian : MonoBehaviour
     private void Idle ()
 
     {
+        _agent.speed = 5f;
         Debug.Log("Idle");
         _aggro = false;
         _pathPatrol.GoingBackToPatrol();
