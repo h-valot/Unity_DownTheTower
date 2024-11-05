@@ -391,7 +391,10 @@ MonoBehaviour:
   _robotHandSocket: {fileID: 6307973222714901695}
   _harness: {fileID: 1235578971946886535}
   _controller: {fileID: 8128893969073989014}
+  _backpackAnchor: {fileID: 8704984283212860373}
   _thirdPersonCamera: {fileID: 0}
+  _PF_backpack: {fileID: 3288633840794069537, guid: 63116bdf185988d46a364d3ad2635d88,
+    type: 3}
   _characterConfig: {fileID: 11400000, guid: 1940b106405212f469b44119418b1e43, type: 2}
   _ladderConfig: {fileID: 11400000, guid: 6502514940db9bb4e8194b9e57b509d9, type: 2}
   _ropeConfig: {fileID: 11400000, guid: ebd551676fad39148a6ccab29ef4ebce, type: 2}
@@ -419,10 +422,16 @@ MonoBehaviour:
   _rsoGamePaused: {fileID: 11400000, guid: faef31959fcedf747aaeb875374bdc6b, type: 2}
   _currentState: 0
   _planarSpeed: 0
+  _targetPlanarSpeed: 0
+  _gravitySpeed: 0
   _isGrounded: 0
+  _hasBackpack: 0
+  _backpack: {fileID: 0}
   ropeLength: 0
   _craftInHand: {fileID: 0}
   _craftInRobot: {fileID: 0}
+  _aiming: 0
+  _crafting: 0
   _ropeState: 0
   _isHolding: 0
   _isAgainstWall: 0
@@ -498,6 +507,37 @@ Transform:
   m_Children: []
   m_Father: {fileID: 5678346985046758300}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &8704984283212860373
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8949423883299147565}
+  m_Layer: 0
+  m_Name: BackpackAnchor
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8949423883299147565
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8704984283212860373}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 1, z: -0.592}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1227528473670976241}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &8894493046973284928
 GameObject:
   m_ObjectHideFlags: 0
@@ -564,5 +604,6 @@ Transform:
   - {fileID: 49414001897713379}
   - {fileID: 6307973222714901695}
   - {fileID: 1235578971946886535}
+  - {fileID: 8949423883299147565}
   m_Father: {fileID: 5678346985046758300}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

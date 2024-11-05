@@ -25,6 +25,7 @@ public class Backpack : Interactible
         _startPosition = transform.position;
         _startRotation = transform.eulerAngles;
         _startScale = transform.localScale;
+        _mesh.material.SetFloat("_craftingPercent", 1f);
     }
 
     private void OnEnable()
@@ -64,14 +65,20 @@ public class Backpack : Interactible
         }
     }
 
+    public void ForceSetupBackpack(CharacterMotor _tmpCharacter)
+    {
+        _character = _tmpCharacter;
+        InteractionTrigger();
+    }
+
     public void StartCrafting(float _craftTime)
     {
-        _mesh.material.DOFloat(1f, "_craftingPercent", _craftTime).SetEase(Ease.Linear).SetId(gameObject.GetInstanceID() +"craftingPercent");
+        _mesh.material.DOFloat(0f, "_craftingPercent", _craftTime).SetEase(Ease.Linear).SetId(gameObject.GetInstanceID() +"craftingPercent");
     }
 
     public void EndCrafting()
     {
         DOTween.Kill(gameObject.GetInstanceID() + "craftingPercent");
-        _mesh.material.SetFloat("_craftingPercent", 0f);
+        _mesh.material.SetFloat("_craftingPercent", 1f);
     }
 }

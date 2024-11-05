@@ -145,7 +145,7 @@ public class CharacterMotor : MonoBehaviour
             {
                 _backpack = Instantiate(_PF_backpack, new Vector3(0, 0, 0), Quaternion.identity).GetComponent<Backpack>(); 
             }
-            _backpack.InteractionTrigger();
+            _backpack.ForceSetupBackpack(this);
         }
     }
 
@@ -434,7 +434,11 @@ public class CharacterMotor : MonoBehaviour
 		_backpack = _newBackpack;
         _hasBackpack = true;
         ToggleCraftInput(_hasBackpack);
-		_backpack.transform.SetParent(_backpackAnchor.transform, true);
+		_backpack.transform.SetParent(_backpackAnchor.transform, false);
+		_backpack.transform.localPosition = Vector3.zero;
+		_backpack.transform.localRotation = Quaternion.identity;
+		_backpack.transform.localScale = Vector3.one;
+		RemoveFromInteractList(_backpack);
     }
 
 	#endregion
@@ -1356,7 +1360,9 @@ public class CharacterMotor : MonoBehaviour
 				break;
 		}
 
-		_craftInHand.transform.position = _handSocket.transform.position;
+        _backpack.EndCrafting();
+
+        _craftInHand.transform.position = _handSocket.transform.position;
 
 		_craftCoroutine = null;
     }
