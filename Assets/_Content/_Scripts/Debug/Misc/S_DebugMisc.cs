@@ -1,13 +1,11 @@
-using System.Collections;
-using System.Collections.Generic;
-using System.Text;
 using TMPro;
 using UnityEngine;
 
-public class S_DebugMisc : MonoBehaviour
+public class DebugMisc : MonoBehaviour
 {
     [Header("External Variables")]
     [SerializeField] private TorchConfig _torchConfig;
+	[SerializeField] private RSE_ToggleCursor _rseToggleCursor;
 
     [Header("Internal Variables")]
     [SerializeField] private GameObject _graphicsParent;
@@ -21,15 +19,11 @@ public class S_DebugMisc : MonoBehaviour
     {
         Hide();
         UpdateTorchText();
-
     }
 
     private void Update()
     {
         HandleShortcut();
-
-        // debug
-        // if (Input.GetKey(KeyCode.Space)) Debug.Log($"GAME_START: debug");
     }
 
     private void HandleShortcut()
@@ -55,27 +49,25 @@ public class S_DebugMisc : MonoBehaviour
         {
             Hide();
             Time.timeScale = 1f;
-            Cursor.visible = false;
-            Cursor.lockState = CursorLockMode.Locked;
         }
         else
         {
             Show();
             Time.timeScale = 0.001f;
-            Cursor.visible = true;
-            Cursor.lockState = CursorLockMode.None;
         }
     }
 
     private void Hide()
-    {
-        _graphicsParent.SetActive(false);
+	{
+		_rseToggleCursor.Call(false);
+		_graphicsParent.SetActive(false);
         _isEnabled = false;
     }
 
     private void Show()
-    {
-        _graphicsParent.SetActive(true);
+	{
+		_rseToggleCursor.Call(true);
+		_graphicsParent.SetActive(true);
         _isEnabled = true;
     }
 
@@ -87,7 +79,6 @@ public class S_DebugMisc : MonoBehaviour
 
     private void UpdateTorchText()
     {
-        if (_torchConfig.activateBreakAnim) _torchButtonText.SetText("Torch Break Anim: ON");
-        else _torchButtonText.SetText("Torch Break Anim: OFF");
-    }
+		_torchButtonText.text = _torchConfig.activateBreakAnim ? "Torch Break Anim: ON" : "Torch Break Anim: OFF";
+	}
 }

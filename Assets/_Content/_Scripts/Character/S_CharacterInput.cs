@@ -1,14 +1,14 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
-using NaughtyAttributes;
 
 public class CharacterInput : MonoBehaviour
 {
 	[Header("Internal references")]
 	[SerializeField] private PlayerInput _playerInput;
 
-	[Header("External references")]
+	[Header("Scriptable references")]
 	[SerializeField] private RSO_ControlScheme _rsoControlScheme;
+	[SerializeField] private RSO_GamePaused _rsoGamePaused;
 	[SerializeField] private RSE_Move _rseMove;
 	[SerializeField] private RSE_Look _rseLook;
 	[SerializeField] private RSE_Jump _rseJump;
@@ -22,21 +22,21 @@ public class CharacterInput : MonoBehaviour
     [SerializeField] private RSE_Pause _rsePause;
     [SerializeField] private RSE_HideUI _rseHideUI;
     [SerializeField] private RSE_Recycle _rseRecycle;
-    [SerializeField] private RSO_GamePaused _rsoGamePaused;
+	[SerializeField] private RSE_ToggleCursor _rseToggleCursor;
 
-	[Header("Debugging")]
-	[ReadOnly] public Vector2 _move;
-	[ReadOnly] public Vector2 _look;
-	[ReadOnly] public bool _run;
-	[ReadOnly] public bool _throw;
-
+	[Header("Debug")]
+	public Vector2 _move;
+	public Vector2 _look;
+	public bool _run;
+	public bool _throw;
 	private float _controlSchemeCheckTimer;
 
+	// ---- CONST ----
     private const float _CONTROL_SCHEME_CHECK_DELAY = 1f;
 
 	private void Start()
 	{
-		// reset the sprint value
+		// Reset values
 		_run = false;
 		_rseRun.Call(false);
 
@@ -56,19 +56,29 @@ public class CharacterInput : MonoBehaviour
 
 	private void OnApplicationFocus(bool hasFocus)
 	{
-		// set cursor state
+		// Set cursor state
 		Cursor.lockState = hasFocus ? CursorLockMode.Locked : CursorLockMode.None;
 	}
 
 	private void UpdateControlScheme()
 	{
-		// check if the control scheme has changed every _CONTROL_SCHEME_CHECK_DELAY seconds
+		// Check if the control scheme has changed every _CONTROL_SCHEME_CHECK_DELAY seconds
 		_controlSchemeCheckTimer += Time.deltaTime;
 		if (_controlSchemeCheckTimer >= _CONTROL_SCHEME_CHECK_DELAY)
 		{
 			_controlSchemeCheckTimer = 0;
 			_rsoControlScheme.value = _playerInput.currentControlScheme;
 		}
+	}
+
+	private void OnEnable()
+	{
+		_rseToggleCursor.action += OnEnableCursor;
+	}
+
+	private void OnDisable()
+	{
+		_rseToggleCursor.action -= OnEnableCursor;
 	}
 
 	public void OnMove(InputValue value)
@@ -134,17 +144,17 @@ public class CharacterInput : MonoBehaviour
 
     public void OnCraftTorch(InputValue value)
     {
-        _rseCraft.Call(CharacterMotor.CraftType.Torch, value.isPressed);
+        _rseCraft.Call(CraftType.TORCH, value.isPressed);
     }
 
     public void OnCraftLadder(InputValue value)
     {
-        _rseCraft.Call(CharacterMotor.CraftType.Ladder, value.isPressed);
+        _rseCraft.Call(CraftType.LADDER, value.isPressed);
     }
 
     public void OnCraftRope(InputValue value)
     {
-        _rseCraft.Call(CharacterMotor.CraftType.Rope, value.isPressed);
+        _rseCraft.Call(CraftType.ROPE, value.isPressed);
 	}
 
 	public void OnHolding(InputValue input)
@@ -156,4 +166,10 @@ public class CharacterInput : MonoBehaviour
     {
         _rseRecycle.Call();
     }
+
+	public void OnEnableCursor(bool value)
+	{
+		Cursor.visible = value;
+		Cursor.lockState = value ? CursorLockMode.None : CursorLockMode.Locked;
+	}
 }

@@ -13,10 +13,13 @@ public class GameStart : MonoBehaviour
 
 	private GameObject _currentCharacter;
 
+	/// <summary>
+	/// 	Destroy the former character if exists.
+	/// </summary>
 	public void RemoveFormerCharacter()
 	{
-		// destroy the former character if exists
 		if (_currentCharacter is null) return;
+
 		Destroy(_currentCharacter);
 	}
 
@@ -24,13 +27,13 @@ public class GameStart : MonoBehaviour
 	{
 		RemoveFormerCharacter();
 
-		// reset player related rso values
+		// Reset player related rso values
 		_rsoPlayerDeath.value = false;
 
-		// instantiate the prefab of the player
+		// Instantiate the prefab of the player
 		_currentCharacter = Instantiate(_pfPlayer, transform.position, transform.rotation, _levelDesigneSpan);
 
-		Debug.Log($"GAME_START: player instantiated");
+		Debug.Log($"GAME_START: Player instantiated.");
 	}
 
 #if UNITY_EDITOR

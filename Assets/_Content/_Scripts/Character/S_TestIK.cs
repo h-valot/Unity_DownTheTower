@@ -1,105 +1,77 @@
-using System.Collections;
-using System.Collections.Generic;
+using NaughtyAttributes;
 using UnityEngine;
-using static CharacterMotor;
 
 [RequireComponent(typeof(Animator))]
 public class TestIk : MonoBehaviour
 {
-    [SerializeField] private CharacterMotor _characterMotor;
-    protected Animator animator;
+	[Header("Internal references")]
+	[Required("TestIk required an animator to work.")]
+	[SerializeField] private Animator _animator;
+	[SerializeField] private Transform _rightHandLiftTorchTarget = null;
+	[SerializeField] private Transform _rightHandAimTorchTarget = null;
+	[SerializeField] private Transform _leftFootObj;
+	[SerializeField] private Transform _rightFootObj;
 
-    private bool _ikLiftTorch = false;
+	[Header("External references")]
+	[SerializeField] private CharacterMotor _characterMotor;
+
+	// ---- PRIVATE VARIABLES ----
+	private bool _ikLiftTorch = false;
     private bool _ikAimTorch = false;
-
-    [SerializeField] private Transform _rightHandLiftTorchTarget = null;
-    [SerializeField] private Transform _rightHandAimTorchTarget = null;
-    [SerializeField] private Transform _leftFootObj;
-    [SerializeField] private Transform _rightFootObj;
-
-    // Start is called before the first frame update
-    void Start()
+	
+    private void OnAnimatorIK()
     {
-        animator = GetComponent<Animator>();
+		// Assert: animator is null
+        if (_animator == null) return;
+
+		if (_ikLiftTorch) SetIK(_rightHandLiftTorchTarget);
+		if (_ikAimTorch) SetIK(_rightHandAimTorchTarget);
+
+		// else
+		// {
+		//    animator.SetIKPositionWeight(AvatarIKGoal.RightHand, 0);
+		//    animator.SetIKRotationWeight(AvatarIKGoal.RightHand, 0);
+		//    animator.SetLookAtWeight(0);
+		// }
     }
 
-    void OnAnimatorIK()
+	private void SetIK(Transform transform)
+	{
+		// Assert: transform is null
+		if (transform == null) return;
+
+		_animator.SetIKPositionWeight(AvatarIKGoal.RightHand, 1);
+		_animator.SetIKRotationWeight(AvatarIKGoal.RightHand, 1);
+		_animator.SetIKPosition(AvatarIKGoal.RightHand, transform.position);
+		_animator.SetIKRotation(AvatarIKGoal.RightHand, transform.rotation);
+	}
+
+    private void Update()
     {
-        if (animator)
-        {
-            if (_ikLiftTorch)
-            {
+        // int layerMask = 1 << 8;
 
-                if(_rightHandLiftTorchTarget != null)
-                {
-                    animator.SetIKPositionWeight(AvatarIKGoal.RightHand,1);
-                    animator.SetIKRotationWeight(AvatarIKGoal.RightHand,1);
-                    animator.SetIKPosition(AvatarIKGoal.RightHand,_rightHandLiftTorchTarget.position);
-                    animator.SetIKRotation(AvatarIKGoal.RightHand, _rightHandLiftTorchTarget.rotation);
-                }
+        // layerMask = ~layerMask;
 
-            }
+        // RaycastHit hit;
 
-            if (_ikAimTorch)
-            {
-                if(_rightHandAimTorchTarget != null)
-                {
-                    animator.SetIKPositionWeight(AvatarIKGoal.RightHand, 1);
-                    animator.SetIKRotationWeight(AvatarIKGoal.RightHand, 1);
-                    animator.SetIKPosition(AvatarIKGoal.RightHand, _rightHandAimTorchTarget.position);
-                    animator.SetIKRotation(AvatarIKGoal.RightHand, _rightHandAimTorchTarget.rotation);
-                }
-            }
+        // Vector3 leftRaycast = Vector3.down;
+        // UnityEngine.Debug.DrawRay(leftFootObj.position, leftRaycast, Color.red, 0.1f);
 
-            //else
-            //{
-            //    animator.SetIKPositionWeight(AvatarIKGoal.RightHand, 0);
-            //    animator.SetIKRotationWeight(AvatarIKGoal.RightHand, 0);
-            //    animator.SetLookAtWeight(0);
-            //}
-        }
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        //int layerMask = 1 << 8;
-
-        //layerMask = ~layerMask;
-
-        //RaycastHit hit;
-
-        //Vector3 leftRaycast = Vector3.down;
-        //UnityEngine.Debug.DrawRay(leftFootObj.position, leftRaycast, Color.red, 0.1f);
-
-        //if (Physics.Raycast(leftFootObj.position, leftRaycast, out hit, 0.1f, layerMask))
-        //{
+        // if (Physics.Raycast(leftFootObj.position, leftRaycast, out hit, 0.1f, layerMask))
+        // {
         //    UnityEngine.Debug.DrawRay(leftFootObj.position, leftRaycast, Color.red, 100);
         //    Debug.Log("Found an object - distance: " + leftFootObj.position);
-        //}
-        if(_characterMotor._craftInHand != null)
-        {
-            if (_characterMotor._craftInHand._craftType == CraftType.Torch)
-            {
-                _ikLiftTorch = true;
-            }
-            else
-            {
-                _ikLiftTorch = false;
-            }
+        // }
+
+        if (_characterMotor._craftInHand != null)
+		{
+			_ikLiftTorch = _characterMotor._craftInHand._craftType == CraftType.TORCH;
         }
         else
         {
             _ikLiftTorch = false;
         }
 
-        if (_characterMotor._aiming)
-        {
-            _ikAimTorch = true;
-        }
-        else
-        {
-            _ikAimTorch = false;
-        }
+		_ikAimTorch = _characterMotor._aiming;
     }
 }

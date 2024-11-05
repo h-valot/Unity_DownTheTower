@@ -111,7 +111,7 @@ public class CharacterMotor : MonoBehaviour
 	
 	// - craft -
 	public bool _crafting = false;
-	private CraftType _objectToCraft = CraftType.None;
+	private CraftType _objectToCraft = CraftType.NONE;
 	private Coroutine _craftCoroutine;
 
 	// - permanent -
@@ -1263,66 +1263,66 @@ public class CharacterMotor : MonoBehaviour
 
         switch (_objectToCraft)
         {
-            case CraftType.None:
+            case CraftType.NONE:
                 break;
 
-            case CraftType.Torch:
+            case CraftType.TORCH:
                 if (_craftInHand != null)
                 {
-                    if (_craftInHand._craftType != CraftType.Torch && _craftInRobot?._craftType != CraftType.Torch)
+                    if (_craftInHand._craftType != CraftType.TORCH && _craftInRobot?._craftType != CraftType.TORCH)
                     {
                         Destroy(_craftInHand.gameObject);
-                        _craftCoroutine = StartCoroutine(Craft(CraftType.Torch, _torchConfig.craftingDuration));
+                        _craftCoroutine = StartCoroutine(Craft(CraftType.TORCH, _torchConfig.craftingDuration));
                     }
                 }
                 else
                 {
-                    _craftCoroutine = StartCoroutine(Craft(CraftType.Torch, _torchConfig.craftingDuration));
+                    _craftCoroutine = StartCoroutine(Craft(CraftType.TORCH, _torchConfig.craftingDuration));
                 }
                 break;
 
-            case CraftType.Ladder:
+            case CraftType.LADDER:
                 if (_craftInHand != null)
                 {
-                    if (_craftInHand._craftType == CraftType.Torch)
+                    if (_craftInHand._craftType == CraftType.TORCH)
                     {
                         _craftInHand.transform.SetParent(_robotHandSocket, false);
                         _craftInRobot = _craftInHand;
                         _craftInRobot.transform.rotation = _robotHandSocket.rotation;
                         _craftInHand = null;
-                        _craftCoroutine = StartCoroutine(Craft(CraftType.Ladder, _torchConfig.craftingDuration));
+                        _craftCoroutine = StartCoroutine(Craft(CraftType.LADDER, _torchConfig.craftingDuration));
                     }
-                    else if (_craftInHand._craftType != CraftType.Ladder)
+                    else if (_craftInHand._craftType != CraftType.LADDER)
                     {
                         Destroy(_craftInHand.gameObject);
-                        _craftCoroutine = StartCoroutine(Craft(CraftType.Ladder, _torchConfig.craftingDuration));
+                        _craftCoroutine = StartCoroutine(Craft(CraftType.LADDER, _torchConfig.craftingDuration));
                     }
                 }
                 else
                 {
-                    _craftCoroutine = StartCoroutine(Craft(CraftType.Ladder, _torchConfig.craftingDuration));
+                    _craftCoroutine = StartCoroutine(Craft(CraftType.LADDER, _torchConfig.craftingDuration));
                 }
                 break;
 
-            case CraftType.Rope:
+            case CraftType.ROPE:
                 if (_craftInHand != null)
                 {
-                    if (_craftInHand._craftType == CraftType.Torch)
+                    if (_craftInHand._craftType == CraftType.TORCH)
                     {
                         _craftInHand.transform.SetParent(_robotHandSocket, false);
                         _craftInRobot = _craftInHand;
                         _craftInHand = null;
-                        _craftCoroutine = StartCoroutine(Craft(CraftType.Rope, _ropeConfig.craftingDuration));
+                        _craftCoroutine = StartCoroutine(Craft(CraftType.ROPE, _ropeConfig.craftingDuration));
                     }
-                    else if (_craftInHand._craftType != CraftType.Rope)
+                    else if (_craftInHand._craftType != CraftType.ROPE)
                     {
                         Destroy(_craftInHand.gameObject);
-                        _craftCoroutine = StartCoroutine(Craft(CraftType.Rope, _ropeConfig.craftingDuration));
+                        _craftCoroutine = StartCoroutine(Craft(CraftType.ROPE, _ropeConfig.craftingDuration));
                     }
                 }
                 else
                 {
-                    _craftCoroutine = StartCoroutine(Craft(CraftType.Rope, _ropeConfig.craftingDuration));
+                    _craftCoroutine = StartCoroutine(Craft(CraftType.ROPE, _ropeConfig.craftingDuration));
                 }
                 break;
         }
@@ -1357,18 +1357,18 @@ public class CharacterMotor : MonoBehaviour
 		// instantiate the crafted object
 		switch (_objectToCraft)
 		{
-            case CraftType.None:
+            case CraftType.NONE:
                 break;
 
-            case CraftType.Torch:
+            case CraftType.TORCH:
                 _craftInHand = Instantiate(_torchConfig.pfTorch, _handSocket.transform);
                 break;
 
-			case CraftType.Ladder:
+			case CraftType.LADDER:
 				_craftInHand = Instantiate(_ladderConfig.PF_Ladder, _handSocket.transform);
                 break;
 
-			case CraftType.Rope:
+			case CraftType.ROPE:
 				_craftInHand = Instantiate(_ropeConfig.pfRope, _handSocket.transform);
 				break;
 		}
@@ -1399,13 +1399,6 @@ public class CharacterMotor : MonoBehaviour
         _rseInteract.action += Interact;
 	}
 
-	public enum CraftType
-	{
-		None,
-		Torch,
-		Ladder,
-		Rope,
-	}
 
     #endregion
 
