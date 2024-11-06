@@ -1,9 +1,8 @@
 using DG.Tweening;
 using NaughtyAttributes;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Rendering;
-using static UnityEngine.Rendering.DebugUI;
 
 public class Torch : Permanent
 {
@@ -11,10 +10,10 @@ public class Torch : Permanent
     [SerializeField] private Light _light;
     [SerializeField] private Rigidbody _rigidbody;
     [SerializeField] private MeshRenderer _meshRenderer;
-    [SerializeField] private TorchPointLight _torchPointLight;
     [SerializeField] private LineRenderer _aimPreview;
-    [SerializeField] private Animator _brokenLightAnim;
     [SerializeField] private Transform _torchTop;
+    [SerializeField] private Transform _pointLightBase;
+    [SerializeField] private SphereCollider _lightCollider;
 
     [Header("Scriptable References")]
 	[SerializeField] private TorchConfig _torchConfig;
@@ -26,7 +25,9 @@ public class Torch : Permanent
     [ReadOnly] public bool _isActive = false;
 
     // ----- PRIVATE VARIABLES -----
-    private bool _islit = true;
+    private LayerMask _layerMask;
+
+    private bool _islit = false;
     private bool _isFalling = false;
     private bool _changedColor = false;
     private bool _isBroken = false;
@@ -36,17 +37,33 @@ public class Torch : Permanent
 
     #region monobehavior functions
 
+    private void Awake()
+    {
+        _isActive = true;
+
+        //Collisions
+        _rigidbody.constraints = RigidbodyConstraints.FreezeAll;
+        _lightCollider.radius = _torchConfig.lightOffsetDistance;
+        _layerMask |= (1 << LayerMask.NameToLayer("Default"));
+        _layerMask |= (1 << LayerMask.NameToLayer("Collision_NoRaycast"));
+
+        //Preview
+        _aimPreview.useWorldSpace = true;
+
+        //Visual
+        _light.color = _torchConfig.lightColor;
+        _light.intensity = _torchConfig.lightIntensity;
+        _meshRenderer.material.SetColor("_lightColor", _torchConfig.lightColor);
+    }
+
     private void Start()
     {
-        _islit = true;
-        _light.color = _torchConfig.lightColor;
-        _meshRenderer.material.SetColor("_lightColor", _torchConfig.lightColor);
-        _light.intensity = _torchConfig.lightIntensity;
-        _rigidbody.constraints = RigidbodyConstraints.FreezeAll;
-        _isActive = true;
-        _aimPreview.useWorldSpace = true;
-        _meshRenderer.material.SetFloat("_lightPercent", 1f);
-        _torchTop.transform.localPosition = new Vector3(_torchTop.transform.localPosition.x, _torchConfig.deployDistance, _torchTop.transform.localPosition.z);
+        if(_torchConfig.startLit)
+        {
+            _islit = true;
+            _meshRenderer.material.SetFloat("_lightPercent", 1f);
+            _torchTop.transform.localPosition = new Vector3(_torchTop.transform.localPosition.x, _torchConfig.topTorchOffsetDistance, _torchTop.transform.localPosition.z);
+        }
     }
 
     private void Update()
@@ -56,6 +73,49 @@ public class Torch : Permanent
             CheckLethalHeight();
         }
     }
+
+    private void LateUpdate()
+    {
+        // TODO: torch
+        // [ ] Prevent the penetration test to fire if the torch is immobile.
+
+        if (_isFalling)
+        {
+            Vector3 _lightOffset = Vector3.zero;
+            Collider[] _hitColliders = Physics.OverlapSphere(_pointLightBase.position, _torchConfig.lightOffsetDistance, _layerMask);
+            if (_hitColliders.Length > 0)
+            {
+                foreach (Collider _otherCollider in _hitColliders)
+                {
+                    Vector3 otherPosition = _otherCollider.gameObject.transform.position;
+                    Quaternion otherRotation = _otherCollider.gameObject.transform.rotation;
+
+                    Vector3 direction;
+                    float distance;
+
+                    bool overlapped = Physics.ComputePenetration(
+                        _lightCollider, transform.position, transform.rotation,
+                        _otherCollider, otherPosition, otherRotation,
+                        out direction, out distance
+                    );
+
+                    if (overlapped)
+                    {
+                        _lightOffset += direction * distance;
+                    }
+
+                    _lightOffset = Vector3.ClampMagnitude(_lightOffset, _torchConfig.lightOffsetDistance);
+                    _light.transform.position = _pointLightBase.position + _lightOffset;
+
+                }
+            }
+            else
+            {
+                _light.transform.position = _pointLightBase.position;
+            }
+
+        }
+    }   
 
     private void OnCollisionEnter(Collision collision)
     {
@@ -70,6 +130,9 @@ public class Torch : Permanent
             Instantiate(_torchConfig.torchHitSFX, transform.position, Quaternion.identity);
             _isHit = true;
         }
+
+        _rigidbody.drag = 1f;
+        _rigidbody.angularDrag = 1f;
     }
 
     #endregion
@@ -87,9 +150,9 @@ public class Torch : Permanent
             DOTween.Kill(gameObject.GetInstanceID() + "lightPercent");
             DOTween.Kill(gameObject.GetInstanceID() + "lightIntensity");
             DOTween.Kill(gameObject.GetInstanceID() + "lightDeploy");
-            _meshRenderer.material.DOFloat(0f, "_lightPercent", _torchConfig.extinguishDuration).SetEase(Ease.Linear).SetId(gameObject.GetInstanceID()+"lightPercent");
-            _light.DOIntensity(0f, _torchConfig.extinguishDuration).SetEase(Ease.Linear).SetId(gameObject.GetInstanceID()+"lightIntensity");
-            _torchTop.DOLocalMoveY(0f, _torchConfig.extinguishDuration).SetEase(Ease.Linear).SetId(gameObject.GetInstanceID() + "lightDeploy").OnComplete(() => { _light.enabled = false; });
+            _meshRenderer.material.DOFloat(0f, "_lightPercent", _torchConfig.lightOffDuration).SetEase(Ease.Linear).SetId(gameObject.GetInstanceID()+"lightPercent");
+            _light.DOIntensity(0f, _torchConfig.lightOffDuration).SetEase(Ease.Linear).SetId(gameObject.GetInstanceID()+"lightIntensity");
+            _torchTop.DOLocalMoveY(0f, _torchConfig.lightOffDuration).SetEase(Ease.Linear).SetId(gameObject.GetInstanceID() + "lightDeploy").OnComplete(() => { _light.enabled = false; });
         }
 		else
 		{
@@ -98,10 +161,15 @@ public class Torch : Permanent
             DOTween.Kill(gameObject.GetInstanceID() + "lightPercent");
             DOTween.Kill(gameObject.GetInstanceID() + "lightIntensity");
             DOTween.Kill(gameObject.GetInstanceID() + "lightDeploy");
-            _meshRenderer.material.DOFloat(1f, "_lightPercent", _torchConfig.lightStartupDuration).SetEase(Ease.Linear).SetId(gameObject.GetInstanceID() + "lightPercent");
-            _light.DOIntensity(_torchConfig.lightIntensity, _torchConfig.lightStartupDuration).SetEase(Ease.Linear).SetId(gameObject.GetInstanceID() + "lightIntensity");
-            _torchTop.DOLocalMoveY(_torchConfig.deployDistance, _torchConfig.lightStartupDuration).SetEase(Ease.Linear).SetId(gameObject.GetInstanceID() + "lightDeploy");
+            _meshRenderer.material.DOFloat(1f, "_lightPercent", _torchConfig.lightOnDuration).SetEase(Ease.Linear).SetId(gameObject.GetInstanceID() + "lightPercent");
+            _light.DOIntensity(_torchConfig.lightIntensity, _torchConfig.lightOnDuration).SetEase(Ease.Linear).SetId(gameObject.GetInstanceID() + "lightIntensity");
+            _torchTop.DOLocalMoveY(_torchConfig.topTorchOffsetDistance, _torchConfig.lightOnDuration).SetEase(Ease.Linear).SetId(gameObject.GetInstanceID() + "lightDeploy");
         }
+    }
+
+    private bool HasMoved()
+    {
+        return false;
     }
 
     #endregion
@@ -158,7 +226,6 @@ public class Torch : Permanent
 			return false;
 		}
 
-        _torchPointLight.SetIsInHand(false);
         _aimPreview.enabled = false;
 
 
@@ -226,7 +293,7 @@ public class Torch : Permanent
         if (_throwStartPoint - transform.position.y > _characterConfig.lethalHeight)
         {
             _light.DOColor(_torchConfig.deathColor, 0.5f);
-            _meshRenderer.material.DOColor(_torchConfig.deathColor, 0.5f);
+            _meshRenderer.material.DOColor(_torchConfig.deathColor, "_lightColor", 0.5f);
             _changedColor = true;
         }
     }
@@ -240,14 +307,33 @@ public class Torch : Permanent
             _isBroken = true;
             Instantiate(_torchConfig.torchBreakSFX, transform.position, Quaternion.identity);
 
-            if (_torchConfig.activateBreakAnim)
-            {
-                _brokenLightAnim.SetBool("isBroken", true);
-                _meshRenderer.material.SetFloat("_lightPercent", 0f);
-                Destroy(gameObject, 3);
-            }
-            else Destroy(gameObject);
+            DeactivateTorch();
         }
+    }
+
+    private void DeactivateTorch()
+    {
+        if (_torchConfig.activateBreakAnim)
+        {
+            Sequence _deactivatingSequence = DOTween.Sequence().Pause();
+            _deactivatingSequence.AppendInterval(0.03f);
+            _deactivatingSequence.AppendCallback(() => { _light.enabled = false; });
+            _deactivatingSequence.AppendInterval(0.08f);
+            _deactivatingSequence.AppendCallback(() => { _light.enabled = true; });
+            _deactivatingSequence.AppendInterval(0.03f);
+            _deactivatingSequence.AppendCallback(() => { _light.enabled = false; });
+            _deactivatingSequence.AppendInterval(0.03f);
+            _deactivatingSequence.AppendCallback(() => { _light.enabled = true; });
+            _deactivatingSequence.AppendInterval(0.03f);
+            _deactivatingSequence.AppendCallback(() => { _light.enabled = false; });
+            _deactivatingSequence.AppendInterval(0.03f);
+            _deactivatingSequence.AppendCallback(() => { _light.enabled = true; });
+            _deactivatingSequence.Insert(0f, _light.DOIntensity(0f, _torchConfig.deactivatingTime).SetEase(Ease.Linear));
+            _deactivatingSequence.Insert(0f, DOTween.To(() => _light.range, x => _light.range = x, 0f, _torchConfig.deactivatingTime).SetEase(Ease.Linear));
+            _deactivatingSequence.Insert(0f, _meshRenderer.material.DOFloat(0f, "_lightPercent", _torchConfig.deactivatingTime).SetEase(Ease.Linear));
+            _deactivatingSequence.Play().OnComplete(() => { Destroy(gameObject); });
+        }
+        else Destroy(gameObject);
     }
 
     #endregion
