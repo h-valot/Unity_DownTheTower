@@ -14,7 +14,7 @@ public class ToxicGas: MonoBehaviour
 
     public void TorchHasEnter(Torch _torch)
     {
-        if (_torch._isActive)
+        if (_torch._isInHand)
         {
             _rseKillCharacter.Call();
         }

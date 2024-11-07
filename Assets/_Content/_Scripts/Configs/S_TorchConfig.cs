@@ -57,6 +57,9 @@ public class TorchConfig : ScriptableObject
 	[Tooltip("If the torch should spawn lit or not")]
 	public bool startLit = true;
 
+	[Tooltip("Number max of torch spawned")]
+	public int maxNumberTorch = 4;
+
     [Space(5f)]
 
     [Header("Aim Preview Variables")]

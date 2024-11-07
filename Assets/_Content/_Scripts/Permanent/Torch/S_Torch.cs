@@ -15,14 +15,14 @@ public class Torch : Permanent
     [SerializeField] private Transform _pointLightBase;
     [SerializeField] private SphereCollider _lightCollider;
 
-    [Header("Scriptable References")]
+    [Header("External References")]
 	[SerializeField] private TorchConfig _torchConfig;
     [SerializeField] private CharacterConfig _characterConfig;
     [SerializeField] private RopeConfig _ropeConfig;
-    [SerializeField] private RSO_CharacterPosition _characterPosition;
+    [SerializeField] private RSO_CharacterPosition _rsoCharacterPosition;
 
     // ----- PUBLIC VARIABLES -----
-    [ReadOnly] public bool _isActive = false;
+    [ReadOnly] public bool _isInHand = false;
 
     // ----- PRIVATE VARIABLES -----
     private LayerMask _layerMask;
@@ -39,7 +39,7 @@ public class Torch : Permanent
 
     private void Awake()
     {
-        _isActive = true;
+        _isInHand = true;
 
         //Collisions
         _rigidbody.constraints = RigidbodyConstraints.FreezeAll;
@@ -64,6 +64,10 @@ public class Torch : Permanent
             _meshRenderer.material.SetFloat("_lightPercent", 1f);
             _torchTop.transform.localPosition = new Vector3(_torchTop.transform.localPosition.x, _torchConfig.topTorchOffsetDistance, _torchTop.transform.localPosition.z);
         }
+
+        TorchManager.instance.AddNewTorchToList(this);
+
+        _rsoCharacterPosition.OnChanged += UpdateTorchFeedback;
     }
 
     private void Update()
@@ -142,7 +146,7 @@ public class Torch : Permanent
     /// <summary> Activate/Deactivate light on the torch </summary>
     public override void ToggleInHand()
     {
-        if (!_isActive) return;
+        if (!_isInHand) return;
 
 		if (_islit) 
 		{
@@ -221,7 +225,7 @@ public class Torch : Permanent
     #region throwing
     public override bool Throw(Transform _cameraTransform)
     {
-        if (!_isActive || !_torchConfig.canThrow) 
+        if (!_isInHand || !_torchConfig.canThrow) 
 		{
 			return false;
 		}
@@ -232,11 +236,11 @@ public class Torch : Permanent
         gameObject.transform.parent = null;
 		_rigidbody.constraints = RigidbodyConstraints.None;
 		_rigidbody.velocity = Quaternion.AngleAxis(-CalculateThrowAngleOffset(_cameraTransform), _cameraTransform.right) * _cameraTransform.forward * CalculateLaunchForce(_cameraTransform);
-		_isActive = false;
+		_isInHand = false;
         _isFalling = true;
-        _throwStartPoint = _characterPosition.value.y;
+        _throwStartPoint = _rsoCharacterPosition.value.y;
 
-		StartCoroutine(WaitAndDestroyTorch(_torchConfig.groundedLightDuration));
+		StartCoroutine(WaitAndDeactivateTorch(_torchConfig.groundedLightDuration));
 
         return true;
     }
@@ -270,20 +274,25 @@ public class Torch : Permanent
             (_torchConfig.maxLaunchCameraAngle / 2 - _torchConfig.minLaunchCameraAngle);
     }
 
-    private IEnumerator WaitAndDestroyTorch(float duration)
+    private IEnumerator WaitAndDeactivateTorch(float duration)
     {
         yield return new WaitForSeconds(duration);
-        Destroy(gameObject);
+        DeactivateTorch();
     }
 
     public override bool StateInHand()
     {
-        return _isActive;
+        return _isInHand;
     }
 
     #endregion
 
     #region fall feedback
+
+    private void UpdateTorchFeedback()
+    {
+        UnityEngine.Debug.Log("Player moved.");
+    }
 
     private void CheckLethalHeight()
     {
@@ -311,7 +320,7 @@ public class Torch : Permanent
         }
     }
 
-    private void DeactivateTorch()
+    public void DeactivateTorch()
     {
         if (_torchConfig.activateBreakAnim)
         {
