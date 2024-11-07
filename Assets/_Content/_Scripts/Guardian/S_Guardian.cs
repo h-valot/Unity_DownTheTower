@@ -1,4 +1,5 @@
 using System.Collections;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -41,8 +42,6 @@ public class Guardian : MonoBehaviour
     {
         _agent = GetComponent<NavMeshAgent>();
         _aggro = false;
-        //_actualTarget = _playerRef.gameObject;
-
     }
    
     IEnumerator CheckForXSecond(float X)
@@ -82,7 +81,9 @@ public class Guardian : MonoBehaviour
                     StopCoroutine(_coroutine);
                     StopCoroutine(_coroutineUpdate);
                 }
+                SelectTargetSequence();
                 AggroState();
+                
             }
         }
     }
@@ -93,10 +94,10 @@ public class Guardian : MonoBehaviour
         if (IsActif() == true)
         {
             if ( _aggro == true)
-            {
-                Debug.Log("plus devant");
-                ToIdle();
-            }
+                {
+                    Debug.Log("plus devant");
+                    ToIdle();
+                }
             
         }
     }
@@ -136,16 +137,16 @@ public class Guardian : MonoBehaviour
     }
     private void SetDestination()
     {
-        if (_isPlayerTarget)
-        {
-            _agent.destination = _playerRef.transform.position;
-        }
-        else
-        {
-            _agent.destination = _torchRef.transform.position;
-        }
+        //if (_isPlayerTarget)
+        //{
+        //    _agent.destination = _playerRef.transform.position;
+        //}
+        //else
+        //{
+        //    _agent.destination = _torchRef.transform.position;
+        //}
 
-        //_agent.destination = _actualTarget.transform.position;
+        _agent.destination = _actualTarget.transform.position;
     }
 
     public bool IsActif()
@@ -176,6 +177,7 @@ public class Guardian : MonoBehaviour
         _pathPatrol.GoingBackToPatrol();
         StopCoroutine(_coroutineUpdate);
         ChangeColor(2f);
+        ResetTarget();
     }
 
     public bool StateAggro()
@@ -250,22 +252,65 @@ public class Guardian : MonoBehaviour
     }
 
 
-    // WIP
-    public void CheckDistancePlayer (CharacterMotor _playerRef)
+    //WIP
+    public void CheckDistancePlayer()
     {
-        _playerDistance = Vector3.Distance(this.transform.position,_playerRef.transform.position);
+        if (_playerRef != null)
+        {
+            _playerDistance = Vector3.Distance(this.transform.position, _playerRef.transform.position);
+        }
     }
 
-    public void CheckDistanceTorch(Torch _torchRef)
+    public void CheckDistanceTorch()
     {
-        _torchDistance = Vector3.Distance(this.transform.position, _torchRef.transform.position);
+        if (_torchRef != null)
+        {
+            _torchDistance = Vector3.Distance(this.transform.position, _torchRef.transform.position);
+        }
     }
 
     public void SelectTarget()
     {
-        if (_torchDistance < _playerDistance)
+        if (_torchRef == null && _playerRef == null)
         {
-            _actualTarget = _torchRef;
+            return;
         }
+        if (_playerRef != null && _torchRef == null)
+        {
+            _actualTarget = _playerRef.gameObject;
+        }
+        if (_torchRef != null && _playerRef == null)
+        {
+            _actualTarget = _torchRef.gameObject;
+        }
+        if (_playerRef != null && _torchRef != null)
+            {
+                if (_playerDistance < _torchDistance)
+                {
+                    _actualTarget = _playerRef.gameObject;
+                }
+                if (_torchDistance < _playerDistance)
+                {
+                    _actualTarget = _torchRef.gameObject;
+                    //Debug.Log(_actualTarget.ToString());
+                }
+            }
+    }
+
+    public void SelectTargetSequence()
+    {
+        CheckDistancePlayer();
+        CheckDistanceTorch();
+        SelectTarget();
+    }
+
+    public void ResetTarget()
+    {
+        _actualTarget = null;
+    }
+
+    public void DestroyedTarget()
+    {
+       TargetStayIn();
     }
 }
