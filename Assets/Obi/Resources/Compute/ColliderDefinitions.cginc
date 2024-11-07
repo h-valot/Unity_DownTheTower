@@ -53,7 +53,6 @@ struct shape
 
     bool isTrigger()
     {
-        // TODO: using bools doesn't work... why?
         int a = (flags & 1 << 1) != 0;
         int b = forceZoneIndex >= 0;
         return a || b;

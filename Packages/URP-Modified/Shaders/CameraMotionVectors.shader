@@ -50,7 +50,6 @@ Shader "Hidden/Universal Render Pipeline/CameraMotionVectors"
                 UNITY_SETUP_INSTANCE_ID(input);
                 UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
 
-                // TODO: Use Core Blitter vert.
                 output.position = GetFullScreenTriangleVertexPosition(input.vertexID);
                 return output;
             }
@@ -108,7 +107,7 @@ Shader "Hidden/Universal Render Pipeline/CameraMotionVectors"
                     // Calculate forward velocity
                     half2 velocity = (posNDC - prevPosNDC);
 
-                    // TODO: test that velocity.y is correct
+					
                     #if UNITY_UV_STARTS_AT_TOP
                         velocity.y = -velocity.y;
                     #endif

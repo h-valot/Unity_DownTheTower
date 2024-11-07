@@ -972,8 +972,6 @@ namespace ShaderStrippingAndPrefiltering
             };
             helper.rendererFeatures.Add(decalFeature);
 
-            // TODO Tests for Automatic
-
             // Initial
             rendererRequirements = helper.defaultRendererRequirements;
             rendererRequirements.needsUnusedVariants = false;

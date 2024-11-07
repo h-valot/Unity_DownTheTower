@@ -224,7 +224,7 @@ namespace Obi
                     float restVolumeA = math.pow(principalRadii[pair.particleA].x * 2, 3 - (int)solverParams.mode);
                     float restVolumeB = math.pow(principalRadii[pair.particleB].x * 2, 3 - (int)solverParams.mode);
 
-                    float dist = math.length(positions[pair.particleA].xyz - positions[pair.particleB].xyz); // TODO: FIX! we cant read positions while we are writing to them.
+                    float dist = math.length(positions[pair.particleA].xyz - positions[pair.particleB].xyz);
 
                     // calculate tensile instability correction factor:
                     float cAvg = (cohesionKernel.W(dist, fluidMaterials[pair.particleA].x * 1.4f) + cohesionKernel.W(dist, fluidMaterials[pair.particleB].x * 1.4f)) * 0.5f;

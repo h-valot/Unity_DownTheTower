@@ -218,7 +218,7 @@ void SampleSDF (uint3 id : SV_DispatchThreadID)  // one thread per voxel,
         uint l = levelPopulation[m];
         float cellSize = CellSizeOfLevel(l);
 
-        int3 cell = floor((samplePos - solverBounds[0].min_.xyz) / cellSize); // TODO: not necessary to subtract solverBounds?
+        int3 cell = floor((samplePos - solverBounds[0].min_.xyz) / cellSize);
         int3 minCell = cell - 1;
         int3 maxCell = cell + 1;
 

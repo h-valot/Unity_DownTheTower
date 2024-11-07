@@ -115,7 +115,7 @@ namespace Obi
                 for (int i = 0; i < batch.activeConstraintCount; ++i)
                 {
                     float restLength = batch.restLengths[i] * user.stretchingScale;
-                    restLengths[m_ActiveConstraintCount + i] = restLength; // TODO: use nativelist methods?
+                    restLengths[m_ActiveConstraintCount + i] = restLength;
                     stiffnesses[m_ActiveConstraintCount + i] = new Vector2(user.stretchCompliance, user.maxCompression * restLength);
                 }
 

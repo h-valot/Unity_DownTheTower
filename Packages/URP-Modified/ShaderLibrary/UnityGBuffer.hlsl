@@ -269,7 +269,6 @@ InputData InputDataFromGbufferAndWorldPosition(half4 gbuffer2, float3 wsPos)
 
     inputData.viewDirectionWS = GetWorldSpaceNormalizeViewDir(wsPos.xyz);
 
-    // TODO: pass this info?
     inputData.shadowCoord     = (float4)0;
     inputData.fogCoord        = (half  )0;
     inputData.vertexLighting  = (half3 )0;

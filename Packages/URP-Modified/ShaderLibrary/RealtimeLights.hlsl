@@ -220,11 +220,6 @@ int GetPerObjectLightIndex(uint index)
     // since index is uint shader compiler will implement
     // div & mod as bitfield ops (shift and mask).
 
-    // TODO: Can we index a float4? Currently compiler is
-    // replacing unity_LightIndicesX[i] with a dp4 with identity matrix.
-    // u_xlat16_40 = dot(unity_LightIndices[int(u_xlatu13)], ImmCB_0_0_0[u_xlati1]);
-    // This increases both arithmetic and register pressure.
-    //
     // NOTE: min16float4 bug workaround.
     // Take the "vec4" part into float4 tmp variable in order to force float4 math.
     // It appears indexing half4 as min16float4 on DX11 can fail. (dp4 {min16f})
@@ -288,9 +283,6 @@ int GetAdditionalLightsCount()
     // Counting the number of lights in clustered requires traversing the bit list, and is not needed up front.
     return 0;
 #else
-    // TODO: we need to expose in SRP api an ability for the pipeline cap the amount of lights
-    // in the culling. This way we could do the loop branch with an uniform
-    // This would be helpful to support baking exceeding lights in SH as well
     return int(min(_AdditionalLightsCount.x, unity_LightData.y));
 #endif
 }

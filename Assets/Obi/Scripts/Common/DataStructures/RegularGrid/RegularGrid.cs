@@ -76,7 +76,6 @@ namespace Obi
                     }
         }
 
-        // TODO: single call passing position and element to ignore.
         public IEnumerable<T> GetNeighborsEnumerator(Vector3 position)
         {
             // if cells are infinitesimaly small,

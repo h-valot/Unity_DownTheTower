@@ -67,7 +67,7 @@ namespace Obi
 
         public override void GetParticlesInvolved(int index, List<int> particles)
         {
-            //TODO.
+			
         }
 
         protected override void SwapConstraints(int sourceIndex, int destIndex)
