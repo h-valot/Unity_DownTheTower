@@ -59,10 +59,10 @@ public class CharacterMotor : MonoBehaviour
 	public AnimationState _currentState;
 
 	// - move -
-	private Vector2 _moveInput;
 	[HideInInspector] public float _planarSpeed;
+	private Vector2 _moveInput;
 	private float _targetPlanarSpeed;
-	public float _gravitySpeed;
+	private float _gravitySpeed;
 	private Vector3 _movement;
 	private bool _isRunning;
 	private float _coyoteTime;
@@ -86,9 +86,15 @@ public class CharacterMotor : MonoBehaviour
 
     // - jump -
     private bool _wantJump;
-	public bool _isJumping;
+	private bool _canJump = true;
+	private bool _isJumping;
 	private RaycastHit[] _edgeHits;
 	private RaycastHit _edgeHit;
+
+	// - prolonged-jump -
+	public bool _isJumpingInputValue;
+	private float _prolongedJumpTimer = 0f;
+	public Triome _isJumpProlonged = Triome.FALSE;
 
 	// - fall -
 	public bool _isGrounded;
@@ -108,9 +114,9 @@ public class CharacterMotor : MonoBehaviour
 
 	// - throw -
 	[HideInInspector] public bool _aiming;
-	
+
 	// - craft -
-	public bool _crafting = false;
+	private bool _crafting = false;
 	private CraftType _objectToCraft = CraftType.NONE;
 	private Coroutine _craftCoroutine;
 
@@ -120,6 +126,9 @@ public class CharacterMotor : MonoBehaviour
 	[HideInInspector] public float ropeLength;
 	[HideInInspector] public Permanent _craftInHand;
 	[HideInInspector] public Permanent _craftInRobot;
+
+	// ---- CONSTS ----
+	private const float _HOLDING_KEY_THRESHOLD = 0.2f;
 
 	#endregion
 
@@ -152,7 +161,8 @@ public class CharacterMotor : MonoBehaviour
 		CalculateOriginForwardRight();
 		CheckGround();
 		CheckCoyoteTime();
-		UpdateStatus();
+		UpdateStatus(); 
+		CheckProlongedJump();
 
 		VerifyState();
 
@@ -397,7 +407,7 @@ public class CharacterMotor : MonoBehaviour
 		}
 
 		// - JUMP -
-		else if (_wantJump && (_isGrounded || _coyoteTime > 0f) && _currentState != AnimationState.JUMP)
+		else if (_canJump && _wantJump && (_isGrounded || _coyoteTime > 0f) && _currentState != AnimationState.JUMP)
         {
             SwitchState(AnimationState.JUMP);
             _isJumping = true;
@@ -921,6 +931,7 @@ public class CharacterMotor : MonoBehaviour
     private void SubscribeInputs()
 	{
 		_rseRun.action += Run;
+		_rseJump.action += Jump;
 		_rseCancelAction.action += CancelAction;
 		_rseKillCharacter.action += HandleDeath;
 
@@ -928,7 +939,6 @@ public class CharacterMotor : MonoBehaviour
         {
             case AnimationState.LOCOMOTION:
                 _rseMove.action += Move;
-                _rseJump.action += Jump;
                 _rseThrow.action += ToggleAim;
                 _rseCraft.action += ToggleCraft;
                 _rseToggleInHand.action += ToggleInHand;
@@ -943,7 +953,6 @@ public class CharacterMotor : MonoBehaviour
                 break;
             case AnimationState.FALL:
                 _rseMove.action += Move;
-                _rseJump.action += Jump;
                 _rseThrow.action += ToggleAim;
                 _rseToggleInHand.action += ToggleInHand;
                 _rseInteract.action += Interact;
@@ -953,7 +962,6 @@ public class CharacterMotor : MonoBehaviour
                 break;
             case AnimationState.ROPE:
                 _rseMove.action += Move;
-                _rseJump.action += Jump;
                 _rseThrow.action += ToggleAim;
                 _rseCraft.action += ToggleCraft;
                 _rseToggleInHand.action += ToggleInHand;
@@ -962,7 +970,6 @@ public class CharacterMotor : MonoBehaviour
                 break;
             case AnimationState.LADDER:
                 _rseMove.action += Move;
-                _rseJump.action += Jump;
                 _rseThrow.action += ToggleAim;
                 _rseCraft.action += ToggleCraft;
                 _rseToggleInHand.action += ToggleInHand;
@@ -1029,9 +1036,30 @@ public class CharacterMotor : MonoBehaviour
 	/// 	Set `_wantJump` to true.
 	/// 	Subscribed to RSE_Jump only in locomotion State.
 	/// </summary>
-	private void Jump()
+	/// <param name="isJumping">Is the input pressed.</param>
+	private void Jump(bool isJumping)
 	{
-        _wantJump = true;
+        _wantJump = isJumping; // Resetted after switch state check
+		_isJumpingInputValue = isJumping;
+	}
+
+	/// <summary>
+	/// 	Called in Update(). Check is the jump input is held by the player.
+	/// </summary>
+	private void CheckProlongedJump()
+	{
+		if (!_isJumpingInputValue) 
+		{
+			_prolongedJumpTimer = 0f;
+			_isJumpProlonged = Triome.FALSE;
+			return;
+		}
+
+		_prolongedJumpTimer += Time.deltaTime;
+		if (_prolongedJumpTimer >= _HOLDING_KEY_THRESHOLD)
+		{
+			_isJumpProlonged = Triome.TRUE;
+		}
 	}
 
 	/// <summary>
@@ -1041,6 +1069,13 @@ public class CharacterMotor : MonoBehaviour
 	private void Run(bool isRunning)
 	{
 		_isRunning = isRunning;
+	}
+
+	private void Holding(Triome isHolding)
+	{
+		if (isHolding == Triome.NONE) return;
+
+		Holding(isHolding.ToBool());
 	}
 
 	/// <summary>
@@ -1064,7 +1099,7 @@ public class CharacterMotor : MonoBehaviour
 				if (_isHolding)
 				{
 					_rope.UpdateHoldLength();
-					
+
 					// Handle error code
 					if (_rope.holdLength == -1) DesequipRope();
 				}
@@ -1164,8 +1199,9 @@ public class CharacterMotor : MonoBehaviour
 
 	private void EnterJumpState()
 	{
-		_rseJump.action -= Jump;
         _rseCraft.action -= ToggleCraft;
+
+		_canJump = false;
 
 		if (_isGroundedLastFrame) {CheckWalkRun();}
 		ApplyJumpImpulsePlanarSpeed();
@@ -1194,9 +1230,11 @@ public class CharacterMotor : MonoBehaviour
 
     private void ExitJumpState()
 	{
-		_rseJump.action += Jump;
         ToggleCraftInput(_hasBackpack);
-    }
+
+		_canJump = true;
+
+	}
 
 	#endregion
 
@@ -1215,7 +1253,7 @@ public class CharacterMotor : MonoBehaviour
 
 	private void UpdateFallState()
 	{
-        //ApplyAirControl();
+        // ApplyAirControl();
         ApplyDrag();
         CreateMovementFall();
         ApplyGravity();
@@ -1262,12 +1300,13 @@ public class CharacterMotor : MonoBehaviour
 	private void EnterCraftState()
 	{
 		_rseMove.action -= Move;
-		_rseJump.action -= Jump;
         _rseThrow.action -= ToggleAim;
 		_rseToggleInHand.action -= ToggleInHand;
         _rseInteract.action -= Interact;
 
-        switch (_objectToCraft)
+		_canJump = false;
+
+		switch (_objectToCraft)
         {
             case CraftType.NONE:
                 break;
@@ -1398,32 +1437,35 @@ public class CharacterMotor : MonoBehaviour
 			}
         }
 
-        _rseMove.action += Move;
-		_rseJump.action += Jump;
+		_canJump = true;
+
+		_rseMove.action += Move;
         _rseThrow.action += ToggleAim;
 		_rseToggleInHand.action += ToggleInHand;
         _rseInteract.action += Interact;
 	}
 
 
-    #endregion
+	#endregion
 
-    #region rope state
+	#region rope state
+
+	// [ ] Climb the rope
+	// [ ] Lerp the rope stop deceleration
+	// [ ] Jump off the rope on motion
+	// [ ] In partial suspension, make the character unable to move while off the wall
+	// [ ] In partial suspension, make the character able to jump off the wall
+	// [ ] In partial suspension, make the character unable to be snap against a cambered wall 
+	// [ ] In complete suspension, make the character pivot with the rope inclination
 
 	#region variables
 
-	public enum RopeState
-	{
-		PARTIAL_SUSPENSION = 0,
-		COMPLETE_SUSPENSION,
-	}
-
 	[Header("Rope")]
 	public RopeState _ropeState;
-	public bool _isHolding;
-	public bool _isAgainstWall;
-	public bool _canStartSwinging = true;
-	public Rope _rope;
+	private bool _isHolding;
+	private bool _isAgainstWall;
+	private bool _canStartSwinging = true;
+	private Rope _rope;
 
 	// ---- PRIVATE VARIABLES ----
 	// Velocities
@@ -1435,6 +1477,7 @@ public class CharacterMotor : MonoBehaviour
 	private Vector3 _ropeInputDirection;
 	private bool _inputsPressed;
 	private bool _inputsTowardsVertical;
+	public Triome _isJumpProlongedCached = Triome.NONE;
 
 	// Mics
 	private Vector3 _towardsCharacter;
@@ -1444,6 +1487,7 @@ public class CharacterMotor : MonoBehaviour
 
 	// ---- CONST ----
 	private const float _TOWARDS_VERTICAL_THRESHOLD = 0.75f;
+	private const float _FALLING_FORCES_THRESHOLD = 0.2f;
 
 	#endregion
 
@@ -1452,6 +1496,19 @@ public class CharacterMotor : MonoBehaviour
 	private void EnterRopeState()
 	{
 		_rseHolding.action += Holding;
+		_rseCraft.action -= ToggleCraft;
+
+		_isJumpProlongedCached = Triome.NONE;
+
+		_rope.UpdateHoldLength();
+		_positionStartFall = _rsoCharacterPosition.value;
+
+		if (_isGroundedLastFrame) 
+		{ 
+			CheckWalkRun();
+			ApplyInputs();
+			ApplyAcceleration();
+		}
 	}
 
 	private void UpdateRopeState()
@@ -1462,7 +1519,12 @@ public class CharacterMotor : MonoBehaviour
 		// Checks
 		CheckGround();
 		DetectEdges();
-		ApplyEdgesSpeed();
+		ApplyEdgesSpeed(); 
+		HandleProlongedJumpOnRope();
+
+		// Reinterate the assertion because checks can desequip the rope
+		// Assert: there is no equipped rope 
+		if (_rope == null) return;
 
 		// State machine update rope state
 		switch (_ropeState)
@@ -1490,8 +1552,13 @@ public class CharacterMotor : MonoBehaviour
 
 	private void ExitRopeState()
 	{
-		_rseHolding.action -= Holding;
 		_isHolding = false;
+
+		_isJumpProlongedCached = Triome.NONE;
+
+		// Update inputs subscriptions
+		ToggleCraftInput(_hasBackpack);
+		_rseHolding.action -= Holding;
 	}
 
 	#endregion
@@ -1519,13 +1586,27 @@ public class CharacterMotor : MonoBehaviour
 	private void UpdateRopeCompleteSuspensionState()
 	{
 		HandleRopeMovement();
-		FaceFoldCenter();
 		HandleRopeLength();
 	}
 
 	#endregion
 
 	#region rope functions
+
+	/// <summary>
+	/// 	Using a cached variable of '_isJumpProlonged' to switch if the character is holding the rope or not.
+	/// </summary>
+	private void HandleProlongedJumpOnRope()
+	{
+		// Assert: the current rope holding method is the wrong one.
+		if (_characterConfig.ropeHoldingMethod != RopeHolding.HOLD_TO_LET_GO) return;
+
+		if (_isJumpProlongedCached != _isJumpProlonged)
+		{
+			_isJumpProlongedCached = _isJumpProlonged;
+			Holding(_isJumpProlongedCached);
+		}
+	}
 
 	/// <summary>
 	/// 	Check if there is a collider in front of the character using a raycast.
@@ -1588,55 +1669,37 @@ public class CharacterMotor : MonoBehaviour
 	/// </summary>
 	private void JumpOffWall()
 	{
-		// Assert: the character can only jump off the wall in the partial suspension state
-		if (_ropeState != RopeState.PARTIAL_SUSPENSION) return;
+		Vector3 direction = new Vector3();
+		float force = 0;
 
 		// Reset velocities
 		_verticalVelocity = Vector3.zero;
 		_pendulumVelocity = Vector3.zero;
 		_suspensionVelocity = Vector3.zero;
 
-		// Get jump direction
-		Vector3 direction = Vector3Extention.GetPositionOnCercle(
-			angle: _characterConfig.ropeOffsetAngle,
-			axis: _characterDirection.right,
-			direction: -_characterDirection.forward,
-			origin: _rope.folds[^1],
-			radius: _rope.holdLength,
-			starting: _rsoCharacterPosition.value
-		);
-
-		// Apply force
-		_movement += direction * _characterConfig.jumpOffWallForce;
-	}
-
-	/// <summary>
-	/// 	Make the character facing center of the last fold (not with the y-axis).
-	/// </summary>
-	private void FaceFoldCenter()
-	{
-		// Assert: holding input method
-		switch (_characterConfig.ropeHoldingMethod)
+		switch (_ropeState)
 		{
-			case RopeHolding.HOLD_TO_STOP:
-				// While hold to stop, we don't constraint the character if the player IS NOT holding the button
-				if (!_isHolding) return;
+			case RopeState.PARTIAL_SUSPENSION:
+
+				force = _characterConfig.jumpOffWallForce;
+
+				direction = Vector3Extention.GetPositionOnCercle(
+					angle: _characterConfig.ropeOffsetAngle,
+					axis: _characterDirection.right,
+					direction: -_characterDirection.forward,
+					origin: _rope.folds[^1],
+					radius: _rope.holdLength,
+					starting: _rsoCharacterPosition.value
+				);
+
 				break;
 
-			case RopeHolding.HOLD_TO_LET_GO:
-				// While hold to let go, we don't constraint the character if the player IS holding the button
-				if (_isHolding) return;
+			case RopeState.COMPLETE_SUSPENSION:
 				break;
 		}
 
-		// Assert: character is touching a wall
-		if (_isAgainstWall) return;
-
-		// Assert: center-character distance is greater than the threshold 
-		if (Mathf.Abs(_rope.holdLength - (_rope.folds[^1] - _rsoCharacterPosition.value).magnitude) > _characterConfig.facingCenterThreshold) return;
-
-		Vector3 towardsCenter = new Vector3(_rope.folds[^1].x, _rsoCharacterPosition.value.y, _rope.folds[^1].z) - _rsoCharacterPosition.value;
-		_characterDirection.forward = towardsCenter.normalized;
+		// Apply jump force
+		_movement += direction * force;
 	}
 	
 	/// <summary>
@@ -1669,9 +1732,9 @@ public class CharacterMotor : MonoBehaviour
 			// Apply regular falling functions
 			// ApplyAirControl();
 			ApplyDrag();
-            CreateMovementFall();
-            ApplyGravity();
-            return;
+			CreateMovementFall();
+			ApplyGravity();
+			return;
 		}
 
 		// ---- CHARACTER IS HOLDING THE ROPE ----
@@ -1691,16 +1754,6 @@ public class CharacterMotor : MonoBehaviour
 		HandleSuspension();
 		HandleVertical();
 
-		// TODO:
-		// [x] Fix free holding into hold it back again snap
-		// [x] Fix unwrapping rope malfunction
-		// [ ] Jump off the rope on motion
-		// [x] Detect partial suspension
-		// [ ] In partial suspension, make the character unable to move off the wall except by jumping off the wall
-		// [ ] Climb the rope
-		// [x] Lerp the vertical movement speed acceleration 
-		// [ ] In complete suspension, make the character pivot with the rope inclination
-
 		// Apply velocities
 		_movement += _suspensionVelocity + _verticalVelocity + _pendulumVelocity;
 	}
@@ -1710,17 +1763,26 @@ public class CharacterMotor : MonoBehaviour
 	/// </summary>
 	private bool IsFallingWithRope()
 	{
+		// Assert: the character is falling if there is no more rope
+		if (_rope == null) return true;
+
 		bool isFalling = false;
 		switch (_characterConfig.ropeHoldingMethod)
 		{
 			case RopeHolding.HOLD_TO_STOP:
-				if (_isHolding) isFalling = false;
-				else isFalling = true;
+				isFalling = !_isHolding;
 				break;
 
 			case RopeHolding.HOLD_TO_LET_GO:
-				if (_isHolding) isFalling = true;
-				else isFalling = false;
+				if (_isHolding)
+				{
+					isFalling = true;
+				}
+				else
+				{
+					// If the character IS NOT holding the rope, let it fall till it reaches the rope limit constraint
+					isFalling = (_rope.folds[^1] - _rsoCharacterPosition.value).magnitude < _rope.holdLength - _FALLING_FORCES_THRESHOLD;
+				}
 				break;
 		}
 		return isFalling;
@@ -2043,5 +2105,5 @@ public class CharacterMotor : MonoBehaviour
 	{ 
 		_rseCanRecycle.Call(isRecyclable && _currentState == AnimationState.LOCOMOTION);
 	}
-    #endregion
+	#endregion
 }

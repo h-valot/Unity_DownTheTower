@@ -29,6 +29,7 @@ public class CharacterInput : MonoBehaviour
 	public Vector2 _look;
 	public bool _run;
 	public bool _throw;
+	public bool _jump;
 
 	private void Start()
 	{
@@ -38,6 +39,9 @@ public class CharacterInput : MonoBehaviour
 
 		_throw = false;
 		_rseThrow.Call(false);
+
+		_jump = false;
+		_rseJump.Call(false);
 	}
 
 	private void Update()
@@ -88,7 +92,8 @@ public class CharacterInput : MonoBehaviour
 
 	public void OnJump(InputValue value)
 	{
-		_rseJump.Call();
+		_jump = value.isPressed;
+		_rseJump.Call(_jump);
 	}
 
 	public void OnRun(InputValue value)

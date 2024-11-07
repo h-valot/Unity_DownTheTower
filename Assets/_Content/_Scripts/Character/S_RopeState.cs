@@ -1,0 +1,5 @@
+public enum RopeState
+{
+	PARTIAL_SUSPENSION = 0,
+	COMPLETE_SUSPENSION,
+}

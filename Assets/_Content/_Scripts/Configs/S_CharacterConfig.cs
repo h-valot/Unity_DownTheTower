@@ -37,6 +37,7 @@ public class CharacterConfig : ScriptableObject
 
 	[Tooltip("Speed scalar when the character is on an edge.")]
 	public float edgeFallFactor = 1f;
+
     [Tooltip("Edge height that the character climb into.")]
     public float edgeMaxClimbingHeight = 1.5f;
 
@@ -44,12 +45,15 @@ public class CharacterConfig : ScriptableObject
     [Header("Ground")]
 	[Tooltip("How far raycast moves down from origin point multiply by the capsule radius")]
 	public float groundCheckYFactor = 2.5f;
+
 	[Tooltip("Used to enlarge character capsule to approximate ground detection")]
 	public float skinWidth = 0.1f;
 	
+
 	[Header("Jump")]
 	[Tooltip("Speed added when using the jump button.")]
 	public float jumpMinimalPlanarVelocity = 1.5f;
+
 	[Tooltip("When jumping, the character reaches this height")]
 	public float jumpHeight;
 
@@ -60,12 +64,16 @@ public class CharacterConfig : ScriptableObject
 	[Header("Gravity")]
 	[Tooltip("The character uses its own gravity value. The engine default is -9.8f")]
 	public float gravity = -9.8f;
+
 	[Tooltip("Acceleration remove from character speed per second while falling.")]
 	public float dragDecceleration = 1f;
+
 	[Tooltip("Angular speed per second the character can turn while falling. Will be effective if character has a speed.")]
 	public float airControlAngularSpeed = 30f;
+
 	[Tooltip("Transform the dot product between character forward and input to a factor that multiply the air control angular speed.")]
 	public AnimationCurve airControlInputFactor;
+
 
 	[Header("Fall")]
 	[Tooltip("Whenever the character leaves a plateform, the coyote time counter starts. During this periode of time, the character can still jump.")]

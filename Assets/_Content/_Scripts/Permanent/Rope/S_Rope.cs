@@ -13,9 +13,9 @@ public class Rope : Permanent
 	[SerializeField] private RopeConfig _ropeConfig;
 	[SerializeField] private RSO_CharacterPosition _rsoCharacterPosition;
 
-	[Header("Debug")]
-	public bool isConnected;
-	public bool isPlaced;
+	// ---- PUBLIC VARIABLES ----
+	[HideInInspector] public bool isConnected;
+	[HideInInspector] public bool isPlaced;
 	[HideInInspector] public float holdLength;
 	[HideInInspector] public List<Vector3> folds = new List<Vector3>();
 

@@ -47,6 +47,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _playerInput: {fileID: 7430430280186034389}
   _rsoControlScheme: {fileID: 11400000, guid: 08b8e15a7a2491145baa753f14863b03, type: 2}
+  _rsoGamePaused: {fileID: 11400000, guid: faef31959fcedf747aaeb875374bdc6b, type: 2}
   _rseMove: {fileID: 11400000, guid: 4c899dda7396ed24c8e3d098dfe89471, type: 2}
   _rseLook: {fileID: 11400000, guid: 96e37ccd82d6cfd43bade6f66c27a479, type: 2}
   _rseJump: {fileID: 11400000, guid: d6896f12727744441bfeccf04390e194, type: 2}
@@ -60,11 +61,11 @@ MonoBehaviour:
   _rsePause: {fileID: 11400000, guid: a2ea92c3ee051664782983f5eda912ec, type: 2}
   _rseHideUI: {fileID: 11400000, guid: 862a61014b9840246b1f9e5c4979539c, type: 2}
   _rseRecycle: {fileID: 11400000, guid: fe915a3bcae02694896e23e598eeb7a8, type: 2}
-  _rsoGamePaused: {fileID: 11400000, guid: faef31959fcedf747aaeb875374bdc6b, type: 2}
   _rseToggleCursor: {fileID: 11400000, guid: e3c127dc7da608c4f85fb9f1feb0c684, type: 2}
-  move: {x: 0, y: 0}
-  look: {x: 0, y: 0}
-  run: 0
+  _move: {x: 0, y: 0}
+  _look: {x: 0, y: 0}
+  _run: 0
+  _throw: 0
 --- !u!114 &7430430280186034389
 MonoBehaviour:
   m_ObjectHideFlags: 0
