@@ -18,11 +18,11 @@ public class CharacterInput : MonoBehaviour
     [SerializeField] private RSE_Craft _rseCraft;
 	[SerializeField] private RSE_Throw _rseThrow;
     [SerializeField] private RSE_ToggleInHand _rseToggleInHand;
-	[SerializeField] private RSE_Holding _rseHolding;
     [SerializeField] private RSE_Pause _rsePause;
     [SerializeField] private RSE_HideUI _rseHideUI;
     [SerializeField] private RSE_Recycle _rseRecycle;
 	[SerializeField] private RSE_ToggleCursor _rseToggleCursor;
+	[SerializeField] private RSE_Climb _rseClimb;
 
 	[Header("Debug")]
 	public Vector2 _move;
@@ -30,6 +30,7 @@ public class CharacterInput : MonoBehaviour
 	public bool _run;
 	public bool _throw;
 	public bool _jump;
+	public bool _climb;
 
 	private void Start()
 	{
@@ -153,11 +154,6 @@ public class CharacterInput : MonoBehaviour
         _rseCraft.Call(CraftType.ROPE, value.isPressed);
 	}
 
-	public void OnHolding(InputValue input)
-	{
-		_rseHolding.Call(input.isPressed);
-	}
-
     public void OnRecycle()
     {
         _rseRecycle.Call();
@@ -167,5 +163,11 @@ public class CharacterInput : MonoBehaviour
 	{
 		Cursor.visible = value;
 		Cursor.lockState = value ? CursorLockMode.None : CursorLockMode.Locked;
+	}
+
+	public void OnClimb(InputValue value)
+	{
+		_climb = value.isPressed;
+		_rseClimb.Call(_climb);
 	}
 }

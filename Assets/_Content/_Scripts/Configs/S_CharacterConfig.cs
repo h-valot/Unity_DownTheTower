@@ -144,6 +144,12 @@ public class CharacterConfig : ScriptableObject
 	[Tooltip("")]
 	public float jumpOffWallForce;
 
+	[Tooltip("")]
+	public float climbingSpeed = 5f;
+
+	[Tooltip("")]
+	public float ropeAcceleration;
+
 
 	[Header("Camera")]
 	[Tooltip("Clamp the camera rotation to this angle when looking down")]

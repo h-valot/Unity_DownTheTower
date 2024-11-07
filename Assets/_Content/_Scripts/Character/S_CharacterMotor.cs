@@ -41,11 +41,11 @@ public class CharacterMotor : MonoBehaviour
     [SerializeField] private RSE_CancelAction _rseCancelAction;
 	[SerializeField] private RSE_CanInteract _rseCanInteract;
 	[SerializeField] private RSE_CanRecycle _rseCanRecycle;
-	[SerializeField] private RSE_Holding _rseHolding;
 	[SerializeField] private RSE_Recycle _rseRecycle;
     [SerializeField] private RSE_ToggleInputs _rseToggleInputs;
 	[SerializeField] private RSE_KillCharacter _rseKillCharacter;
 	[SerializeField] private RSO_GamePaused _rsoGamePaused;
+	[SerializeField] private RSE_Climb _rseClimb;
 
 	#endregion
 
@@ -934,6 +934,7 @@ public class CharacterMotor : MonoBehaviour
 		_rseJump.action += Jump;
 		_rseCancelAction.action += CancelAction;
 		_rseKillCharacter.action += HandleDeath;
+		_rseClimb.action += Climb;
 
 		switch (_currentState)
         {
@@ -966,7 +967,6 @@ public class CharacterMotor : MonoBehaviour
                 _rseCraft.action += ToggleCraft;
                 _rseToggleInHand.action += ToggleInHand;
                 _rseInteract.action += Interact;
-				_rseHolding.action += Holding;
                 break;
             case AnimationState.LADDER:
                 _rseMove.action += Move;
@@ -979,7 +979,7 @@ public class CharacterMotor : MonoBehaviour
     }
 
     /// <summary>
-    /// 	remove character behavior from player inputs
+    /// 	Remove character behavior from player inputs.
     /// </summary>
     private void UnsubscribeInputs()
     {
@@ -992,9 +992,9 @@ public class CharacterMotor : MonoBehaviour
         _rseCancelAction.action -= CancelAction;
         _rseInteract.action -= Interact;
 		_rseKillCharacter.action -= HandleDeath;
-		_rseHolding.action -= Holding;
         _rseRecycle.action -= Recycle;
-    }
+		_rseClimb.action -= Climb;
+	}
 
 	public void ToggleCraftInput(bool _isActive)
 	{
@@ -1069,21 +1069,18 @@ public class CharacterMotor : MonoBehaviour
 	private void Run(bool isRunning)
 	{
 		_isRunning = isRunning;
-	}
-
-	private void Holding(Triome isHolding)
-	{
-		if (isHolding == Triome.NONE) return;
-
-		Holding(isHolding.ToBool());
+		Holding(isRunning);
 	}
 
 	/// <summary>
-	/// 	update the holding rope input value.
+	/// 	Update the holding rope input value.
 	/// </summary>
 	/// <param name="isHolding">is the input pressed</param>
 	private void Holding(bool isHolding)
 	{
+		// Assert: if the jump is released and the running input is still pressed
+		if (_isRunning && !isHolding) return;
+
 		if (_rope == null)
 		{
 			_isHolding = false;
@@ -1127,6 +1124,18 @@ public class CharacterMotor : MonoBehaviour
 				}
 				break;
 		}
+	}
+
+	private void Holding(Triome isHolding)
+	{
+		if (isHolding == Triome.NONE) return;
+
+		Holding(isHolding.ToBool());
+	}
+
+	private void Climb(bool isClimbing)
+	{
+		_isClimbing = isClimbing;
 	}
 
 	/// <summary>
@@ -1478,6 +1487,7 @@ public class CharacterMotor : MonoBehaviour
 	private bool _inputsPressed;
 	private bool _inputsTowardsVertical;
 	public Triome _isJumpProlongedCached = Triome.NONE;
+	public bool _isClimbing;
 
 	// Mics
 	private Vector3 _towardsCharacter;
@@ -1495,7 +1505,6 @@ public class CharacterMotor : MonoBehaviour
 
 	private void EnterRopeState()
 	{
-		_rseHolding.action += Holding;
 		_rseCraft.action -= ToggleCraft;
 
 		_isJumpProlongedCached = Triome.NONE;
@@ -1553,12 +1562,10 @@ public class CharacterMotor : MonoBehaviour
 	private void ExitRopeState()
 	{
 		_isHolding = false;
-
 		_isJumpProlongedCached = Triome.NONE;
 
 		// Update inputs subscriptions
 		ToggleCraftInput(_hasBackpack);
-		_rseHolding.action -= Holding;
 	}
 
 	#endregion
@@ -1911,6 +1918,8 @@ public class CharacterMotor : MonoBehaviour
 		}
 	}
 
+	private const float _CLIMB_PER_FRAME = 0.01f;
+
 	/// <summary>
 	/// 	Add spherical locomotion constraint to the character movement. 
 	/// </summary>
@@ -1930,6 +1939,9 @@ public class CharacterMotor : MonoBehaviour
 				break;
 		}
 
+		// Climb the rope if the hold lenght rope constraint is applied.
+		HandleClimbing();
+
 		// Get the distance between the current character's position and the position of the last fold
 		Vector3 towardCharacter = _rsoCharacterPosition.value - _rope.folds[^1];
 
@@ -1942,6 +1954,20 @@ public class CharacterMotor : MonoBehaviour
 			// Call this unity function to synchronize transform to avoid glitchy movement effects
 			Physics.SyncTransforms();
 		}
+	}
+
+	private float _currentClimbSpeed;
+	private void HandleClimbing()
+	{
+		if (!_isClimbing) 
+		{
+			_currentClimbSpeed = 0f;
+			return;
+		}
+
+		_currentClimbSpeed += _characterConfig.ropeAcceleration * Time.fixedDeltaTime;
+		float clampedClimbSpeed = Mathf.Clamp(_currentClimbSpeed, 0, _characterConfig.climbingSpeed);
+		_rope.ReduceHoldLength(clampedClimbSpeed * Time.fixedDeltaTime);
 	}
 
 	#endregion

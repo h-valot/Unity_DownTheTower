@@ -228,6 +228,11 @@ public class Rope : Permanent
 		// issue if spamming holding rope key
 		return (folds[^1] - _rsoCharacterPosition.value).magnitude;
 	}
+	
+	public void ReduceHoldLength(float amount)
+	{
+		holdLength -= amount;
+	}
 
 	private void DrawLines()
 	{

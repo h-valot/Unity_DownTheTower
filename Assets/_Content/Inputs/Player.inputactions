@@ -123,15 +123,6 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "Holding",
-                    "type": "Value",
-                    "id": "636c60ef-c8e7-482a-a635-cca84e9a3b0a",
-                    "expectedControlType": "Button",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": true
-                },
-                {
                     "name": "Recycle",
                     "type": "Button",
                     "id": "9537cb3f-24db-42e8-9bbe-55f5cd0f3d33",
@@ -139,6 +130,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "Climb",
+                    "type": "Value",
+                    "id": "9ad2c068-a6a3-4c1a-8abe-c67c11b1199a",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
                 }
             ],
             "bindings": [
@@ -474,17 +474,6 @@
                 },
                 {
                     "name": "",
-                    "id": "bf9ce1b8-b330-4572-a684-25b56db15a92",
-                    "path": "<Gamepad>/leftShoulder",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "Gamepad",
-                    "action": "Holding",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
                     "id": "8721ae5f-ea6e-4ee1-a4b4-fbc8d91f78ac",
                     "path": "<Gamepad>/dpad/down",
                     "interactions": "",
@@ -507,12 +496,23 @@
                 },
                 {
                     "name": "",
-                    "id": "d213f6e5-5813-4c52-90d5-ba7a4f8d0a0c",
-                    "path": "<Keyboard>/c",
+                    "id": "bdb7540c-bccb-412e-963d-1e99b7d1f683",
+                    "path": "<Keyboard>/leftCtrl",
                     "interactions": "",
                     "processors": "",
                     "groups": "KeyboardMouse",
-                    "action": "Holding",
+                    "action": "Climb",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "2deb8d9a-7a8b-44f9-873e-1879f97f5be5",
+                    "path": "<Gamepad>/leftShoulder",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "Climb",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
