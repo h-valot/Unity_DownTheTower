@@ -70,12 +70,12 @@
                 },
                 {
                     "name": "CancelAction",
-                    "type": "Button",
+                    "type": "Value",
                     "id": "5d232460-59ae-44b6-bc7b-b01bf5a4f1ce",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
-                    "initialStateCheck": false
+                    "initialStateCheck": true
                 },
                 {
                     "name": "CraftTorch",
@@ -358,6 +358,17 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "Gamepad",
+                    "action": "CancelAction",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "4a4dfdbe-28dd-4d0e-9177-860efb2555c4",
+                    "path": "<Keyboard>/g",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "KeyboardMouse",
                     "action": "CancelAction",
                     "isComposite": false,
                     "isPartOfComposite": false

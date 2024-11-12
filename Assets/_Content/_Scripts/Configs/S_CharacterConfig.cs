@@ -145,10 +145,10 @@ public class CharacterConfig : ScriptableObject
 	public float jumpOffWallForce;
 
 	[Tooltip("")]
-	public float climbingSpeed = 5f;
+	public float maxClimbSpeed = 5f;
 
 	[Tooltip("")]
-	public float ropeAcceleration;
+	public float climbAcceleration;
 
 
 	[Header("Camera")]

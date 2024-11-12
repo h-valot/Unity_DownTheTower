@@ -1079,7 +1079,7 @@ public class CharacterMotor : MonoBehaviour
 	private void Holding(bool isHolding)
 	{
 		// Assert: if the jump is released and the running input is still pressed
-		if (_isRunning && !isHolding) return;
+		if (_isJumpingInputValue && !isHolding) return;
 
 		if (_rope == null)
 		{
@@ -1152,7 +1152,7 @@ public class CharacterMotor : MonoBehaviour
 		// Do various things based on the context
 
 		// Rope context
-		if (_rope != null)
+		if (_rope != null && _rope.isPlaced)
 		{
 			DesequipRope();
 		}
@@ -1965,8 +1965,8 @@ public class CharacterMotor : MonoBehaviour
 			return;
 		}
 
-		_currentClimbSpeed += _characterConfig.ropeAcceleration * Time.fixedDeltaTime;
-		float clampedClimbSpeed = Mathf.Clamp(_currentClimbSpeed, 0, _characterConfig.climbingSpeed);
+		_currentClimbSpeed += _characterConfig.climbAcceleration * Time.fixedDeltaTime;
+		float clampedClimbSpeed = Mathf.Clamp(_currentClimbSpeed, 0, _characterConfig.maxClimbSpeed);
 		_rope.ReduceHoldLength(clampedClimbSpeed * Time.fixedDeltaTime);
 	}
 
