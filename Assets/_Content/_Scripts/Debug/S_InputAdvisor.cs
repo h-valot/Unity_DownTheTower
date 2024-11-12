@@ -7,10 +7,13 @@ public class InputAdvisor : MonoBehaviour
     [SerializeField] private GameObject graphicInteract;
     [SerializeField] private GameObject graphicRecycle;
     [SerializeField] private GameObject inputPanel;
+    [SerializeField] private GameObject ropeInputs;
+    [SerializeField] private GameObject locomotionInputs;
 
     [Header("External References")]
     [SerializeField] private RSE_CanInteract _rseCanInteract;
     [SerializeField] private RSE_CanRecycle _rseCanRecycle;
+    [SerializeField] private RSO_CharacterState _rsoCharacterState;
     [SerializeField] private RSE_HideUI _rseHideUI;
 
     private bool isUIactive = true;
@@ -20,6 +23,7 @@ public class InputAdvisor : MonoBehaviour
         _rseCanInteract.action += ToggleInteract;
         _rseCanRecycle.action += ToggleRecycle;
         _rseHideUI.action += ToggleUI;
+        _rsoCharacterState.OnChanged += SwitchAdvisorInputs;
     }
 
     private void OnDisable()
@@ -27,6 +31,7 @@ public class InputAdvisor : MonoBehaviour
         _rseCanInteract.action -= ToggleInteract;
         _rseCanRecycle.action -= ToggleRecycle;
         _rseHideUI.action -= ToggleUI;
+        _rsoCharacterState.OnChanged -= SwitchAdvisorInputs;
     }
 
     private void ToggleInteract(bool isActive)
@@ -43,5 +48,11 @@ public class InputAdvisor : MonoBehaviour
     {
         isUIactive = !isUIactive;
         inputPanel.SetActive(isUIactive);
+    }
+
+    private void SwitchAdvisorInputs()
+    {
+        ropeInputs.SetActive(_rsoCharacterState.value == AnimationState.ROPE);
+        locomotionInputs.SetActive(!(_rsoCharacterState.value == AnimationState.ROPE));
     }
 }

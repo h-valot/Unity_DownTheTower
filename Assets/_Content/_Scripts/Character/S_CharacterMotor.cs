@@ -29,6 +29,7 @@ public class CharacterMotor : MonoBehaviour
 	[SerializeField] private TorchConfig _torchConfig;
     [SerializeField] private RSO_CharacterForward _rsoCharacterForward;
 	[SerializeField] private RSO_CharacterPosition _rsoCharacterPosition;
+	[SerializeField] private RSO_CharacterState _rsoCharacterState;
     [SerializeField] private RSO_PlayerDeath _rsoPlayerDeath;
 	[SerializeField] private RSE_Run _rseRun;
 	[SerializeField] private RSE_Look _rseLook;
@@ -239,7 +240,9 @@ public class CharacterMotor : MonoBehaviour
 	{
 		ExitCurrentState();
 		EnterState(newState);
-	}
+        _rsoCharacterState.value = newState;
+
+    }
 
 	/// <summary>
 	/// 	call the enter function of the given state.
