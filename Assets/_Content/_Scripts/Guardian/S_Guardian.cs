@@ -21,6 +21,9 @@ public class Guardian : MonoBehaviour
     private GameObject _actualTarget;
     private float _playerDistance;
     private float _torchDistance;
+    private bool _isPlayerSeen = false;
+    [SerializeField] private float _timeToDestroy;
+    [SerializeField] private float _killTime;
 
     public Material _aggroMaterial;
     public Material _scanMaterial;
@@ -68,37 +71,51 @@ public class Guardian : MonoBehaviour
             i--;
             yield return null;
         }
+    }
 
+    public IEnumerator KillPlayer()
+    {
+        StopCoroutine(UpdatePlayerPosition());
+        yield return new WaitForSeconds(_killTime);
+        _playerRef.HandleDeath();
+        ResetTarget();
+        DestroyedTarget();
+    }
+
+    public IEnumerator DestroyTorchTime()
+    {
+        yield return new WaitForSecondsRealtime(_timeToDestroy);
+        DestroyedTarget();
     }
     public void TargetStayIn()
     {
         if (IsActif() == true)
         {
-            if (CheckRaycast() == true)
-            {
-                if (_coroutine != null)
-                {
-                    StopCoroutine(_coroutine);
-                    StopCoroutine(_coroutineUpdate);
-                }
-                SelectTargetSequence();
-                AggroState();
-                
-            }
+                if (CheckRaycast() == true)
+                    {
+                        if (_coroutine != null)
+                        {
+                            StopCoroutine(_coroutine);
+                            StopCoroutine(_coroutineUpdate);
+                        }
+                        SelectTargetSequence();
+                        AggroState();
+                    }
         }
     }
-
 
     public void TargetExit()
     {
         if (IsActif() == true)
         {
-            if ( _aggro == true)
+            if ( _aggro == true && _actualTarget == _playerRef)
                 {
-                    Debug.Log("plus devant");
-                    ToIdle();
+                if (_torchRef == null)
+                    {
+                        ToIdle();
+                    }
                 }
-            
+           
         }
     }
 
@@ -137,15 +154,6 @@ public class Guardian : MonoBehaviour
     }
     private void SetDestination()
     {
-        //if (_isPlayerTarget)
-        //{
-        //    _agent.destination = _playerRef.transform.position;
-        //}
-        //else
-        //{
-        //    _agent.destination = _torchRef.transform.position;
-        //}
-
         _agent.destination = _actualTarget.transform.position;
     }
 
@@ -163,19 +171,24 @@ public class Guardian : MonoBehaviour
 
     private void ToIdle()
     {
-        Debug.Log("To idle");
-        _coroutine = StartCoroutine(CheckForXSecond(1f));
-        _coroutineUpdate = StartCoroutine(UpdatePlayerPosition());
+        {
+            Debug.Log("To idle");
+            _coroutine = StartCoroutine(CheckForXSecond(1f));
+            _coroutineUpdate = StartCoroutine(UpdatePlayerPosition());
+        }
     }
 
     private void Idle ()
 
     {
+        if (_coroutineUpdate != null)
+        {
+            StopCoroutine(_coroutineUpdate);
+        }
         _agent.speed = 5f;
         Debug.Log("Idle");
         _aggro = false;
         _pathPatrol.GoingBackToPatrol();
-        StopCoroutine(_coroutineUpdate);
         ChangeColor(2f);
         ResetTarget();
     }
@@ -202,17 +215,16 @@ public class Guardian : MonoBehaviour
 
             if (hitDataHead.transform == _playerRef.transform || hitDataEyes.transform == _playerRef.transform || hitDataFeet.transform == _playerRef.transform)
             {
-                Debug.Log("pas de mur entre");
+                _isPlayerSeen = true;
                 return true;
             }
             else
             {
-
-                Debug.Log(" mur entre");
+                _isPlayerSeen = false;
                 return false;
             }
         }
-        else
+        else if (_torchRef != null)
         {
             Physics.Linecast(_raycastEyes.transform.position, _torchRef.transform.position, out var hitDatatorch);
             // UnityEngine.Debug.DrawRay(_raycastEyes.transform.position, (_torchRef.transform.position - _raycastEyes.transform.position).normalized, Color.red);
@@ -220,15 +232,14 @@ public class Guardian : MonoBehaviour
             if (hitDatatorch.collider.TryGetComponent<Torch>(out var torch)
                 || hitDatatorch.collider.TryGetComponent<TorchPointLight>(out var torchPointLight))
             {
-                Debug.Log("pas de mur entre torch");
                 return true;
             }
             else
             {
-                Debug.Log(" mur entre torch");
                 return false;
             }
         }
+        else { return false; }
     }
     private void CheckPlayerHeight()
     {
@@ -292,7 +303,6 @@ public class Guardian : MonoBehaviour
                 if (_torchDistance < _playerDistance)
                 {
                     _actualTarget = _torchRef.gameObject;
-                    //Debug.Log(_actualTarget.ToString());
                 }
             }
     }
@@ -307,10 +317,24 @@ public class Guardian : MonoBehaviour
     public void ResetTarget()
     {
         _actualTarget = null;
+        _torchRef = null;
+        _playerRef = null;
     }
 
     public void DestroyedTarget()
     {
-       TargetStayIn();
+        if (_isPlayerSeen == true)
+        {
+            if (_coroutineUpdate != null)
+                {
+                    StopCoroutine(_coroutineUpdate);
+                }
+            TargetStayIn();
+        }
+
+        else
+        { 
+            Idle();
+        }
     }
 }

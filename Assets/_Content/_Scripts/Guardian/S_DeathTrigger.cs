@@ -8,11 +8,10 @@ public class DeathTrigger : MonoBehaviour
 
     public void OnTriggerEnter(Collider other)
     {
-        Debug.Log(other.ToString());
         if (other.TryGetComponent<CharacterMotor>(out var _playerCheckRef))
         {
-            _playerCheckRef.HandleDeath();
-            _GuardianRef.DestroyedTarget();
+            StartCoroutine(_GuardianRef.KillPlayer());
+            //_playerCheckRef.HandleDeath();
         }
 
         if (other.TryGetComponent<Torch>(out var _torchCheckRef))
@@ -20,8 +19,8 @@ public class DeathTrigger : MonoBehaviour
             if (_torchCheckRef!=null)
             {
                 Destroy(_torchCheckRef.gameObject);
-                _GuardianRef.DestroyedTarget();
             }
+            StartCoroutine(_GuardianRef.DestroyTorchTime());
         }
 
         

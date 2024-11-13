@@ -5,10 +5,10 @@ using UnityEngine.AI;
 
 public class PathPatrol : MonoBehaviour
 {
-    [SerializeField] private Guardian _guardianRef;
+    [SerializeField] public Guardian _guardianRef;
 
     //private
-    private NavMeshAgent _agent;
+    public NavMeshAgent _agent;
 
     //public
     public Transform[] _patrolPoints;
@@ -42,7 +42,7 @@ public class PathPatrol : MonoBehaviour
         if (_aggro == false)
         {
             _guardianRef.ChangeColor(2f);
-            if ((transform.position - _patrolPoints[_targetPoint].position).magnitude <= 0.1f)
+            if ((transform.position - _patrolPoints[_targetPoint].position).magnitude <= 0.5f)
             {
                 IncreaseTargetInt();
             }
@@ -61,14 +61,16 @@ public class PathPatrol : MonoBehaviour
 
     public void GoingBackToPatrol()
     {
-        if (dontPatrol == false)
-        {
-            if (_aggro == false)
+        Debug.Log("Je tente de revenir en patrouille");
+        GetAggro();
+        
+        if (_aggro == false)
             {
-                Debug.Log("retour en patrouille");
-                _agent.destination = _patrolPoints[_targetPoint].transform.position;
+                Debug.Log("Patrol mode");
+                Patrolling();
+                //_agent.destination = _patrolPoints[_targetPoint].transform.position;
+                dontPatrol = false;
             }
-        }
         
         
     }
