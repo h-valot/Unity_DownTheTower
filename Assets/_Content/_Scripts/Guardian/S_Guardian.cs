@@ -92,15 +92,15 @@ public class Guardian : MonoBehaviour
         if (IsActif() == true)
         {
                 if (CheckRaycast() == true)
+                {
+                    if (_coroutine != null)
                     {
-                        if (_coroutine != null)
-                        {
-                            StopCoroutine(_coroutine);
-                            StopCoroutine(_coroutineUpdate);
-                        }
-                        SelectTargetSequence();
-                        AggroState();
+                        StopCoroutine(_coroutine);
+                        StopCoroutine(_coroutineUpdate);
                     }
+                    SelectTargetSequence();
+                    AggroState();
+                }
         }
     }
 
@@ -109,12 +109,17 @@ public class Guardian : MonoBehaviour
         if (IsActif() == true)
         {
             if ( _aggro == true && _actualTarget == _playerRef)
+            {
+                if (_isPlayerSeen == true) 
                 {
-                if (_torchRef == null)
-                    {
-                        ToIdle();
-                    }
+                    SetDestination();
                 }
+
+                if (_torchRef == null)
+                {
+                    ToIdle();
+                }
+            }
            
         }
     }
@@ -200,7 +205,7 @@ public class Guardian : MonoBehaviour
 
     bool CheckRaycast()
     {
-        if (_isPlayerTarget)
+        if (_isPlayerTarget && _playerRef != null)
         {
             CheckPlayerHeight();
             Physics.Raycast(_raycastEyes.transform.position, ((_playerRef.transform.position + new Vector3(0, headHeight, 0)) - _raycastEyes.transform.position).normalized, out var hitDataHead);
@@ -295,16 +300,16 @@ public class Guardian : MonoBehaviour
             _actualTarget = _torchRef.gameObject;
         }
         if (_playerRef != null && _torchRef != null)
+        {
+            if (_playerDistance < _torchDistance)
             {
-                if (_playerDistance < _torchDistance)
-                {
-                    _actualTarget = _playerRef.gameObject;
-                }
-                if (_torchDistance < _playerDistance)
-                {
-                    _actualTarget = _torchRef.gameObject;
-                }
+                _actualTarget = _playerRef.gameObject;
             }
+            if (_torchDistance < _playerDistance)
+            {
+                _actualTarget = _torchRef.gameObject;
+            }
+        }
     }
 
     public void SelectTargetSequence()
@@ -319,6 +324,7 @@ public class Guardian : MonoBehaviour
         _actualTarget = null;
         _torchRef = null;
         _playerRef = null;
+        _isPlayerSeen = false;
     }
 
     public void DestroyedTarget()
@@ -326,9 +332,10 @@ public class Guardian : MonoBehaviour
         if (_isPlayerSeen == true)
         {
             if (_coroutineUpdate != null)
-                {
-                    StopCoroutine(_coroutineUpdate);
-                }
+            {
+                StopCoroutine(_coroutineUpdate);
+            }
+            Debug.Log("je devrais poursuivre le joueur");
             TargetStayIn();
         }
 
