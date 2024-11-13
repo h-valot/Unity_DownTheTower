@@ -108,6 +108,16 @@ public class CharacterConfig : ScriptableObject
 	[Tooltip("HOLD_TO_STOP: stop the character from getting any further away from the rope base when pressing the corresponding input. HOLD_TO_LET_GO: letting the character getting further from the rope base when pressing the corresponding input.")]
 	public RopeHolding ropeHoldingMethod;
 
+	[Tooltip("Angle on the cercle the second point will be placed to get a direction of movement on the rope constraint sphere. By default, 5f.")]
+	public float ropeOffsetAngle = 5f;
+
+	[Tooltip("")]
+	public float jumpOffRopeModifier = 1.2f;
+
+	[Tooltip("")]
+	public float freeFallFromRopeModifier = 0.9f;
+
+	[Header("Rope - Partial suspension")]
 	[Tooltip("Against wall raycasts will include only referenced layers.")]
 	public LayerMask againstWallLayerToInclude;
 
@@ -120,35 +130,36 @@ public class CharacterConfig : ScriptableObject
 	[Tooltip("Scalar that multiply the player's input direction while on the partial rope suspension (eg. character against a wall).")]
 	public float partialSuspensionSpeed = 3.0f;
 
+	[Tooltip("")]
+	public float jumpOffWallForce;
+
+	[Header("Rope - Complete suspension")]
 	[Tooltip("Scalar that multiply the direction towards the attraction point while on the complete rope suspension (eg. character in the void).")]
 	public float completeSphericalAttractiveForce = 3.0f;
 
 	[Tooltip("Scalar that multiply the player's input direction while on the complete rope suspension (eg. character in the void).")]
 	public float completeSuspensionSpeed = 4.0f;
 
-	[Tooltip("Start facing the center when the distance between the character and the hold rope radius is less than this value.")]
-	public float facingCenterThreshold = 0.25f;
-
+	[Header("Rope - Pendulum angles")]
 	[Tooltip("")]
 	public float maxSideAngle = 45f;
 
-	[Tooltip("")]
-	public float ropeOffsetAngle = 5f;
-
-	[Tooltip("The mass of the character. Used for rope pendulum effect calculations")]
+	[Tooltip("The mass of the character. Used for rope pendulum effect calculations.")]
 	public float mass = 1f;
 
-	[Tooltip("")]
+	[Tooltip("The air drag of the character on the rope while experimenting the pendulum effect.")]
 	public float drag;
 
-	[Tooltip("")]
-	public float jumpOffWallForce;
-
-	[Tooltip("")]
+	[Header("Rope - Climb")]
+	[Tooltip("While pressing the climb input on rope, the climb speed will be clamped to this value.")]
 	public float maxClimbSpeed = 5f;
 
-	[Tooltip("")]
+	[Tooltip("Each frame while pressing the climb input on rope, the climb speed will be increment by this value * fixedDetlaTime.")]
 	public float climbAcceleration;
+
+	[Header("Rope - Deceleration")]
+	[Tooltip("")]
+	public AnimationCurve ropeDecelerationDistanceCurve;
 
 
 	[Header("Camera")]

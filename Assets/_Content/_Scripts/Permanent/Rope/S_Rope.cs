@@ -229,9 +229,9 @@ public class Rope : Permanent
 		return (folds[^1] - _rsoCharacterPosition.value).magnitude;
 	}
 	
-	public void ReduceHoldLength(float amount)
+	public void ChangeHoldLength(float amount)
 	{
-		holdLength -= amount;
+		holdLength += amount;
 	}
 
 	private void DrawLines()
