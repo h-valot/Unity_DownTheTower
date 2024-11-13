@@ -163,4 +163,9 @@ public class CharacterInput : MonoBehaviour
 		Cursor.visible = value;
 		Cursor.lockState = value ? CursorLockMode.None : CursorLockMode.Locked;
 	}
+
+	public void OnHideUI()
+	{
+		_rseHideUI.Call();
+	}
 }
