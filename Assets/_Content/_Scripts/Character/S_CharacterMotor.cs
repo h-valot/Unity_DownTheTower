@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using NaughtyAttributes;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -9,44 +10,43 @@ public class CharacterMotor : MonoBehaviour
 	#region exposed variables
 
 	[Header("Internal references")]
-	[SerializeField] private Transform _cameraTransform;
-	[SerializeField] private Transform _characterDirection;
-	[SerializeField] private Transform _handSocket;
-	[SerializeField] private Transform _robotHandSocket;
-	[SerializeField] private Transform _harness;
-	[SerializeField] private CharacterController _controller;
-	[SerializeField] private GameObject _backpackAnchor;
+	[Foldout("Internal references")] [SerializeField] private Transform _cameraTransform;
+	[Foldout("Internal references")] [SerializeField] private Transform _characterDirection;
+	[Foldout("Internal references")] [SerializeField] private Transform _handSocket;
+	[Foldout("Internal references")] [SerializeField] private Transform _robotHandSocket;
+	[Foldout("Internal references")] [SerializeField] private Transform _harness;
+	[Foldout("Internal references")] [SerializeField] private CharacterController _controller;
+	[Foldout("Internal references")] [SerializeField] private GameObject _backpackAnchor;
 
 	[Space(5)]
-    [Header("External references")]
-	[SerializeField] private ThirdPersonCamera _thirdPersonCamera;
-	[SerializeField] private GameObject _PF_backpack;
+	[Foldout("External references")] [SerializeField] private ThirdPersonCamera _thirdPersonCamera;
+	[Foldout("External references")] [SerializeField] private GameObject _PF_backpack;
 
     [Space(5)]
-    [Header("Scriptable references")]
-	[SerializeField] private CharacterConfig _characterConfig;
-	[SerializeField] private LadderConfig _ladderConfig;
-	[SerializeField] private RopeConfig _ropeConfig;
-	[SerializeField] private TorchConfig _torchConfig;
-    [SerializeField] private RSO_CharacterForward _rsoCharacterForward;
-	[SerializeField] private RSO_CharacterPosition _rsoCharacterPosition;
-    [SerializeField] private RSO_PlayerDeath _rsoPlayerDeath;
-	[SerializeField] private RSE_Run _rseRun;
-	[SerializeField] private RSE_Look _rseLook;
-	[SerializeField] private RSE_Move _rseMove;
-	[SerializeField] private RSE_Jump _rseJump;
-	[SerializeField] private RSE_Throw _rseThrow;
-	[SerializeField] private RSE_ToggleInHand _rseToggleInHand;
-	[SerializeField] private RSE_Craft _rseCraft;
-	[SerializeField] private RSE_Interact _rseInteract;
-    [SerializeField] private RSE_CancelAction _rseCancelAction;
-	[SerializeField] private RSE_CanInteract _rseCanInteract;
-	[SerializeField] private RSE_CanRecycle _rseCanRecycle;
-	[SerializeField] private RSE_Recycle _rseRecycle;
-    [SerializeField] private RSE_ToggleInputs _rseToggleInputs;
-	[SerializeField] private RSE_KillCharacter _rseKillCharacter;
-	[SerializeField] private RSO_GamePaused _rsoGamePaused;
-	[SerializeField] private RSE_Climb _rseClimb;
+	[Foldout("Scriptable references")] [SerializeField] private CharacterConfig _characterConfig;
+	[Foldout("Scriptable references")] [SerializeField] private LadderConfig _ladderConfig;
+	[Foldout("Scriptable references")] [SerializeField] private RopeConfig _ropeConfig;
+	[Foldout("Scriptable references")] [SerializeField] private TorchConfig _torchConfig;
+	[Foldout("Scriptable references")] [SerializeField] private RSO_CharacterForward _rsoCharacterForward;
+	[Foldout("Scriptable references")] [SerializeField] private RSO_CharacterPosition _rsoCharacterPosition;
+	[Foldout("Scriptable references")] [SerializeField] private RSO_PlayerDeath _rsoPlayerDeath;
+	[Foldout("Scriptable references")] [SerializeField] private RSE_Run _rseRun;
+	[Foldout("Scriptable references")] [SerializeField] private RSE_Look _rseLook;
+	[Foldout("Scriptable references")] [SerializeField] private RSE_Move _rseMove;
+	[Foldout("Scriptable references")] [SerializeField] private RSE_Jump _rseJump;
+	[Foldout("Scriptable references")] [SerializeField] private RSE_Throw _rseThrow;
+	[Foldout("Scriptable references")] [SerializeField] private RSE_ToggleInHand _rseToggleInHand;
+	[Foldout("Scriptable references")] [SerializeField] private RSE_Craft _rseCraft;
+	[Foldout("Scriptable references")] [SerializeField] private RSE_Interact _rseInteract;
+	[Foldout("Scriptable references")] [SerializeField] private RSE_CancelAction _rseCancelAction;
+	[Foldout("Scriptable references")] [SerializeField] private RSE_CanInteract _rseCanInteract;
+	[Foldout("Scriptable references")] [SerializeField] private RSE_CanRecycle _rseCanRecycle;
+	[Foldout("Scriptable references")] [SerializeField] private RSE_Recycle _rseRecycle;
+	[Foldout("Scriptable references")] [SerializeField] private RSE_ToggleInputs _rseToggleInputs;
+	[Foldout("Scriptable references")] [SerializeField] private RSE_KillCharacter _rseKillCharacter;
+	[Foldout("Scriptable references")] [SerializeField] private RSO_GamePaused _rsoGamePaused;
+	[Foldout("Scriptable references")] [SerializeField] private RSE_Climb _rseClimb;
+	[Foldout("Scriptable references")] [SerializeField] private RSE_SetCharacterPosition _rseSetCharacterPosition;
 
 	#endregion
 
@@ -493,6 +493,16 @@ public class CharacterMotor : MonoBehaviour
 	#region movement
 
 	/// <summary>
+	/// 	Force character's tranform position and rotation to the given values.
+	/// </summary>
+	private void ForceCharacterPosition(Vector3 position, Quaternion rotation)
+	{
+		transform.position = position;
+		transform.rotation = rotation;
+		Physics.SyncTransforms();
+	}
+
+	/// <summary>
 	/// 	Determine origin forward and right vectors based on character position, camera and inputs.	
 	/// </summary>
 	private void CalculateOriginForwardRight()
@@ -936,6 +946,7 @@ public class CharacterMotor : MonoBehaviour
 		_rseCancelAction.action += CancelAction;
 		_rseKillCharacter.action += HandleDeath;
 		_rseClimb.action += Climb;
+		_rseSetCharacterPosition.action += ForceCharacterPosition;
 
 		switch (_currentState)
         {
@@ -995,6 +1006,7 @@ public class CharacterMotor : MonoBehaviour
 		_rseKillCharacter.action -= HandleDeath;
         _rseRecycle.action -= Recycle;
 		_rseClimb.action -= Climb;
+		_rseSetCharacterPosition.action -= ForceCharacterPosition;
 	}
 
 	public void ToggleCraftInput(bool _isActive)
@@ -1080,15 +1092,10 @@ public class CharacterMotor : MonoBehaviour
 	/// <param name="isHolding">is the input pressed</param>
 	private void Holding(bool isHolding)
 	{
-		if (_isJumpingPressed && !isHolding)
-		{
-			print("CHARACTER_MOTOR: Assert - if the jump is released and the running input is still pressed.");
-			return;
-		}
+		if (_isJumpingPressed && !isHolding) return;
 
 		if (_rope == null)
 		{
-			print("CHARACTER_MOTOR: Assert - there is no rope.");
 			_isHolding = false;
 			return;
 		}
@@ -1447,12 +1454,12 @@ public class CharacterMotor : MonoBehaviour
 
 	// [x] Climb the rope
 	// [x] Jump off the rope on motion
-	// [ ] In partial suspension, make the character unable to move while off the wall
+	// [x] Re-equip an already-used rope (debug version)
 	// [ ] In partial suspension, make the character able to jump off the wall
+	// [ ] In partial suspension, make the character unable to move while off the wall
 	// [ ] In partial suspension, make the character unable to be snap against a cambered wall 
 	// [ ] In complete suspension, make the character pivot with the rope inclination
 	// [ ] Lerp the rope stop deceleration
-	// [ ] Re-equip an already-used rope
 
 	#region variables
 
@@ -1506,14 +1513,8 @@ public class CharacterMotor : MonoBehaviour
 		_isJumpProlongedCached = Triome.NONE;
 
 		_rope.UpdateHoldLength();
-		_positionStartFall = _rsoCharacterPosition.value;
-
-		if (_isGroundedLastFrame) 
-		{ 
-			CheckWalkRun();
-			ApplyInputs();
-			ApplyAcceleration();
-		}
+		
+		EnterFallState();
 	}
 
 	private void UpdateRopeState()
@@ -1710,10 +1711,10 @@ public class CharacterMotor : MonoBehaviour
 
 		// Apply jump force
 		_currTime = 0;
-		StartCoroutine(ApplyForceOverTime(direction, force, 2));
+		StartCoroutine(ApplyFreeFallForce(direction, force, 2));
 	}
 
-	private IEnumerator ApplyForceOverTime(Vector3 direction, float force, float duration)
+	private IEnumerator ApplyFreeFallForce(Vector3 direction, float force, float duration)
 	{
 		while (_currTime < duration)
 		{
@@ -2097,26 +2098,28 @@ public class CharacterMotor : MonoBehaviour
     #endregion
 	
     #region interaction
+	
     private void Interact()
     {
-		if (_interactables.Count == 0
-			|| _currentState != AnimationState.LOCOMOTION) return;
+		// Assertion
+		if (_interactables.Count == 0 || _currentState != AnimationState.LOCOMOTION) return;
 
 		Interactible nearest = GetNearestInteractible();
 		if (nearest != null) nearest.InteractionTrigger();
-
     }
 
     private void Recycle()
     {
-        if (_interactables.Count == 0
-            || _currentState != AnimationState.LOCOMOTION) return;
+		// Assertion
+        if (_interactables.Count == 0 || _currentState != AnimationState.LOCOMOTION) return;
 
         Interactible interactible = GetNearestInteractible();
+
+		// Assertion
         if (interactible == null) return;
 
         if (interactible.isRecyclable
-            && interactible.objectToRecycle != null)
+        && interactible.objectToRecycle != null)
         {
             _interactables.Remove(interactible);
             _validInteractibles.Remove(interactible);
@@ -2140,12 +2143,18 @@ public class CharacterMotor : MonoBehaviour
 
         for (int i = 0; i < _interactables.Count; i++)
         {
+			// Assertion
+			if (_interactables[i] == null) continue;
+
 			Vector3 towardsInteract = _interactables[i].transform.position - transform.position;
+
 			if (Vector3.Dot(
 				new Vector3(_characterDirection.transform.forward.x, 0, _characterDirection.transform.forward.z).normalized, 
 				new Vector3(towardsInteract.x, 0, towardsInteract.z).normalized
 				) > 0.5)
+			{
 				validInteractibles.Add(_interactables[i]);
+			}
         }
 
 		return validInteractibles;
@@ -2157,8 +2166,8 @@ public class CharacterMotor : MonoBehaviour
 
         for (int i = 1; i < _validInteractibles.Count; i++)
         {
-			if ((_validInteractibles[i].transform.position - this.transform.position).sqrMagnitude <
-                     (nearestInteractible.transform.position - this.transform.position).sqrMagnitude)
+			if ((_validInteractibles[i].transform.position - transform.position).sqrMagnitude <
+            	(nearestInteractible.transform.position - transform.position).sqrMagnitude)
             {
                 nearestInteractible = _validInteractibles[i];
             }
@@ -2176,18 +2185,26 @@ public class CharacterMotor : MonoBehaviour
     {
         _interactables.Remove(_interactibleObject);
 		_validInteractibles.Remove(_interactibleObject);
+
 		CheckShowInteract();
 		CheckShowRecycle(false);
     }
 
 	private void CheckShowInteract()
 	{
-		_rseCanInteract.Call(_validInteractibles.Count > 0 && _currentState == AnimationState.LOCOMOTION);
+		_rseCanInteract.Call(
+			_validInteractibles.Count > 0 
+			&& _currentState == AnimationState.LOCOMOTION
+		);
     }
 
 	private void CheckShowRecycle(bool isRecyclable)
 	{ 
-		_rseCanRecycle.Call(isRecyclable && _currentState == AnimationState.LOCOMOTION);
+		_rseCanRecycle.Call(
+			isRecyclable 
+			&& _currentState == AnimationState.LOCOMOTION
+		);
 	}
+
 	#endregion
 }
