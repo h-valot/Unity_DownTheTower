@@ -33,7 +33,7 @@ public class GameManager : MonoBehaviour
 	private void Reset()
 	{
 		Restart();
-		// TODO - Handle game data reset
+		// [ ] Handle game data reset
 	}
 
 	private void HandleDeath()

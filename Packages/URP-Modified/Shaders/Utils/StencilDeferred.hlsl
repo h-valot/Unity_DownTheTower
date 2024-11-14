@@ -299,7 +299,6 @@ half4 DeferredShading(Varyings input) : SV_Target
         half smoothness = exp2(10 * surfaceData.smoothness + 1);
         half3 specularColor = LightingSpecular(attenuatedLightColor, unityLight.direction, inputData.normalWS, inputData.viewDirectionWS, half4(surfaceData.specular, 1), smoothness);
 
-        // TODO: if !defined(_SPECGLOSSMAP) && !defined(_SPECULAR_COLOR), force specularColor to 0 in gbuffer code
         color = diffuseColor * surfaceData.albedo + specularColor;
     #endif
 

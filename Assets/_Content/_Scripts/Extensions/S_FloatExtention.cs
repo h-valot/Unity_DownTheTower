@@ -1,7 +1,6 @@
-using System;
 using UnityEngine;
 
-public static class S_FloatExtention
+public static class FloatExtention
 {
 	/// <summary>
 	/// 	return the given float with the given amout of digit.

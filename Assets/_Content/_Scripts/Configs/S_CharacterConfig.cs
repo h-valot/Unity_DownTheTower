@@ -37,6 +37,7 @@ public class CharacterConfig : ScriptableObject
 
 	[Tooltip("Speed scalar when the character is on an edge.")]
 	public float edgeFallFactor = 1f;
+
     [Tooltip("Edge height that the character climb into.")]
     public float edgeMaxClimbingHeight = 1.5f;
 
@@ -44,12 +45,15 @@ public class CharacterConfig : ScriptableObject
     [Header("Ground")]
 	[Tooltip("How far raycast moves down from origin point multiply by the capsule radius")]
 	public float groundCheckYFactor = 2.5f;
+
 	[Tooltip("Used to enlarge character capsule to approximate ground detection")]
 	public float skinWidth = 0.1f;
 	
+
 	[Header("Jump")]
 	[Tooltip("Speed added when using the jump button.")]
 	public float jumpMinimalPlanarVelocity = 1.5f;
+
 	[Tooltip("When jumping, the character reaches this height")]
 	public float jumpHeight;
 
@@ -60,12 +64,16 @@ public class CharacterConfig : ScriptableObject
 	[Header("Gravity")]
 	[Tooltip("The character uses its own gravity value. The engine default is -9.8f")]
 	public float gravity = -9.8f;
+
 	[Tooltip("Acceleration remove from character speed per second while falling.")]
 	public float dragDecceleration = 1f;
+
 	[Tooltip("Angular speed per second the character can turn while falling. Will be effective if character has a speed.")]
 	public float airControlAngularSpeed = 30f;
+
 	[Tooltip("Transform the dot product between character forward and input to a factor that multiply the air control angular speed.")]
 	public AnimationCurve airControlInputFactor;
+
 
 	[Header("Fall")]
 	[Tooltip("Whenever the character leaves a plateform, the coyote time counter starts. During this periode of time, the character can still jump.")]
@@ -100,6 +108,16 @@ public class CharacterConfig : ScriptableObject
 	[Tooltip("HOLD_TO_STOP: stop the character from getting any further away from the rope base when pressing the corresponding input. HOLD_TO_LET_GO: letting the character getting further from the rope base when pressing the corresponding input.")]
 	public RopeHolding ropeHoldingMethod;
 
+	[Tooltip("Angle on the cercle the second point will be placed to get a direction of movement on the rope constraint sphere. By default, 5f.")]
+	public float ropeOffsetAngle = 5f;
+
+	[Tooltip("")]
+	public float jumpOffRopeModifier = 1.2f;
+
+	[Tooltip("")]
+	public float freeFallFromRopeModifier = 0.9f;
+
+	[Header("Rope - Partial suspension")]
 	[Tooltip("Against wall raycasts will include only referenced layers.")]
 	public LayerMask againstWallLayerToInclude;
 
@@ -112,29 +130,36 @@ public class CharacterConfig : ScriptableObject
 	[Tooltip("Scalar that multiply the player's input direction while on the partial rope suspension (eg. character against a wall).")]
 	public float partialSuspensionSpeed = 3.0f;
 
+	[Tooltip("")]
+	public float jumpOffWallForce;
+
+	[Header("Rope - Complete suspension")]
 	[Tooltip("Scalar that multiply the direction towards the attraction point while on the complete rope suspension (eg. character in the void).")]
 	public float completeSphericalAttractiveForce = 3.0f;
 
 	[Tooltip("Scalar that multiply the player's input direction while on the complete rope suspension (eg. character in the void).")]
 	public float completeSuspensionSpeed = 4.0f;
 
-	[Tooltip("Start facing the center when the distance between the character and the hold rope radius is less than this value.")]
-	public float facingCenterThreshold = 0.25f;
-
+	[Header("Rope - Pendulum angles")]
 	[Tooltip("")]
 	public float maxSideAngle = 45f;
 
-	[Tooltip("")]
-	public float ropeOffsetAngle = 5f;
-
-	[Tooltip("The mass of the character. Used for rope pendulum effect calculations")]
+	[Tooltip("The mass of the character. Used for rope pendulum effect calculations.")]
 	public float mass = 1f;
 
-	[Tooltip("")]
+	[Tooltip("The air drag of the character on the rope while experimenting the pendulum effect.")]
 	public float drag;
 
+	[Header("Rope - Climb")]
+	[Tooltip("While pressing the climb input on rope, the climb speed will be clamped to this value.")]
+	public float maxClimbSpeed = 5f;
+
+	[Tooltip("Each frame while pressing the climb input on rope, the climb speed will be increment by this value * fixedDetlaTime.")]
+	public float climbAcceleration;
+
+	[Header("Rope - Deceleration")]
 	[Tooltip("")]
-	public float jumpOffWallForce;
+	public AnimationCurve ropeDecelerationDistanceCurve;
 
 
 	[Header("Camera")]

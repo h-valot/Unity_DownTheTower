@@ -7,9 +7,6 @@ Shader "Hidden/Universal Render Pipeline/MaterialError"
             // Hybrid Renderer compatible error shader, which is used by Hybrid Renderer
             // instead of the incompatible built-in error shader.
 
-            // TODO: Ideally this would be combined with FallbackError.shader, but it seems
-            // problematic because FallbackError needs to support SM2.0 and seems to use
-            // built-in shader headers, whereas Hybrid support needs SM4.5 and SRP shader headers.
             HLSLPROGRAM
             #pragma target 2.0
 

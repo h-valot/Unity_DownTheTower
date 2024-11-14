@@ -2,8 +2,10 @@ using UnityEngine;
 
 public class LadderTP : Interactible
 {
+	[Header("Scriptable references")]
+	[SerializeField] private RSE_SetCharacterPosition _rseSetCharacterPosition;
 
-    public Vector3 _teleportTo;
+    [HideInInspector] public Vector3 _teleportTo;
     private CharacterMotor _character;
 
     public override void OnTriggerEnter(Collider other)
@@ -16,9 +18,7 @@ public class LadderTP : Interactible
 
     public override void InteractionTrigger()
     {
-        _character.transform.position = _teleportTo;
-
-        Physics.SyncTransforms();
+		_rseSetCharacterPosition.Call(_teleportTo, Quaternion.identity);
     }
 
     public void SetVariables(Vector3 _origin, Vector3 _destination)

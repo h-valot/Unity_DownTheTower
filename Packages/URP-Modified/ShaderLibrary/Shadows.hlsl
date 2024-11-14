@@ -275,7 +275,6 @@ real SampleShadowmap(TEXTURE2D_SHADOW_PARAM(ShadowMap, sampler_ShadowMap), float
     attenuation = LerpWhiteTo(attenuation, shadowStrength);
 
     // Shadow coords that fall out of the light frustum volume must always return attenuation 1.0
-    // TODO: We could use branch here to save some perf on some platforms.
     return BEYOND_SHADOW_FAR(shadowCoord) ? 1.0 : attenuation;
 }
 

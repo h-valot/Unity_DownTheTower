@@ -45,7 +45,7 @@ class RuntimeTests
 
     // When switching to URP it sets "UniversalPipeline" as global shader tag.
     // When switching to Built-in it sets "" as global shader tag.
-#if UNITY_EDITOR // TODO This API call does not reset in player
+#if UNITY_EDITOR
     [UnityTest]
     public IEnumerator PipelineSetsAndRestoreGlobalShaderTagCorrectly()
     {

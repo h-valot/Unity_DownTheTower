@@ -12,25 +12,28 @@ public class Rope : Permanent
 	[Header("Scriptable references")]
 	[SerializeField] private RopeConfig _ropeConfig;
 	[SerializeField] private RSO_CharacterPosition _rsoCharacterPosition;
+	[SerializeField] private RSE_SetCharacterPosition _rseSetCharacterPosition;
 
-	[Header("Debug")]
-	public bool isConnected;
-	public bool isPlaced;
+	// ---- PUBLIC VARIABLES ----
+	[HideInInspector] public bool isConnected;
+	[HideInInspector] public bool isPlaced;
 	[HideInInspector] public float holdLength;
 	[HideInInspector] public List<Vector3> folds = new List<Vector3>();
 
 	private List<RopeLine> _ropeLines = new List<RopeLine>();
+	private List<Interactible> _interactibles = new List<Interactible>();
 	private Transform _characterHarness;
 
 	#region default functions
 
 	public void Update()
 	{
-		// asserts
+		// Assertions
 		if (!isConnected) return;
 		if (!isPlaced) return;
 
 		HandleFolds();
+		HandleInteractibles();
 		HandleEnd();
 		DrawLines();
 	}
@@ -131,26 +134,33 @@ public class Rope : Permanent
 
 	public void Detach()
 	{
+		// Assertion
+		if (_characterHarness == null || !isConnected) return;
+
+		// Add a final fold to spawn an interactible on it.
+		folds.Add(_characterHarness.position.CutDigits(2));
+		HandleInteractibles();
+
 		_characterHarness = null;
 		isConnected = false;
 	}
 
 	/// <summary>
-	/// 	check rope folding using raycasts
+	/// 	Check rope folding using raycasts.
 	/// </summary>
 	public void HandleFolds()
 	{
-		// assert: character ref null
+		// Assert: character ref null
 		if (_characterHarness == null) return;
 
-		// add fold if a collider stands between the character and the last fold
+		// Add fold if a collider stands between the character and the last fold
 		if (Physics.Linecast(_characterHarness.position, folds[^1], out var addHit, ~_ropeConfig.foldLayerToIgnore))
 		{
 			Vector3 approximatePoint = addHit.point.CutDigits(2);
 
 			if (folds.Count >= 2)
 			{
-				// minimal distance between two fold point to be register
+				// Minimal distance between two fold point to be register
 				if ((folds[^1] - folds[^2]).magnitude >= _ropeConfig.minFoldDistance)
 				{
 					folds.AddUnique(approximatePoint, UpdateHoldLength);
@@ -172,22 +182,50 @@ public class Rope : Permanent
 		}
 	}
 
+	public void HandleInteractibles()
+	{
+		for (int i = _interactibles.Count - 1; i >= folds.Count - 1; i--)
+		{
+			_interactibles[i].OnInteracted -= Teleport;
+			Destroy(_interactibles[i].gameObject);
+			_interactibles.RemoveAt(i);
+		}
+
+		for (int i = 0; i < folds.Count; i++)
+		{
+			if (_interactibles.Count - 1 < i) 
+			{
+				Interactible newInteractible = Instantiate(_ropeConfig.pfRopeInteractible, folds[i], Quaternion.identity, transform);
+				newInteractible.OnInteracted += Teleport;
+				_interactibles.Add(newInteractible);
+				continue;
+			}
+
+			_interactibles[i].transform.position = folds[i];
+		}
+	}
+
+	public void Teleport()
+	{
+		_rseSetCharacterPosition.Call(_ropeAttach.transform.position, Quaternion.identity);
+	}
+
 	/// <summary>
-	/// 	detach the rope from the player if its total length is greater than the limit.
+	/// 	Detach the rope from the player if its total length is greater than the limit.
 	/// </summary>
 	private void HandleEnd()
 	{
-		// assert: total rope length is smaller than the max length
+		// Assert: total rope length is smaller than the max length
 		if (GetTotalLength() <= _ropeConfig.maxLength) return;
 
 		Detach();
 	}
 
 	/// <summary>
-	/// 	update hold rope radius to be the distance between the character rope attach position and the last fold of the rope.
-	/// 	only if allowed.
+	/// 	Opdate hold rope radius to be the distance between the character rope attach 
+	/// 	position and the last fold of the rope. Only if allowed.
 	/// </summary>
-	/// <param name="isAllowed">is it allowed to update hold rope radius</param>
+	/// <param name="isAllowed">Is it allowed to update hold rope radius</param>
 	public void UpdateHoldLength(bool isAllowed = true)
 	{
 		// Assert: is it not allowed
@@ -197,7 +235,7 @@ public class Rope : Permanent
 	}
 
 	/// <summary>
-	/// 	current distance between the character's position and the base of the rope.
+	/// 	Current distance between the character's position and the base of the rope.
 	/// </summary>
 	public float GetTotalLength()
 	{
@@ -220,13 +258,18 @@ public class Rope : Permanent
 	public float GetLastFoldHarnessDistance()
 	{
 		// Assertions
-		if (!isPlaced) return 0;
-		if (_characterHarness == null) return 0;
+		if (!isPlaced) return -1;
+		if (_characterHarness == null) return -1;
 
 		// Note that we do not connect the last fold to the harness
 		// but the character's current position. This avoids re-centering
 		// issue if spamming holding rope key
 		return (folds[^1] - _rsoCharacterPosition.value).magnitude;
+	}
+	
+	public void ChangeHoldLength(float amount)
+	{
+		holdLength += amount;
 	}
 
 	private void DrawLines()

@@ -56,7 +56,6 @@ namespace Obi
                         rp.worldBounds = m_Solver.bounds;
                         rp.matProps = mpb;
 
-                        // TODO: use generic overload to pass matrix + instance color.
                         Graphics.RenderMeshInstanced(rp, batch.mesh, 0, instanceTransforms.AsNativeArray<Matrix4x4>(), batch.instanceCount, batch.firstInstance);
                     }
                 }
