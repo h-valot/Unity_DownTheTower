@@ -389,6 +389,15 @@ public class Guardian : MonoBehaviour
 
     #endregion
 
+    private void CheckForTargets()
+    {
+
+    }
+
+
+    #region Behavior
+
+    #endregion
     public class ClassGardianTarget
     {
         public int activeColliders;
