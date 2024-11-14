@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
@@ -25,6 +26,7 @@ public class Guardian : MonoBehaviour
     [SerializeField] private float _timeToDestroy;
     [SerializeField] private float _killTime;
 
+    public float timeToDesaggro;
     public Material _aggroMaterial;
     public Material _scanMaterial;
     public Material _dormantMaterial;
@@ -40,7 +42,13 @@ public class Guardian : MonoBehaviour
     float eyesHeight;
     float feetHeight;
 
+    // --- WIP ---
+    
+    // Private ---
 
+    Dictionary<GameObject, ClassGardianTarget> _potentialTarget = new Dictionary<GameObject, ClassGardianTarget> ();
+
+    #region BaseScript
     private void Start()
     {
         _agent = GetComponent<NavMeshAgent>();
@@ -267,8 +275,6 @@ public class Guardian : MonoBehaviour
         _isPlayerTarget = false;
     }
 
-
-    //WIP
     public void CheckDistancePlayer()
     {
         if (_playerRef != null)
@@ -343,5 +349,49 @@ public class Guardian : MonoBehaviour
         { 
             Idle();
         }
+    }
+    #endregion
+
+    #region Dictionary Manager
+    public void AddToPotentialTargets(GameObject _targetRef)
+    {
+        if (_potentialTarget.ContainsKey(_targetRef) == false) 
+        {
+            _potentialTarget.Add(_targetRef, new ClassGardianTarget());
+        }
+        IncreaseActiveColliders(_targetRef);
+    }
+
+    public void RemovePotentialTargets(GameObject _targetRef)
+    {
+        DecreaseActiveColliders(_targetRef);
+        _potentialTarget.TryGetValue(_targetRef, out var data);
+        if (data.activeColliders <1)
+        {
+            _potentialTarget.Remove(_targetRef);
+            Debug.Log(_potentialTarget.Count.ToString());
+        }
+        
+    }
+
+    private void IncreaseActiveColliders(GameObject _objectRef)
+    {
+        _potentialTarget.TryGetValue(_objectRef, out var data);
+        data.activeColliders++;
+        Debug.Log(_objectRef + "," + data.activeColliders.ToString());
+    }
+
+    private void DecreaseActiveColliders(GameObject _objectRef)
+    {
+        _potentialTarget.TryGetValue(_objectRef, out var data);
+        data.activeColliders--;
+    }
+
+    #endregion
+
+    public class ClassGardianTarget
+    {
+        public int activeColliders;
+        public bool isSeen;
     }
 }

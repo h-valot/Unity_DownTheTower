@@ -7,13 +7,14 @@ public class SmallCollider : MonoBehaviour
     [SerializeField] private Guardian _guardianRef;
 
 
-    private void OnTriggerStay(Collider other)
+    private void OnTriggerEnter(Collider other)
     {
         if (other.TryGetComponent<CharacterMotor>(out var _playerCheckRef))
         {
             if (_playerCheckRef._craftInHand && _playerCheckRef._craftInRobot) { }
-            _guardianRef.MakePLayerRef(_playerCheckRef);
-            _guardianRef.TargetStayIn();
+            //_guardianRef.MakePLayerRef(_playerCheckRef);
+            //_guardianRef.TargetStayIn();
+            _guardianRef.AddToPotentialTargets(_playerCheckRef.gameObject);
         }
 
     }
@@ -22,7 +23,8 @@ public class SmallCollider : MonoBehaviour
     {
         if (other.TryGetComponent<CharacterMotor>(out var _playerCheckRef) )
         {
-            _guardianRef.TargetExit();
+            //_guardianRef.TargetExit();
+            _guardianRef.RemovePotentialTargets(_playerCheckRef.gameObject);
         }
     }
 }
