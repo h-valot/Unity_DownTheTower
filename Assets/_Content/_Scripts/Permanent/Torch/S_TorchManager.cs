@@ -3,9 +3,8 @@ using UnityEngine;
 
 public class TorchManager : MonoBehaviour
 {
-    static public TorchManager instance;
-
     [Header("External References")]
+    [SerializeField] private RSO_TorchManager _rsoTorchManager;
     [SerializeField] private TorchConfig _torchConfig;
 
     // -- Private Variables --
@@ -13,7 +12,7 @@ public class TorchManager : MonoBehaviour
 
     private void Awake()
     {
-        instance = this;
+        _rsoTorchManager.value = this;
     }
 
     public void AddNewTorchToList(Torch _newTorch)
@@ -31,4 +30,6 @@ public class TorchManager : MonoBehaviour
     {
         ActiveTorchs.Remove(_removeTorch);
     }
+
+
 }

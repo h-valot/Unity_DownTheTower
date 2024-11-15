@@ -195,17 +195,20 @@ MonoBehaviour:
   _craftType: 1
   _light: {fileID: 1720485948228762332}
   _rigidbody: {fileID: 5666824575402529614}
-  _meshRenderer: {fileID: 1118350445352578061}
+  _meshRenderer: {fileID: 7272609494548576517}
   _aimPreview: {fileID: 2398609788582600357}
   _torchTop: {fileID: 8405497087091573354}
   _pointLightBase: {fileID: 2294269590647890243}
   _lightCollider: {fileID: 5976173811647340609}
   _torchConfig: {fileID: 11400000, guid: 0c5c3bc89382c9e439e0ef105c99e62b, type: 2}
+  _rsoTorchManager: {fileID: 11400000, guid: 013e0e8312f52a7408c42a7d0621de0c, type: 2}
   _characterConfig: {fileID: 11400000, guid: 1940b106405212f469b44119418b1e43, type: 2}
   _ropeConfig: {fileID: 11400000, guid: ebd551676fad39148a6ccab29ef4ebce, type: 2}
   _rsoCharacterPosition: {fileID: 11400000, guid: 7cfc39952cca0d6478396ad49ab9e0db,
     type: 2}
   _isInHand: 0
+  _lightPercent: 0
+  _emitColor: {r: 0, g: 0, b: 0, a: 0}
 --- !u!54 &5666824575402529614
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -501,12 +504,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 669fda647ea5ef246b06761ad2940db7, type: 3}
---- !u!23 &1118350445352578061 stripped
-MeshRenderer:
-  m_CorrespondingSourceObject: {fileID: -7511558181221131132, guid: 669fda647ea5ef246b06761ad2940db7,
-    type: 3}
-  m_PrefabInstance: {fileID: 1748725345814671497}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &2291770440046876514 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 669fda647ea5ef246b06761ad2940db7,
@@ -529,7 +526,7 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: 0a04b33a9e1c55245a490f2936af7484,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 0.144
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 0a04b33a9e1c55245a490f2936af7484,
         type: 3}
@@ -586,6 +583,12 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 0a04b33a9e1c55245a490f2936af7484, type: 3}
+--- !u!23 &7272609494548576517 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: -7511558181221131132, guid: 0a04b33a9e1c55245a490f2936af7484,
+    type: 3}
+  m_PrefabInstance: {fileID: 8299265964962342273}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &8405497087091573354 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 0a04b33a9e1c55245a490f2936af7484,

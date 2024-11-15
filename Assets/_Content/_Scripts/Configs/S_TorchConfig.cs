@@ -9,12 +9,20 @@ public class TorchConfig : ScriptableObject
 	[Tooltip("Torch prefab that is instantiated when crafted")]
 	public Torch pfTorch;
 
+	[Space(5)]
+
+	[Header("Manager")]
+    [Tooltip("Number of torchs that can be light at the same time, if more are spawn the oldest one start fading")]
+    public int maxTorchs = 4;
+    [Tooltip("Very max number of torchs, instant despawn if more than this number")]
+    public int HardMaxTorchs = 8;
+
 	[Space(5f)]
 
 	[Header("Light")]
 
 	[Tooltip("Default torch color")]
-    public Color lightColor = new Color(255, 170, 85, 255);
+    public Color baseColor = new Color(255, 170, 85, 255);
 
 	[Tooltip("Intensity of the light")]
 	public float lightIntensity;
@@ -78,6 +86,12 @@ public class TorchConfig : ScriptableObject
 
 	[Tooltip("Time the torch stay lit before despawning when beneath rope lentgh + lethal height")]
 	public float deactivatingTime = 3f;
+
+	[Tooltip("Minimal speed of the torch to trigger a hit sound")]
+	public float minimalSpeedForHitSound = 4f;
+
+	[Tooltip("Time in second between hit sound")]
+	public float timeBetweenHitSound = 1f;
 
     [Space(5f)]
 

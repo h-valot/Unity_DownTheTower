@@ -13,7 +13,9 @@ MonoBehaviour:
   m_Name: TorchConfig
   m_EditorClassIdentifier: 
   pfTorch: {fileID: 4567227452422965972, guid: c06366f12c0c9ff4db3b81d641d4173b, type: 3}
-  lightColor: {r: 1, g: 0.6666667, b: 0.33333334, a: 1}
+  maxTorchs: 4
+  HardMaxTorchs: 8
+  baseColor: {r: 1, g: 0.7058824, b: 0.34509805, a: 255}
   lightIntensity: 5
   groundedLightDuration: 120
   lightOnDuration: 0.1
@@ -27,6 +29,7 @@ MonoBehaviour:
   maxLaunchCameraAngle: 130
   craftingDuration: 1
   startLit: 1
+  maxNumberTorch: 4
   minThrowAngleOffset: 0
   maxThrowAngleOffset: 30
   previewLength: 10
@@ -36,6 +39,8 @@ MonoBehaviour:
     m_Bits: 260
   deathColor: {r: 1, g: 0.2028302, b: 0.2028302, a: 1}
   deactivatingTime: 3
+  minimalSpeedForHitSound: 1
+  timeBetweenHitSound: 0.5
   activateBreakAnim: 1
   torchBreakSFX: {fileID: 708887329953543571, guid: 9be71127c133719429b79674e1c08627,
     type: 3}
