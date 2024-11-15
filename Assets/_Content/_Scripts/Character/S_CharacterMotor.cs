@@ -1136,7 +1136,7 @@ public class CharacterMotor : MonoBehaviour
 	/// </summary>
 	private void ToggleInHand()
 	{
-		_craftInHand?.ToggleLight();
+		_craftInHand?.ToggleInHand();
 	}
 
 	private void CancelAction()
