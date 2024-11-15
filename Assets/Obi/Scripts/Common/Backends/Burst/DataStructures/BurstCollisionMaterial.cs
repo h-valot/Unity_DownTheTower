@@ -6,7 +6,7 @@ using System;
 
 namespace Obi
 {
-    public struct BurstCollisionMaterial // TODO: use CollisionMaterial directly.
+    public struct BurstCollisionMaterial 
     {
         public float dynamicFriction;
         public float staticFriction;

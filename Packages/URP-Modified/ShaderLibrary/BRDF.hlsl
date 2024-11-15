@@ -67,7 +67,6 @@ inline void InitializeBRDFDataDirect(half3 albedo, half3 diffuse, half3 specular
     // In shader: Cs' = Cs * As, in ROP: Cs' + Cd(1-As);
     // i.e. we only alpha blend the diffuse part to background (transmittance).
     #if defined(_ALPHAPREMULTIPLY_ON)
-        // TODO: would be clearer to multiply this once to accumulated diffuse lighting at end instead of the surface property.
         outBRDFData.diffuse *= alpha;
     #endif
 }
@@ -138,7 +137,6 @@ inline void InitializeBRDFDataClearCoat(half clearCoatMask, half clearCoatSmooth
 
     // Darken/saturate base layer using coat to surface reflectance (vs. air to surface)
     baseBRDFData.specular = lerp(baseBRDFData.specular, ConvertF0ForClearCoat15(baseBRDFData.specular), clearCoatMask);
-    // TODO: what about diffuse? at least in specular workflow diffuse should be recalculated as it directly depends on it.
 }
 
 BRDFData CreateClearCoatBRDFData(SurfaceData surfaceData, inout BRDFData brdfData)

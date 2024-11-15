@@ -276,7 +276,6 @@ namespace Obi
             if (path.Closed)
                 indices[m_ActiveParticleCount] = 0;
 
-            // TODO: variable distance between particles:
             batch.AddConstraint(indices, m_InterParticleDistance, 1, 1);
             batch.activeConstraintCount++;
 

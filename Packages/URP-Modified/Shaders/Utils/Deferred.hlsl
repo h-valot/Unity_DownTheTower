@@ -6,7 +6,6 @@
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/UnityGBuffer.hlsl"
 
 // This structure is used in StructuredBuffer.
-// TODO move some of the properties to half storage (color, attenuation, spotDirection, flag to 16bits, occlusionProbeInfo)
 struct PunctualLightData
 {
     float3 posWS;

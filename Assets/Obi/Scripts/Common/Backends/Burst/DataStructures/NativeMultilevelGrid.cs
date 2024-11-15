@@ -236,7 +236,6 @@ namespace Obi
 
             coords.Capacity = size.x * size.y * size.z;
 
-            // TODO: return some sort of iterator trough the cells, not a native array.
             for (int x = minCell[0]; x <= maxCell[0]; ++x)
             {
                 for (int y = minCell[1]; y <= maxCell[1]; ++y)

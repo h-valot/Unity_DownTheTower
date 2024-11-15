@@ -447,7 +447,6 @@ namespace Obi
 
             EditorGUI.BeginChangeCheck();
 
-            // TODO: investigate weird rotation gizmo:
             Quaternion newRotation = Handles.RotationHandle(prevRot, handlePosition);
 
             if (EditorGUI.EndChangeCheck())
