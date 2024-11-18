@@ -209,8 +209,7 @@ public class Guardian : MonoBehaviour
             Physics.Linecast(_raycastEyes.transform.position, _torchRef.transform.position, out var hitDatatorch);
             // UnityEngine.Debug.DrawRay(_raycastEyes.transform.position, (_torchRef.transform.position - _raycastEyes.transform.position).normalized, Color.red);
 
-            if (hitDatatorch.collider.TryGetComponent<Torch>(out var torch)
-                || hitDatatorch.collider.TryGetComponent<TorchPointLight>(out var torchPointLight))
+            if (hitDatatorch.collider.TryGetComponent<Torch>(out var torch))
             {
                 Debug.Log("pas de mur entre torch");
                 return true;
