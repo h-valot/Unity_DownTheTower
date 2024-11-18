@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
@@ -46,7 +47,7 @@ public class Guardian : MonoBehaviour
     
     // Private ---
 
-    Dictionary<GameObject, ClassGardianTarget> _potentialTarget = new Dictionary<GameObject, ClassGardianTarget> ();
+    Dictionary<GameObject, ClassGuardianTarget> _potentialTarget = new Dictionary<GameObject, ClassGuardianTarget> ();
 
     #region BaseScript
     private void Start()
@@ -357,21 +358,24 @@ public class Guardian : MonoBehaviour
     {
         if (_potentialTarget.ContainsKey(_targetRef) == false) 
         {
-            _potentialTarget.Add(_targetRef, new ClassGardianTarget());
+            _potentialTarget.Add(_targetRef, new ClassGuardianTarget());
         }
         IncreaseActiveColliders(_targetRef);
+        CheckForTargets();
     }
 
     public void RemovePotentialTargets(GameObject _targetRef)
     {
-        DecreaseActiveColliders(_targetRef);
-        _potentialTarget.TryGetValue(_targetRef, out var data);
-        if (data.activeColliders <1)
+        if(_potentialTarget.Count >0)
         {
-            _potentialTarget.Remove(_targetRef);
-            Debug.Log(_potentialTarget.Count.ToString());
+            DecreaseActiveColliders(_targetRef);
+            _potentialTarget.TryGetValue(_targetRef, out var data);
+            if (data.activeColliders < 1)
+            {
+                _potentialTarget.Remove(_targetRef);
+            }
+            CheckForTargets();
         }
-        
     }
 
     private void IncreaseActiveColliders(GameObject _objectRef)
@@ -385,20 +389,50 @@ public class Guardian : MonoBehaviour
     {
         _potentialTarget.TryGetValue(_objectRef, out var data);
         data.activeColliders--;
+        Debug.Log(_objectRef + "," + data.activeColliders.ToString());
     }
 
     #endregion
 
     private void CheckForTargets()
     {
+        List<GameObject> _potentialTargetsRef = new List<GameObject>();
+        Dictionary<GameObject, float> _distance = new Dictionary<GameObject, float>();
 
+        foreach (KeyValuePair<GameObject, ClassGuardianTarget> pair in _potentialTarget)
+        {
+           if (pair.Value.activeColliders > 1)
+            {
+                _potentialTargetsRef.AddUnique(pair.Key.gameObject);
+                Debug.Log(_potentialTargetsRef.ToString());
+                foreach (GameObject _objectRef in _potentialTargetsRef)
+                {
+                    _distance.Add(_objectRef, Vector3.Distance(this.transform.position, _objectRef.transform.position));
+                }
+                var keyAndValue = _distance.OrderBy(kvp => kvp.Value).First();
+                _actualTarget = keyAndValue.Key;
+                Debug.Log("Target is" + _actualTarget.ToString());
+            }
+
+           else
+            {
+                ResetTarget();
+            }
+        }
+        
+
+    }
+
+    private void ResetTargets()
+    {
+        _actualTarget = null;
     }
 
 
     #region Behavior
 
     #endregion
-    public class ClassGardianTarget
+    public class ClassGuardianTarget
     {
         public int activeColliders;
         public bool isSeen;

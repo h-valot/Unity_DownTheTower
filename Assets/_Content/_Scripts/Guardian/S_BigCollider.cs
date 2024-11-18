@@ -10,7 +10,6 @@ public class BigCollider : MonoBehaviour
     {
         if (other.TryGetComponent<Torch>(out var _torchCheckRef))
         {
-            Debug.Log("torche en vue");
             //_guardianRef.MakeTorchRef(_torchCheckRef);
             //_guardianRef.TargetStayIn();
             _guardianRef.AddToPotentialTargets(_torchCheckRef.gameObject);
@@ -18,13 +17,19 @@ public class BigCollider : MonoBehaviour
 
         else if (other.TryGetComponent<CharacterMotor>(out var _playerCheckRef))
         {
-            Debug.Log("joueur");
-            if ((_playerCheckRef._craftInHand._craftType == CraftType.TORCH && _playerCheckRef._craftInHand.StateInHand())
-                || (_playerCheckRef._craftInRobot._craftType == CraftType.TORCH && _playerCheckRef._craftInRobot.StateInHand()))
+            if (_playerCheckRef._craftInHand != null)
             {
-                Debug.Log("detecte torchonplayer");
-                //_guardianRef.MakePLayerRef(_playerCheckRef);
-                //_guardianRef.TargetStayIn();
+                if ((_playerCheckRef._craftInHand._craftType == CraftType.TORCH && _playerCheckRef._craftInHand.StateInHand())
+                || (_playerCheckRef._craftInRobot._craftType == CraftType.TORCH && _playerCheckRef._craftInRobot.StateInHand()))
+                {
+                    //_guardianRef.MakePLayerRef(_playerCheckRef);
+                    //_guardianRef.TargetStayIn();
+                    _guardianRef.AddToPotentialTargets(_playerCheckRef.gameObject);
+                }
+            }
+
+            if (_playerCheckRef._craftInHand == null)
+            {
                 _guardianRef.AddToPotentialTargets(_playerCheckRef.gameObject);
             }
         }
@@ -34,15 +39,14 @@ public class BigCollider : MonoBehaviour
     {
         if (other.TryGetComponent<Torch>(out var _torchCheckRef))
         {
-            Debug.Log("Torche plus dans la range");
             //_guardianRef.TargetExit();
             _guardianRef.RemovePotentialTargets(_torchCheckRef.gameObject);
         }
 
         if (other.TryGetComponent<CharacterMotor>(out var _playerCheckRef))
         {
-            Debug.Log("plus dans la range");
             _guardianRef.RemovePotentialTargets(_playerCheckRef.gameObject);
+
         }
     }
 }
