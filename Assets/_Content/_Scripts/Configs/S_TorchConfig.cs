@@ -1,26 +1,24 @@
-using DG.Tweening;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "TorchConfig", menuName = "Configs/Torch")]
 public class TorchConfig : ScriptableObject
 {
 	[Header("References")]
-
 	[Tooltip("Torch prefab that is instantiated when crafted")]
 	public Torch pfTorch;
 
-	[Space(5)]
 
+	[Space(5)]
 	[Header("Manager")]
     [Tooltip("Number of torchs that can be light at the same time, if more are spawn the oldest one start fading")]
     public int maxTorchs = 4;
+
     [Tooltip("Very max number of torchs, instant despawn if more than this number")]
     public int HardMaxTorchs = 8;
 
+
 	[Space(5f)]
-
 	[Header("Light")]
-
 	[Tooltip("Default torch color")]
     public Color baseColor = new Color(255, 170, 85, 255);
 
@@ -42,23 +40,24 @@ public class TorchConfig : ScriptableObject
 	[Tooltip("Offset distance of the point light from surfaces")]
 	public float lightOffsetDistance = 0.5f;
 
+
     [Space(5f)]
-
     [Header("Throw")]
-
 	[Tooltip("Can throw the torch when handled")]
     public bool canThrow;
 
     [Tooltip("Launch force of the throw")]
 	public float minLaunchForce = 0.1f;
+
 	public float maxLaunchForce = 20f;
+
 	public float minLaunchCameraAngle = 0f;
+
 	public float maxLaunchCameraAngle = 130f;
 
+
     [Space(5f)]
-
     [Header("Crafting")]
-
 	[Tooltip("Wait this value after pressing the craft button to get the torch prefab instantiate")]
 	public float craftingDuration;
 
@@ -68,19 +67,22 @@ public class TorchConfig : ScriptableObject
 	[Tooltip("Number max of torch spawned")]
 	public int maxNumberTorch = 4;
 
-    [Space(5f)]
 
+    [Space(5f)]
     [Header("Aim Preview Variables")]
     public float minThrowAngleOffset = 0f;
+
     public float maxThrowAngleOffset = 20f;
+
 	[Range(0.1f, 10f)] public float previewLength = 10f;
+
 	[Range(0.1f, 0.25f)] public float previewSmoothing = 0.1f;
+
 	public LayerMask layersToIgnorePreview;
 
+
     [Space(5f)]
-
     [Header("Height Feedback")]
-
     [Tooltip("Torch color when height higher than lethal death")]
     public Color deathColor = new Color(255, 52, 52, 255);
 
@@ -93,10 +95,12 @@ public class TorchConfig : ScriptableObject
 	[Tooltip("Time in second between hit sound")]
 	public float timeBetweenHitSound = 1f;
 
-    [Space(5f)]
 
+    [Space(5f)]
     [Header("Debug")]
 	public bool activateBreakAnim = true;
+
     public GameObject torchBreakSFX;
+
 	public GameObject torchHitSFX;
 }

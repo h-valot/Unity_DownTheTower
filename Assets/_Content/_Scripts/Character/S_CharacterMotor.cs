@@ -1316,7 +1316,7 @@ public class CharacterMotor : MonoBehaviour
             case CraftType.TORCH:
                 if (_craftInHand != null)
                 {
-                    if (_craftInHand._craftType != CraftType.TORCH && _craftInRobot?._craftType != CraftType.TORCH)
+                    if (_craftInHand.Type != CraftType.TORCH && _craftInRobot?.Type != CraftType.TORCH)
                     {
                         Destroy(_craftInHand.gameObject);
                         _craftCoroutine = StartCoroutine(Craft(CraftType.TORCH, _torchConfig.craftingDuration));
@@ -1331,7 +1331,7 @@ public class CharacterMotor : MonoBehaviour
             case CraftType.LADDER:
                 if (_craftInHand != null)
                 {
-                    if (_craftInHand._craftType == CraftType.TORCH)
+                    if (_craftInHand.Type == CraftType.TORCH)
                     {
                         _craftInHand.transform.SetParent(_robotHandSocket, false);
                         _craftInRobot = _craftInHand;
@@ -1339,7 +1339,7 @@ public class CharacterMotor : MonoBehaviour
                         _craftInHand = null;
                         _craftCoroutine = StartCoroutine(Craft(CraftType.LADDER, _torchConfig.craftingDuration));
                     }
-                    else if (_craftInHand._craftType != CraftType.LADDER)
+                    else if (_craftInHand.Type != CraftType.LADDER)
                     {
                         Destroy(_craftInHand.gameObject);
                         _craftCoroutine = StartCoroutine(Craft(CraftType.LADDER, _torchConfig.craftingDuration));
@@ -1354,14 +1354,14 @@ public class CharacterMotor : MonoBehaviour
             case CraftType.ROPE:
                 if (_craftInHand != null)
                 {
-                    if (_craftInHand._craftType == CraftType.TORCH)
+                    if (_craftInHand.Type == CraftType.TORCH)
                     {
                         _craftInHand.transform.SetParent(_robotHandSocket, false);
                         _craftInRobot = _craftInHand;
                         _craftInHand = null;
                         _craftCoroutine = StartCoroutine(Craft(CraftType.ROPE, _ropeConfig.craftingDuration));
                     }
-                    else if (_craftInHand._craftType != CraftType.ROPE)
+                    else if (_craftInHand.Type != CraftType.ROPE)
                     {
                         Destroy(_craftInHand.gameObject);
                         _craftCoroutine = StartCoroutine(Craft(CraftType.ROPE, _ropeConfig.craftingDuration));

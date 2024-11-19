@@ -31,8 +31,9 @@ public class ThirdPersonCamera : MonoBehaviour
 	private float _cinemachineTargetYaw;
 	private float _cinemachineTargetPitch;
 
-	// ----- CONST -----
-	private const float _LOOK_THRESHOLD = 0.01f;
+	// - Proprieties -
+	public Vector3 PlanarForward { get; private set; }
+	public Vector3 PlanarRight { get; private set; }
 
 	private void Start()
 	{
@@ -61,6 +62,9 @@ public class ThirdPersonCamera : MonoBehaviour
 
 	private void Initialize()
 	{
+		PlanarForward = new Vector3(_cameraDirection.forward.x, 0, _cameraDirection.forward.z);
+		PlanarRight = new Vector3(_cameraDirection.right.x, 0, _cameraDirection.right.z);
+
 		SwitchCameraStyle(_characterConfig.startingStyle);
 		_cinemachineTargetYaw = _cinemachineCameraTarget.transform.rotation.eulerAngles.y;
 	}
@@ -107,6 +111,14 @@ public class ThirdPersonCamera : MonoBehaviour
 		}
 		_rsoCameraForward.value = _cameraDirection.forward;
 	}
+	public void CalculatePlanarVectors()
+	{
+		if (_lookInput == Vector2.zero)
+		{
+			PlanarForward = new Vector3(_cameraDirection.forward.x, 0, _cameraDirection.forward.z);
+			PlanarRight = new Vector3(_cameraDirection.right.x, 0, _cameraDirection.right.z);
+		}
+	}
 
 	public void SwitchCameraStyle(CameraStyle newStyle)
 	{
@@ -121,17 +133,10 @@ public class ThirdPersonCamera : MonoBehaviour
 
 	private void Look(Vector2 input)
 	{
-		// exit, if there is no inputs
-		if (input.sqrMagnitude < _LOOK_THRESHOLD)
-		{
-			return;
-		}
-
 		_lookInput = input;
 
         // don't multiply mouse input by Time.deltaTime;
         float deltaTimeMultiplier = _rsoControlScheme.value == "KeyboardMouse" ? 1.0f : Time.deltaTime;
-
 		_cinemachineTargetYaw += input.x * deltaTimeMultiplier;
 		_cinemachineTargetPitch += input.y * deltaTimeMultiplier;
     }

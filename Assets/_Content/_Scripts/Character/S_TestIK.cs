@@ -65,7 +65,7 @@ public class TestIk : MonoBehaviour
 
         if (_characterMotor._craftInHand != null)
 		{
-			_ikLiftTorch = _characterMotor._craftInHand._craftType == CraftType.TORCH;
+			_ikLiftTorch = _characterMotor._craftInHand.Type == CraftType.TORCH;
         }
         else
         {
