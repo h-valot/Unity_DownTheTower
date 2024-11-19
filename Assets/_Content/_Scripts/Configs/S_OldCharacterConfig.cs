@@ -1,8 +1,8 @@
 using System;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "CharacterConfig", menuName = "Configs/character")]
-public class CharacterConfig : ScriptableObject
+[CreateAssetMenu(fileName = "OldCharacterConfig", menuName = "Configs/Old character")]
+public class OldCharacterConfig : ScriptableObject
 {
 	/// <summary>
 	/// 	Unity in-built editor function called whenever the scriptable object is updated.

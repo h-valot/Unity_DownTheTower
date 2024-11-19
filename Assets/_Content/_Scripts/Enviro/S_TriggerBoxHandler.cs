@@ -1,9 +1,6 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.InputSystem.EnhancedTouch;
 
-public class S_TriggerBoxHandler : MonoBehaviour
+public class TriggerBoxHandler : MonoBehaviour
 {
     [SerializeField] private ToxicGas _toxicGas;
 

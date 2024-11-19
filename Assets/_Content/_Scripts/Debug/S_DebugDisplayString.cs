@@ -1,7 +1,7 @@
 using TMPro;
 using UnityEngine;
 
-public class HPPC_DisplayString : MonoBehaviour
+public class DebugDisplayString : MonoBehaviour
 {
     [Header("External References")]
     [SerializeField] private RSO_MovementDatas _rso;

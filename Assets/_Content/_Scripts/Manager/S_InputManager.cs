@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class CharacterInput : MonoBehaviour
+public class InputManager : MonoBehaviour
 {
 	[Header("Internal references")]
 	[SerializeField] private PlayerInput _playerInput;
@@ -151,7 +151,7 @@ public class CharacterInput : MonoBehaviour
 
     public void OnCraftLadder(InputValue value)
     {
-        _rseCraft.Call(CraftType.LADDER, value.isPressed);
+        _rseCraft.Call(CraftType.DEPRECATED_LADDER, value.isPressed);
     }
 
     public void OnCraftRope(InputValue value)

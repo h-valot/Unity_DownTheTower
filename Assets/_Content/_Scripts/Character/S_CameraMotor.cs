@@ -1,14 +1,14 @@
 using Cinemachine;
 using UnityEngine;
 
-public class CameraManager : MonoBehaviour
+public class CameraMotor : MonoBehaviour
 {
 	[Header("External references")]
 	[SerializeField] private CinemachineVirtualCamera _aimingCamera;
 	[SerializeField] private CinemachineVirtualCamera _thirdPersonCamera;
 
 	[Header("Scriptable references")]
-	[SerializeField] private CharacterConfig _characterConfig;
+	[SerializeField] private OldCharacterConfig _characterConfig;
 	[Space(5)]
 	[SerializeField] private RSE_Look _rseLook;
 	[SerializeField] private RSE_Move _rseMove;

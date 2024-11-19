@@ -16,7 +16,7 @@ public class NewCharacterMotor : MonoBehaviour
 	[SerializeField] private CharacterGraphics _graphics;
 
 	[Header("Scriptable references")]
-    [SerializeField] private HPPC_CharacterConfig _characterConfig;
+    [SerializeField] private NewCharacterConfig _characterConfig;
 	[SerializeField] private TorchConfig _torchConfig;
 	[SerializeField] private RopeConfig _ropeConfig;
 	[Space(5)]
@@ -40,7 +40,7 @@ public class NewCharacterMotor : MonoBehaviour
     private RaycastHit[] _raycastHits;
 
 	// - Camera -
-	private CameraManager _camera;
+	private CameraMotor _camera;
 
 	// - Movement -
 	private bool _isGrounded;
@@ -77,7 +77,7 @@ public class NewCharacterMotor : MonoBehaviour
 		CheckGround();
         DetermineState();
 
-		_camera = Instantiate(_characterConfig.pfCamera, transform.position, Quaternion.identity, null).GetComponentInChildren<CameraManager>();
+		_camera = Instantiate(_characterConfig.pfCamera, transform.position, Quaternion.identity, null).GetComponentInChildren<CameraMotor>();
 		_camera.Initialize(_aimingLookTo, _cameraTarget);
 
 		_graphics.Initialize(_aimingLookTo);

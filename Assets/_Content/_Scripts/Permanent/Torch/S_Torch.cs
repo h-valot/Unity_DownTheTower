@@ -17,7 +17,7 @@ public class Torch : Permanent
     [Header("External References")]
 	[SerializeField] private TorchConfig _torchConfig;
     [SerializeField] private RSO_TorchManager _rsoTorchManager;
-    [SerializeField] private CharacterConfig _characterConfig;
+    [SerializeField] private OldCharacterConfig _characterConfig;
     [SerializeField] private RopeConfig _ropeConfig;
     [SerializeField] private RSO_CharacterPosition _rsoCharacterPosition;
 

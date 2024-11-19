@@ -2,6 +2,6 @@ public enum CraftType
 {
 	NONE,
 	TORCH,
-	LADDER,
+	DEPRECATED_LADDER,
 	ROPE,
 }

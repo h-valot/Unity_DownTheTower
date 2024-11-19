@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class Lever : Interactible
 {
-
+	[Header("Internal references")]
     [SerializeField] private GameObject _target;
     [SerializeField] private GameObject _leverPivot;
     [SerializeField] private Vector3 _rotationLeverActivate;
@@ -13,16 +13,10 @@ public class Lever : Interactible
     [SerializeField] private Vector3 _rotationTargetActivate;
     [SerializeField] private Vector3 _rotationTargetDeactivate;
 
-    // animation curve
+	[Header("Tweakable values")]
     [SerializeField] private AnimationCurve _rotationCurve;
 
     private bool _objectActivate;
-
-
-    private void Start()
-    {
-      
-    }
 
     IEnumerator WaitXSeconds(float _time, Action callback)
     {

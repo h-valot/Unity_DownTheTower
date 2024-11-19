@@ -6,7 +6,7 @@ public class CharacterGraphics : MonoBehaviour
     [SerializeField] private Rigidbody _rigidbody;
 
 	[Header("Scriptable references")]
-	[SerializeField] private CharacterConfig _characterConfig;
+	[SerializeField] private OldCharacterConfig _characterConfig;
 	[Space(5)]
 	[SerializeField] private RSO_CameraStyle _rsoCameraStyle;
 	[Space(5)]

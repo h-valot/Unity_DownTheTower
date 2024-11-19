@@ -3,7 +3,6 @@ using UnityEngine;
 
 public class MemoryCristal : Interactible
 {
-
     [SerializeField] private GameObject _firstDoor;
     [SerializeField] private GameObject _secondDoor;
     [SerializeField] private Vector3 _openvector;

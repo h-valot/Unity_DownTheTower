@@ -1,8 +1,8 @@
 using System;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "HPPC_CharacterConfig", menuName = "Configs/HPPC Character")]
-public class HPPC_CharacterConfig : ScriptableObject
+[CreateAssetMenu(fileName = "NewCharacterConfig", menuName = "Configs/New character")]
+public class NewCharacterConfig : ScriptableObject
 {
     public Action OnConfigChanged;
 

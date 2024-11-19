@@ -5,7 +5,6 @@ using UnityEngine;
 public class Interactible : MonoBehaviour
 {
 	[Header("Interactible")]
-
 	[Tooltip("If set as true destroys the `Object To Recycle` on interaction triggered. Otherwise, don't.")]
     public bool isRecyclable;
 
@@ -39,6 +38,7 @@ public class Interactible : MonoBehaviour
     }
 
 #if UNITY_EDITOR
+
 	private void OnDrawGizmos()
 	{
 		if (!displayGizmos) return;
@@ -46,5 +46,6 @@ public class Interactible : MonoBehaviour
 		Gizmos.color = Color.cyan;
 		Gizmos.DrawSphere(transform.position, 0.25f);
 	}
+
 #endif
 }

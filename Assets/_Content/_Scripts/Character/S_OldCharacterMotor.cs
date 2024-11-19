@@ -17,10 +17,10 @@ public class OldCharacterMotor : MonoBehaviour
 	[Foldout("Internal references")] [SerializeField] private CharacterController _controller;
 	[Foldout("Internal references")] [SerializeField] private GameObject _backpackAnchor;
 
-	[Foldout("External references")] [SerializeField] private CameraManager _thirdPersonCamera;
+	[Foldout("External references")] [SerializeField] private CameraMotor _thirdPersonCamera;
 	[Foldout("External references")] [SerializeField] private GameObject _PF_backpack;
 
-	[Foldout("Scriptable references")] [SerializeField] private CharacterConfig _characterConfig;
+	[Foldout("Scriptable references")] [SerializeField] private OldCharacterConfig _characterConfig;
 	[Foldout("Scriptable references")] [SerializeField] private LadderConfig _ladderConfig;
 	[Foldout("Scriptable references")] [SerializeField] private RopeConfig _ropeConfig;
 	[Foldout("Scriptable references")] [SerializeField] private TorchConfig _torchConfig;
@@ -1328,7 +1328,7 @@ public class OldCharacterMotor : MonoBehaviour
                 }
                 break;
 
-            case CraftType.LADDER:
+            case CraftType.DEPRECATED_LADDER:
                 if (_craftInHand != null)
                 {
                     if (_craftInHand.Type == CraftType.TORCH)
@@ -1337,17 +1337,17 @@ public class OldCharacterMotor : MonoBehaviour
                         _craftInRobot = _craftInHand;
                         _craftInRobot.transform.rotation = _robotHandSocket.rotation;
                         _craftInHand = null;
-                        _craftCoroutine = StartCoroutine(Craft(CraftType.LADDER, _torchConfig.craftingDuration));
+                        _craftCoroutine = StartCoroutine(Craft(CraftType.DEPRECATED_LADDER, _torchConfig.craftingDuration));
                     }
-                    else if (_craftInHand.Type != CraftType.LADDER)
+                    else if (_craftInHand.Type != CraftType.DEPRECATED_LADDER)
                     {
                         Destroy(_craftInHand.gameObject);
-                        _craftCoroutine = StartCoroutine(Craft(CraftType.LADDER, _torchConfig.craftingDuration));
+                        _craftCoroutine = StartCoroutine(Craft(CraftType.DEPRECATED_LADDER, _torchConfig.craftingDuration));
                     }
                 }
                 else
                 {
-                    _craftCoroutine = StartCoroutine(Craft(CraftType.LADDER, _torchConfig.craftingDuration));
+                    _craftCoroutine = StartCoroutine(Craft(CraftType.DEPRECATED_LADDER, _torchConfig.craftingDuration));
                 }
                 break;
 
@@ -1411,7 +1411,7 @@ public class OldCharacterMotor : MonoBehaviour
                 _craftInHand = Instantiate(_torchConfig.pfTorch, _handSocket.transform);
                 break;
 
-			case CraftType.LADDER:
+			case CraftType.DEPRECATED_LADDER:
 				_craftInHand = Instantiate(_ladderConfig.PF_Ladder, _handSocket.transform);
                 break;
 

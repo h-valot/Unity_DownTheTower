@@ -11,7 +11,7 @@ public class Backpack : Interactible
     [SerializeField] private RSO_PlayerDeath _rsoPlayerDeath;
 
     [Header("Scriptable references")]
-    [SerializeField] private CharacterConfig _characterConfig;
+    [SerializeField] private OldCharacterConfig _characterConfig;
 
     // PRIVATE VARIABLES
     private OldCharacterMotor _character;

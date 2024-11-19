@@ -3,8 +3,9 @@ using UnityEngine;
 public class CharacterGlow : MonoBehaviour
 {
     [Header("Scriptables references")]
+    [SerializeField] private OldCharacterConfig _characterConfig;
+	[Space(5)]
     [SerializeField] private RSO_CharacterPosition _rsoCharacterPosition;
-    [SerializeField] private CharacterConfig _characterConfig;
 
     private void OnEnable()
     {
