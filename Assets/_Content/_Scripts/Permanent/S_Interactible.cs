@@ -24,7 +24,7 @@ public class Interactible : MonoBehaviour
 
     public virtual void OnTriggerEnter(Collider other)
     {
-        if (other.TryGetComponent<CharacterMotor>(out var _character))
+        if (other.TryGetComponent<OldCharacterMotor>(out var _character))
         {
             _character.AddToInteractList(this);
         }
@@ -32,7 +32,7 @@ public class Interactible : MonoBehaviour
 
     public virtual void OnTriggerExit(Collider other)
     {
-        if (other.TryGetComponent<CharacterMotor>(out var _character))
+        if (other.TryGetComponent<OldCharacterMotor>(out var _character))
         {
             _character.RemoveFromInteractList(this);
         }

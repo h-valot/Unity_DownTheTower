@@ -37,12 +37,14 @@ public class GameStart : MonoBehaviour
 	}
 
 #if UNITY_EDITOR
+
 	public void OnDrawGizmos()
 	{
-		// display the game start gizmos in editor
+		// Display the game start gizmos in editor
 		Gizmos.color = Color.cyan;
 		Gizmos.DrawWireSphere(transform.position, 1f);
 		Gizmos.DrawLine(transform.position, 1.5f * transform.forward.normalized + transform.position);
 	}
+	
 #endif
 }

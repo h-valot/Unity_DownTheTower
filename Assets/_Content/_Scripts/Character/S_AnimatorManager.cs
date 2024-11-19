@@ -4,7 +4,7 @@ public class AnimatorManager : MonoBehaviour
 {
 	[Header("External references")]
     [SerializeField] private Animator _animator;
-    [SerializeField] private CharacterMotor _characterMotor;
+    [SerializeField] private OldCharacterMotor _characterMotor;
 
     // ---- PRIVATE VARIABLES ----
     private int _moveSpeedHash = Animator.StringToHash("MoveSpeed");

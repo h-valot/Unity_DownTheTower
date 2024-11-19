@@ -14,7 +14,7 @@ public class Backpack : Interactible
     [SerializeField] private CharacterConfig _characterConfig;
 
     // PRIVATE VARIABLES
-    private CharacterMotor _character;
+    private OldCharacterMotor _character;
     private bool _isPickedUp = false;
     private Vector3 _startPosition;
     private Vector3 _startRotation;
@@ -40,7 +40,7 @@ public class Backpack : Interactible
 
     public override void OnTriggerEnter(Collider other)
     {
-        if (other.TryGetComponent<CharacterMotor>(out _character) && !_isPickedUp)
+        if (other.TryGetComponent<OldCharacterMotor>(out _character) && !_isPickedUp)
         {
             _character.AddToInteractList(this);
         }
@@ -65,7 +65,7 @@ public class Backpack : Interactible
         }
     }
 
-    public void ForceSetupBackpack(CharacterMotor _tmpCharacter)
+    public void ForceSetupBackpack(OldCharacterMotor _tmpCharacter)
     {
         _character = _tmpCharacter;
         InteractionTrigger();

@@ -1,9 +1,9 @@
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "HPPC_InputsConfig", menuName = "Configs/HPPC Inputs")]
-public class HPPC_InputsConfig : ScriptableObject
+[CreateAssetMenu(fileName = "InputsConfig", menuName = "Configs/Inputs")]
+public class InputsConfig : ScriptableObject
 {
-    [Header("Look")]
+    [Header("Look - Gamepad")]
     [Tooltip("Scalar for mouse sensibility on X")]
     public float mouseSensibilityX;
     [Tooltip("Scalar for mouse sensibility on Y")]
@@ -13,7 +13,8 @@ public class HPPC_InputsConfig : ScriptableObject
 
 
     [Space(5)]
-    [Tooltip("Scalar for gamepad sensibility on X")]
+	[Header("Look - Mouse")]
+	[Tooltip("Scalar for gamepad sensibility on X")]
     public float gamepadSensibilityX;
     [Tooltip("Scalar for gamepad sensibility on Y")]
     public float gamepadSensibilityY;

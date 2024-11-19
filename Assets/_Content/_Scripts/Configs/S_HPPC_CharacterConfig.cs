@@ -13,7 +13,10 @@ public class HPPC_CharacterConfig : ScriptableObject
 	public void OnValidate() => OnConfigChanged?.Invoke();
 
 
-    [Header("Movement")]
+	public GameObject pfCamera;
+
+
+	[Header("Movement")]
     [Tooltip("Max speed when walking")]
     public float walkSpeed;
 

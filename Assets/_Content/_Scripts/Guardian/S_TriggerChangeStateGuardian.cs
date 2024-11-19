@@ -13,7 +13,7 @@ public class TriggerChangeStateGuardian : MonoBehaviour
     }
     private void OnTriggerEnter(Collider other)
     {
-        if (other.TryGetComponent<CharacterMotor>(out var _playerCheckRef))
+        if (other.TryGetComponent<OldCharacterMotor>(out var _playerCheckRef))
         {
             ChangeState();
         }

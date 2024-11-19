@@ -9,7 +9,7 @@ public class SmallCollider : MonoBehaviour
 
     private void OnTriggerStay(Collider other)
     {
-        if (other.TryGetComponent<CharacterMotor>(out var _playerCheckRef))
+        if (other.TryGetComponent<OldCharacterMotor>(out var _playerCheckRef))
         {
             if (_playerCheckRef._craftInHand && _playerCheckRef._craftInRobot) { }
             _guardianRef.MakePLayerRef(_playerCheckRef);
@@ -20,7 +20,7 @@ public class SmallCollider : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
-        if (other.TryGetComponent<CharacterMotor>(out var _playerCheckRef) )
+        if (other.TryGetComponent<OldCharacterMotor>(out var _playerCheckRef) )
         {
             _guardianRef.TargetExit();
         }

@@ -8,7 +8,7 @@ public class DeathTrigger : MonoBehaviour
     public void OnTriggerEnter(Collider other)
     {
         Debug.Log(other.ToString());
-        if (other.TryGetComponent<CharacterMotor>(out var _playerCheckRef))
+        if (other.TryGetComponent<OldCharacterMotor>(out var _playerCheckRef))
         {
             _playerCheckRef.HandleDeath();
         }

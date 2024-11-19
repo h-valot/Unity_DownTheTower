@@ -5,7 +5,7 @@ using NaughtyAttributes;
 using Unity.VisualScripting;
 using UnityEngine;
 
-public class CharacterMotor : MonoBehaviour
+public class OldCharacterMotor : MonoBehaviour
 {
 	#region exposed variables
 
@@ -17,7 +17,7 @@ public class CharacterMotor : MonoBehaviour
 	[Foldout("Internal references")] [SerializeField] private CharacterController _controller;
 	[Foldout("Internal references")] [SerializeField] private GameObject _backpackAnchor;
 
-	[Foldout("External references")] [SerializeField] private ThirdPersonCamera _thirdPersonCamera;
+	[Foldout("External references")] [SerializeField] private CameraManager _thirdPersonCamera;
 	[Foldout("External references")] [SerializeField] private GameObject _PF_backpack;
 
 	[Foldout("Scriptable references")] [SerializeField] private CharacterConfig _characterConfig;
@@ -2065,7 +2065,7 @@ public class CharacterMotor : MonoBehaviour
         if (_isPressed && _craftInHand != null)
 		{
             _aiming = true;
-            _thirdPersonCamera.SwitchCameraStyle(CameraStyle.AIMING);
+            // _thirdPersonCamera.SwitchStyle(CameraStyle.AIMING);
             _craftInHand.InitializePreview();
         }
 		else if (_craftInHand != null)
@@ -2091,7 +2091,7 @@ public class CharacterMotor : MonoBehaviour
                 }
             }
 
-            _thirdPersonCamera.SwitchCameraStyle(CameraStyle.BASIC);
+            // _thirdPersonCamera.SwitchStyle(CameraStyle.BASIC);
         }
 	}
 

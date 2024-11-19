@@ -1,4 +1,4 @@
-public enum HPPC_BehaviorState
+public enum BehaviorState
 {
    NONE,
    LOCOMOTION,

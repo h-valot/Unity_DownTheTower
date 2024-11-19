@@ -6,11 +6,11 @@ public class LadderTP : Interactible
 	[SerializeField] private RSE_SetCharacterPosition _rseSetCharacterPosition;
 
     [HideInInspector] public Vector3 _teleportTo;
-    private CharacterMotor _character;
+    private OldCharacterMotor _character;
 
     public override void OnTriggerEnter(Collider other)
     {
-        if (other.TryGetComponent<CharacterMotor>(out _character))
+        if (other.TryGetComponent<OldCharacterMotor>(out _character))
         {
             _character.AddToInteractList(this);
         }

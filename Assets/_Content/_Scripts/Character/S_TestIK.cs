@@ -13,7 +13,7 @@ public class TestIk : MonoBehaviour
 	[SerializeField] private Transform _rightFootObj;
 
 	[Header("External references")]
-	[SerializeField] private CharacterMotor _characterMotor;
+	[SerializeField] private OldCharacterMotor _characterMotor;
 
 	// ---- PRIVATE VARIABLES ----
 	private bool _ikLiftTorch = false;

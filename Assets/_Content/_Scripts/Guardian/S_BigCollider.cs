@@ -1,5 +1,5 @@
 using UnityEngine;
-using static CharacterMotor;
+using static OldCharacterMotor;
 
 public class BigCollider : MonoBehaviour
 {
@@ -15,7 +15,7 @@ public class BigCollider : MonoBehaviour
             _guardianRef.TargetStayIn();
         }
 
-        else if (other.TryGetComponent<CharacterMotor>(out var _playerCheckRef))
+        else if (other.TryGetComponent<OldCharacterMotor>(out var _playerCheckRef))
         {
             Debug.Log("joueur");
             if ((_playerCheckRef._craftInHand.Type == CraftType.TORCH && _playerCheckRef._craftInHand.StateInHand())
@@ -30,7 +30,7 @@ public class BigCollider : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
-        if (other.TryGetComponent<CharacterMotor>(out var _playerCheckRef) || other.TryGetComponent<Torch>(out var _torchCheckRef))
+        if (other.TryGetComponent<OldCharacterMotor>(out var _playerCheckRef) || other.TryGetComponent<Torch>(out var _torchCheckRef))
         {
             Debug.Log("plus dans la range");
             _guardianRef.TargetExit();

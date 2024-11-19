@@ -4,7 +4,7 @@ using UnityEngine;
 public class HPPC_DisplayString : MonoBehaviour
 {
     [Header("External References")]
-    [SerializeField] private RSO_HPPC_MovementDatas _rso;
+    [SerializeField] private RSO_MovementDatas _rso;
     [Header("Config")]
     [SerializeField] private int rowToDisplay;
     

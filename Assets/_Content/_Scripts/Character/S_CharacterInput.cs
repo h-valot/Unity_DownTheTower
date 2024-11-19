@@ -7,7 +7,7 @@ public class CharacterInput : MonoBehaviour
 	[SerializeField] private PlayerInput _playerInput;
 
 	[Header("Scriptable references")]
-	[SerializeField] private RSO_ControlScheme _rsoControlScheme;
+	[SerializeField] private InputsConfig _inputsConfig;
 	[SerializeField] private RSO_GamePaused _rsoGamePaused;
 	[SerializeField] private RSE_Move _rseMove;
 	[SerializeField] private RSE_Look _rseLook;
@@ -24,13 +24,12 @@ public class CharacterInput : MonoBehaviour
 	[SerializeField] private RSE_ToggleCursor _rseToggleCursor;
 	[SerializeField] private RSE_Climb _rseClimb;
 
-	[Header("Debug")]
-	public Vector2 _move;
-	public Vector2 _look;
-	public bool _run;
-	public bool _throw;
-	public bool _jump;
-	public bool _climb;
+	private Vector2 _move;
+	private Vector2 _look;
+	private bool _run;
+	private bool _throw;
+	private bool _jump;
+	private bool _climb;
 
 	private void Start()
 	{
@@ -59,13 +58,6 @@ public class CharacterInput : MonoBehaviour
 		Cursor.lockState = hasFocus ? CursorLockMode.Locked : CursorLockMode.None;
 	}
 
-	private void UpdateControlScheme()
-	{
-		if (_look == Vector2.zero) return;
-
-		_rsoControlScheme.value = _playerInput.currentControlScheme;
-	}
-
 	private void OnEnable()
 	{
 		_rseToggleCursor.action += OnEnableCursor;
@@ -84,10 +76,24 @@ public class CharacterInput : MonoBehaviour
 
 	public void OnLook(InputValue value)
 	{
-		if (_rsoGamePaused.value) _look = Vector2.zero;
-        else _look = value.Get<Vector2>();
+		Vector2 input = value.Get<Vector2>();
 
-		UpdateControlScheme();
+		if (_playerInput.currentControlScheme == "Gamepad")
+		{
+			_look = new Vector2(
+				input.x * _inputsConfig.gamepadSensibilityX,
+				input.y * _inputsConfig.gamepadSensibilityY
+			);
+		}
+		else
+		{
+			_look = new Vector2(
+				input.x * _inputsConfig.mouseSensibilityX,
+				input.y * _inputsConfig.mouseSensibilityY * (_inputsConfig.InvertMouseY ? -1 : 1)
+			);
+		}
+
+		if (_rsoGamePaused.value) _look = Vector2.zero;
 		_rseLook.Call(_look);
     }
 
@@ -121,7 +127,6 @@ public class CharacterInput : MonoBehaviour
                 _rseThrow.Call(_throw);
             }
         }
-        
 	}
 
 	public void OnToggleInHand()

@@ -7,7 +7,7 @@ public class DestroyingPlatform : MonoBehaviour
 {
     public void OnTriggerEnter(Collider other)
     {
-        if (other.TryGetComponent<CharacterMotor>(out var _playerCheckRef))
+        if (other.TryGetComponent<OldCharacterMotor>(out var _playerCheckRef))
         {
             Destroy(this.gameObject);
         }

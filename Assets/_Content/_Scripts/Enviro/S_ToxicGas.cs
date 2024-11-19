@@ -8,7 +8,7 @@ public class ToxicGas: MonoBehaviour
     [SerializeField] private List<ExplosiveMushroom> _mushroomsList;
     [SerializeField] private GameObject _gaz;
     [SerializeField] private ToxicConfig _toxicConfig;
-    [SerializeField] private CharacterMotor _characterMotor;
+    [SerializeField] private OldCharacterMotor _characterMotor;
     [SerializeField] private RSE_KillCharacter _rseKillCharacter;
 
 
@@ -32,7 +32,7 @@ public class ToxicGas: MonoBehaviour
         }
     }
 
-    public void CharacterHasEnter(CharacterMotor _character)
+    public void CharacterHasEnter(OldCharacterMotor _character)
     {
         _rseKillCharacter.Call();
     }

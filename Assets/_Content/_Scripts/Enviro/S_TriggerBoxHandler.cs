@@ -9,7 +9,7 @@ public class S_TriggerBoxHandler : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.TryGetComponent<CharacterMotor>(out var _character))
+        if (other.TryGetComponent<OldCharacterMotor>(out var _character))
         {
             _toxicGas.CharacterHasEnter(_character);
         }

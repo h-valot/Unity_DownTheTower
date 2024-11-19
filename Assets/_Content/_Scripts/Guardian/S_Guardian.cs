@@ -11,7 +11,7 @@ public class Guardian : MonoBehaviour
     [SerializeField] private GuardianConfig _guardianConfig;
 
     private NavMeshAgent _agent;
-    private CharacterMotor _playerRef;
+    private OldCharacterMotor _playerRef;
     private Torch _torchRef;
     private bool _isPlayerTarget;
     private Coroutine _coroutine;
@@ -230,7 +230,7 @@ public class Guardian : MonoBehaviour
         
     }
 
-    public void MakePLayerRef(CharacterMotor Player)
+    public void MakePLayerRef(OldCharacterMotor Player)
     {
         _playerRef = Player;
         _isPlayerTarget = true;

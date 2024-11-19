@@ -1,20 +1,19 @@
 using System.Collections;
 using UnityEngine;
 
-public class HPPC_Controller : MonoBehaviour
+public class NewCharacterMotor : MonoBehaviour
 {
     #region REFERENCES
 
     [Header("Internal references")]
     [SerializeField] private Rigidbody _rigidbody;
     [SerializeField] private CapsuleCollider _collider;
-	[SerializeField] private ThirdPersonCamera _camera;
 	[SerializeField] private Transform _handSocket;
 	[SerializeField] private Transform _robotSocket;
 	[SerializeField] private Transform _harness;
-
-	[Header("External references")]
-	[SerializeField] private Transform _cameraManager;
+	[SerializeField] private Transform _aimingLookTo;
+	[SerializeField] private Transform _cameraTarget;
+	[SerializeField] private CharacterGraphics _graphics;
 
 	[Header("Scriptable references")]
     [SerializeField] private HPPC_CharacterConfig _characterConfig;
@@ -22,26 +21,29 @@ public class HPPC_Controller : MonoBehaviour
 	[SerializeField] private RopeConfig _ropeConfig;
 	[Space(5)]
     [SerializeField] private RSE_Move _rseMove;
-    [SerializeField] private RSE_Look _rseLook;
     [SerializeField] private RSE_Jump _rseJump;
 	[SerializeField] private RSE_Craft _rseCraft;
 	[SerializeField] private RSE_Throw _rseThrow;
 	[Space(5)]
-	[SerializeField] private RSO_HPPC_MovementDatas _rsoMovementDatas;
+	[SerializeField] private RSO_MovementDatas _rsoMovementDatas;
+	[SerializeField] private RSO_CameraStyle _rsoCameraStyle;
 
-    #endregion
+	#endregion
 
-    #region VARIABLES
+	#region VARIABLES
 
-    // - Inputs -
-    private Vector2 _moveInput = new Vector2();
+	// - Inputs -
+	private Vector2 _moveInput = new Vector2();
 
     // - Collisions -
     private LayerMask _layerMaskToIgnore;
     private RaycastHit[] _raycastHits;
 
-    // - Movement -
-    private bool _isGrounded;
+	// - Camera -
+	private CameraManager _camera;
+
+	// - Movement -
+	private bool _isGrounded;
     private Vector3 _groundNormal;
     private bool _isRunning;
     private bool _hasRope;
@@ -49,7 +51,7 @@ public class HPPC_Controller : MonoBehaviour
     private bool _isCrafting;
 
     // - State machine -
-    private HPPC_BehaviorState _currentState;
+    private BehaviorState _currentState;
 
 	// - Craft state -
 	private CraftType _craftType;
@@ -74,6 +76,11 @@ public class HPPC_Controller : MonoBehaviour
 
 		CheckGround();
         DetermineState();
+
+		_camera = Instantiate(_characterConfig.pfCamera, transform.position, Quaternion.identity, null).GetComponentInChildren<CameraManager>();
+		_camera.Initialize(_aimingLookTo, _cameraTarget);
+
+		_graphics.Initialize(_aimingLookTo);
 	}
 
     private void OnDestroy()
@@ -91,14 +98,14 @@ public class HPPC_Controller : MonoBehaviour
 
     private void LateUpdate()
     {
-        HPPC_MovementDatas _movementDatas = new HPPC_MovementDatas();
+		MovementDatas _movementDatas = new MovementDatas();
 
         _movementDatas.dataToString.Add((Mathf.Round(_rigidbody.velocity.magnitude * 100f) / 100f).ToString());
         _movementDatas.dataToString.Add(_isGrounded.ToString());
         _movementDatas.dataToString.Add(_currentState.ToString());
         _rsoMovementDatas.value = _movementDatas;
 
-		if (_isAiming) _handObject.PreviewThrow(_cameraManager.transform);
+		if (_isAiming) _handObject.PreviewThrow(_camera.transform);
 	}
 
     private void OnDrawGizmos()
@@ -134,23 +141,23 @@ public class HPPC_Controller : MonoBehaviour
     {
         switch (_currentState)
         {
-            case HPPC_BehaviorState.LOCOMOTION:
+            case BehaviorState.LOCOMOTION:
                 _rseMove.action += UpdateMoveInput;
                 _rseJump.action += Jump;
 				_rseCraft.action += ToggleCraft;
 				_rseThrow.action += ToggleAim;
 				break;
 
-            case HPPC_BehaviorState.FALL:
+            case BehaviorState.FALL:
                 _rseMove.action += UpdateMoveInput;
 				_rseThrow.action += ToggleAim;
 				break;
 
-            case HPPC_BehaviorState.CRAFT:
+            case BehaviorState.CRAFT:
 				_rseCraft.action += ToggleCraft;
 				break;
 
-            case HPPC_BehaviorState.ROPE:
+            case BehaviorState.ROPE:
 				_rseMove.action += UpdateMoveInput;
 				// _rseJump.action += Jump;
 				_rseCraft.action += ToggleCraft;
@@ -180,21 +187,21 @@ public class HPPC_Controller : MonoBehaviour
     /// </summary>
     private void DetermineState()
     {
-        if (_currentState != HPPC_BehaviorState.LOCOMOTION && _isGrounded && !_isCrafting)
+        if (_currentState != BehaviorState.LOCOMOTION && _isGrounded && !_isCrafting)
         {
-            SwitchState(HPPC_BehaviorState.LOCOMOTION);
+            SwitchState(BehaviorState.LOCOMOTION);
         }
-        else if (_currentState != HPPC_BehaviorState.FALL && !_isGrounded && !_hasRope)
+        else if (_currentState != BehaviorState.FALL && !_isGrounded && !_hasRope)
         {
-            SwitchState(HPPC_BehaviorState.FALL);
+            SwitchState(BehaviorState.FALL);
         }
-        else if (_currentState != HPPC_BehaviorState.ROPE && !_isGrounded && _hasRope)
+        else if (_currentState != BehaviorState.ROPE && !_isGrounded && _hasRope)
         {
-            SwitchState(HPPC_BehaviorState.ROPE);
+            SwitchState(BehaviorState.ROPE);
         }
-        else if (_currentState != HPPC_BehaviorState.CRAFT && _currentState == HPPC_BehaviorState.LOCOMOTION && _isCrafting)
+        else if (_currentState != BehaviorState.CRAFT && _currentState == BehaviorState.LOCOMOTION && _isCrafting)
         {
-            SwitchState(HPPC_BehaviorState.CRAFT);
+            SwitchState(BehaviorState.CRAFT);
         }
     }
 
@@ -202,7 +209,7 @@ public class HPPC_Controller : MonoBehaviour
     /// Switch to new state by triggering old state exit then new state enter
     /// </summary>
     /// <param name="_newState">New state to switch to</param>
-    private void SwitchState(HPPC_BehaviorState _newState)
+    private void SwitchState(BehaviorState _newState)
     {
         ExitState();
         EnterState(_newState);
@@ -213,26 +220,26 @@ public class HPPC_Controller : MonoBehaviour
     /// (2) Call EnterState method of the new state
     /// </summary>
     /// <param name="_newState">New state to trigger</param>
-    private void EnterState(HPPC_BehaviorState _newState)
+    private void EnterState(BehaviorState _newState)
     {
         _currentState = _newState;
 		SubscribeStateInputs();
 
 		switch (_currentState)
         {
-            case HPPC_BehaviorState.LOCOMOTION:
+            case BehaviorState.LOCOMOTION:
                 EnterLocomotionState();
                 break;
 
-            case HPPC_BehaviorState.FALL:
+            case BehaviorState.FALL:
                 EnterFallState();
                 break;
 
-            case HPPC_BehaviorState.CRAFT:
+            case BehaviorState.CRAFT:
                 EnterCraftState();
                 break;
 
-            case HPPC_BehaviorState.ROPE:
+            case BehaviorState.ROPE:
                 EnterRopeState();
                 break;
         }
@@ -245,19 +252,19 @@ public class HPPC_Controller : MonoBehaviour
     {
         switch (_currentState)
         {
-            case HPPC_BehaviorState.LOCOMOTION:
+            case BehaviorState.LOCOMOTION:
                 FixedUpdateLocomotionState();
                 break;
 
-            case HPPC_BehaviorState.FALL:
+            case BehaviorState.FALL:
                 FixedUpdateFallState();
                 break;
 
-            case HPPC_BehaviorState.CRAFT:
+            case BehaviorState.CRAFT:
                 FixedUpdateCraftState();
                 break;
 
-            case HPPC_BehaviorState.ROPE:
+            case BehaviorState.ROPE:
                 FixedUpdateRopeState();
                 break;
         }
@@ -272,19 +279,19 @@ public class HPPC_Controller : MonoBehaviour
 
 		switch (_currentState)
         {
-            case HPPC_BehaviorState.LOCOMOTION:
+            case BehaviorState.LOCOMOTION:
                 ExitLocomotionState();
                 break;
 
-            case HPPC_BehaviorState.FALL:
+            case BehaviorState.FALL:
                 ExitFallState();
                 break;
 
-            case HPPC_BehaviorState.CRAFT:
+            case BehaviorState.CRAFT:
                 ExitCraftState();
                 break;
 
-            case HPPC_BehaviorState.ROPE:
+            case BehaviorState.ROPE:
                 ExitRopeState();
                 break;
 		}
@@ -363,11 +370,11 @@ public class HPPC_Controller : MonoBehaviour
 
     private void UpdateDrag()
     {
-        if (_currentState == HPPC_BehaviorState.LOCOMOTION)
+        if (_currentState == BehaviorState.LOCOMOTION)
         {
             _rigidbody.drag = _characterConfig.dragGround;
         }
-        else if (_currentState == HPPC_BehaviorState.FALL || _currentState == HPPC_BehaviorState.ROPE)
+        else if (_currentState == BehaviorState.FALL || _currentState == BehaviorState.ROPE)
         {
             _rigidbody.drag = _characterConfig.dragFall;
         }
@@ -555,8 +562,8 @@ public class HPPC_Controller : MonoBehaviour
 	private void ToggleCraft(CraftType craftType, bool isInputPressed)
 	{
 		// Prevent switching to craft state if not in locomotion or crafting state or already crafting another item
-		if (_currentState != HPPC_BehaviorState.LOCOMOTION 
-		|| _currentState != HPPC_BehaviorState.CRAFT)
+		if (_currentState != BehaviorState.LOCOMOTION 
+		|| _currentState != BehaviorState.CRAFT)
 		{
 			// If craft button is pressed
 			if (isInputPressed)
@@ -599,7 +606,7 @@ public class HPPC_Controller : MonoBehaviour
 		if (_handObject == null) return;
 
 		_isAiming = isInputPressed;
-		// _cameraManager.SwitchCameraStyle(_isAiming ? CameraStyle.AIMING : CameraStyle.BASIC);
+		_rsoCameraStyle.value = _isAiming ? CameraStyle.AIMING : CameraStyle.BASIC;
 
 		// Handle preview on input pressed
 		if (_isAiming)
@@ -611,7 +618,7 @@ public class HPPC_Controller : MonoBehaviour
 		else
 		{
 			// Assert: object can't be thrown
-			if (!_handObject.Throw(_cameraManager.transform)) return;
+			if (!_handObject.Throw(_camera.transform)) return;
 
 			// Exception: rope attachment
 			_rope = _handObject as Rope;
