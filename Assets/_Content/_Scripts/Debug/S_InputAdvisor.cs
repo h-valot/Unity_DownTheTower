@@ -1,9 +1,11 @@
+using EnhancedHierarchy.Icons;
 using UnityEngine;
 
 public class InputAdvisor : MonoBehaviour
 {
 
     [Header("Internal References")]
+    [SerializeField] private GameObject parentPanel;
     [SerializeField] private GameObject graphicInteract;
     [SerializeField] private GameObject graphicRecycle;
     [SerializeField] private GameObject inputPanel;
@@ -13,10 +15,9 @@ public class InputAdvisor : MonoBehaviour
     [Header("External References")]
     [SerializeField] private RSE_CanInteract _rseCanInteract;
     [SerializeField] private RSE_CanRecycle _rseCanRecycle;
-    [SerializeField] private RSO_CharacterState _rsoCharacterState;
     [SerializeField] private RSE_HideUI _rseHideUI;
-
-    private bool isUIactive = true;
+    [SerializeField] private RSO_CharacterState _rsoCharacterState;
+    [SerializeField] private RSO_GamePaused _rsoGamePaused;
 
     private void OnEnable()
     {
@@ -24,6 +25,7 @@ public class InputAdvisor : MonoBehaviour
         _rseCanRecycle.action += ToggleRecycle;
         _rseHideUI.action += ToggleUI;
         _rsoCharacterState.OnChanged += SwitchAdvisorInputs;
+        _rsoGamePaused.OnChanged += HideAdvisor;
     }
 
     private void OnDisable()
@@ -32,6 +34,7 @@ public class InputAdvisor : MonoBehaviour
         _rseCanRecycle.action -= ToggleRecycle;
         _rseHideUI.action -= ToggleUI;
         _rsoCharacterState.OnChanged -= SwitchAdvisorInputs;
+        _rsoGamePaused.OnChanged -= HideAdvisor;
     }
 
     private void ToggleInteract(bool isActive)
@@ -46,8 +49,13 @@ public class InputAdvisor : MonoBehaviour
 
     private void ToggleUI()
     {
-        isUIactive = !isUIactive;
-        inputPanel.SetActive(isUIactive);
+        inputPanel.SetActive(!inputPanel.activeInHierarchy);
+    }
+
+    private void HideAdvisor()
+    {
+        if (_rsoGamePaused.value) parentPanel.SetActive(false);
+        else parentPanel.SetActive(true);
     }
 
     private void SwitchAdvisorInputs()
