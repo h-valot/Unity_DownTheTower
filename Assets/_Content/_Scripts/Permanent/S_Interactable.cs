@@ -33,7 +33,7 @@ public class Interactable : MonoBehaviour
     public virtual void OnTriggerEnter(Collider collider)
     {
 		// Assert: the collided object isn't the character motor.
-        if (!collider.TryGetComponent<NewCharacterMotor>(out var character))
+        if (!collider.TryGetComponent<CharacterInteract>(out var character))
 
 		character.Add(this);
 	}
@@ -45,7 +45,7 @@ public class Interactable : MonoBehaviour
 	public virtual void OnTriggerExit(Collider collider)
 	{
 		// Assert: the collided object isn't the character motor.
-		if (!collider.TryGetComponent<NewCharacterMotor>(out var character))
+		if (!collider.TryGetComponent<CharacterInteract>(out var character))
 			
 		character.Remove(this);
 	}

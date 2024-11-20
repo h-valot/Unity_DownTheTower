@@ -1005,7 +1005,7 @@ GameObject:
   - component: {fileID: 1500310086000764558}
   - component: {fileID: 349985769423256722}
   m_Layer: 0
-  m_Name: PNL_Input
+  m_Name: PNL_Inputs locomotion
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1125,15 +1125,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e162ae869bd5cca409b41d4777fefc08, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  graphicInteract: {fileID: 7849162614162478194}
-  graphicRecycle: {fileID: 5595784458281941138}
-  inputPanel: {fileID: 2563226632995417378}
-  ropeInputs: {fileID: 8140482689333178674}
-  locomotionInputs: {fileID: 4337462778302127370}
-  _rseCanInteract: {fileID: 11400000, guid: d033d8dff7bb85b4da9d48e829c06002, type: 2}
-  _rseCanRecycle: {fileID: 11400000, guid: b877347d77b400046becd59d8cc9b5f8, type: 2}
-  _rsoCharacterState: {fileID: 11400000, guid: 2f035642b557e7740b684a64f1d67a0a, type: 2}
-  _rseHideUI: {fileID: 11400000, guid: 862a61014b9840246b1f9e5c4979539c, type: 2}
+  m_graphicInteract: {fileID: 7849162614162478194}
+  m_graphicRecycle: {fileID: 5595784458281941138}
+  m_inputPanel: {fileID: 2563226632995417378}
+  m_ropeInputs: {fileID: 8140482689333178674}
+  m_locomotionInputs: {fileID: 4337462778302127370}
+  m_rseHideUI: {fileID: 11400000, guid: 862a61014b9840246b1f9e5c4979539c, type: 2}
+  m_rsoCanInteract: {fileID: 11400000, guid: d033d8dff7bb85b4da9d48e829c06002, type: 2}
+  m_rsoCanRecycle: {fileID: 11400000, guid: b877347d77b400046becd59d8cc9b5f8, type: 2}
+  m_rsoCharacterState: {fileID: 11400000, guid: 2f035642b557e7740b684a64f1d67a0a,
+    type: 2}
 --- !u!1 &4542899965146648207
 GameObject:
   m_ObjectHideFlags: 0
@@ -2362,7 +2363,7 @@ GameObject:
   - component: {fileID: 1991409675184679147}
   - component: {fileID: 4630749217622074838}
   m_Layer: 0
-  m_Name: PNL_InputRope
+  m_Name: PNL_Inputs rope
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

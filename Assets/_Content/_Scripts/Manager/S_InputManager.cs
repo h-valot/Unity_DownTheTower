@@ -4,51 +4,56 @@ using UnityEngine.InputSystem;
 public class InputManager : MonoBehaviour
 {
 	[Header("Internal references")]
-	[SerializeField] private PlayerInput _playerInput;
+	[SerializeField] private PlayerInput m_playerInput;
 
 	[Header("Scriptable references")]
-	[SerializeField] private InputsConfig _inputsConfig;
-	[SerializeField] private RSO_GamePaused _rsoGamePaused;
-	[SerializeField] private RSE_Move _rseMove;
-	[SerializeField] private RSE_Look _rseLook;
-	[SerializeField] private RSE_Jump _rseJump;
-	[SerializeField] private RSE_Run _rseRun;
-	[SerializeField] private RSE_Interact _rseInteract;
-	[SerializeField] private RSE_CancelAction _rseCancelAction;
-    [SerializeField] private RSE_Craft _rseCraft;
-	[SerializeField] private RSE_Throw _rseThrow;
-    [SerializeField] private RSE_ToggleInHand _rseToggleInHand;
-    [SerializeField] private RSE_Pause _rsePause;
-    [SerializeField] private RSE_HideUI _rseHideUI;
-    [SerializeField] private RSE_Recycle _rseRecycle;
-	[SerializeField] private RSE_ToggleCursor _rseToggleCursor;
-	[SerializeField] private RSE_Climb _rseClimb;
+	[SerializeField] private InputsConfig m_inputsConfig;
+	[Space(5)]
+	[SerializeField] private RSE_Move m_rseMove;
+	[SerializeField] private RSE_Look m_rseLook;
+	[SerializeField] private RSE_Jump m_rseJump;
+	[SerializeField] private RSE_Run m_rseRun;
+	[SerializeField] private RSE_Interact m_rseInteract;
+	[SerializeField] private RSE_CancelAction m_rseCancelAction;
+    [SerializeField] private RSE_Craft m_rseCraft;
+	[SerializeField] private RSE_Throw m_rseThrow;
+    [SerializeField] private RSE_ToggleInHand m_rseToggleInHand;
+    [SerializeField] private RSE_Pause m_rsePause;
+    [SerializeField] private RSE_HideUI m_rseHideUI;
+    [SerializeField] private RSE_Recycle m_rseRecycle;
+	[SerializeField] private RSE_ToggleCursor m_rseToggleCursor;
+	[SerializeField] private RSE_Climb m_rseClimb;
+	[Space(5)]
+	[SerializeField] private RSO_GamePaused m_rsoGamePaused;
+	[SerializeField] private RSO_CanCraft m_rsoCanCraft;
+	[SerializeField] private RSO_CanRecycle m_rsoCanRecycle;
+	[SerializeField] private RSO_CanInteract m_rsoCanInteract;
 
-	private Vector2 _move;
-	private Vector2 _look;
-	private bool _run;
-	private bool _throw;
-	private bool _jump;
-	private bool _climb;
+	private Vector2 m_move;
+	private Vector2 m_look;
+	private bool m_run;
+	private bool m_throw;
+	private bool m_jump;
+	private bool m_climb;
 
 	private void Start()
 	{
 		// Reset values
-		_run = false;
-		_rseRun.Call(false);
+		m_run = false;
+		m_rseRun.Call(false);
 
-		_throw = false;
-		_rseThrow.Call(false);
+		m_throw = false;
+		m_rseThrow.Call(false);
 
-		_jump = false;
-		_rseJump.Call(false);
+		m_jump = false;
+		m_rseJump.Call(false);
 	}
 
 	private void Update()
 	{
-		if (_look != Vector2.zero) 
+		if (m_look != Vector2.zero) 
 		{
-			_rseLook.Call(_look);
+			m_rseLook.Call(m_look);
 		}
 	}
 
@@ -60,102 +65,117 @@ public class InputManager : MonoBehaviour
 
 	private void OnEnable()
 	{
-		_rseToggleCursor.action += OnEnableCursor;
+		m_rseToggleCursor.action += OnEnableCursor;
 	}
 
 	private void OnDisable()
 	{
-		_rseToggleCursor.action -= OnEnableCursor;
+		m_rseToggleCursor.action -= OnEnableCursor;
 	}
 
 	public void OnMove(InputValue value)
 	{
-		_move = value.Get<Vector2>();
-		_rseMove.Call(_move);
+		m_move = value.Get<Vector2>();
+		m_rseMove.Call(m_move);
 	}
 
 	public void OnLook(InputValue value)
 	{
 		Vector2 input = value.Get<Vector2>();
 
-		if (_playerInput.currentControlScheme == "Gamepad")
+		if (m_playerInput.currentControlScheme == "Gamepad")
 		{
-			_look = new Vector2(
-				input.x * _inputsConfig.gamepadSensibilityX,
-				input.y * _inputsConfig.gamepadSensibilityY
+			m_look = new Vector2(
+				input.x * m_inputsConfig.gamepadSensibilityX,
+				input.y * m_inputsConfig.gamepadSensibilityY
 			);
 		}
 		else
 		{
-			_look = new Vector2(
-				input.x * _inputsConfig.mouseSensibilityX,
-				input.y * _inputsConfig.mouseSensibilityY * (_inputsConfig.InvertMouseY ? -1 : 1)
+			m_look = new Vector2(
+				input.x * m_inputsConfig.mouseSensibilityX,
+				input.y * m_inputsConfig.mouseSensibilityY * (m_inputsConfig.InvertMouseY ? -1 : 1)
 			);
 		}
 
-		if (_rsoGamePaused.value) _look = Vector2.zero;
-		_rseLook.Call(_look);
+		if (m_rsoGamePaused.value) m_look = Vector2.zero;
+		m_rseLook.Call(m_look);
     }
 
 	public void OnJump(InputValue value)
 	{
-		_jump = value.isPressed;
-		_rseJump.Call(_jump);
+		m_jump = value.isPressed;
+		m_rseJump.Call(m_jump);
 	}
 
 	public void OnRun(InputValue value)
 	{
-		_run = value.isPressed;
-		_rseRun.Call(_run);
+		m_run = value.isPressed;
+		m_rseRun.Call(m_run);
 	}
 
 	public void OnThrow(InputValue value)
     {
 		if (value.Get<float>() >= 0.05f)
 		{
-			_throw = !_throw;
-			_rseThrow.Call(_throw);
+			m_throw = !m_throw;
+			m_rseThrow.Call(m_throw);
 		}
 		else
 		{
-			_throw = !_throw;
-			_rseThrow.Call(_throw);
+			m_throw = !m_throw;
+			m_rseThrow.Call(m_throw);
         }
 	}
 
 	public void OnToggleInHand()
 	{
-		_rseToggleInHand.Call();
+		m_rseToggleInHand.Call();
 	}
 
 	public void OnInteract(InputValue value)
 	{
-		_rseInteract.Call();
+		// Assertion
+		if (!m_rsoCanInteract.value) return;
+
+		m_rseInteract.Call();
 	}
 
     public void OnCancelAction()
     {
-        _rseCancelAction.Call();
+        m_rseCancelAction.Call();
     }
 
     public void OnCraftTorch(InputValue value)
     {
-        _rseCraft.Call(CraftType.TORCH, value.isPressed);
+		// Assertion
+		if (!m_rsoCanCraft.value) return;
+
+        m_rseCraft.Call(CraftType.TORCH, value.isPressed);
     }
 
     public void OnCraftLadder(InputValue value)
-    {
-        _rseCraft.Call(CraftType.DEPRECATED_LADDER, value.isPressed);
+	{
+		// Assertion
+		if (!m_rsoCanCraft.value) return;
+
+		m_rseCraft.Call(CraftType.DEPRECATED_LADDER, value.isPressed);
     }
 
     public void OnCraftRope(InputValue value)
-    {
-        _rseCraft.Call(CraftType.ROPE, value.isPressed);
+	{
+		// Assertion
+		if (!m_rsoCanCraft.value) return;
+
+		m_rseCraft.Call(CraftType.ROPE, value.isPressed);
 	}
 
     public void OnRecycle(InputValue value)
-    {
-        _rseRecycle.Call();
+	{
+		// Assertion
+		if (!m_rsoCanRecycle.value) return;
+
+		m_rseRecycle.Call();
     }
 
 	public void OnEnableCursor(bool value)
@@ -166,12 +186,12 @@ public class InputManager : MonoBehaviour
 
 	public void OnClimb(InputValue value)
 	{
-		_climb = value.isPressed;
-		_rseClimb.Call(_climb);
+		m_climb = value.isPressed;
+		m_rseClimb.Call(m_climb);
 	}
 
 	public void OnHideUI()
 	{
-		_rseHideUI.Call();
+		m_rseHideUI.Call();
 	}
 }

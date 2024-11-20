@@ -1,12 +1,5 @@
-using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using DG.Tweening.Core.Easing;
 using UnityEngine;
-using Unity.Mathematics;
-using Unity.VisualScripting;
-using DG.Tweening;
 
 public class NewCharacterMotor : MonoBehaviour
 {
@@ -20,7 +13,6 @@ public class NewCharacterMotor : MonoBehaviour
 	[SerializeField] private Transform m_harness;
 	[SerializeField] private Transform m_aimingLookTo;
 	[SerializeField] private Transform m_cameraTarget;
-	[SerializeField] private Transform m_backpackAnchor;
 	[SerializeField] private CharacterGraphics m_characterGraphics;
 
 	[Header("Scriptable references")]
@@ -32,13 +24,12 @@ public class NewCharacterMotor : MonoBehaviour
     [SerializeField] private RSE_Jump m_rseJump;
 	[SerializeField] private RSE_Craft m_rseCraft;
 	[SerializeField] private RSE_Throw m_rseThrow;
-	[SerializeField] private RSE_Interact m_rseInteract;
-	[SerializeField] private RSE_Recycle m_rseRecycle;
-	[SerializeField] private RSE_CanInteract m_rseCanInteract;
-	[SerializeField] private RSE_CanRecycle m_rseCanRecycle;
+	[SerializeField] private RSE_BackpackCrafting m_rseBackpackCrafting;
 	[Space(5)]
 	[SerializeField] private RSO_MovementDatas m_rsoMovementDatas;
 	[SerializeField] private RSO_CameraStyle m_rsoCameraStyle;
+	[SerializeField] private RSO_CanCraft m_rsoCanCraft;
+	[SerializeField] private RSO_CanRecycle m_rsoCanRecycle;
 
 	#endregion
 
@@ -65,8 +56,6 @@ public class NewCharacterMotor : MonoBehaviour
     private BehaviorState m_currentState;
 
 	// - Craft state -
-	private bool m_hasBackpack;
-	private Backpack m_backpack;
 	private CraftType m_craftType;
 	private Coroutine m_craftCoroutine;
 	private Permanent m_handObject;
@@ -75,9 +64,6 @@ public class NewCharacterMotor : MonoBehaviour
 
 	// - Rope state -
 	private Rope m_rope;
-
-	// - Interaction -
-	private List<Interactable> m_interactables = new List<Interactable>();
 
 	#endregion
 
@@ -98,7 +84,8 @@ public class NewCharacterMotor : MonoBehaviour
 
 		m_characterGraphics.Initialize(m_aimingLookTo, m_rigidbody);
 
-		GetBackpackDebug();
+		m_rsoCanCraft.value = false;
+		m_rsoCanRecycle.value = false;
 	}
 
     private void OnEnable()
@@ -159,21 +146,17 @@ public class NewCharacterMotor : MonoBehaviour
         m_rseJump.action -= Jump;
 		m_rseCraft.action -= ToggleCraft;
 		m_rseThrow.action -= ToggleAim;
-		m_rseRecycle.action -= Recycle;
-		m_rseInteract.action -= Interact;
 	}
 
     private void SubscribeStateInputs()
     {
-        switch (m_currentState)
+		switch (m_currentState)
         {
             case BehaviorState.LOCOMOTION:
                 m_rseMove.action += UpdateMoveInput;
                 m_rseJump.action += Jump;
 				m_rseCraft.action += ToggleCraft;
 				m_rseThrow.action += ToggleAim;
-				m_rseRecycle.action += Recycle;
-				m_rseInteract.action += Interact;
 				break;
 
             case BehaviorState.FALL:
@@ -203,20 +186,6 @@ public class NewCharacterMotor : MonoBehaviour
 	{
 		m_isRunning = ispressed;
     }
-
-	public void ToggleCraftInput(bool enable)
-	{
-		if (enable)
-		{
-			m_rseCraft.action += ToggleCraft;
-			m_rseRecycle.action += Recycle;
-		}
-		else
-		{
-			m_rseCraft.action -= ToggleCraft;
-			m_rseRecycle.action -= Recycle;
-		}
-	}
 
 	#endregion
 
@@ -624,8 +593,8 @@ public class NewCharacterMotor : MonoBehaviour
 		{
 			StopCoroutine(m_craftCoroutine);
 			m_craftCoroutine = null;
-			
-			if (m_backpack != null) m_backpack.EndCrafting();
+
+			m_rseBackpackCrafting.Call(false, -1);
 		}
 	}
 
@@ -654,8 +623,7 @@ public class NewCharacterMotor : MonoBehaviour
 	/// </summary>
 	private IEnumerator Craft(CraftType craftType, float duration)
 	{
-		// Wait the crafting duration
-		// if (_backpack != null) _backpack.StartCrafting(duration);
+		m_rseBackpackCrafting.Call(true, duration);
 
 		yield return new WaitForSeconds(duration);
 
@@ -666,7 +634,7 @@ public class NewCharacterMotor : MonoBehaviour
 			m_handSocket.transform
 		);
 
-		m_backpack.EndCrafting();
+		m_rseBackpackCrafting.Call(false, -1);
 		m_craftCoroutine = null;
 	}
 
@@ -713,135 +681,6 @@ public class NewCharacterMotor : MonoBehaviour
 		to = from;
 		to.transform.rotation = socket.transform.rotation;
 		from = toCache;
-	}
-
-	#endregion
-
-	#region INTERACTION
-
-	private void Interact()
-	{
-		// Assertion
-		if (m_interactables.Count == 0 || m_currentState != BehaviorState.LOCOMOTION) return;
-
-		GetNearestInteractable()?.InteractionTrigger();
-	}
-
-	private void Recycle()
-	{
-		// Assertion
-		if (m_interactables.Count == 0 || m_currentState != BehaviorState.LOCOMOTION) return;
-
-		Interactable interactable = GetNearestInteractable();
-
-		// Assert: interactable isn't valid
-		if (!interactable || !interactable.IsRecyclable) return;
-
-		Remove(interactable, doRecycle: true);
-	}
-
-	/// <summary>
-	/// 	Add the given interactable into the interactable list.
-	/// </summary>
-	public void Add(Interactable interactable)
-	{
-		m_interactables.Add(interactable);
-	}
-
-	/// <summary>
-	/// 	Remove the given interactable from the interactable list.
-	/// 	The character will no longer be able to interact with it.
-	/// </summary>
-	public void Remove(Interactable interactable, bool doRecycle = false)
-	{
-		interactable.IsValid = false;
-		m_interactables.Remove(interactable);
-
-		CheckShowInteract();
-		CheckShowRecycle(false);
-
-		if (doRecycle) interactable.Recycle();
-	}
-
-	/// <summary>
-	/// 	Return the nearest interactable in front of the character.
-	/// </summary>
-	private Interactable GetNearestInteractable()
-	{
-		// - Get interactable in front of the character -
-		var counter = 0;
-		foreach (var interactable in m_interactables)
-		{
-			// Assertion
-			if (!interactable) continue;
-
-			Vector3 towardsInteract = interactable.transform.position - transform.position;
-
-			interactable.IsValid = Vector3.Dot(
-				new Vector3(m_characterGraphics.transform.forward.x, 0, m_characterGraphics.transform.forward.z).normalized,
-				new Vector3(towardsInteract.x, 0, towardsInteract.z).normalized
-			) > 0.5f;
-			
-			if (interactable.IsValid) counter++;
-		}
-
-		// Assert: there is no interactable in front of the character.
-		if (counter == 0) return null;
-
-		// - Get the nearest interactable object from the character -
-		var nearest = m_interactables.FirstOrDefault(i => i.IsValid);
-		foreach (var valid in m_interactables.Where(i => i.IsValid))
-		{
-			if ((valid.transform.position - transform.position).sqrMagnitude <
-				(nearest.transform.position - transform.position).sqrMagnitude)
-			{
-				nearest = valid;
-			}
-		}
-		return nearest;
-	}
-
-	private void CheckShowInteract()
-	{
-		m_rseCanInteract.Call(
-			m_interactables.Count(i => i.IsValid) > 0
-			&& m_currentState == BehaviorState.LOCOMOTION
-		);
-	}
-
-	private void CheckShowRecycle(bool isRecyclable)
-	{
-		m_rseCanRecycle.Call(
-			isRecyclable
-			&& m_currentState == BehaviorState.LOCOMOTION
-		);
-	}
-
-	#endregion
-
-	#region BACKPACK
-
-	private void GetBackpackDebug()
-	{
-		// Assertion
-		if (m_characterConfig.startWithBag) return;
-
-		m_backpack = FindAnyObjectByType<Backpack>();
-		if (m_backpack == null) m_backpack = Instantiate(m_characterConfig.pfBackpack);
-		m_backpack.ForceSetupBackpack(this);
-	}
-
-	public void Pickup(Backpack backpack)
-	{
-		m_backpack = backpack;
-		m_hasBackpack = true;
-
-		ToggleCraftInput(m_hasBackpack);
-		m_backpack.transform.SetParent(m_backpackAnchor.transform, false);
-		m_backpack.transform.localPosition = Vector3.zero;
-		m_backpack.transform.localRotation = Quaternion.identity;
-		m_backpack.transform.localScale = Vector3.one;
-		Remove(m_backpack);
 	}
 
 	#endregion

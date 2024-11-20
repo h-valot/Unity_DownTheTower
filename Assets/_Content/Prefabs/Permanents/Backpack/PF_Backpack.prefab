@@ -47,13 +47,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 597bcaf2f533cb44ab328992f8acebee, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isRecyclable: 0
-  objectToRecycle: {fileID: 3288633840794069537}
-  displayGizmos: 0
+  m_isRecyclable: 0
+  m_objectToRecycle: {fileID: 0}
+  m_displayGizmos: 0
   m_mesh: {fileID: 7265488484443596003}
   m_sphereCollider: {fileID: 1521777261592441377}
-  m_characterConfig: {fileID: 11400000, guid: 002492e8a2733234b8bdf7d15dea453b, type: 2}
   m_rsoCharacterDeath: {fileID: 11400000, guid: 52795416a18d6764ab55f73b88f71b83,
+    type: 2}
+  m_rsoPackbackCrafting: {fileID: 11400000, guid: 996a2f4b5d1bdcf459659fcd9ce1aa7e,
     type: 2}
 --- !u!23 &7265488484443596003
 MeshRenderer:

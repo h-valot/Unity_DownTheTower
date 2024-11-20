@@ -1,6 +1,5 @@
 using RuntimeScriptables;
 using UnityEngine;
-using static OldCharacterMotor;
 
-[CreateAssetMenu(fileName = "RSE_CraftTorch", menuName = "RSE/Inputs/CraftTorch")]
+[CreateAssetMenu(fileName = "RSE_CraftTorch", menuName = "Runtime Scriptable/Inputs/Craft")]
 public class RSE_Craft : RuntimeScriptableEvent<CraftType, bool> {}
