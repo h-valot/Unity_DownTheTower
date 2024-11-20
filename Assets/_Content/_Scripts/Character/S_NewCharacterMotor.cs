@@ -1,12 +1,7 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using DG.Tweening.Core.Easing;
 using UnityEngine;
-using Unity.Mathematics;
-using Unity.VisualScripting;
-using DG.Tweening;
 
 public class NewCharacterMotor : MonoBehaviour
 {
@@ -133,7 +128,7 @@ public class NewCharacterMotor : MonoBehaviour
 		if (m_isAiming) m_handObject.PreviewThrow(m_cameraMotor.transform);
 	}
 
-#if UNITY_EDITOR
+    #if UNITY_EDITOR
 
     private void OnDrawGizmos()
     {
@@ -147,7 +142,7 @@ public class NewCharacterMotor : MonoBehaviour
         }
     }
 
-#endif
+    #endif
 
     #endregion
 
@@ -353,19 +348,24 @@ public class NewCharacterMotor : MonoBehaviour
         m_raycastHits = Physics.SphereCastAll(_start, _radius, _direction, _distance, ~m_layerMaskToIgnore);
 
         //check each points
-        foreach (RaycastHit _hit in m_raycastHits)
+        foreach (RaycastHit hit in m_raycastHits)
         {
-            //check if it is on the bottom round part of the capsule
-            if (_hit.point.y < transform.position.y + m_collider.radius)
+            //exclude hit point that come from the spherecast spawning inside a collider
+            if (hit.point == Vector3.zero)
             {
-                float _angle = Vector3.Angle(_hit.normal, Vector3.up);
+                continue;
+            }
+            //check if it is on the bottom round part of the capsule
+            if (hit.point.y < transform.position.y + m_collider.radius)
+            {
+                float _angle = Vector3.Angle(hit.normal, Vector3.up);
                 if (_angle < 46f)
                 {
                     m_isGrounded = true;
                     //take the smallest normal from ground check as the new ground normal
-                    if (Vector3.Dot(_hit.normal, Vector3.up) > Vector3.Dot(m_groundNormal, Vector3.up))
+                    if (Vector3.Dot(hit.normal, Vector3.up) > Vector3.Dot(m_groundNormal, Vector3.up))
                     {
-                        m_groundNormal = _hit.normal;
+                        m_groundNormal = hit.normal;
                     }
                 }
             }
@@ -424,7 +424,11 @@ public class NewCharacterMotor : MonoBehaviour
     }
 
     /// <summary>
-    /// Move function used when grounded
+    /// (1) Update friction based on gorunded or not to not slide on slope if immobile
+    /// (2) Calculate desired speed force based on input and camera direction
+    /// (3) Orient speed force on floor
+    /// (4) Multiply desired speed force by walk/run speed
+    /// (5) Apply force and auto clamp it by susubstractiong actual speed to desired speed
     /// </summary>
     private void MoveGrounded()
     {
@@ -432,24 +436,24 @@ public class NewCharacterMotor : MonoBehaviour
 
         if (m_moveInput != Vector2.zero)
         {
-            Vector3 _desiredSpeed = (m_cameraMotor.PlanarRight * m_moveInput.x + m_cameraMotor.PlanarForward * m_moveInput.y).normalized;
+            Vector3 desiredSpeed = (m_cameraMotor.PlanarRight * m_moveInput.x + m_cameraMotor.PlanarForward * m_moveInput.y).normalized;
 
             //orient speed along slope
-            Vector3 _slopeRight = Vector3.Cross(Vector3.up, m_groundNormal);
-            _desiredSpeed = Quaternion.AngleAxis(Vector3.SignedAngle(Vector3.up, m_groundNormal, _slopeRight), _slopeRight) * _desiredSpeed;
+            Vector3 slopeRight = Vector3.Cross(Vector3.up, m_groundNormal);
+            desiredSpeed = Quaternion.AngleAxis(Vector3.SignedAngle(Vector3.up, m_groundNormal, slopeRight), slopeRight) * desiredSpeed;
 
             //set desired speed magnitude based on walk/run state
             if (m_isRunning)
             {
-                _desiredSpeed *= m_characterConfig.runSpeed;
+                desiredSpeed *= m_characterConfig.runSpeed;
             }
             else
             {
-                _desiredSpeed *= m_characterConfig.walkSpeed;
+                desiredSpeed *= m_characterConfig.walkSpeed;
             }
 
             //apply final force to move character, auto clamp the speed by substractiong actual speed to desired speed
-            m_rigidbody.AddForce(_desiredSpeed - m_rigidbody.velocity, ForceMode.Acceleration);
+            m_rigidbody.AddForce(desiredSpeed - m_rigidbody.velocity, ForceMode.Acceleration);
         }
     }
 
@@ -517,6 +521,30 @@ public class NewCharacterMotor : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// (1) Calculate desired speed force based on input and camera direction
+    /// (2) Multiply desired speed force by walk/run speed
+    /// (3) Apply force and auto clamp it by susubstractiong actual speed to desired speed
+    /// (4) Multiply said speed force by falling factor
+    /// </summary>
+    private void MoveFalling()
+    {
+        Vector3 desiredSpeedForce = (m_cameraMotor.PlanarRight * m_moveInput.x + m_cameraMotor.PlanarForward * m_moveInput.y).normalized;
+
+        //set desired speed magnitude based on walk/run state
+        if (m_isRunning)
+        {
+            desiredSpeedForce *= m_characterConfig.runSpeed;
+        }
+        else
+        {
+            desiredSpeedForce *= m_characterConfig.walkSpeed;
+        }
+
+        //apply final force to move character, auto clamp the speed by substractiong actual speed to desired speed
+        m_rigidbody.AddForce((desiredSpeedForce - m_rigidbody.velocity) * m_characterConfig.fallingForceFactor, ForceMode.Acceleration);
+    }
+
     #endregion
 
     #region LOCOMOTION STATE
@@ -549,7 +577,7 @@ public class NewCharacterMotor : MonoBehaviour
 
     private void FixedUpdateFallState()
     {
-
+        MoveFalling();
     }
 
     private void ExitFallState()
