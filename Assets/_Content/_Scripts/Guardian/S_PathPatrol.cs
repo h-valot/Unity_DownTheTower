@@ -41,7 +41,6 @@ public class PathPatrol : MonoBehaviour
     {
         if (_aggro == false)
         {
-            _guardianRef.ChangeColor(2f);
             if ((transform.position - _patrolPoints[_targetPoint].position).magnitude <= 0.5f)
             {
                 IncreaseTargetInt();
