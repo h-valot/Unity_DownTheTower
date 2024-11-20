@@ -16,11 +16,23 @@ public class SmallCollider : MonoBehaviour
             //_guardianRef.TargetStayIn();
             _guardianRef.AddToPotentialTargets(_playerCheckRef.gameObject);
         }
+        if (other.TryGetComponent<Torch>(out var _torchCheckRef))
+        {
+            //_guardianRef.MakeTorchRef(_torchCheckRef);
+            //_guardianRef.TargetStayIn();
+            _guardianRef.AddToPotentialTargets(_torchCheckRef.gameObject);
+        }
 
     }
 
     private void OnTriggerExit(Collider other)
     {
+        if (other.TryGetComponent<Torch>(out var _torchCheckRef))
+        {
+            //_guardianRef.TargetExit();
+            _guardianRef.RemovePotentialTargets(_torchCheckRef.gameObject);
+        }
+
         if (other.TryGetComponent<CharacterMotor>(out var _playerCheckRef) )
         {
             //_guardianRef.TargetExit();

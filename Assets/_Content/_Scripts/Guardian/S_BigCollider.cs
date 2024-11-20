@@ -28,10 +28,10 @@ public class BigCollider : MonoBehaviour
                 }
             }
 
-            if (_playerCheckRef._craftInHand == null)
-            {
-                _guardianRef.AddToPotentialTargets(_playerCheckRef.gameObject);
-            }
+            //if (_playerCheckRef._craftInHand == null)
+            //{
+            //    _guardianRef.AddToPotentialTargets(_playerCheckRef.gameObject);
+            //}
         }
     }
 

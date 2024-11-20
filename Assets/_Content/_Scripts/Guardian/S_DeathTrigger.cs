@@ -10,6 +10,7 @@ public class DeathTrigger : MonoBehaviour
     {
         if (other.TryGetComponent<CharacterMotor>(out var _playerCheckRef))
         {
+            _GuardianRef.RemovePotentialTargets(_playerCheckRef.gameObject);
             StartCoroutine(_GuardianRef.KillPlayer());
             //_playerCheckRef.HandleDeath();
         }
@@ -17,10 +18,16 @@ public class DeathTrigger : MonoBehaviour
         if (other.TryGetComponent<Torch>(out var _torchCheckRef))
         {
             if (_torchCheckRef!=null)
-            {
-                Destroy(_torchCheckRef.gameObject);
-            }
-            StartCoroutine(_GuardianRef.DestroyTorchTime());
+
+                if (!_torchCheckRef.StateInHand())
+                {
+                    {
+
+                        Destroy(_torchCheckRef.gameObject);
+                        _GuardianRef.RemovePotentialTargets(_torchCheckRef.gameObject);
+                    }
+                    StartCoroutine(_GuardianRef.DestroyTorchTime());
+                }
         }
 
         
