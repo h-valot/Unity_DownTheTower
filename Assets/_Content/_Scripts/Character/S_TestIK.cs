@@ -6,26 +6,26 @@ public class TestIk : MonoBehaviour
 {
 	[Header("Internal references")]
 	[Required("TestIk required an animator to work.")]
-	[SerializeField] private Animator _animator;
-	[SerializeField] private Transform _rightHandLiftTorchTarget = null;
-	[SerializeField] private Transform _rightHandAimTorchTarget = null;
-	[SerializeField] private Transform _leftFootObj;
-	[SerializeField] private Transform _rightFootObj;
+	[SerializeField] private Animator m_animator;
+	[SerializeField] private Transform m_rightHandLiftTorchTarget = null;
+	[SerializeField] private Transform m_rightHandAimTorchTarget = null;
+	[SerializeField] private Transform m_leftFootObj;
+	[SerializeField] private Transform m_rightFootObj;
 
 	[Header("External references")]
-	[SerializeField] private OldCharacterMotor _characterMotor;
+	[SerializeField] private OldCharacterMotor m_characterMotor;
 
 	// ---- PRIVATE VARIABLES ----
-	private bool _ikLiftTorch = false;
-    private bool _ikAimTorch = false;
+	private bool m_ikLiftTorch = false;
+    private bool m_ikAimTorch = false;
 	
     private void OnAnimatorIK()
     {
 		// Assert: animator is null
-        if (_animator == null) return;
+        if (m_animator == null) return;
 
-		if (_ikLiftTorch) SetIK(_rightHandLiftTorchTarget);
-		if (_ikAimTorch) SetIK(_rightHandAimTorchTarget);
+		if (m_ikLiftTorch) SetIK(m_rightHandLiftTorchTarget);
+		if (m_ikAimTorch) SetIK(m_rightHandAimTorchTarget);
 
 		// else
 		// {
@@ -40,10 +40,10 @@ public class TestIk : MonoBehaviour
 		// Assert: transform is null
 		if (transform == null) return;
 
-		_animator.SetIKPositionWeight(AvatarIKGoal.RightHand, 1);
-		_animator.SetIKRotationWeight(AvatarIKGoal.RightHand, 1);
-		_animator.SetIKPosition(AvatarIKGoal.RightHand, transform.position);
-		_animator.SetIKRotation(AvatarIKGoal.RightHand, transform.rotation);
+		m_animator.SetIKPositionWeight(AvatarIKGoal.RightHand, 1);
+		m_animator.SetIKRotationWeight(AvatarIKGoal.RightHand, 1);
+		m_animator.SetIKPosition(AvatarIKGoal.RightHand, transform.position);
+		m_animator.SetIKRotation(AvatarIKGoal.RightHand, transform.rotation);
 	}
 
     private void Update()
@@ -63,15 +63,15 @@ public class TestIk : MonoBehaviour
         //    Debug.Log("Found an object - distance: " + leftFootObj.position);
         // }
 
-        if (_characterMotor._craftInHand != null)
+        if (m_characterMotor.CraftInHand != null)
 		{
-			_ikLiftTorch = _characterMotor._craftInHand.Type == CraftType.TORCH;
+			m_ikLiftTorch = m_characterMotor.CraftInHand.Type == CraftType.TORCH;
         }
         else
         {
-            _ikLiftTorch = false;
+            m_ikLiftTorch = false;
         }
 
-		_ikAimTorch = _characterMotor._aiming;
+		m_ikAimTorch = m_characterMotor.Aiming;
     }
 }

@@ -11,7 +11,7 @@ public class SmallCollider : MonoBehaviour
     {
         if (other.TryGetComponent<OldCharacterMotor>(out var _playerCheckRef))
         {
-            if (_playerCheckRef._craftInHand && _playerCheckRef._craftInRobot) { }
+            if (_playerCheckRef.CraftInHand && _playerCheckRef.CraftInRobot) { }
             _guardianRef.MakePLayerRef(_playerCheckRef);
             _guardianRef.TargetStayIn();
         }

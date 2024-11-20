@@ -3,18 +3,18 @@ using UnityEngine;
 public class AnimatorManager : MonoBehaviour
 {
 	[Header("External references")]
-    [SerializeField] private Animator _animator;
-    [SerializeField] private OldCharacterMotor _characterMotor;
+    [SerializeField] private Animator m_animator;
+    [SerializeField] private OldCharacterMotor m_characterMotor;
 
     // ---- PRIVATE VARIABLES ----
-    private int _moveSpeedHash = Animator.StringToHash("MoveSpeed");
-    private int _isGroundedHash = Animator.StringToHash("IsGrounded");
-    private int _isJumpingHash = Animator.StringToHash("IsJumping");
+    private int m_moveSpeedHash = Animator.StringToHash("MoveSpeed");
+    private int m_isGroundedHash = Animator.StringToHash("IsGrounded");
+    private int m_isJumpingHash = Animator.StringToHash("IsJumping");
 
     void LateUpdate()
     {
-        _animator.SetFloat(_moveSpeedHash, _characterMotor._planarSpeed);
-        _animator.SetBool(_isGroundedHash, _characterMotor._isGrounded);
-        _animator.SetBool(_isJumpingHash, _characterMotor._currentState == AnimationState.JUMP);
+        m_animator.SetFloat(m_moveSpeedHash, m_characterMotor.PlanarSpeed);
+        m_animator.SetBool(m_isGroundedHash, m_characterMotor.IsGrounded);
+        m_animator.SetBool(m_isJumpingHash, m_characterMotor._currentState == AnimationState.JUMP);
     }
 }

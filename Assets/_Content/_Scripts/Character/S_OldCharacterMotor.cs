@@ -9,125 +9,124 @@ public class OldCharacterMotor : MonoBehaviour
 {
 	#region exposed variables
 
-	[Foldout("Internal references")] [SerializeField] private Transform _cameraTransform;
-	[Foldout("Internal references")] [SerializeField] private Transform _characterDirection;
-	[Foldout("Internal references")] [SerializeField] private Transform _handSocket;
-	[Foldout("Internal references")] [SerializeField] private Transform _robotHandSocket;
-	[Foldout("Internal references")] [SerializeField] private Transform _harness;
-	[Foldout("Internal references")] [SerializeField] private CharacterController _controller;
-	[Foldout("Internal references")] [SerializeField] private GameObject _backpackAnchor;
+	[Foldout("Internal references")] [SerializeField] private Transform m_cameraTransform;
+	[Foldout("Internal references")] [SerializeField] private Transform m_characterDirection;
+	[Foldout("Internal references")] [SerializeField] private Transform m_handSocket;
+	[Foldout("Internal references")] [SerializeField] private Transform m_robotHandSocket;
+	[Foldout("Internal references")] [SerializeField] private Transform m_harness;
+	[Foldout("Internal references")] [SerializeField] private CharacterController m_controller;
+	[Foldout("Internal references")] [SerializeField] private GameObject m_backpackAnchor;
 
-	[Foldout("External references")] [SerializeField] private CameraMotor _thirdPersonCamera;
-	[Foldout("External references")] [SerializeField] private GameObject _PF_backpack;
+	[Foldout("External references")] [SerializeField] private CameraMotor m_thirdPersonCamera;
+	[Foldout("External references")] [SerializeField] private GameObject m_PF_backpack;
 
-	[Foldout("Scriptable references")] [SerializeField] private OldCharacterConfig _characterConfig;
-	[Foldout("Scriptable references")] [SerializeField] private LadderConfig _ladderConfig;
-	[Foldout("Scriptable references")] [SerializeField] private RopeConfig _ropeConfig;
-	[Foldout("Scriptable references")] [SerializeField] private TorchConfig _torchConfig;
-	[Foldout("Scriptable references")] [SerializeField] private RSO_CharacterForward _rsoCharacterForward;
-	[Foldout("Scriptable references")] [SerializeField] private RSO_CharacterPosition _rsoCharacterPosition;
-	[Foldout("Scriptable references")] [SerializeField] private RSO_PlayerDeath _rsoPlayerDeath;
-	[Foldout("Scriptable references")] [SerializeField] private RSO_CharacterState _rsoCharacterState;
-	[Foldout("Scriptable references")] [SerializeField] private RSO_GamePaused _rsoGamePaused;
-	[Foldout("Scriptable references")] [SerializeField] private RSE_Run _rseRun;
-	[Foldout("Scriptable references")] [SerializeField] private RSE_Look _rseLook;
-	[Foldout("Scriptable references")] [SerializeField] private RSE_Move _rseMove;
-	[Foldout("Scriptable references")] [SerializeField] private RSE_Jump _rseJump;
-	[Foldout("Scriptable references")] [SerializeField] private RSE_Throw _rseThrow;
-	[Foldout("Scriptable references")] [SerializeField] private RSE_ToggleInHand _rseToggleInHand;
-	[Foldout("Scriptable references")] [SerializeField] private RSE_Craft _rseCraft;
-	[Foldout("Scriptable references")] [SerializeField] private RSE_Interact _rseInteract;
-	[Foldout("Scriptable references")] [SerializeField] private RSE_CancelAction _rseCancelAction;
-	[Foldout("Scriptable references")] [SerializeField] private RSE_CanInteract _rseCanInteract;
-	[Foldout("Scriptable references")] [SerializeField] private RSE_CanRecycle _rseCanRecycle;
-	[Foldout("Scriptable references")] [SerializeField] private RSE_Recycle _rseRecycle;
-	[Foldout("Scriptable references")] [SerializeField] private RSE_ToggleInputs _rseToggleInputs;
-	[Foldout("Scriptable references")] [SerializeField] private RSE_KillCharacter _rseKillCharacter;
-	[Foldout("Scriptable references")] [SerializeField] private RSE_Climb _rseClimb;
-	[Foldout("Scriptable references")] [SerializeField] private RSE_SetCharacterPosition _rseSetCharacterPosition;
+	[Foldout("Scriptable references")] [SerializeField] private OldCharacterConfig m_characterConfig;
+	[Foldout("Scriptable references")] [SerializeField] private LadderConfig m_ladderConfig;
+	[Foldout("Scriptable references")] [SerializeField] private RopeConfig m_ropeConfig;
+	[Foldout("Scriptable references")] [SerializeField] private TorchConfig m_torchConfig;
+	[Foldout("Scriptable references")] [SerializeField] private RSO_CharacterForward m_rsoCharacterForward;
+	[Foldout("Scriptable references")] [SerializeField] private RSO_CharacterPosition m_rsoCharacterPosition;
+	[Foldout("Scriptable references")] [SerializeField] private RSO_PlayerDeath m_rsoPlayerDeath;
+	[Foldout("Scriptable references")] [SerializeField] private RSO_CharacterState m_rsoCharacterState;
+	[Foldout("Scriptable references")] [SerializeField] private RSO_GamePaused m_rsoGamePaused;
+	[Foldout("Scriptable references")] [SerializeField] private RSE_Run m_rseRun;
+	[Foldout("Scriptable references")] [SerializeField] private RSE_Look m_rseLook;
+	[Foldout("Scriptable references")] [SerializeField] private RSE_Move m_rseMove;
+	[Foldout("Scriptable references")] [SerializeField] private RSE_Jump m_rseJump;
+	[Foldout("Scriptable references")] [SerializeField] private RSE_Throw m_rseThrow;
+	[Foldout("Scriptable references")] [SerializeField] private RSE_ToggleInHand m_rseToggleInHand;
+	[Foldout("Scriptable references")] [SerializeField] private RSE_Craft m_rseCraft;
+	[Foldout("Scriptable references")] [SerializeField] private RSE_Interact m_rseInteract;
+	[Foldout("Scriptable references")] [SerializeField] private RSE_CancelAction m_rseCancelAction;
+	[Foldout("Scriptable references")] [SerializeField] private RSE_CanInteract m_rseCanInteract;
+	[Foldout("Scriptable references")] [SerializeField] private RSE_CanRecycle m_rseCanRecycle;
+	[Foldout("Scriptable references")] [SerializeField] private RSE_Recycle m_rseRecycle;
+	[Foldout("Scriptable references")] [SerializeField] private RSE_ToggleInputs m_rseToggleInputs;
+	[Foldout("Scriptable references")] [SerializeField] private RSE_KillCharacter m_rseKillCharacter;
+	[Foldout("Scriptable references")] [SerializeField] private RSE_Climb m_rseClimb;
+	[Foldout("Scriptable references")] [SerializeField] private RSE_SetCharacterPosition m_rseSetCharacterPosition;
 
 	#endregion
 
 	#region runtime variables
 
 	// Debug header to separate possible private variables set public to be debugged
-	[Header("Debug")]
+	//[Header("Debug")]
 
 	// ----- PRIVATE VARIABLES -----
 	// - animation -
-	public AnimationState _currentState;
+	public AnimationState _currentState { get; private set; }
 
-	// - move -
-	[HideInInspector] public float _planarSpeed;
-	private Vector2 _moveInput;
-	private float _targetPlanarSpeed;
-	private float _gravitySpeed;
-	private Vector3 _movement;
-	private bool _isRunning;
-	private float _coyoteTime;
+    // - move -
+    public float PlanarSpeed { get; private set; }
+	private Vector2 m_moveInput;
+	private float m_targetPlanarSpeed;
+	private float m_gravitySpeed;
+	private Vector3 m_movement;
+	private bool m_isRunning;
+	private float m_coyoteTime;
 
 	// - slope -
-	private float _slopePercentage;
+	private float m_slopePercentage;
 
 	// - status -
-	private float _stunTimer;
-	private float _slowTimer;
+	private float m_stunTimer;
+	private float m_slowTimer;
 
 	// - ground -
-	private Vector3 _origin;
-    private Vector3 _planarForward;
-    private Vector3 _planarRight;
-	private bool _isGroundedLastFrame = true;
-	private LayerMask _raycastLayerMask;
-    private RaycastHit[] _groundHits = new RaycastHit[5];
-	private float _discriminantForward;
-    private float _discriminantRight;
+	private Vector3 m_origin;
+    private Vector3 m_planarForward;
+    private Vector3 m_planarRight;
+	private bool m_isGroundedLastFrame = true;
+	private LayerMask m_raycastLayerMask;
+    private RaycastHit[] m_groundHits = new RaycastHit[5];
+	private float m_discriminantForward;
+    private float m_discriminantRight;
 
     // - jump -
-    private bool _wantJump;
-	private bool _canJump = true;
-	private bool _isJumping;
-	private RaycastHit[] _edgeHits;
-	private RaycastHit _edgeHit;
+    private bool m_wantJump;
+	private bool m_canJump = true;
+	private bool m_isJumping;
+	private RaycastHit[] m_edgeHits;
+	private RaycastHit m_edgeHit;
 
 	// - prolonged-jump -
-	public bool _isJumpingPressed;
-	private float _prolongedJumpTimer = 0f;
-	public Triome _isJumpProlonged = Triome.FALSE;
+	public bool IsJumpingPressed { get; private set; }
+    private float m_prolongedJumpTimer = 0f;
+	public Triome IsJumpProlonged { get; private set; }
 
 	// - fall -
-	public bool _isGrounded;
-	private bool[] _groundChecks = new bool[5];
-	private bool _isStunned = false;
-	private bool _isSlowed = false;
-	private bool _isSlowedPostStun = false;
+	public bool IsGrounded { get; private set; }
+    private bool[] m_groundChecks = new bool[5];
+	private bool m_isStunned = false;
+	private bool m_isSlowed = false;
+	private bool m_isSlowedPostStun = false;
 
 	// - momentum - 
-	private Vector3 _positionStartFall;
-	private Vector3 _lastGroundedPlanarForward;
-	private float _fallHeight;
+	private Vector3 m_positionStartFall;
+	private Vector3 m_lastGroundedPlanarForward;
+	private float m_fallHeight;
 
 	// - interact -
-	private List<Interactible> _interactables;
-	private List<Interactible> _validInteractibles;
+	private List<Interactible> m_interactables;
+	private List<Interactible> m_validInteractibles;
 
 	// - throw -
-	[HideInInspector] public bool _aiming;
+	public bool Aiming { get; private set; }
 
-	// - craft -
-	private bool _crafting = false;
-	private CraftType _objectToCraft = CraftType.NONE;
-	private Coroutine _craftCoroutine;
+    // - craft -
+    private bool m_crafting = false;
+	private CraftType m_objectToCraft = CraftType.NONE;
+	private Coroutine m_craftCoroutine;
 
 	// - permanent -
-	[HideInInspector] public bool _hasBackpack;
-	[HideInInspector] public Backpack _backpack;
-	[HideInInspector] public float ropeLength;
-	[HideInInspector] public Permanent _craftInHand;
-	[HideInInspector] public Permanent _craftInRobot;
+	[HideInInspector] public bool HasBackpack { get; private set; }
+    [HideInInspector] public Backpack Backpack { get; private set; }
+	[HideInInspector] public Permanent CraftInHand { get; private set; }
+    [HideInInspector] public Permanent CraftInRobot { get; private set; }
 
-	// ---- CONSTS ----
-	private const float _HOLDING_KEY_THRESHOLD = 0.2f;
+    // ---- CONSTS ----
+    private const float _HOLDING_KEY_THRESHOLD = 0.2f;
 
 	#endregion
 
@@ -136,23 +135,25 @@ public class OldCharacterMotor : MonoBehaviour
 	private void Start()
     {
         // creation of the interaction list
-        _interactables = new List<Interactible>();
-        _validInteractibles = new List<Interactible>();
+        m_interactables = new List<Interactible>();
+        m_validInteractibles = new List<Interactible>();
 
-		_raycastLayerMask |= (1 << LayerMask.NameToLayer("Default"));
-		_raycastLayerMask |= (1 << LayerMask.NameToLayer("Collision_NoRaycast"));
+		m_raycastLayerMask |= (1 << LayerMask.NameToLayer("Default"));
+		m_raycastLayerMask |= (1 << LayerMask.NameToLayer("Collision_NoRaycast"));
 
 		SwitchState(AnimationState.LOCOMOTION);
 
-        if (_characterConfig.startWithBag)
+        if (m_characterConfig.startWithBag)
         {
-			_backpack = FindAnyObjectByType<Backpack>();
-            if (_backpack == null)
+			Backpack = FindAnyObjectByType<Backpack>();
+            if (Backpack == null)
             {
-                _backpack = Instantiate(_PF_backpack, new Vector3(0, 0, 0), Quaternion.identity).GetComponent<Backpack>(); 
+                Backpack = Instantiate(m_PF_backpack, new Vector3(0, 0, 0), Quaternion.identity).GetComponent<Backpack>(); 
             }
-            _backpack.ForceSetupBackpack(this);
+            Backpack.ForceSetupBackpack(this);
         }
+
+        IsJumpProlonged = Triome.FALSE;
     }
 
 	private void Update()
@@ -171,15 +172,15 @@ public class OldCharacterMotor : MonoBehaviour
     private void LateUpdate()
     {
         LateUpdateCurrentState();
-		if (_aiming)
+		if (Aiming)
 		{
-            _craftInHand.PreviewThrow(_thirdPersonCamera.transform);
+            CraftInHand.PreviewThrow(m_thirdPersonCamera.transform);
         }
     }
 
     private void OnEnable()
 	{
-        _rseToggleInputs.action += ToggleInputs;
+        m_rseToggleInputs.action += ToggleInputs;
         SubscribeInputs();
     }
 
@@ -191,33 +192,33 @@ public class OldCharacterMotor : MonoBehaviour
 	#if UNITY_EDITOR
 	private void OnDrawGizmos()
     {
-        if (_characterConfig.showGroundedDebug)
+        if (m_characterConfig.showGroundedDebug)
         {
-            if (_discriminantForward > 0)
+            if (m_discriminantForward > 0)
             {
                 Gizmos.color = Color.green;
-                Gizmos.DrawSphere(_groundHits[1].point + (_groundHits[2].point - _groundHits[1].point).normalized *
-                    (-Vector3.Dot((_groundHits[2].point - _groundHits[1].point).normalized, _groundHits[1].point - _origin) + Mathf.Sqrt(_discriminantForward))
+                Gizmos.DrawSphere(m_groundHits[1].point + (m_groundHits[2].point - m_groundHits[1].point).normalized *
+                    (-Vector3.Dot((m_groundHits[2].point - m_groundHits[1].point).normalized, m_groundHits[1].point - m_origin) + Mathf.Sqrt(m_discriminantForward))
                     , 0.05f);
-                Gizmos.DrawSphere(_groundHits[1].point + (_groundHits[2].point - _groundHits[1].point).normalized *
-                    (-Vector3.Dot((_groundHits[2].point - _groundHits[1].point).normalized, _groundHits[1].point - _origin) - Mathf.Sqrt(_discriminantForward))
+                Gizmos.DrawSphere(m_groundHits[1].point + (m_groundHits[2].point - m_groundHits[1].point).normalized *
+                    (-Vector3.Dot((m_groundHits[2].point - m_groundHits[1].point).normalized, m_groundHits[1].point - m_origin) - Mathf.Sqrt(m_discriminantForward))
                     , 0.05f);
             }
-            if (_discriminantRight > 0)
+            if (m_discriminantRight > 0)
             {
                 Gizmos.color = Color.green;
-                Gizmos.DrawSphere(_groundHits[3].point + (_groundHits[4].point - _groundHits[3].point).normalized *
-                    (-Vector3.Dot((_groundHits[4].point - _groundHits[3].point).normalized, _groundHits[3].point - _origin) + Mathf.Sqrt(_discriminantRight))
+                Gizmos.DrawSphere(m_groundHits[3].point + (m_groundHits[4].point - m_groundHits[3].point).normalized *
+                    (-Vector3.Dot((m_groundHits[4].point - m_groundHits[3].point).normalized, m_groundHits[3].point - m_origin) + Mathf.Sqrt(m_discriminantRight))
                     , 0.05f);
-                Gizmos.DrawSphere(_groundHits[3].point + (_groundHits[4].point - _groundHits[3].point).normalized *
-                    (-Vector3.Dot((_groundHits[4].point - _groundHits[3].point).normalized, _groundHits[3].point - _origin) - Mathf.Sqrt(_discriminantRight))
+                Gizmos.DrawSphere(m_groundHits[3].point + (m_groundHits[4].point - m_groundHits[3].point).normalized *
+                    (-Vector3.Dot((m_groundHits[4].point - m_groundHits[3].point).normalized, m_groundHits[3].point - m_origin) - Mathf.Sqrt(m_discriminantRight))
                     , 0.05f);
             }
         }
-		if (_edgeHits != null && (_currentState == AnimationState.FALL || _currentState == AnimationState.JUMP))
+		if (m_edgeHits != null && (_currentState == AnimationState.FALL || _currentState == AnimationState.JUMP))
 		{
             Gizmos.color = Color.cyan;
-            foreach (RaycastHit _hit in _edgeHits)
+            foreach (RaycastHit _hit in m_edgeHits)
             {
 				Gizmos.DrawSphere(_hit.point, 0.05f);
             }
@@ -248,7 +249,7 @@ public class OldCharacterMotor : MonoBehaviour
 	{
 		ExitCurrentState();
 		EnterState(newState);
-        _rsoCharacterState.value = newState;
+        m_rsoCharacterState.value = newState;
 
     }
 
@@ -396,29 +397,29 @@ public class OldCharacterMotor : MonoBehaviour
     private void VerifyState()
     {
 		// - CRAFT - from locomotion
-		if (_crafting && _currentState == AnimationState.LOCOMOTION)
+		if (m_crafting && _currentState == AnimationState.LOCOMOTION)
 		{
             SwitchState(AnimationState.CRAFT);
 		}
 
 		// - LOCOMOTION - from crafting
-		else if (!_crafting && _currentState == AnimationState.CRAFT)
+		else if (!m_crafting && _currentState == AnimationState.CRAFT)
 		{
             SwitchState(AnimationState.LOCOMOTION);
 		}
 
 		// - JUMP -
-		else if (_canJump && _wantJump && (_isGrounded || _coyoteTime > 0f) && _currentState != AnimationState.JUMP)
+		else if (m_canJump && m_wantJump && (IsGrounded || m_coyoteTime > 0f) && _currentState != AnimationState.JUMP)
         {
             SwitchState(AnimationState.JUMP);
-            _isJumping = true;
+            m_isJumping = true;
 		}
 
 		// - FALL & ROPE -
-		else if (!_isGrounded && _gravitySpeed <= 0 && (_currentState != AnimationState.FALL || _currentState != AnimationState.ROPE))
+		else if (!IsGrounded && m_gravitySpeed <= 0 && (_currentState != AnimationState.FALL || _currentState != AnimationState.ROPE))
         {
 			// Reset coyote time
-            if (_isGroundedLastFrame) _coyoteTime = _characterConfig.coyoteTime;
+            if (m_isGroundedLastFrame) m_coyoteTime = m_characterConfig.coyoteTime;
 
 			// If the character is attached to a rope, switch to Rope state instead
 			// This state handles free fall and rope-attached fall.
@@ -437,7 +438,7 @@ public class OldCharacterMotor : MonoBehaviour
 		}
 
 		// - LOCOMOTION - default state back up
-		else if (_isGrounded && !_isJumping && _currentState != AnimationState.LOCOMOTION && !_crafting)
+		else if (IsGrounded && !m_isJumping && _currentState != AnimationState.LOCOMOTION && !m_crafting)
         {
             ApplyFallHeight();
             SwitchState(AnimationState.LOCOMOTION);
@@ -452,11 +453,11 @@ public class OldCharacterMotor : MonoBehaviour
 				: RopeState.COMPLETE_SUSPENSION;
 
 			// Simulate rope sub-jump state by directly calling the rope jump function
-			if (_wantJump) JumpOffWall();
+			if (m_wantJump) JumpOffWall();
 		}
 
 		// Reset Jump if it is not possible to jump
-		_wantJump = false;
+		m_wantJump = false;
     }
 
     #endregion
@@ -468,7 +469,7 @@ public class OldCharacterMotor : MonoBehaviour
     /// </summary>
     public void HandleDeath()
 	{
-		_rsoPlayerDeath.value = true;
+		m_rsoPlayerDeath.value = true;
 		Destroy(gameObject);
 	}
 
@@ -478,14 +479,14 @@ public class OldCharacterMotor : MonoBehaviour
 	/// <param name="_skipAnim">Prevent grab backpack animation from playing.</param>
 	public void PickupBackpack(bool _skipAnim, Backpack _newBackpack)
 	{
-		_backpack = _newBackpack;
-        _hasBackpack = true;
-        ToggleCraftInput(_hasBackpack);
-		_backpack.transform.SetParent(_backpackAnchor.transform, false);
-		_backpack.transform.localPosition = Vector3.zero;
-		_backpack.transform.localRotation = Quaternion.identity;
-		_backpack.transform.localScale = Vector3.one;
-		RemoveFromInteractList(_backpack);
+		Backpack = _newBackpack;
+        HasBackpack = true;
+        ToggleCraftInput(HasBackpack);
+		Backpack.transform.SetParent(m_backpackAnchor.transform, false);
+		Backpack.transform.localPosition = Vector3.zero;
+		Backpack.transform.localRotation = Quaternion.identity;
+		Backpack.transform.localScale = Vector3.one;
+		RemoveFromInteractList(Backpack);
     }
 
 	#endregion
@@ -507,20 +508,20 @@ public class OldCharacterMotor : MonoBehaviour
 	/// </summary>
 	private void CalculateOriginForwardRight()
 	{
-		_origin = new Vector3(transform.position.x, transform.position.y + _controller.radius, transform.position.z);
+		m_origin = new Vector3(transform.position.x, transform.position.y + m_controller.radius, transform.position.z);
 
         // Check if ground on 5 points align with player inputs or character direction if no inputs
-        if (_moveInput != Vector2.zero)
+        if (m_moveInput != Vector2.zero)
 		{
 			//Calculate input forward and right on character plane
-            _planarForward = (new Vector3(_thirdPersonCamera.transform.forward.x, 0, _thirdPersonCamera.transform.forward.z) * _moveInput.y + new Vector3(_thirdPersonCamera.transform.right.x, 0, _thirdPersonCamera.transform.right.z) * _moveInput.x).normalized;
-            _planarRight = new Vector3(-_planarForward.z, 0, _planarForward.x);
+            m_planarForward = (new Vector3(m_thirdPersonCamera.transform.forward.x, 0, m_thirdPersonCamera.transform.forward.z) * m_moveInput.y + new Vector3(m_thirdPersonCamera.transform.right.x, 0, m_thirdPersonCamera.transform.right.z) * m_moveInput.x).normalized;
+            m_planarRight = new Vector3(-m_planarForward.z, 0, m_planarForward.x);
         }
 		else
 		{
             //Calculate character graphic forward and right on character plane
-            _planarForward = new Vector3(_characterDirection.forward.x, 0, _characterDirection.forward.z).normalized;
-            _planarRight = new Vector3(-_planarForward.z, 0, _planarForward.x);
+            m_planarForward = new Vector3(m_characterDirection.forward.x, 0, m_characterDirection.forward.z).normalized;
+            m_planarRight = new Vector3(-m_planarForward.z, 0, m_planarForward.x);
         }
 
 	}
@@ -531,75 +532,75 @@ public class OldCharacterMotor : MonoBehaviour
 	private void CheckGround()
     {
 		//Debug Line
-		if (_characterConfig.showGroundedDebug)
+		if (m_characterConfig.showGroundedDebug)
 		{
-			UnityEngine.Debug.DrawLine(_origin, new Vector3(_origin.x, _origin.y - _controller.radius * _characterConfig.groundCheckYFactor, _origin.z), Color.red);
-			UnityEngine.Debug.DrawLine(_origin + _planarForward * _controller.radius, new Vector3(_origin.x + _planarForward.x * _controller.radius, _origin.y - _controller.radius * _characterConfig.groundCheckYFactor, _origin.z + _planarForward.z * _controller.radius), Color.red);
-			UnityEngine.Debug.DrawLine(_origin - _planarForward * _controller.radius, new Vector3(_origin.x - _planarForward.x * _controller.radius, _origin.y - _controller.radius * _characterConfig.groundCheckYFactor, _origin.z - _planarForward.z * _controller.radius), Color.red);
-			UnityEngine.Debug.DrawLine(_origin + _planarRight * _controller.radius, new Vector3(_origin.x + _planarRight.x * _controller.radius, _origin.y - _controller.radius * _characterConfig.groundCheckYFactor, _origin.z + _planarRight.z * _controller.radius), Color.red);
-			UnityEngine.Debug.DrawLine(_origin - _planarRight * _controller.radius, new Vector3(_origin.x - _planarRight.x * _controller.radius, _origin.y - _controller.radius * _characterConfig.groundCheckYFactor, _origin.z - _planarRight.z * _controller.radius), Color.red);
+			UnityEngine.Debug.DrawLine(m_origin, new Vector3(m_origin.x, m_origin.y - m_controller.radius * m_characterConfig.groundCheckYFactor, m_origin.z), Color.red);
+			UnityEngine.Debug.DrawLine(m_origin + m_planarForward * m_controller.radius, new Vector3(m_origin.x + m_planarForward.x * m_controller.radius, m_origin.y - m_controller.radius * m_characterConfig.groundCheckYFactor, m_origin.z + m_planarForward.z * m_controller.radius), Color.red);
+			UnityEngine.Debug.DrawLine(m_origin - m_planarForward * m_controller.radius, new Vector3(m_origin.x - m_planarForward.x * m_controller.radius, m_origin.y - m_controller.radius * m_characterConfig.groundCheckYFactor, m_origin.z - m_planarForward.z * m_controller.radius), Color.red);
+			UnityEngine.Debug.DrawLine(m_origin + m_planarRight * m_controller.radius, new Vector3(m_origin.x + m_planarRight.x * m_controller.radius, m_origin.y - m_controller.radius * m_characterConfig.groundCheckYFactor, m_origin.z + m_planarRight.z * m_controller.radius), Color.red);
+			UnityEngine.Debug.DrawLine(m_origin - m_planarRight * m_controller.radius, new Vector3(m_origin.x - m_planarRight.x * m_controller.radius, m_origin.y - m_controller.radius * m_characterConfig.groundCheckYFactor, m_origin.z - m_planarRight.z * m_controller.radius), Color.red);
 		}
 
         //Raycast
-        _groundChecks[0] = Physics.Raycast(_origin, Vector3.down, out _groundHits[0], _controller.radius * _characterConfig.groundCheckYFactor, _raycastLayerMask);
-        _groundChecks[1] = Physics.Raycast(_origin + _planarForward * _controller.radius, Vector3.down, out _groundHits[1], _controller.radius * _characterConfig.groundCheckYFactor, _raycastLayerMask);
-        _groundChecks[2] = Physics.Raycast(_origin - _planarForward * _controller.radius, Vector3.down, out _groundHits[2], _controller.radius * _characterConfig.groundCheckYFactor, _raycastLayerMask);
-        _groundChecks[3] = Physics.Raycast(_origin + _planarRight * _controller.radius, Vector3.down, out _groundHits[3], _controller.radius * _characterConfig.groundCheckYFactor, _raycastLayerMask);
-        _groundChecks[4] = Physics.Raycast(_origin - _planarRight * _controller.radius, Vector3.down, out _groundHits[4], _controller.radius * _characterConfig.groundCheckYFactor, _raycastLayerMask);
+        m_groundChecks[0] = Physics.Raycast(m_origin, Vector3.down, out m_groundHits[0], m_controller.radius * m_characterConfig.groundCheckYFactor, m_raycastLayerMask);
+        m_groundChecks[1] = Physics.Raycast(m_origin + m_planarForward * m_controller.radius, Vector3.down, out m_groundHits[1], m_controller.radius * m_characterConfig.groundCheckYFactor, m_raycastLayerMask);
+        m_groundChecks[2] = Physics.Raycast(m_origin - m_planarForward * m_controller.radius, Vector3.down, out m_groundHits[2], m_controller.radius * m_characterConfig.groundCheckYFactor, m_raycastLayerMask);
+        m_groundChecks[3] = Physics.Raycast(m_origin + m_planarRight * m_controller.radius, Vector3.down, out m_groundHits[3], m_controller.radius * m_characterConfig.groundCheckYFactor, m_raycastLayerMask);
+        m_groundChecks[4] = Physics.Raycast(m_origin - m_planarRight * m_controller.radius, Vector3.down, out m_groundHits[4], m_controller.radius * m_characterConfig.groundCheckYFactor, m_raycastLayerMask);
 
-		_isGroundedLastFrame = _isGrounded;
-		_isGrounded = false;
-		_discriminantForward = -1f;
-		_discriminantRight = -1f;
+		m_isGroundedLastFrame = IsGrounded;
+		IsGrounded = false;
+		m_discriminantForward = -1f;
+		m_discriminantRight = -1f;
 
 		//Check if raycast directly below the character hit a surface near enough to consider grounded
-		if (_groundChecks[0])
+		if (m_groundChecks[0])
 		{
-			if ((_groundHits[0].point - _origin).magnitude <= _controller.radius + _characterConfig.skinWidth)
+			if ((m_groundHits[0].point - m_origin).magnitude <= m_controller.radius + m_characterConfig.skinWidth)
 			{
-				_isGrounded = true;
+				IsGrounded = true;
 			}
 		}
 		//Prevent unnecessary check if we already know the character is grounded
-		if (!_isGrounded)
+		if (!IsGrounded)
 		{
             //Check if the raycast hits Forward/Backward make a line that cross player capsule+skin, which mean the player is grounded
-            if (_groundChecks[1] && _groundChecks[2])
+            if (m_groundChecks[1] && m_groundChecks[2])
             {
                 //Debug Line
-                if (_characterConfig.showGroundedDebug)
+                if (m_characterConfig.showGroundedDebug)
                 {
-                    UnityEngine.Debug.DrawLine(_groundHits[1].point, _groundHits[2].point, Color.yellow);
+                    UnityEngine.Debug.DrawLine(m_groundHits[1].point, m_groundHits[2].point, Color.yellow);
                 }
 
                 //discriminant of the equation between the sphere (centered on _origin and radius of _controller.radius+skinWidth) and the line resulting of the hits of the raycasts
-                _discriminantForward = Mathf.Pow(Vector3.Dot((_groundHits[2].point - _groundHits[1].point).normalized, _groundHits[1].point - _origin), 2) - ((_groundHits[1].point - _origin).sqrMagnitude - Mathf.Pow(_controller.radius + _characterConfig.skinWidth, 2));
+                m_discriminantForward = Mathf.Pow(Vector3.Dot((m_groundHits[2].point - m_groundHits[1].point).normalized, m_groundHits[1].point - m_origin), 2) - ((m_groundHits[1].point - m_origin).sqrMagnitude - Mathf.Pow(m_controller.radius + m_characterConfig.skinWidth, 2));
                 //discriminant > 0 means that the line cross the sphere in at least 2 points (no tangent)
-                if (_discriminantForward > 0)
+                if (m_discriminantForward > 0)
                 {
-                    _isGrounded = true;
+                    IsGrounded = true;
                 }
             }
             //Check if the raycast hits Right/Left make a line that cross player capsule+skin, which mean the player is grounded
-            if (_groundChecks[3] && _groundChecks[4])
+            if (m_groundChecks[3] && m_groundChecks[4])
             {
                 //Debug Line
-                if (_characterConfig.showGroundedDebug)
+                if (m_characterConfig.showGroundedDebug)
                 {
-                    UnityEngine.Debug.DrawLine(_groundHits[3].point, _groundHits[4].point, Color.yellow);
+                    UnityEngine.Debug.DrawLine(m_groundHits[3].point, m_groundHits[4].point, Color.yellow);
                 }
                 //discriminant of the equation between the sphere (centered on _origin and radius of _controller.radius+skinWidth) and the line resulting of the hits of the raycasts
-                _discriminantRight = Mathf.Pow(Vector3.Dot((_groundHits[4].point - _groundHits[3].point).normalized, _groundHits[3].point - _origin), 2) - ((_groundHits[3].point - _origin).sqrMagnitude - Mathf.Pow(_controller.radius + _characterConfig.skinWidth, 2));
+                m_discriminantRight = Mathf.Pow(Vector3.Dot((m_groundHits[4].point - m_groundHits[3].point).normalized, m_groundHits[3].point - m_origin), 2) - ((m_groundHits[3].point - m_origin).sqrMagnitude - Mathf.Pow(m_controller.radius + m_characterConfig.skinWidth, 2));
                 //discriminant > 0 means that the line cross the sphere in at least 2 points (no tangent)
-                if (_discriminantRight > 0)
+                if (m_discriminantRight > 0)
                 {
-                    _isGrounded = true;
+                    IsGrounded = true;
                 }
             }
         }
-		if (_isJumping && _gravitySpeed <= 0)
+		if (m_isJumping && m_gravitySpeed <= 0)
 		{
-			_isJumping = false;
+			m_isJumping = false;
 		}
     }
 
@@ -608,28 +609,28 @@ public class OldCharacterMotor : MonoBehaviour
 	/// </summary>
 	private void ApplyFallHeight()
 	{
-        _fallHeight = Math.Abs(_rsoCharacterPosition.value.y - _positionStartFall.y);
-		if (_fallHeight >= _characterConfig.lethalHeight)
+        m_fallHeight = Math.Abs(m_rsoCharacterPosition.value.y - m_positionStartFall.y);
+		if (m_fallHeight >= m_characterConfig.lethalHeight)
         {
             HandleDeath();
         }
-        else if (_fallHeight >= _characterConfig.stunHeight)
+        else if (m_fallHeight >= m_characterConfig.stunHeight)
         {
             // stun the character for x secondes
-            _isStunned = true;
+            m_isStunned = true;
 
             // cross product to get the stun mitiged value on a 0-1 scale
-            float stunMitigedValue = (_fallHeight - _characterConfig.stunHeight) / (_characterConfig.lethalHeight - _characterConfig.stunHeight);
-            _stunTimer = _characterConfig.stunDuration.Evaluate(stunMitigedValue);
+            float stunMitigedValue = (m_fallHeight - m_characterConfig.stunHeight) / (m_characterConfig.lethalHeight - m_characterConfig.stunHeight);
+            m_stunTimer = m_characterConfig.stunDuration.Evaluate(stunMitigedValue);
         }
-        else if (_fallHeight >= _characterConfig.slowHeight)
+        else if (m_fallHeight >= m_characterConfig.slowHeight)
         {
             // slow the character for x secondes by y percent
-            _isSlowed = true;
+            m_isSlowed = true;
 
             // cross product to get the slow mitiged value on a 0-1 scale
-            float slowMitigedValue = (_fallHeight - _characterConfig.slowHeight) / (_characterConfig.stunHeight - _characterConfig.slowHeight);
-            _slowTimer = _characterConfig.slowDuration.Evaluate(slowMitigedValue);
+            float slowMitigedValue = (m_fallHeight - m_characterConfig.slowHeight) / (m_characterConfig.stunHeight - m_characterConfig.slowHeight);
+            m_slowTimer = m_characterConfig.slowDuration.Evaluate(slowMitigedValue);
         }
     }
 
@@ -638,9 +639,9 @@ public class OldCharacterMotor : MonoBehaviour
 	/// </summary>
 	private void CheckCoyoteTime()
 	{
-		if (_coyoteTime > 0f)
+		if (m_coyoteTime > 0f)
 		{
-			_coyoteTime -= Time.deltaTime;
+			m_coyoteTime -= Time.deltaTime;
 		}
 	}
 
@@ -649,13 +650,13 @@ public class OldCharacterMotor : MonoBehaviour
 	/// </summary>
 	private void CheckWalkRun()
 	{
-		if(_isRunning)
+		if(m_isRunning)
 		{
-			_targetPlanarSpeed = _characterConfig.runSpeed;
+			m_targetPlanarSpeed = m_characterConfig.runSpeed;
 		}
 		else
 		{
-			_targetPlanarSpeed = _characterConfig.walkSpeed;
+			m_targetPlanarSpeed = m_characterConfig.walkSpeed;
 		}
 	}
 
@@ -665,27 +666,27 @@ public class OldCharacterMotor : MonoBehaviour
 	/// </summary>
 	private void ApplySlope()
 	{
-		if (!_isGrounded) return;
+		if (!IsGrounded) return;
 
 		Vector3 _hitsNormalSum = Vector3.zero;
 		int _hitCount = 0;
 
 		for (int _indexHit = 0; _indexHit < 5; _indexHit++)
 		{
-			if (_groundChecks[_indexHit])
+			if (m_groundChecks[_indexHit])
 			{
-                _hitsNormalSum += _groundHits[_indexHit].normal;
+                _hitsNormalSum += m_groundHits[_indexHit].normal;
 				_hitCount++;
             }
 		}
 
         // get the slope percentage to calculate slows later in the movement function
-        _slopePercentage = Vector3.Angle(_hitsNormalSum/_hitCount, Vector3.up) / _controller.slopeLimit;
+        m_slopePercentage = Vector3.Angle(_hitsNormalSum/_hitCount, Vector3.up) / m_controller.slopeLimit;
 
 		// signed and scaled percent based on player input direction and mean normal
-		_slopePercentage *= -Vector3.Dot(new Vector3((_hitsNormalSum/_hitCount).x, 0, (_hitsNormalSum/_hitCount).z).normalized, _planarForward)*2;
+		m_slopePercentage *= -Vector3.Dot(new Vector3((_hitsNormalSum/_hitCount).x, 0, (_hitsNormalSum/_hitCount).z).normalized, m_planarForward)*2;
 
-		_targetPlanarSpeed *= _characterConfig.slopeSpeedModifier.Evaluate(_slopePercentage);
+		m_targetPlanarSpeed *= m_characterConfig.slopeSpeedModifier.Evaluate(m_slopePercentage);
 	}
 
 	/// <summary>
@@ -693,13 +694,13 @@ public class OldCharacterMotor : MonoBehaviour
 	/// </summary>
 	private void ApplyJumpImpulsePlanarSpeed()
 	{
-        if (_isRunning)
+        if (m_isRunning)
 		{
-			_planarSpeed = Mathf.Clamp(_planarSpeed+_characterConfig.jumpMinimalPlanarVelocity, 0, _characterConfig.runSpeed);
+			PlanarSpeed = Mathf.Clamp(PlanarSpeed+m_characterConfig.jumpMinimalPlanarVelocity, 0, m_characterConfig.runSpeed);
 		}
 		else
 		{
-			_planarSpeed = Mathf.Clamp(_planarSpeed+_characterConfig.jumpMinimalPlanarVelocity, 0, _characterConfig.walkSpeed);
+			PlanarSpeed = Mathf.Clamp(PlanarSpeed+m_characterConfig.jumpMinimalPlanarVelocity, 0, m_characterConfig.walkSpeed);
 		}
 	}
 
@@ -709,7 +710,7 @@ public class OldCharacterMotor : MonoBehaviour
 	private void ApplyInputs()
 	{
         //multiply by input magnitude
-        _targetPlanarSpeed *= Mathf.Clamp(_moveInput.magnitude, 0, 1);
+        m_targetPlanarSpeed *= Mathf.Clamp(m_moveInput.magnitude, 0, 1);
         // TO DO: remap input magnitude from 0:1 to deadzone:1
     }
 
@@ -719,13 +720,13 @@ public class OldCharacterMotor : MonoBehaviour
     private void ApplyAcceleration()
 	{
 		// accelerate or decelerate to target speed
-		if (_planarSpeed <= _targetPlanarSpeed)
+		if (PlanarSpeed <= m_targetPlanarSpeed)
 		{
-			_planarSpeed = Mathf.Clamp(_planarSpeed + _characterConfig.groundAcceleration*Time.deltaTime, 0, _targetPlanarSpeed);
+			PlanarSpeed = Mathf.Clamp(PlanarSpeed + m_characterConfig.groundAcceleration*Time.deltaTime, 0, m_targetPlanarSpeed);
 		}
 		else
 		{
-			_planarSpeed = Mathf.Clamp(_planarSpeed - _characterConfig.groundDecceleration*Time.deltaTime, _targetPlanarSpeed, _characterConfig.runSpeed);
+			PlanarSpeed = Mathf.Clamp(PlanarSpeed - m_characterConfig.groundDecceleration*Time.deltaTime, m_targetPlanarSpeed, m_characterConfig.runSpeed);
 		}
 	}
 
@@ -735,7 +736,7 @@ public class OldCharacterMotor : MonoBehaviour
     private void CreateMovement()
 	{
         //calculate _movement to apply to CharacterController
-        _movement += _planarSpeed * _planarForward;
+        m_movement += PlanarSpeed * m_planarForward;
     }
 
     /// <summary>
@@ -743,7 +744,7 @@ public class OldCharacterMotor : MonoBehaviour
     /// </summary>
     private void ApplyJumpImpulseVerticalSpeed()
 	{
-        _gravitySpeed = Mathf.Sqrt(_characterConfig.jumpHeight * -3f * _characterConfig.gravity) + _characterConfig.gravity * Time.deltaTime;
+        m_gravitySpeed = Mathf.Sqrt(m_characterConfig.jumpHeight * -3f * m_characterConfig.gravity) + m_characterConfig.gravity * Time.deltaTime;
 	}
 
 	/// <summary>
@@ -751,26 +752,26 @@ public class OldCharacterMotor : MonoBehaviour
 	/// </summary>
 	private void UpdateStatus()
 	{
-		if(_isStunned)
+		if(m_isStunned)
 		{
-			_stunTimer -= Time.deltaTime;
+			m_stunTimer -= Time.deltaTime;
 
-			if (_stunTimer <= 0)
+			if (m_stunTimer <= 0)
 			{
-				_isStunned = false;
-				_isSlowed = true;
-				_isSlowedPostStun = true;
-				_slowTimer = _characterConfig.slowTimePostStun;
+				m_isStunned = false;
+				m_isSlowed = true;
+				m_isSlowedPostStun = true;
+				m_slowTimer = m_characterConfig.slowTimePostStun;
 			}
 		}
-		if(_isSlowed)
+		if(m_isSlowed)
 		{
-			_slowTimer -= Time.deltaTime;
+			m_slowTimer -= Time.deltaTime;
 			
-			if (_slowTimer <= 0)
+			if (m_slowTimer <= 0)
 			{
-				_isSlowed = false;
-				_isSlowedPostStun = false;
+				m_isSlowed = false;
+				m_isSlowedPostStun = false;
 			}
 		}
 	}
@@ -780,19 +781,19 @@ public class OldCharacterMotor : MonoBehaviour
 	/// </summary>
 	private void ApplyStatus()
 	{
-		if(_isStunned)
+		if(m_isStunned)
 		{
-			_movement += Vector3.zero;
+			m_movement += Vector3.zero;
 		}
-		else if(_isSlowed)
+		else if(m_isSlowed)
 		{
-			if(!_isSlowedPostStun)
+			if(!m_isSlowedPostStun)
 			{
-				_movement *= _characterConfig.slowPercentage.Evaluate((_characterConfig.maxSlowTime - _slowTimer)/_characterConfig.maxSlowTime);
+				m_movement *= m_characterConfig.slowPercentage.Evaluate((m_characterConfig.maxSlowTime - m_slowTimer)/m_characterConfig.maxSlowTime);
 			}
 			else
 			{
-				_movement *= _characterConfig.slowPercentage.Evaluate((_characterConfig.slowTimePostStun - _slowTimer)/_characterConfig.slowTimePostStun);
+				m_movement *= m_characterConfig.slowPercentage.Evaluate((m_characterConfig.slowTimePostStun - m_slowTimer)/m_characterConfig.slowTimePostStun);
 			}
 		}
 	}
@@ -802,7 +803,7 @@ public class OldCharacterMotor : MonoBehaviour
 	/// </summary>
 	private void ApplySnapGravity()
 	{
-		_movement += new Vector3(_movement.x, _characterConfig.SnapGravity, _movement.z);
+		m_movement += new Vector3(m_movement.x, m_characterConfig.SnapGravity, m_movement.z);
 	}
 
 	/// <summary>
@@ -811,14 +812,14 @@ public class OldCharacterMotor : MonoBehaviour
 	private void ApplyAirControl()
 	{
 		//Angle to add based on time since last frame
-		float _airControlAngle = _characterConfig.airControlAngularSpeed * Time.deltaTime;
+		float _airControlAngle = m_characterConfig.airControlAngularSpeed * Time.deltaTime;
 		//Factor it based on difference between input and character forward
-		_airControlAngle *= _characterConfig.airControlInputFactor.Evaluate(Vector3.Dot(_planarForward, _lastGroundedPlanarForward));
+		_airControlAngle *= m_characterConfig.airControlInputFactor.Evaluate(Vector3.Dot(m_planarForward, m_lastGroundedPlanarForward));
 		//Sign it
-		float _angleInputForward = Vector3.SignedAngle(_lastGroundedPlanarForward, _planarForward, Vector3.up);
+		float _angleInputForward = Vector3.SignedAngle(m_lastGroundedPlanarForward, m_planarForward, Vector3.up);
 		_airControlAngle *= _angleInputForward/Mathf.Abs(_angleInputForward);
 		//Apply it to character direction (we use _lastGrounded while in air)
-		_lastGroundedPlanarForward = Quaternion.AngleAxis(_airControlAngle, Vector3.up) * _lastGroundedPlanarForward;
+		m_lastGroundedPlanarForward = Quaternion.AngleAxis(_airControlAngle, Vector3.up) * m_lastGroundedPlanarForward;
 	}
 
 	/// <summary>
@@ -826,12 +827,12 @@ public class OldCharacterMotor : MonoBehaviour
 	/// </summary>
 	private void ApplyDrag()
 	{
-		float _inputOrientationFactor = (-Vector3.Dot(_lastGroundedPlanarForward, _planarForward) + 3f) / 4f;
-		if (_moveInput == Vector2.zero)
+		float _inputOrientationFactor = (-Vector3.Dot(m_lastGroundedPlanarForward, m_planarForward) + 3f) / 4f;
+		if (m_moveInput == Vector2.zero)
 		{
 			_inputOrientationFactor = 0.75f;
         }
-		_planarSpeed = Mathf.Clamp(_planarSpeed - _characterConfig.dragDecceleration * Time.deltaTime * _inputOrientationFactor, 0, _characterConfig.runSpeed);
+		PlanarSpeed = Mathf.Clamp(PlanarSpeed - m_characterConfig.dragDecceleration * Time.deltaTime * _inputOrientationFactor, 0, m_characterConfig.runSpeed);
 	}
 
     /// <summary>
@@ -839,7 +840,7 @@ public class OldCharacterMotor : MonoBehaviour
     /// </summary>
     private void CreateMovementFall()
     {
-        _movement += _planarSpeed * _lastGroundedPlanarForward;
+        m_movement += PlanarSpeed * m_lastGroundedPlanarForward;
     }
 
     /// <summary>
@@ -847,9 +848,9 @@ public class OldCharacterMotor : MonoBehaviour
     /// </summary>
     private void ApplyGravity()
 	{
-		_gravitySpeed += _characterConfig.gravity * Time.deltaTime;
+		m_gravitySpeed += m_characterConfig.gravity * Time.deltaTime;
 
-        _movement += new Vector3(_movement.x, _gravitySpeed, _movement.z);
+        m_movement += new Vector3(m_movement.x, m_gravitySpeed, m_movement.z);
 	}
 
 	/// <summary>
@@ -857,19 +858,19 @@ public class OldCharacterMotor : MonoBehaviour
 	/// </summary>
 	private void DetectEdges()
 	{
-		Vector3 _start = new Vector3(transform.position.x, transform.position.y + _controller.height - _controller.radius, transform.position.z);
-		float _radius = _controller.radius + _characterConfig.skinWidth;
-		float _distance = _controller.height - 2 * _controller.radius + _characterConfig.skinWidth;
-        _edgeHits = Physics.SphereCastAll(_start, _controller.radius, Vector3.down, _distance, _raycastLayerMask);
+		Vector3 _start = new Vector3(transform.position.x, transform.position.y + m_controller.height - m_controller.radius, transform.position.z);
+		float _radius = m_controller.radius + m_characterConfig.skinWidth;
+		float _distance = m_controller.height - 2 * m_controller.radius + m_characterConfig.skinWidth;
+        m_edgeHits = Physics.SphereCastAll(_start, m_controller.radius, Vector3.down, _distance, m_raycastLayerMask);
 
-		if (_edgeHits.Length > 0 )
+		if (m_edgeHits.Length > 0 )
 		{
-            _edgeHit = _edgeHits[0];
-			if(_edgeHit.normal == Vector3.up) _edgeHit = new RaycastHit();
+            m_edgeHit = m_edgeHits[0];
+			if(m_edgeHit.normal == Vector3.up) m_edgeHit = new RaycastHit();
         }
 		else
 		{
-            _edgeHit = new RaycastHit();
+            m_edgeHit = new RaycastHit();
         }
     }
 
@@ -878,17 +879,17 @@ public class OldCharacterMotor : MonoBehaviour
 	/// </summary>
 	private void SortEdgeHits()
 	{
-		_edgeHit = new RaycastHit();
+		m_edgeHit = new RaycastHit();
 
-		foreach (RaycastHit _hit in _edgeHits)
+		foreach (RaycastHit _hit in m_edgeHits)
 		{
 
 		}
 
-		for (int i = 1; i < _edgeHits.Length; i++)
+		for (int i = 1; i < m_edgeHits.Length; i++)
 		{
 			//Study only point below character edge climb height
-			if (_edgeHits[i].point.y - transform.position.y < _characterConfig.edgeMaxClimbingHeight)
+			if (m_edgeHits[i].point.y - transform.position.y < m_characterConfig.edgeMaxClimbingHeight)
 			{
 				
 			}
@@ -907,16 +908,16 @@ public class OldCharacterMotor : MonoBehaviour
 	/// </summary>
 	private void ApplyEdgesSpeed()
 	{
-		if (_edgeHit.collider == null) { return;}
+		if (m_edgeHit.collider == null) { return;}
 
-        Vector3 _edgeSlopeSlideLeft = Vector3.Cross(_edgeHit.normal, Vector3.up).normalized;
-        Vector3 _edgeSlopeSlideDown = Vector3.Cross(_edgeHit.normal, _edgeSlopeSlideLeft).normalized;
+        Vector3 _edgeSlopeSlideLeft = Vector3.Cross(m_edgeHit.normal, Vector3.up).normalized;
+        Vector3 _edgeSlopeSlideDown = Vector3.Cross(m_edgeHit.normal, _edgeSlopeSlideLeft).normalized;
 
 		// UnityEngine.Debug.DrawRay(_rsoCharacterPosition.value, _edgeHit.normal, Color.blue);
 
-		_movement += -_edgeSlopeSlideDown.normalized * _gravitySpeed;
+		m_movement += -_edgeSlopeSlideDown.normalized * m_gravitySpeed;
 
-        UnityEngine.Debug.DrawRay(_rsoCharacterPosition.value, - _edgeSlopeSlideDown * _gravitySpeed, Color.cyan);
+        UnityEngine.Debug.DrawRay(m_rsoCharacterPosition.value, - _edgeSlopeSlideDown * m_gravitySpeed, Color.cyan);
     }
 
 	/// <summary>
@@ -924,12 +925,12 @@ public class OldCharacterMotor : MonoBehaviour
 	/// </summary>
 	private void HandleMovement()
 	{
-        _controller.Move(_movement * Time.deltaTime);
-		_movement = Vector3.zero;
+        m_controller.Move(m_movement * Time.deltaTime);
+		m_movement = Vector3.zero;
 
 		// - update variables -
-		if (_rsoCharacterPosition.value != _characterDirection.position) { _rsoCharacterPosition.value = _characterDirection.position; }
-		if (_rsoCharacterForward.value != _characterDirection.forward) { _rsoCharacterForward.value = _characterDirection.forward; }
+		if (m_rsoCharacterPosition.value != m_characterDirection.position) { m_rsoCharacterPosition.value = m_characterDirection.position; }
+		if (m_rsoCharacterForward.value != m_characterDirection.forward) { m_rsoCharacterForward.value = m_characterDirection.forward; }
     }
 
     #endregion
@@ -941,51 +942,51 @@ public class OldCharacterMotor : MonoBehaviour
     /// </summary>
     private void SubscribeInputs()
 	{
-		_rseRun.action += Run;
-		_rseJump.action += Jump;
-		_rseCancelAction.action += CancelAction;
-		_rseKillCharacter.action += HandleDeath;
-		_rseClimb.action += Climb;
-		_rseSetCharacterPosition.action += ForceCharacterPosition;
+		m_rseRun.action += Run;
+		m_rseJump.action += Jump;
+		m_rseCancelAction.action += CancelAction;
+		m_rseKillCharacter.action += HandleDeath;
+		m_rseClimb.action += Climb;
+		m_rseSetCharacterPosition.action += ForceCharacterPosition;
 
 		switch (_currentState)
         {
             case AnimationState.LOCOMOTION:
-                _rseMove.action += Move;
-                _rseThrow.action += ToggleAim;
-                _rseCraft.action += ToggleCraft;
-                _rseToggleInHand.action += ToggleInHand;
-                _rseInteract.action += Interact;
-				ToggleCraftInput(_hasBackpack);
+                m_rseMove.action += Move;
+                m_rseThrow.action += ToggleAim;
+                m_rseCraft.action += ToggleCraft;
+                m_rseToggleInHand.action += ToggleInHand;
+                m_rseInteract.action += Interact;
+				ToggleCraftInput(HasBackpack);
                 break;
             case AnimationState.JUMP:
-                _rseMove.action += Move;
-                _rseThrow.action += ToggleAim;
-                _rseToggleInHand.action += ToggleInHand;
-                _rseInteract.action += Interact;
+                m_rseMove.action += Move;
+                m_rseThrow.action += ToggleAim;
+                m_rseToggleInHand.action += ToggleInHand;
+                m_rseInteract.action += Interact;
                 break;
             case AnimationState.FALL:
-                _rseMove.action += Move;
-                _rseThrow.action += ToggleAim;
-                _rseToggleInHand.action += ToggleInHand;
-                _rseInteract.action += Interact;
+                m_rseMove.action += Move;
+                m_rseThrow.action += ToggleAim;
+                m_rseToggleInHand.action += ToggleInHand;
+                m_rseInteract.action += Interact;
                 break;
             case AnimationState.CRAFT:
-                _rseCraft.action += ToggleCraft;
+                m_rseCraft.action += ToggleCraft;
                 break;
             case AnimationState.ROPE:
-                _rseMove.action += Move;
-                _rseThrow.action += ToggleAim;
-                _rseCraft.action += ToggleCraft;
-                _rseToggleInHand.action += ToggleInHand;
-                _rseInteract.action += Interact;
+                m_rseMove.action += Move;
+                m_rseThrow.action += ToggleAim;
+                m_rseCraft.action += ToggleCraft;
+                m_rseToggleInHand.action += ToggleInHand;
+                m_rseInteract.action += Interact;
                 break;
             case AnimationState.LADDER:
-                _rseMove.action += Move;
-                _rseThrow.action += ToggleAim;
-                _rseCraft.action += ToggleCraft;
-                _rseToggleInHand.action += ToggleInHand;
-				_rseInteract.action += Interact;
+                m_rseMove.action += Move;
+                m_rseThrow.action += ToggleAim;
+                m_rseCraft.action += ToggleCraft;
+                m_rseToggleInHand.action += ToggleInHand;
+				m_rseInteract.action += Interact;
                 break;
         }
     }
@@ -995,37 +996,37 @@ public class OldCharacterMotor : MonoBehaviour
     /// </summary>
     private void UnsubscribeInputs()
     {
-        _rseMove.action -= Move;
-        _rseRun.action -= Run;
-        _rseJump.action -= Jump;
-        _rseThrow.action -= ToggleAim;
-        _rseCraft.action -= ToggleCraft;
-        _rseToggleInHand.action -= ToggleInHand;
-        _rseCancelAction.action -= CancelAction;
-        _rseInteract.action -= Interact;
-		_rseKillCharacter.action -= HandleDeath;
-        _rseRecycle.action -= Recycle;
-		_rseClimb.action -= Climb;
-		_rseSetCharacterPosition.action -= ForceCharacterPosition;
+        m_rseMove.action -= Move;
+        m_rseRun.action -= Run;
+        m_rseJump.action -= Jump;
+        m_rseThrow.action -= ToggleAim;
+        m_rseCraft.action -= ToggleCraft;
+        m_rseToggleInHand.action -= ToggleInHand;
+        m_rseCancelAction.action -= CancelAction;
+        m_rseInteract.action -= Interact;
+		m_rseKillCharacter.action -= HandleDeath;
+        m_rseRecycle.action -= Recycle;
+		m_rseClimb.action -= Climb;
+		m_rseSetCharacterPosition.action -= ForceCharacterPosition;
 	}
 
 	public void ToggleCraftInput(bool _isActive)
 	{
 		if (_isActive)
 		{
-			_rseCraft.action += ToggleCraft;
-			_rseRecycle.action += Recycle;
+			m_rseCraft.action += ToggleCraft;
+			m_rseRecycle.action += Recycle;
 		}
 		else
 		{
-			_rseCraft.action -= ToggleCraft;
-			_rseRecycle.action -= Recycle;
+			m_rseCraft.action -= ToggleCraft;
+			m_rseRecycle.action -= Recycle;
 		}
     }
 
 	private void ToggleInputs()
 	{
-		if (_rsoGamePaused.value)
+		if (m_rsoGamePaused.value)
 		{
 			CancelAction();
 			UnsubscribeInputs();
@@ -1042,7 +1043,7 @@ public class OldCharacterMotor : MonoBehaviour
     /// <param name="input">input direction value</param>
     private void Move(Vector2 input)
 	{
-		_moveInput = input;
+		m_moveInput = input;
 	}
 
 	/// <summary>
@@ -1052,8 +1053,8 @@ public class OldCharacterMotor : MonoBehaviour
 	/// <param name="isJumping">Is the input pressed.</param>
 	private void Jump(bool isJumping)
 	{
-        _wantJump = isJumping; // Resetted after switch state check
-		_isJumpingPressed = isJumping;
+        m_wantJump = isJumping; // Resetted after switch state check
+		IsJumpingPressed = isJumping;
 	}
 
 	/// <summary>
@@ -1061,18 +1062,18 @@ public class OldCharacterMotor : MonoBehaviour
 	/// </summary>
 	private void CheckProlongedJump()
 	{
-		if (!_isJumpingPressed) 
+		if (!IsJumpingPressed) 
 		{
-			_prolongedJumpTimer = 0f;
-			_isJumpProlonged = Triome.FALSE;
+			m_prolongedJumpTimer = 0f;
+			IsJumpProlonged = Triome.FALSE;
 			return;
 		}
 
-		_prolongedJumpTimer += Time.deltaTime;
-		if (_prolongedJumpTimer >= _HOLDING_KEY_THRESHOLD
-		&& _isJumpProlonged == Triome.FALSE)
+		m_prolongedJumpTimer += Time.deltaTime;
+		if (m_prolongedJumpTimer >= _HOLDING_KEY_THRESHOLD
+		&& IsJumpProlonged == Triome.FALSE)
 		{
-			_isJumpProlonged = Triome.TRUE;
+			IsJumpProlonged = Triome.TRUE;
 		}
 	}
 
@@ -1082,7 +1083,7 @@ public class OldCharacterMotor : MonoBehaviour
 	/// <param name="isRunning">is the input pressed</param>
 	private void Run(bool isRunning)
 	{
-		_isRunning = isRunning;
+		m_isRunning = isRunning;
 		Holding(isRunning);
 	}
 
@@ -1092,7 +1093,7 @@ public class OldCharacterMotor : MonoBehaviour
 	/// <param name="isHolding">is the input pressed</param>
 	private void Holding(bool isHolding)
 	{
-		if (_isJumpingPressed && !isHolding) return;
+		if (IsJumpingPressed && !isHolding) return;
 
 		if (_rope == null)
 		{
@@ -1101,7 +1102,7 @@ public class OldCharacterMotor : MonoBehaviour
 		}
 
 		// Handle both hold methods
-		switch (_characterConfig.ropeHoldingMethod)
+		switch (m_characterConfig.ropeHoldingMethod)
 		{
 			case RopeHolding.HOLD_TO_STOP:
 				ToggleRopeHolding(isHolding);
@@ -1136,7 +1137,7 @@ public class OldCharacterMotor : MonoBehaviour
 	/// </summary>
 	private void ToggleInHand()
 	{
-		_craftInHand?.ToggleInHand();
+		CraftInHand?.ToggleInHand();
 	}
 
 	private void CancelAction()
@@ -1162,7 +1163,7 @@ public class OldCharacterMotor : MonoBehaviour
 
 	private void UpdateLocomotionState()
 	{
-		if (_interactables.Count > 0)
+		if (m_interactables.Count > 0)
 		{
 			Interactible nearest = GetNearestInteractible();
 			CheckShowInteract();
@@ -1191,8 +1192,8 @@ public class OldCharacterMotor : MonoBehaviour
 
     private void ExitLocomotionState()
 	{
-		_gravitySpeed = 0;
-		_lastGroundedPlanarForward = _planarForward;
+		m_gravitySpeed = 0;
+		m_lastGroundedPlanarForward = m_planarForward;
     }
 
 	#endregion
@@ -1201,14 +1202,14 @@ public class OldCharacterMotor : MonoBehaviour
 
 	private void EnterJumpState()
 	{
-        _rseCraft.action -= ToggleCraft;
+        m_rseCraft.action -= ToggleCraft;
 
-		_canJump = false;
+		m_canJump = false;
 
-		if (_isGroundedLastFrame) {CheckWalkRun();}
+		if (m_isGroundedLastFrame) {CheckWalkRun();}
 		ApplyJumpImpulsePlanarSpeed();
-        if (_isGroundedLastFrame) {ApplyInputs(); };
-        if (_isGroundedLastFrame) {ApplyAcceleration();};
+        if (m_isGroundedLastFrame) {ApplyInputs(); };
+        if (m_isGroundedLastFrame) {ApplyAcceleration();};
         ApplyJumpImpulseVerticalSpeed();
 	}
 
@@ -1232,9 +1233,9 @@ public class OldCharacterMotor : MonoBehaviour
 
     private void ExitJumpState()
 	{
-        ToggleCraftInput(_hasBackpack);
+        ToggleCraftInput(HasBackpack);
 
-		_canJump = true;
+		m_canJump = true;
 
 	}
 
@@ -1244,13 +1245,13 @@ public class OldCharacterMotor : MonoBehaviour
 
 	private void EnterFallState()
 	{
-		_rseCraft.action -= ToggleCraft;
+		m_rseCraft.action -= ToggleCraft;
 
-        _positionStartFall = _rsoCharacterPosition.value;
+        m_positionStartFall = m_rsoCharacterPosition.value;
 
-        if (_isGroundedLastFrame) { CheckWalkRun(); }
-        if (_isGroundedLastFrame) { ApplyInputs(); };
-        if (_isGroundedLastFrame) { ApplyAcceleration(); };
+        if (m_isGroundedLastFrame) { CheckWalkRun(); }
+        if (m_isGroundedLastFrame) { ApplyInputs(); };
+        if (m_isGroundedLastFrame) { ApplyAcceleration(); };
     }
 
 	private void UpdateFallState()
@@ -1274,7 +1275,7 @@ public class OldCharacterMotor : MonoBehaviour
 
     private void ExitFallState()
 	{
-		ToggleCraftInput(_hasBackpack);
+		ToggleCraftInput(HasBackpack);
 	}
 
     #endregion
@@ -1289,87 +1290,87 @@ public class OldCharacterMotor : MonoBehaviour
             //If craft button is pressed
             if (_isInputPressed)
             {
-                _objectToCraft = _craftName;
-                _crafting = true;
+                m_objectToCraft = _craftName;
+                m_crafting = true;
             }
             else // if craft button is released
             {
-                _crafting = false;
+                m_crafting = false;
             }
         }
     }
 
 	private void EnterCraftState()
 	{
-		_rseMove.action -= Move;
-        _rseThrow.action -= ToggleAim;
-		_rseToggleInHand.action -= ToggleInHand;
-        _rseInteract.action -= Interact;
+		m_rseMove.action -= Move;
+        m_rseThrow.action -= ToggleAim;
+		m_rseToggleInHand.action -= ToggleInHand;
+        m_rseInteract.action -= Interact;
 
-		_canJump = false;
+		m_canJump = false;
 
-		switch (_objectToCraft)
+		switch (m_objectToCraft)
         {
             case CraftType.NONE:
                 break;
 
             case CraftType.TORCH:
-                if (_craftInHand != null)
+                if (CraftInHand != null)
                 {
-                    if (_craftInHand.Type != CraftType.TORCH && _craftInRobot?.Type != CraftType.TORCH)
+                    if (CraftInHand.Type != CraftType.TORCH && CraftInRobot?.Type != CraftType.TORCH)
                     {
-                        Destroy(_craftInHand.gameObject);
-                        _craftCoroutine = StartCoroutine(Craft(CraftType.TORCH, _torchConfig.craftingDuration));
+                        Destroy(CraftInHand.gameObject);
+                        m_craftCoroutine = StartCoroutine(Craft(CraftType.TORCH, m_torchConfig.craftingDuration));
                     }
                 }
                 else
                 {
-                    _craftCoroutine = StartCoroutine(Craft(CraftType.TORCH, _torchConfig.craftingDuration));
+                    m_craftCoroutine = StartCoroutine(Craft(CraftType.TORCH, m_torchConfig.craftingDuration));
                 }
                 break;
 
             case CraftType.DEPRECATED_LADDER:
-                if (_craftInHand != null)
+                if (CraftInHand != null)
                 {
-                    if (_craftInHand.Type == CraftType.TORCH)
+                    if (CraftInHand.Type == CraftType.TORCH)
                     {
-                        _craftInHand.transform.SetParent(_robotHandSocket, false);
-                        _craftInRobot = _craftInHand;
-                        _craftInRobot.transform.rotation = _robotHandSocket.rotation;
-                        _craftInHand = null;
-                        _craftCoroutine = StartCoroutine(Craft(CraftType.DEPRECATED_LADDER, _torchConfig.craftingDuration));
+                        CraftInHand.transform.SetParent(m_robotHandSocket, false);
+                        CraftInRobot = CraftInHand;
+                        CraftInRobot.transform.rotation = m_robotHandSocket.rotation;
+                        CraftInHand = null;
+                        m_craftCoroutine = StartCoroutine(Craft(CraftType.DEPRECATED_LADDER, m_torchConfig.craftingDuration));
                     }
-                    else if (_craftInHand.Type != CraftType.DEPRECATED_LADDER)
+                    else if (CraftInHand.Type != CraftType.DEPRECATED_LADDER)
                     {
-                        Destroy(_craftInHand.gameObject);
-                        _craftCoroutine = StartCoroutine(Craft(CraftType.DEPRECATED_LADDER, _torchConfig.craftingDuration));
+                        Destroy(CraftInHand.gameObject);
+                        m_craftCoroutine = StartCoroutine(Craft(CraftType.DEPRECATED_LADDER, m_torchConfig.craftingDuration));
                     }
                 }
                 else
                 {
-                    _craftCoroutine = StartCoroutine(Craft(CraftType.DEPRECATED_LADDER, _torchConfig.craftingDuration));
+                    m_craftCoroutine = StartCoroutine(Craft(CraftType.DEPRECATED_LADDER, m_torchConfig.craftingDuration));
                 }
                 break;
 
             case CraftType.ROPE:
-                if (_craftInHand != null)
+                if (CraftInHand != null)
                 {
-                    if (_craftInHand.Type == CraftType.TORCH)
+                    if (CraftInHand.Type == CraftType.TORCH)
                     {
-                        _craftInHand.transform.SetParent(_robotHandSocket, false);
-                        _craftInRobot = _craftInHand;
-                        _craftInHand = null;
-                        _craftCoroutine = StartCoroutine(Craft(CraftType.ROPE, _ropeConfig.craftingDuration));
+                        CraftInHand.transform.SetParent(m_robotHandSocket, false);
+                        CraftInRobot = CraftInHand;
+                        CraftInHand = null;
+                        m_craftCoroutine = StartCoroutine(Craft(CraftType.ROPE, m_ropeConfig.craftingDuration));
                     }
-                    else if (_craftInHand.Type != CraftType.ROPE)
+                    else if (CraftInHand.Type != CraftType.ROPE)
                     {
-                        Destroy(_craftInHand.gameObject);
-                        _craftCoroutine = StartCoroutine(Craft(CraftType.ROPE, _ropeConfig.craftingDuration));
+                        Destroy(CraftInHand.gameObject);
+                        m_craftCoroutine = StartCoroutine(Craft(CraftType.ROPE, m_ropeConfig.craftingDuration));
                     }
                 }
                 else
                 {
-                    _craftCoroutine = StartCoroutine(Craft(CraftType.ROPE, _ropeConfig.craftingDuration));
+                    m_craftCoroutine = StartCoroutine(Craft(CraftType.ROPE, m_ropeConfig.craftingDuration));
                 }
                 break;
         }
@@ -1394,9 +1395,9 @@ public class OldCharacterMotor : MonoBehaviour
     private IEnumerator Craft(CraftType _objectToCraft, float _craftDuration)
     {
 		// wait the crafting duration
-		if(_backpack != null)
+		if(Backpack != null)
 		{
-			_backpack.StartCrafting(_craftDuration);
+			Backpack.StartCrafting(_craftDuration);
 		}
 
         yield return new WaitForSeconds(_craftDuration);
@@ -1408,43 +1409,43 @@ public class OldCharacterMotor : MonoBehaviour
                 break;
 
             case CraftType.TORCH:
-                _craftInHand = Instantiate(_torchConfig.pfTorch, _handSocket.transform);
+                CraftInHand = Instantiate(m_torchConfig.pfTorch, m_handSocket.transform);
                 break;
 
 			case CraftType.DEPRECATED_LADDER:
-				_craftInHand = Instantiate(_ladderConfig.PF_Ladder, _handSocket.transform);
+				CraftInHand = Instantiate(m_ladderConfig.PF_Ladder, m_handSocket.transform);
                 break;
 
 			case CraftType.ROPE:
-				_craftInHand = Instantiate(_ropeConfig.pfRope, _handSocket.transform);
+				CraftInHand = Instantiate(m_ropeConfig.pfRope, m_handSocket.transform);
 				break;
 		}
 
-        _backpack.EndCrafting();
+        Backpack.EndCrafting();
 
-        _craftInHand.transform.position = _handSocket.transform.position;
+        CraftInHand.transform.position = m_handSocket.transform.position;
 
-		_craftCoroutine = null;
+		m_craftCoroutine = null;
     }
 
     private void ExitCraftState()
 	{
-        if (_craftCoroutine != null)
+        if (m_craftCoroutine != null)
         {
-            StopCoroutine(_craftCoroutine);
-            _craftCoroutine = null;
-			if(_backpack != null)
+            StopCoroutine(m_craftCoroutine);
+            m_craftCoroutine = null;
+			if(Backpack != null)
 			{
-				_backpack.EndCrafting();
+				Backpack.EndCrafting();
 			}
         }
 
-		_canJump = true;
+		m_canJump = true;
 
-		_rseMove.action += Move;
-        _rseThrow.action += ToggleAim;
-		_rseToggleInHand.action += ToggleInHand;
-        _rseInteract.action += Interact;
+		m_rseMove.action += Move;
+        m_rseThrow.action += ToggleAim;
+		m_rseToggleInHand.action += ToggleInHand;
+        m_rseInteract.action += Interact;
 	}
 
 
@@ -1508,7 +1509,7 @@ public class OldCharacterMotor : MonoBehaviour
 
 	private void EnterRopeState()
 	{
-		_rseCraft.action -= ToggleCraft;
+		m_rseCraft.action -= ToggleCraft;
 
 		_isJumpProlongedCached = Triome.NONE;
 
@@ -1548,7 +1549,7 @@ public class OldCharacterMotor : MonoBehaviour
 		HandleRopeConstraint();
 
 		// Debug
-		UnityEngine.Debug.DrawRay(_rsoCharacterPosition.value, _ropeVelocity.normalized);
+		UnityEngine.Debug.DrawRay(m_rsoCharacterPosition.value, _ropeVelocity.normalized);
 	}
 
 	private void LateUpdateRopeState()
@@ -1562,7 +1563,7 @@ public class OldCharacterMotor : MonoBehaviour
 		_isJumpProlongedCached = Triome.NONE;
 
 		// Update inputs subscriptions
-		ToggleCraftInput(_hasBackpack);
+		ToggleCraftInput(HasBackpack);
 	}
 
 	#endregion
@@ -1603,10 +1604,10 @@ public class OldCharacterMotor : MonoBehaviour
 	private void HandleProlongedJumpOnRope()
 	{
 		// Assertions
-		if (_characterConfig.ropeHoldingMethod != RopeHolding.HOLD_TO_LET_GO) return;
-		if (_isJumpProlongedCached == _isJumpProlonged) return;
+		if (m_characterConfig.ropeHoldingMethod != RopeHolding.HOLD_TO_LET_GO) return;
+		if (_isJumpProlongedCached == IsJumpProlonged) return;
 
-		_isJumpProlongedCached = _isJumpProlonged;
+		_isJumpProlongedCached = IsJumpProlonged;
 		Holding(_isJumpProlongedCached);
 	}
 
@@ -1616,9 +1617,9 @@ public class OldCharacterMotor : MonoBehaviour
 	private bool CheckWall()
 	{
 		// Lisibility varaibles
-		Vector3 origin = _rsoCharacterPosition.value + new Vector3(0, 0.5f, 0);
-		float length = _characterConfig.againstWallRayCastLength;
-		LayerMask layerMask = _characterConfig.againstWallLayerToInclude;
+		Vector3 origin = m_rsoCharacterPosition.value + new Vector3(0, 0.5f, 0);
+		float length = m_characterConfig.againstWallRayCastLength;
+		LayerMask layerMask = m_characterConfig.againstWallLayerToInclude;
 
 		// Raycasts variables
 		bool[] raycastHits = new bool[8];
@@ -1657,9 +1658,9 @@ public class OldCharacterMotor : MonoBehaviour
 		if (_isAgainstWall)
 		{
 			// Simple re-direction
-			Vector3 hitPoint = new Vector3(averagedPosition.x, _rsoCharacterPosition.value.y, averagedPosition.z);
-			Vector3 touchedDirection = hitPoint - _rsoCharacterPosition.value;
-			_characterDirection.forward = touchedDirection.normalized;
+			Vector3 hitPoint = new Vector3(averagedPosition.x, m_rsoCharacterPosition.value.y, averagedPosition.z);
+			Vector3 touchedDirection = hitPoint - m_rsoCharacterPosition.value;
+			m_characterDirection.forward = touchedDirection.normalized;
 		}
 
 		return _isAgainstWall;
@@ -1683,15 +1684,15 @@ public class OldCharacterMotor : MonoBehaviour
 		{
 			case RopeState.PARTIAL_SUSPENSION:
 
-				force = _characterConfig.jumpOffWallForce;
+				force = m_characterConfig.jumpOffWallForce;
 
 				direction = Vector3Extention.GetPositionOnCercle(
-					angle: _characterConfig.ropeOffsetAngle,
-					axis: _characterDirection.right,
-					direction: -_characterDirection.forward,
+					angle: m_characterConfig.ropeOffsetAngle,
+					axis: m_characterDirection.right,
+					direction: -m_characterDirection.forward,
 					origin: _rope.folds[^1],
 					radius: _rope.holdLength,
-					starting: _rsoCharacterPosition.value
+					starting: m_rsoCharacterPosition.value
 				);
 
 				break;
@@ -1701,7 +1702,7 @@ public class OldCharacterMotor : MonoBehaviour
 		}
 
 		// Apply jump force
-		_movement += direction * force;
+		m_movement += direction * force;
 	}
 
 	private void ApplyFreeRopeForce(float modifier)
@@ -1718,11 +1719,11 @@ public class OldCharacterMotor : MonoBehaviour
 	{
 		while (_currTime < duration)
 		{
-			if (_isGrounded) yield break;
+			if (IsGrounded) yield break;
 
 			_currTime += Time.deltaTime;
 			float percentage = _currTime / duration;
-			_movement += direction * force * (1 - percentage);
+			m_movement += direction * force * (1 - percentage);
 			yield return new WaitForNextFrameUnit();
 		}
 	}
@@ -1733,7 +1734,7 @@ public class OldCharacterMotor : MonoBehaviour
 	private void HandleRopeLength()
 	{
 		// Assert: total rope length is smaller than the max length
-		if (_rope.GetTotalLength() <= _ropeConfig.maxLength) return;
+		if (_rope.GetTotalLength() <= m_ropeConfig.maxLength) return;
 
 		DesequipRope();
 	}
@@ -1766,11 +1767,11 @@ public class OldCharacterMotor : MonoBehaviour
 
 		// Populate useful varaibles
 		Vector3 verticalPoint = _rope.folds[^1] + Vector3.down * _rope.holdLength;
-		Vector3 towardsVertical = (_rsoCharacterPosition.value - verticalPoint).normalized;
-		_towardsCharacter = (_rsoCharacterPosition.value - _rope.folds[^1]).normalized;
+		Vector3 towardsVertical = (m_rsoCharacterPosition.value - verticalPoint).normalized;
+		_towardsCharacter = (m_rsoCharacterPosition.value - _rope.folds[^1]).normalized;
 
 		// Get input related data
-		_ropeInputDirection = _cameraTransform.forward * _moveInput.y + _cameraTransform.right * _moveInput.x;
+		_ropeInputDirection = m_cameraTransform.forward * m_moveInput.y + m_cameraTransform.right * m_moveInput.x;
 		_inputsTowardsVertical = Vector3.Dot(_ropeInputDirection, towardsVertical) <= _TOWARDS_VERTICAL_THRESHOLD;
 		_inputsPressed = _ropeInputDirection.magnitude > 0;
 
@@ -1781,7 +1782,7 @@ public class OldCharacterMotor : MonoBehaviour
 
 		// Apply velocities
 		_ropeVelocity = _suspensionVelocity + _verticalVelocity + _pendulumVelocity;
-		_movement += _ropeVelocity;
+		m_movement += _ropeVelocity;
 	}
 
 	/// <summary>
@@ -1793,7 +1794,7 @@ public class OldCharacterMotor : MonoBehaviour
 		if (_rope == null) return true;
 
 		bool isFalling = false;
-		switch (_characterConfig.ropeHoldingMethod)
+		switch (m_characterConfig.ropeHoldingMethod)
 		{
 			case RopeHolding.HOLD_TO_STOP:
 				isFalling = !_isHolding;
@@ -1807,7 +1808,7 @@ public class OldCharacterMotor : MonoBehaviour
 				else
 				{
 					// If the character IS NOT holding the rope, let it fall till it reaches the rope limit constraint
-					isFalling = (_rope.folds[^1] - _rsoCharacterPosition.value).magnitude < _rope.holdLength - _FALLING_FORCES_THRESHOLD;
+					isFalling = (_rope.folds[^1] - m_rsoCharacterPosition.value).magnitude < _rope.holdLength - _FALLING_FORCES_THRESHOLD;
 				}
 				break;
 		}
@@ -1841,7 +1842,7 @@ public class OldCharacterMotor : MonoBehaviour
 	/// </summary>
 	private void ResetPendulumVelocity()
 	{
-		_gizmoStartPendulumPosition = _rsoCharacterPosition.value;
+		_gizmoStartPendulumPosition = m_rsoCharacterPosition.value;
 		_pendulumVelocity = Vector3.zero;
 	}
 
@@ -1849,14 +1850,14 @@ public class OldCharacterMotor : MonoBehaviour
 	{
 		// Add gravity free fall
 		// Character gravity force is negative so we reverse it
-		float gravityForce = _characterConfig.mass * -_characterConfig.gravity;
+		float gravityForce = m_characterConfig.mass * -m_characterConfig.gravity;
 
 		// Apply the gravity to `m_CurrentVelocity`
 		_pendulumVelocity += Vector3.down * gravityForce * Time.fixedDeltaTime;
 
 		// Cache pivot and bob positions
 		Vector3 pivotPositionCache = _rope.folds[^1];
-		Vector3 bobPositionCache = _rsoCharacterPosition.value;
+		Vector3 bobPositionCache = m_rsoCharacterPosition.value;
 
 		// Get bob's position after applying gravity force
 		Vector3 auxiliaryMovementDelta = _pendulumVelocity * Time.fixedDeltaTime;
@@ -1873,14 +1874,14 @@ public class OldCharacterMotor : MonoBehaviour
 			float tensionForce = gravityForce * Mathf.Cos(Mathf.Deg2Rad * inclinationAngle);
 
 			// Generate the counter force to make the bob stay within the circle : centripetal force
-			tensionForce += _characterConfig.mass * Mathf.Pow(_pendulumVelocity.magnitude, 2) / _rope.holdLength;
+			tensionForce += m_characterConfig.mass * Mathf.Pow(_pendulumVelocity.magnitude, 2) / _rope.holdLength;
 
 			// Apply the tension to `m_CurrentVelocity`
 			_pendulumVelocity += tensionDirection * tensionForce * Time.fixedDeltaTime;
 		}
 
 		// Apply a counter velocity force: a drag
-		_pendulumVelocity -= _pendulumVelocity * (_characterConfig.drag / gravityForce);
+		_pendulumVelocity -= _pendulumVelocity * (m_characterConfig.drag / gravityForce);
 	}
 
 	/// <summary>
@@ -1891,33 +1892,33 @@ public class OldCharacterMotor : MonoBehaviour
 		// Get desired position on the cercle offset by given angle
 		Vector3 completeDirection =
 			(Vector3Extention.GetPositionOnCercle(
-				angle: _characterConfig.ropeOffsetAngle,
-				axis: _cameraTransform.forward,
-				direction: _cameraTransform.right,
+				angle: m_characterConfig.ropeOffsetAngle,
+				axis: m_cameraTransform.forward,
+				direction: m_cameraTransform.right,
 				origin: _rope.folds[^1],
 				radius: _rope.holdLength,
-				starting: _rsoCharacterPosition.value
-			) - _rsoCharacterPosition.value).normalized * _moveInput.x +
+				starting: m_rsoCharacterPosition.value
+			) - m_rsoCharacterPosition.value).normalized * m_moveInput.x +
 			(Vector3Extention.GetPositionOnCercle(
-				angle: _characterConfig.ropeOffsetAngle,
-				axis: _cameraTransform.right,
-				direction: _cameraTransform.forward,
+				angle: m_characterConfig.ropeOffsetAngle,
+				axis: m_cameraTransform.right,
+				direction: m_cameraTransform.forward,
 				origin: _rope.folds[^1],
 				radius: _rope.holdLength,
-				starting: _rsoCharacterPosition.value
-			) - _rsoCharacterPosition.value).normalized * _moveInput.y;
+				starting: m_rsoCharacterPosition.value
+			) - m_rsoCharacterPosition.value).normalized * m_moveInput.y;
 
 		Vector3 partialDirection =
 			(Vector3Extention.GetPositionOnCercle(
-				angle: _characterConfig.ropeOffsetAngle,
-				axis: _cameraTransform.forward,
-				direction: _cameraTransform.right,
+				angle: m_characterConfig.ropeOffsetAngle,
+				axis: m_cameraTransform.forward,
+				direction: m_cameraTransform.right,
 				origin: _rope.folds[^1],
 				radius: _rope.holdLength,
-				starting: _rsoCharacterPosition.value
-			) - _rsoCharacterPosition.value).normalized * _moveInput.x;
+				starting: m_rsoCharacterPosition.value
+			) - m_rsoCharacterPosition.value).normalized * m_moveInput.x;
 
-		float suspensionForce = _isAgainstWall ? _characterConfig.partialSuspensionSpeed : _characterConfig.completeSuspensionSpeed;
+		float suspensionForce = _isAgainstWall ? m_characterConfig.partialSuspensionSpeed : m_characterConfig.completeSuspensionSpeed;
 		Vector3 suspensionDirection = _isAgainstWall ? partialDirection : completeDirection;
 		_suspensionVelocity = suspensionDirection * suspensionForce;
 	}
@@ -1927,9 +1928,9 @@ public class OldCharacterMotor : MonoBehaviour
 	/// </summary>
 	public void HandleVertical()
 	{
-		float angleCharacterVertical = Mathf.Clamp(Vector3.Angle(Vector3.down, _towardsCharacter), 0, _characterConfig.maxSideAngle);
+		float angleCharacterVertical = Mathf.Clamp(Vector3.Angle(Vector3.down, _towardsCharacter), 0, m_characterConfig.maxSideAngle);
 		Vector3 totalForces = -(_pendulumVelocity + _suspensionVelocity);
-		_verticalVelocity = angleCharacterVertical * totalForces / _characterConfig.maxSideAngle;
+		_verticalVelocity = angleCharacterVertical * totalForces / m_characterConfig.maxSideAngle;
 
 		if (!_inputsPressed)
 		{
@@ -1943,7 +1944,7 @@ public class OldCharacterMotor : MonoBehaviour
 	private void HandleRopeConstraint()
 	{
 		// Assert: holding input method
-		switch (_characterConfig.ropeHoldingMethod)
+		switch (m_characterConfig.ropeHoldingMethod)
 		{
 			case RopeHolding.HOLD_TO_STOP:
 				// While hold to stop, we don't constraint the character if the player IS NOT holding the button
@@ -1957,7 +1958,7 @@ public class OldCharacterMotor : MonoBehaviour
 		}
 
 		// Get the distance between the current character's position and the position of the last fold
-		Vector3 towardCharacter = _rsoCharacterPosition.value - _rope.folds[^1];
+		Vector3 towardCharacter = m_rsoCharacterPosition.value - _rope.folds[^1];
 
 		// Re-snap the character's position within the spherical constraint
 		if (towardCharacter.magnitude > _rope.holdLength)
@@ -1983,7 +1984,7 @@ public class OldCharacterMotor : MonoBehaviour
 	private void HandleClimbing()
 	{
 		// Assert: holding input method
-		switch (_characterConfig.ropeHoldingMethod)
+		switch (m_characterConfig.ropeHoldingMethod)
 		{
 			case RopeHolding.HOLD_TO_STOP:
 				// While hold to stop, we don't constraint the character if the player IS NOT holding the button
@@ -2002,8 +2003,8 @@ public class OldCharacterMotor : MonoBehaviour
 			return;
 		}
 
-		_currentClimbSpeed += _characterConfig.climbAcceleration * Time.fixedDeltaTime;
-		float clampedClimbSpeed = Mathf.Clamp(_currentClimbSpeed, 0, _characterConfig.maxClimbSpeed);
+		_currentClimbSpeed += m_characterConfig.climbAcceleration * Time.fixedDeltaTime;
+		float clampedClimbSpeed = Mathf.Clamp(_currentClimbSpeed, 0, m_characterConfig.maxClimbSpeed);
 		_rope.ChangeHoldLength(-clampedClimbSpeed * Time.fixedDeltaTime);
 	}
 
@@ -2017,14 +2018,14 @@ public class OldCharacterMotor : MonoBehaviour
 		else
 		{
 			// Reset the gravity velocity
-			_positionStartFall = _rsoCharacterPosition.value;
-			_gravitySpeed = 0f;
+			m_positionStartFall = m_rsoCharacterPosition.value;
+			m_gravitySpeed = 0f;
 
-			if (_ropeConstraintAppliedLastly && _isJumpingPressed) DesequipRope();
+			if (_ropeConstraintAppliedLastly && IsJumpingPressed) DesequipRope();
 
-			ApplyFreeRopeForce(_isJumpingPressed 
-				? _characterConfig.jumpOffRopeModifier 
-				: _characterConfig.freeFallFromRopeModifier
+			ApplyFreeRopeForce(IsJumpingPressed 
+				? m_characterConfig.jumpOffRopeModifier 
+				: m_characterConfig.freeFallFromRopeModifier
 			);
 		}
 	}
@@ -2062,31 +2063,31 @@ public class OldCharacterMotor : MonoBehaviour
 
 	private void ToggleAim(bool _isPressed)
 	{
-        if (_isPressed && _craftInHand != null)
+        if (_isPressed && CraftInHand != null)
 		{
-            _aiming = true;
+            Aiming = true;
             // _thirdPersonCamera.SwitchStyle(CameraStyle.AIMING);
-            _craftInHand.InitializePreview();
+            CraftInHand.InitializePreview();
         }
-		else if (_craftInHand != null)
+		else if (CraftInHand != null)
 		{
-            _aiming = false;
+            Aiming = false;
 
-			if (_craftInHand != null)
+			if (CraftInHand != null)
 			{
-                if (_craftInHand.Throw(_thirdPersonCamera.transform))
+                if (CraftInHand.Throw(m_thirdPersonCamera.transform))
                 {
                     // rope attachment exception
-                    _rope = _craftInHand as Rope;
-                    if (_rope != null) _rope?.Attach(_harness);
+                    _rope = CraftInHand as Rope;
+                    if (_rope != null) _rope?.Attach(m_harness);
 
-                    _craftInHand = null;
-                    if (_craftInRobot != null)
+                    CraftInHand = null;
+                    if (CraftInRobot != null)
                     {
-                        _craftInRobot.transform.SetParent(_handSocket, false);
-                        _craftInHand = _craftInRobot;
-                        _craftInHand.transform.rotation = _handSocket.transform.rotation;
-                        _craftInRobot = null;
+                        CraftInRobot.transform.SetParent(m_handSocket, false);
+                        CraftInHand = CraftInRobot;
+                        CraftInHand.transform.rotation = m_handSocket.transform.rotation;
+                        CraftInRobot = null;
                     }
                 }
             }
@@ -2102,7 +2103,7 @@ public class OldCharacterMotor : MonoBehaviour
     private void Interact()
     {
 		// Assertion
-		if (_interactables.Count == 0 || _currentState != AnimationState.LOCOMOTION) return;
+		if (m_interactables.Count == 0 || _currentState != AnimationState.LOCOMOTION) return;
 
 		Interactible nearest = GetNearestInteractible();
 		if (nearest != null) nearest.InteractionTrigger();
@@ -2111,7 +2112,7 @@ public class OldCharacterMotor : MonoBehaviour
     private void Recycle()
     {
 		// Assertion
-        if (_interactables.Count == 0 || _currentState != AnimationState.LOCOMOTION) return;
+        if (m_interactables.Count == 0 || _currentState != AnimationState.LOCOMOTION) return;
 
         Interactible interactible = GetNearestInteractible();
 
@@ -2121,8 +2122,8 @@ public class OldCharacterMotor : MonoBehaviour
         if (interactible.isRecyclable
         && interactible.objectToRecycle != null)
         {
-            _interactables.Remove(interactible);
-            _validInteractibles.Remove(interactible);
+            m_interactables.Remove(interactible);
+            m_validInteractibles.Remove(interactible);
             Destroy(interactible.objectToRecycle);
             CheckShowInteract();
             CheckShowRecycle(false);
@@ -2131,8 +2132,8 @@ public class OldCharacterMotor : MonoBehaviour
 
     private Interactible GetNearestInteractible()
 	{
-		_validInteractibles = FilterInteractiblesByAngle();
-		if (_validInteractibles.Count == 0) return null;
+		m_validInteractibles = FilterInteractiblesByAngle();
+		if (m_validInteractibles.Count == 0) return null;
 
 		return FilterInteractiblesByDistance();
     }
@@ -2141,19 +2142,19 @@ public class OldCharacterMotor : MonoBehaviour
 	{
 		List<Interactible> validInteractibles = new List<Interactible>();
 
-        for (int i = 0; i < _interactables.Count; i++)
+        for (int i = 0; i < m_interactables.Count; i++)
         {
 			// Assertion
-			if (_interactables[i] == null) continue;
+			if (m_interactables[i] == null) continue;
 
-			Vector3 towardsInteract = _interactables[i].transform.position - transform.position;
+			Vector3 towardsInteract = m_interactables[i].transform.position - transform.position;
 
 			if (Vector3.Dot(
-				new Vector3(_characterDirection.transform.forward.x, 0, _characterDirection.transform.forward.z).normalized, 
+				new Vector3(m_characterDirection.transform.forward.x, 0, m_characterDirection.transform.forward.z).normalized, 
 				new Vector3(towardsInteract.x, 0, towardsInteract.z).normalized
 				) > 0.5)
 			{
-				validInteractibles.Add(_interactables[i]);
+				validInteractibles.Add(m_interactables[i]);
 			}
         }
 
@@ -2162,14 +2163,14 @@ public class OldCharacterMotor : MonoBehaviour
 
 	private Interactible FilterInteractiblesByDistance()
 	{
-		Interactible nearestInteractible = _validInteractibles[0];
+		Interactible nearestInteractible = m_validInteractibles[0];
 
-        for (int i = 1; i < _validInteractibles.Count; i++)
+        for (int i = 1; i < m_validInteractibles.Count; i++)
         {
-			if ((_validInteractibles[i].transform.position - transform.position).sqrMagnitude <
+			if ((m_validInteractibles[i].transform.position - transform.position).sqrMagnitude <
             	(nearestInteractible.transform.position - transform.position).sqrMagnitude)
             {
-                nearestInteractible = _validInteractibles[i];
+                nearestInteractible = m_validInteractibles[i];
             }
         }
 
@@ -2178,13 +2179,13 @@ public class OldCharacterMotor : MonoBehaviour
 
     public void AddToInteractList(Interactible _interactibleObject)
     {
-        _interactables.Add(_interactibleObject);
+        m_interactables.Add(_interactibleObject);
     }
 
     public void RemoveFromInteractList(Interactible _interactibleObject)
     {
-        _interactables.Remove(_interactibleObject);
-		_validInteractibles.Remove(_interactibleObject);
+        m_interactables.Remove(_interactibleObject);
+		m_validInteractibles.Remove(_interactibleObject);
 
 		CheckShowInteract();
 		CheckShowRecycle(false);
@@ -2192,15 +2193,15 @@ public class OldCharacterMotor : MonoBehaviour
 
 	private void CheckShowInteract()
 	{
-		_rseCanInteract.Call(
-			_validInteractibles.Count > 0 
+		m_rseCanInteract.Call(
+			m_validInteractibles.Count > 0 
 			&& _currentState == AnimationState.LOCOMOTION
 		);
     }
 
 	private void CheckShowRecycle(bool isRecyclable)
 	{ 
-		_rseCanRecycle.Call(
+		m_rseCanRecycle.Call(
 			isRecyclable 
 			&& _currentState == AnimationState.LOCOMOTION
 		);

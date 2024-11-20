@@ -3,51 +3,51 @@ using UnityEngine;
 public class CharacterGraphics : MonoBehaviour
 {
     [Header("External References")]
-    [SerializeField] private Rigidbody _rigidbody;
+    [SerializeField] private Rigidbody m_rigidbody;
 
 	[Header("Scriptable references")]
-	[SerializeField] private OldCharacterConfig _characterConfig;
+	[SerializeField] private OldCharacterConfig m_characterConfig;
 	[Space(5)]
-	[SerializeField] private RSO_CameraStyle _rsoCameraStyle;
+	[SerializeField] private RSO_CameraStyle m_rsoCameraStyle;
 	[Space(5)]
-	[SerializeField] private RSE_Move _rseMove;
+	[SerializeField] private RSE_Move m_rseMove;
 
-	private Transform _aimingLookAt;
-	private Vector2 _moveInput;
+	private Transform m_aimingLookAt;
+	private Vector2 m_moveInput;
 
 	private const float k_MinimumThreshold = 0.1f;
 
 	private void OnEnable()
 	{
-		_rseMove.action += UpdateMoveInput;
+		m_rseMove.action += UpdateMoveInput;
 	}
 
 	private void OnDisable()
 	{
-		_rseMove.action += UpdateMoveInput;
+		m_rseMove.action += UpdateMoveInput;
 	}
 
 	private void LateUpdate()
     {
-		if (_rsoCameraStyle.value == CameraStyle.BASIC)
+		if (m_rsoCameraStyle.value == CameraStyle.BASIC)
 		{
 			// Character is facing the movement direction
 			// But not is the moveInput is null or equals to zero
-			Vector3 moveDirection = transform.forward * _moveInput.y + transform.right * _moveInput.x;
-			if (_moveInput != Vector2.zero)
+			Vector3 moveDirection = transform.forward * m_moveInput.y + transform.right * m_moveInput.x;
+			if (m_moveInput != Vector2.zero)
 			{
 				transform.forward = Vector3.Slerp(
 					transform.forward,
 					moveDirection.normalized,
-					Time.deltaTime * _characterConfig.rotationSpeed
+					Time.deltaTime * m_characterConfig.rotationSpeed
 				);
 			}
 		}
-		else if (_rsoCameraStyle.value == CameraStyle.AIMING)
+		else if (m_rsoCameraStyle.value == CameraStyle.AIMING)
 		{
-			transform.forward = _aimingLookAt.position - new Vector3(
+			transform.forward = m_aimingLookAt.position - new Vector3(
 				transform.transform.position.x, 
-				_aimingLookAt.position.y, 
+				m_aimingLookAt.position.y, 
 				transform.transform.position.z
 			);
 		}
@@ -55,11 +55,11 @@ public class CharacterGraphics : MonoBehaviour
 
 	public void Initialize(Transform aimingLookAt)
 	{
-		_aimingLookAt = aimingLookAt;
+		m_aimingLookAt = aimingLookAt;
 	}
 
 	private void UpdateMoveInput(Vector2 input)
 	{
-		_moveInput = input;
+		m_moveInput = input;
 	}
 }

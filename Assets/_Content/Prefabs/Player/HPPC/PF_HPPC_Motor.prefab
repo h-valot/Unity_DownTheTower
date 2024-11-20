@@ -81,23 +81,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fcc788972d238a34a9e82fda293cc015, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _rigidbody: {fileID: 5381602771882170276}
-  _collider: {fileID: 4489746191395963294}
-  _handSocket: {fileID: 9110457169432425}
-  _robotSocket: {fileID: 2889435511280919431}
-  _harness: {fileID: 6079601352614649837}
-  _aimingLookTo: {fileID: 5572654035266128898}
-  _cameraTarget: {fileID: 3133267520293983452}
-  _graphics: {fileID: 3734418414163333688}
-  _characterConfig: {fileID: 11400000, guid: 002492e8a2733234b8bdf7d15dea453b, type: 2}
-  _torchConfig: {fileID: 11400000, guid: 0c5c3bc89382c9e439e0ef105c99e62b, type: 2}
-  _ropeConfig: {fileID: 11400000, guid: ebd551676fad39148a6ccab29ef4ebce, type: 2}
-  _rseMove: {fileID: 11400000, guid: 4c899dda7396ed24c8e3d098dfe89471, type: 2}
-  _rseJump: {fileID: 11400000, guid: d6896f12727744441bfeccf04390e194, type: 2}
-  _rseCraft: {fileID: 11400000, guid: a5a67e5b9e43b3e47b905af27b5b8657, type: 2}
-  _rseThrow: {fileID: 11400000, guid: 9c0f340dc33672b4ca20f5f1cf2f8528, type: 2}
-  _rsoMovementDatas: {fileID: 11400000, guid: 46a30bfbc28dee740ba4e77a36571da1, type: 2}
-  _rsoCameraStyle: {fileID: 11400000, guid: 54ea121d351e9664dbe3f636e336b041, type: 2}
+  m_rigidbody: {fileID: 5381602771882170276}
+  m_collider: {fileID: 4489746191395963294}
+  m_handSocket: {fileID: 9110457169432425}
+  m_robotSocket: {fileID: 2889435511280919431}
+  m_harness: {fileID: 6079601352614649837}
+  m_aimingLookTo: {fileID: 5572654035266128898}
+  m_cameraTarget: {fileID: 3133267520293983452}
+  m_graphics: {fileID: 3734418414163333688}
+  m_characterConfig: {fileID: 11400000, guid: 002492e8a2733234b8bdf7d15dea453b, type: 2}
+  m_torchConfig: {fileID: 11400000, guid: 0c5c3bc89382c9e439e0ef105c99e62b, type: 2}
+  m_ropeConfig: {fileID: 11400000, guid: ebd551676fad39148a6ccab29ef4ebce, type: 2}
+  m_rseMove: {fileID: 11400000, guid: 4c899dda7396ed24c8e3d098dfe89471, type: 2}
+  m_rseJump: {fileID: 11400000, guid: d6896f12727744441bfeccf04390e194, type: 2}
+  m_rseCraft: {fileID: 11400000, guid: a5a67e5b9e43b3e47b905af27b5b8657, type: 2}
+  m_rseThrow: {fileID: 11400000, guid: 9c0f340dc33672b4ca20f5f1cf2f8528, type: 2}
+  m_rsoMovementDatas: {fileID: 11400000, guid: 46a30bfbc28dee740ba4e77a36571da1, type: 2}
+  m_rsoCameraStyle: {fileID: 11400000, guid: 54ea121d351e9664dbe3f636e336b041, type: 2}
 --- !u!136 &4489746191395963294
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -160,8 +160,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8d723e8d1123563489614b5f7be731cf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _characterConfig: {fileID: 11400000, guid: 1940b106405212f469b44119418b1e43, type: 2}
-  _rsoCharacterPosition: {fileID: 11400000, guid: 7cfc39952cca0d6478396ad49ab9e0db,
+  m_characterConfig: {fileID: 11400000, guid: 1940b106405212f469b44119418b1e43, type: 2}
+  m_rsoCharacterPosition: {fileID: 11400000, guid: 7cfc39952cca0d6478396ad49ab9e0db,
     type: 2}
 --- !u!1 &8156258402222326569
 GameObject:
@@ -259,9 +259,32 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8789223992376889300, guid: 7544e1a2ef9f92846a2661054cf72879,
         type: 3}
+      propertyPath: m_rseMove
+      value: 
+      objectReference: {fileID: 11400000, guid: 4c899dda7396ed24c8e3d098dfe89471,
+        type: 2}
+    - target: {fileID: 8789223992376889300, guid: 7544e1a2ef9f92846a2661054cf72879,
+        type: 3}
       propertyPath: _rigidbody
       value: 
       objectReference: {fileID: 5381602771882170276}
+    - target: {fileID: 8789223992376889300, guid: 7544e1a2ef9f92846a2661054cf72879,
+        type: 3}
+      propertyPath: m_rigidbody
+      value: 
+      objectReference: {fileID: 5381602771882170276}
+    - target: {fileID: 8789223992376889300, guid: 7544e1a2ef9f92846a2661054cf72879,
+        type: 3}
+      propertyPath: m_rsoCameraStyle
+      value: 
+      objectReference: {fileID: 11400000, guid: 54ea121d351e9664dbe3f636e336b041,
+        type: 2}
+    - target: {fileID: 8789223992376889300, guid: 7544e1a2ef9f92846a2661054cf72879,
+        type: 3}
+      propertyPath: m_characterConfig
+      value: 
+      objectReference: {fileID: 11400000, guid: 1940b106405212f469b44119418b1e43,
+        type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

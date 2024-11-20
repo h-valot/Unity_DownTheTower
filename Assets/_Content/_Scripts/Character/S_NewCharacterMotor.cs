@@ -6,62 +6,62 @@ public class NewCharacterMotor : MonoBehaviour
     #region REFERENCES
 
     [Header("Internal references")]
-    [SerializeField] private Rigidbody _rigidbody;
-    [SerializeField] private CapsuleCollider _collider;
-	[SerializeField] private Transform _handSocket;
-	[SerializeField] private Transform _robotSocket;
-	[SerializeField] private Transform _harness;
-	[SerializeField] private Transform _aimingLookTo;
-	[SerializeField] private Transform _cameraTarget;
-	[SerializeField] private CharacterGraphics _graphics;
+    [SerializeField] private Rigidbody m_rigidbody;
+    [SerializeField] private CapsuleCollider m_collider;
+	[SerializeField] private Transform m_handSocket;
+	[SerializeField] private Transform m_robotSocket;
+	[SerializeField] private Transform m_harness;
+	[SerializeField] private Transform m_aimingLookTo;
+	[SerializeField] private Transform m_cameraTarget;
+	[SerializeField] private CharacterGraphics m_graphics;
 
 	[Header("Scriptable references")]
-    [SerializeField] private NewCharacterConfig _characterConfig;
-	[SerializeField] private TorchConfig _torchConfig;
-	[SerializeField] private RopeConfig _ropeConfig;
+    [SerializeField] private NewCharacterConfig m_characterConfig;
+	[SerializeField] private TorchConfig m_torchConfig;
+	[SerializeField] private RopeConfig m_ropeConfig;
 	[Space(5)]
-    [SerializeField] private RSE_Move _rseMove;
-    [SerializeField] private RSE_Jump _rseJump;
-	[SerializeField] private RSE_Craft _rseCraft;
-	[SerializeField] private RSE_Throw _rseThrow;
+    [SerializeField] private RSE_Move m_rseMove;
+    [SerializeField] private RSE_Jump m_rseJump;
+	[SerializeField] private RSE_Craft m_rseCraft;
+	[SerializeField] private RSE_Throw m_rseThrow;
 	[Space(5)]
-	[SerializeField] private RSO_MovementDatas _rsoMovementDatas;
-	[SerializeField] private RSO_CameraStyle _rsoCameraStyle;
+	[SerializeField] private RSO_MovementDatas m_rsoMovementDatas;
+	[SerializeField] private RSO_CameraStyle m_rsoCameraStyle;
 
 	#endregion
 
 	#region VARIABLES
 
 	// - Inputs -
-	private Vector2 _moveInput = new Vector2();
+	private Vector2 m_moveInput = new Vector2();
 
     // - Collisions -
-    private LayerMask _layerMaskToIgnore;
-    private RaycastHit[] _raycastHits;
+    private LayerMask m_layerMaskToIgnore;
+    private RaycastHit[] m_raycastHits;
 
 	// - Camera -
-	private CameraMotor _camera;
+	private CameraMotor m_camera;
 
 	// - Movement -
-	private bool _isGrounded;
-    private Vector3 _groundNormal;
-    private bool _isRunning;
-    private bool _hasRope;
-    private bool _hasJump;
-    private bool _isCrafting;
+	private bool m_isGrounded;
+    private Vector3 m_groundNormal;
+    private bool m_isRunning;
+    private bool m_hasRope;
+    private bool m_hasJump;
+    private bool m_isCrafting;
 
     // - State machine -
-    private BehaviorState _currentState;
+    private BehaviorState m_currentState;
 
 	// - Craft state -
-	private CraftType _craftType;
-	private Coroutine _craftCoroutine;
-	private Permanent _handObject;
-	private Permanent _robotObject;
-	private bool _isAiming;
+	private CraftType m_craftType;
+	private Coroutine m_craftCoroutine;
+	private Permanent m_handObject;
+	private Permanent m_robotObject;
+	private bool m_isAiming;
 
 	// - Rope state -
-	private Rope _rope;
+	private Rope m_rope;
 
 	#endregion
 
@@ -70,23 +70,23 @@ public class NewCharacterMotor : MonoBehaviour
 	private void Awake()
     {
         // Update drag in rigidbody if changed in characterConfig
-        _characterConfig.OnConfigChanged += UpdateDrag;
+        m_characterConfig.OnConfigChanged += UpdateDrag;
         // Layer mask to remove character for cast, use ~_layerMaskToIgnore
-        _layerMaskToIgnore |= 1 << LayerMask.NameToLayer("Character");
+        m_layerMaskToIgnore |= 1 << LayerMask.NameToLayer("Character");
 
 		CheckGround();
         DetermineState();
 
-		_camera = Instantiate(_characterConfig.pfCamera, transform.position, Quaternion.identity, null).GetComponentInChildren<CameraMotor>();
-		_camera.Initialize(_aimingLookTo, _cameraTarget);
+		m_camera = Instantiate(m_characterConfig.pfCamera, transform.position, Quaternion.identity, null).GetComponentInChildren<CameraMotor>();
+		m_camera.Initialize(m_aimingLookTo, m_cameraTarget);
 
-		_graphics.Initialize(_aimingLookTo);
+		m_graphics.Initialize(m_aimingLookTo);
 	}
 
     private void OnDestroy()
     {
         UnsubscibeAllInputs();
-        _characterConfig.OnConfigChanged -= UpdateDrag;
+        m_characterConfig.OnConfigChanged -= UpdateDrag;
     }
 
     void FixedUpdate()
@@ -100,20 +100,20 @@ public class NewCharacterMotor : MonoBehaviour
     {
 		MovementDatas _movementDatas = new MovementDatas();
 
-        _movementDatas.dataToString.Add((Mathf.Round(_rigidbody.velocity.magnitude * 100f) / 100f).ToString());
-        _movementDatas.dataToString.Add(_isGrounded.ToString());
-        _movementDatas.dataToString.Add(_currentState.ToString());
-        _rsoMovementDatas.value = _movementDatas;
+        _movementDatas.dataToString.Add((Mathf.Round(m_rigidbody.velocity.magnitude * 100f) / 100f).ToString());
+        _movementDatas.dataToString.Add(m_isGrounded.ToString());
+        _movementDatas.dataToString.Add(m_currentState.ToString());
+        m_rsoMovementDatas.value = _movementDatas;
 
-		if (_isAiming) _handObject.PreviewThrow(_camera.transform);
+		if (m_isAiming) m_handObject.PreviewThrow(m_camera.transform);
 	}
 
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.cyan;
-        if(_raycastHits != null)
+        if(m_raycastHits != null)
         {
-            foreach (RaycastHit _hit in _raycastHits)
+            foreach (RaycastHit _hit in m_raycastHits)
             {
                 Gizmos.DrawSphere(_hit.point, 0.05f);
             }
@@ -124,44 +124,44 @@ public class NewCharacterMotor : MonoBehaviour
 
     #region INPUTS
 
-    private void UpdateMoveInput(Vector2 _input)
+    private void UpdateMoveInput(Vector2 input)
     {
-        _moveInput = _input;
+        m_moveInput = input;
     }
 
     private void UnsubscibeAllInputs()
     {
-        _rseMove.action -= UpdateMoveInput;
-        _rseJump.action -= Jump;
-		_rseCraft.action -= ToggleCraft;
-		_rseThrow.action -= ToggleAim;
+        m_rseMove.action -= UpdateMoveInput;
+        m_rseJump.action -= Jump;
+		m_rseCraft.action -= ToggleCraft;
+		m_rseThrow.action -= ToggleAim;
 	}
 
     private void SubscribeStateInputs()
     {
-        switch (_currentState)
+        switch (m_currentState)
         {
             case BehaviorState.LOCOMOTION:
-                _rseMove.action += UpdateMoveInput;
-                _rseJump.action += Jump;
-				_rseCraft.action += ToggleCraft;
-				_rseThrow.action += ToggleAim;
+                m_rseMove.action += UpdateMoveInput;
+                m_rseJump.action += Jump;
+				m_rseCraft.action += ToggleCraft;
+				m_rseThrow.action += ToggleAim;
 				break;
 
             case BehaviorState.FALL:
-                _rseMove.action += UpdateMoveInput;
-				_rseThrow.action += ToggleAim;
+                m_rseMove.action += UpdateMoveInput;
+				m_rseThrow.action += ToggleAim;
 				break;
 
             case BehaviorState.CRAFT:
-				_rseCraft.action += ToggleCraft;
+				m_rseCraft.action += ToggleCraft;
 				break;
 
             case BehaviorState.ROPE:
-				_rseMove.action += UpdateMoveInput;
+				m_rseMove.action += UpdateMoveInput;
 				// _rseJump.action += Jump;
-				_rseCraft.action += ToggleCraft;
-				_rseThrow.action += ToggleAim;
+				m_rseCraft.action += ToggleCraft;
+				m_rseThrow.action += ToggleAim;
 				break;
         }
     }
@@ -170,11 +170,11 @@ public class NewCharacterMotor : MonoBehaviour
     {
         if (ispressed)
         {
-            _isRunning = true;
+            m_isRunning = true;
         }
         else
         {
-            _isRunning = false;
+            m_isRunning = false;
         }
     }
 
@@ -187,19 +187,19 @@ public class NewCharacterMotor : MonoBehaviour
     /// </summary>
     private void DetermineState()
     {
-        if (_currentState != BehaviorState.LOCOMOTION && _isGrounded && !_isCrafting)
+        if (m_currentState != BehaviorState.LOCOMOTION && m_isGrounded && !m_isCrafting)
         {
             SwitchState(BehaviorState.LOCOMOTION);
         }
-        else if (_currentState != BehaviorState.FALL && !_isGrounded && !_hasRope)
+        else if (m_currentState != BehaviorState.FALL && !m_isGrounded && !m_hasRope)
         {
             SwitchState(BehaviorState.FALL);
         }
-        else if (_currentState != BehaviorState.ROPE && !_isGrounded && _hasRope)
+        else if (m_currentState != BehaviorState.ROPE && !m_isGrounded && m_hasRope)
         {
             SwitchState(BehaviorState.ROPE);
         }
-        else if (_currentState != BehaviorState.CRAFT && _currentState == BehaviorState.LOCOMOTION && _isCrafting)
+        else if (m_currentState != BehaviorState.CRAFT && m_currentState == BehaviorState.LOCOMOTION && m_isCrafting)
         {
             SwitchState(BehaviorState.CRAFT);
         }
@@ -208,24 +208,24 @@ public class NewCharacterMotor : MonoBehaviour
     /// <summary>
     /// Switch to new state by triggering old state exit then new state enter
     /// </summary>
-    /// <param name="_newState">New state to switch to</param>
-    private void SwitchState(BehaviorState _newState)
+    /// <param name="newState">New state to switch to</param>
+    private void SwitchState(BehaviorState newState)
     {
         ExitState();
-        EnterState(_newState);
+        EnterState(newState);
     }
 
     /// <summary>
     /// (1) Update _currentState value
     /// (2) Call EnterState method of the new state
     /// </summary>
-    /// <param name="_newState">New state to trigger</param>
-    private void EnterState(BehaviorState _newState)
+    /// <param name="newState">New state to trigger</param>
+    private void EnterState(BehaviorState newState)
     {
-        _currentState = _newState;
+        m_currentState = newState;
 		SubscribeStateInputs();
 
-		switch (_currentState)
+		switch (m_currentState)
         {
             case BehaviorState.LOCOMOTION:
                 EnterLocomotionState();
@@ -250,7 +250,7 @@ public class NewCharacterMotor : MonoBehaviour
     /// </summary>
     private void FixedUpdateState()
     {
-        switch (_currentState)
+        switch (m_currentState)
         {
             case BehaviorState.LOCOMOTION:
                 FixedUpdateLocomotionState();
@@ -277,7 +277,7 @@ public class NewCharacterMotor : MonoBehaviour
 	{
 		UnsubscibeAllInputs();
 
-		switch (_currentState)
+		switch (m_currentState)
         {
             case BehaviorState.LOCOMOTION:
                 ExitLocomotionState();
@@ -303,29 +303,29 @@ public class NewCharacterMotor : MonoBehaviour
 
     private void CheckGround()
     {
-        _isGrounded = false;
-        _groundNormal = Vector3.down;
+        m_isGrounded = false;
+        m_groundNormal = Vector3.down;
 
-        Vector3 _start = transform.position + Vector3.up * (_collider.height - _collider.radius);
-        float _radius = _collider.radius + _characterConfig.skinWidth;
+        Vector3 _start = transform.position + Vector3.up * (m_collider.height - m_collider.radius);
+        float _radius = m_collider.radius + m_characterConfig.skinWidth;
         Vector3 _direction = Vector3.down;
-        float _distance = _collider.height - 2 * _collider.radius;
-        _raycastHits = Physics.SphereCastAll(_start, _radius, _direction, _distance, ~_layerMaskToIgnore);
+        float _distance = m_collider.height - 2 * m_collider.radius;
+        m_raycastHits = Physics.SphereCastAll(_start, _radius, _direction, _distance, ~m_layerMaskToIgnore);
 
         //check each points
-        foreach (RaycastHit _hit in _raycastHits)
+        foreach (RaycastHit _hit in m_raycastHits)
         {
             //check if it is on the bottom round part of the capsule
-            if (_hit.point.y < transform.position.y + _collider.radius)
+            if (_hit.point.y < transform.position.y + m_collider.radius)
             {
                 float _angle = Vector3.Angle(_hit.normal, Vector3.up);
                 if (_angle < 46f)
                 {
-                    _isGrounded = true;
+                    m_isGrounded = true;
                     //take the smallest normal from ground check as the new ground normal
-                    if (Vector3.Dot(_hit.normal, Vector3.up) > Vector3.Dot(_groundNormal, Vector3.up))
+                    if (Vector3.Dot(_hit.normal, Vector3.up) > Vector3.Dot(m_groundNormal, Vector3.up))
                     {
-                        _groundNormal = _hit.normal;
+                        m_groundNormal = _hit.normal;
                     }
                 }
             }
@@ -340,11 +340,11 @@ public class NewCharacterMotor : MonoBehaviour
     {
         SetFriction();
 
-        if  (_moveInput != Vector2.zero)
+        if  (m_moveInput != Vector2.zero)
         {
-            Vector3 _desiredSpeed = (_camera.PlanarRight * _moveInput.x + _camera.PlanarForward * _moveInput.y).normalized;
-            _desiredSpeed *= _characterConfig.walkSpeed;
-            _rigidbody.AddForce(_desiredSpeed - _rigidbody.velocity, ForceMode.Acceleration);
+            Vector3 _desiredSpeed = (m_camera.PlanarRight * m_moveInput.x + m_camera.PlanarForward * m_moveInput.y).normalized;
+            _desiredSpeed *= m_characterConfig.walkSpeed;
+            m_rigidbody.AddForce(_desiredSpeed - m_rigidbody.velocity, ForceMode.Acceleration);
         }
     }
 
@@ -356,27 +356,27 @@ public class NewCharacterMotor : MonoBehaviour
     /// </summary>
     private void SetFriction()
     {
-        if (_moveInput == Vector2.zero && _isGrounded)
+        if (m_moveInput == Vector2.zero && m_isGrounded)
         {
-            _collider.sharedMaterial.dynamicFriction = _characterConfig.frictionNotMovingGround;
-            _collider.sharedMaterial.frictionCombine = PhysicMaterialCombine.Maximum;
+            m_collider.sharedMaterial.dynamicFriction = m_characterConfig.frictionNotMovingGround;
+            m_collider.sharedMaterial.frictionCombine = PhysicMaterialCombine.Maximum;
         }
         else
         {
-            _collider.sharedMaterial.dynamicFriction = _characterConfig.frictionMovingFalling;
-            _collider.sharedMaterial.frictionCombine = PhysicMaterialCombine.Minimum;
+            m_collider.sharedMaterial.dynamicFriction = m_characterConfig.frictionMovingFalling;
+            m_collider.sharedMaterial.frictionCombine = PhysicMaterialCombine.Minimum;
         }
     }
 
     private void UpdateDrag()
     {
-        if (_currentState == BehaviorState.LOCOMOTION)
+        if (m_currentState == BehaviorState.LOCOMOTION)
         {
-            _rigidbody.drag = _characterConfig.dragGround;
+            m_rigidbody.drag = m_characterConfig.dragGround;
         }
-        else if (_currentState == BehaviorState.FALL || _currentState == BehaviorState.ROPE)
+        else if (m_currentState == BehaviorState.FALL || m_currentState == BehaviorState.ROPE)
         {
-            _rigidbody.drag = _characterConfig.dragFall;
+            m_rigidbody.drag = m_characterConfig.dragFall;
         }
     }
 
@@ -387,42 +387,42 @@ public class NewCharacterMotor : MonoBehaviour
     {
         SetFriction();
 
-        if (_moveInput != Vector2.zero)
+        if (m_moveInput != Vector2.zero)
         {
-            Vector3 _desiredSpeed = (_camera.PlanarRight * _moveInput.x + _camera.PlanarForward * _moveInput.y).normalized;
+            Vector3 _desiredSpeed = (m_camera.PlanarRight * m_moveInput.x + m_camera.PlanarForward * m_moveInput.y).normalized;
 
             //orient speed along slope
-            Vector3 _slopeRight = Vector3.Cross(Vector3.up, _groundNormal);
-            _desiredSpeed = Quaternion.AngleAxis(Vector3.SignedAngle(Vector3.up, _groundNormal, _slopeRight), _slopeRight) * _desiredSpeed;
+            Vector3 _slopeRight = Vector3.Cross(Vector3.up, m_groundNormal);
+            _desiredSpeed = Quaternion.AngleAxis(Vector3.SignedAngle(Vector3.up, m_groundNormal, _slopeRight), _slopeRight) * _desiredSpeed;
 
             //set desired speed magnitude based on walk/run state
-            if (_isRunning)
+            if (m_isRunning)
             {
-                _desiredSpeed *= _characterConfig.runSpeed;
+                _desiredSpeed *= m_characterConfig.runSpeed;
             }
             else
             {
-                _desiredSpeed *= _characterConfig.walkSpeed;
+                _desiredSpeed *= m_characterConfig.walkSpeed;
             }
 
             //apply final force to move character, auto clamp the speed by substractiong actual speed to desired speed
-            _rigidbody.AddForce(_desiredSpeed - _rigidbody.velocity, ForceMode.Acceleration);
+            m_rigidbody.AddForce(_desiredSpeed - m_rigidbody.velocity, ForceMode.Acceleration);
         }
     }
 
     private void Jump(bool input)
     {
-        _rigidbody.AddForce(Vector3.up * _characterConfig.jumpForce, ForceMode.Impulse);
+        m_rigidbody.AddForce(Vector3.up * m_characterConfig.jumpForce, ForceMode.Impulse);
     }
 
     private void HandleStepOn()
     {
-        if(_raycastHits.Length > 1 && _moveInput != Vector2.zero)
+        if(m_raycastHits.Length > 1 && m_moveInput != Vector2.zero)
         {
             Vector3 _stepOnHeightTarget = transform.position;
-            Vector3 _moveInput3D = (_camera.PlanarRight * _moveInput.x + _camera.PlanarForward * _moveInput.y).normalized;
+            Vector3 _moveInput3D = (m_camera.PlanarRight * m_moveInput.x + m_camera.PlanarForward * m_moveInput.y).normalized;
 
-            foreach (RaycastHit _hit in _raycastHits)
+            foreach (RaycastHit _hit in m_raycastHits)
             {
                 Vector3 _hitDirection = _hit.point - transform.position;
                 _hitDirection = new Vector3(_hitDirection.x, 0, _hitDirection.z);
@@ -430,7 +430,7 @@ public class NewCharacterMotor : MonoBehaviour
                 //check if hit is in front of character
                 if (Vector3.Dot(_moveInput3D,_hitDirection) > 0.1)
                 {
-                    if (_hit.point.y - transform.position.y < _characterConfig.StepOnHeight)
+                    if (_hit.point.y - transform.position.y < m_characterConfig.StepOnHeight)
                     {
                         if (_hit.point.y > _stepOnHeightTarget.y)
                         {
@@ -442,7 +442,7 @@ public class NewCharacterMotor : MonoBehaviour
 
             if(_stepOnHeightTarget != transform.position)
             {
-                _rigidbody.position = _stepOnHeightTarget;
+                m_rigidbody.position = _stepOnHeightTarget;
             }
         }
     }
@@ -512,34 +512,34 @@ public class NewCharacterMotor : MonoBehaviour
 
 	private void EnterCraftState()
 	{
-		if (_craftType == CraftType.TORCH)
+		if (m_craftType == CraftType.TORCH)
 		{
-			if (_handObject != null
-			&& _handObject.Type != CraftType.TORCH
-			&& _robotObject?.Type != CraftType.TORCH)
+			if (m_handObject != null
+			&& m_handObject.Type != CraftType.TORCH
+			&& m_robotObject?.Type != CraftType.TORCH)
 			{
-				Destroy(_handObject.gameObject);
+				Destroy(m_handObject.gameObject);
 			}
-			_craftCoroutine = StartCoroutine(Craft(CraftType.TORCH, _torchConfig.craftingDuration));
+			m_craftCoroutine = StartCoroutine(Craft(CraftType.TORCH, m_torchConfig.craftingDuration));
 		}
-		else if (_craftType == CraftType.ROPE)
+		else if (m_craftType == CraftType.ROPE)
 		{
-			if (_handObject != null)
+			if (m_handObject != null)
 			{
-				if (_handObject.Type == CraftType.TORCH)
+				if (m_handObject.Type == CraftType.TORCH)
 				{
 					// _handObject.transform.SetParent(_robotSocket, false);
 					// _robotObject = _handObject;
 					// _handObject = null;
 
-					SwitchObjects(ref _handObject, ref _robotObject, _robotSocket);
+					SwitchObjects(ref m_handObject, ref m_robotObject, m_robotSocket);
 				}
-				else if (_handObject.Type != CraftType.ROPE)
+				else if (m_handObject.Type != CraftType.ROPE)
 				{
-					Destroy(_handObject.gameObject);
+					Destroy(m_handObject.gameObject);
 				}
 			}
-			_craftCoroutine = StartCoroutine(Craft(CraftType.ROPE, _ropeConfig.craftingDuration));
+			m_craftCoroutine = StartCoroutine(Craft(CraftType.ROPE, m_ropeConfig.craftingDuration));
 		}
 	}
 
@@ -550,10 +550,10 @@ public class NewCharacterMotor : MonoBehaviour
 
     private void ExitCraftState()
     {
-		if (_craftCoroutine != null)
+		if (m_craftCoroutine != null)
 		{
-			StopCoroutine(_craftCoroutine);
-			_craftCoroutine = null;
+			StopCoroutine(m_craftCoroutine);
+			m_craftCoroutine = null;
 			
 			// if (_backpack != null) _backpack.EndCrafting();
 		}
@@ -562,19 +562,19 @@ public class NewCharacterMotor : MonoBehaviour
 	private void ToggleCraft(CraftType craftType, bool isInputPressed)
 	{
 		// Prevent switching to craft state if not in locomotion or crafting state or already crafting another item
-		if (_currentState != BehaviorState.LOCOMOTION 
-		|| _currentState != BehaviorState.CRAFT)
+		if (m_currentState != BehaviorState.LOCOMOTION 
+		|| m_currentState != BehaviorState.CRAFT)
 		{
 			// If craft button is pressed
 			if (isInputPressed)
 			{
-				_craftType = craftType;
-				_isCrafting = true;
+				m_craftType = craftType;
+				m_isCrafting = true;
 			}
 			// If craft button is released
 			else
 			{
-				_isCrafting = false;
+				m_isCrafting = false;
 			}
 		}
 	}
@@ -589,43 +589,43 @@ public class NewCharacterMotor : MonoBehaviour
 
 		yield return new WaitForSeconds(duration);
 
-		_handObject = Instantiate(
-			craftType == CraftType.TORCH ? (Permanent)_torchConfig.pfTorch : (Permanent)_ropeConfig.pfRope, 
-			_handSocket.transform.position,
+		m_handObject = Instantiate(
+			craftType == CraftType.TORCH ? (Permanent)m_torchConfig.pfTorch : (Permanent)m_ropeConfig.pfRope, 
+			m_handSocket.transform.position,
 			Quaternion.identity,
-			_handSocket.transform
+			m_handSocket.transform
 		);
 
 		// _backpack.EndCrafting();
-		_craftCoroutine = null;
+		m_craftCoroutine = null;
 	}
 
 	private void ToggleAim(bool isInputPressed)
 	{
 		// Assert: can't throw null
-		if (_handObject == null) return;
+		if (m_handObject == null) return;
 
-		_isAiming = isInputPressed;
-		_rsoCameraStyle.value = _isAiming ? CameraStyle.AIMING : CameraStyle.BASIC;
+		m_isAiming = isInputPressed;
+		m_rsoCameraStyle.value = m_isAiming ? CameraStyle.AIMING : CameraStyle.BASIC;
 
 		// Handle preview on input pressed
-		if (_isAiming)
+		if (m_isAiming)
 		{
-			_handObject.InitializePreview();
+			m_handObject.InitializePreview();
 		}
 
 		// Handle pernament throw on input released
 		else
 		{
 			// Assert: object can't be thrown
-			if (!_handObject.Throw(_camera.transform)) return;
+			if (!m_handObject.Throw(m_camera.transform)) return;
 
 			// Exception: rope attachment
-			_rope = _handObject as Rope;
-			if (_rope != null) _rope?.Attach(_harness);
+			m_rope = m_handObject as Rope;
+			if (m_rope != null) m_rope?.Attach(m_harness);
 
-			_handObject = null;
-			SwitchObjects(ref _robotObject, ref _handObject, _handSocket);
+			m_handObject = null;
+			SwitchObjects(ref m_robotObject, ref m_handObject, m_handSocket);
 		}
 	}
 
