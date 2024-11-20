@@ -6,7 +6,7 @@ public class RopeConfig : ScriptableObject
 	[Header("Prefabs")]
 	public Rope pfRope;
 	public RopeLine pfRopeLine;
-	public Interactible pfRopeInteractible;
+	public Interactable pfRopeInteractible;
 
 	[Header("Settings")]
 	public int maxSegmentInstantiatedPerFrame = 5;

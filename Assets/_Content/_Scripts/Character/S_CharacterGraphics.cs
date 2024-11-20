@@ -2,43 +2,36 @@ using UnityEngine;
 
 public class CharacterGraphics : MonoBehaviour
 {
-    [Header("External References")]
-    [SerializeField] private Rigidbody m_rigidbody;
-
 	[Header("Scriptable references")]
 	[SerializeField] private OldCharacterConfig m_characterConfig;
 	[Space(5)]
 	[SerializeField] private RSO_CameraStyle m_rsoCameraStyle;
-	[Space(5)]
-	[SerializeField] private RSE_Move m_rseMove;
 
 	private Transform m_aimingLookAt;
-	private Vector2 m_moveInput;
+	private Rigidbody m_rigidbody;
+	private bool m_isInitialized;
 
 	private const float k_MinimumThreshold = 0.1f;
 
-	private void OnEnable()
+	public void Initialize(Transform aimingLookAt, Rigidbody rigidbody)
 	{
-		m_rseMove.action += UpdateMoveInput;
-	}
-
-	private void OnDisable()
-	{
-		m_rseMove.action += UpdateMoveInput;
+		m_aimingLookAt = aimingLookAt;
+		m_rigidbody = rigidbody;
+		m_isInitialized = true;
 	}
 
 	private void LateUpdate()
     {
+		if (!m_isInitialized) return;
+
 		if (m_rsoCameraStyle.value == CameraStyle.BASIC)
 		{
-			// Character is facing the movement direction
-			// But not is the moveInput is null or equals to zero
-			Vector3 moveDirection = transform.forward * m_moveInput.y + transform.right * m_moveInput.x;
-			if (m_moveInput != Vector2.zero)
+			Vector3 planarMovement = new Vector3(m_rigidbody.velocity.x, 0, m_rigidbody.velocity.z);
+			if (planarMovement.magnitude >= k_MinimumThreshold)
 			{
-				transform.forward = Vector3.Slerp(
-					transform.forward,
-					moveDirection.normalized,
+				transform.localRotation = Quaternion.Lerp(
+					transform.localRotation,
+					Quaternion.LookRotation(planarMovement, Vector3.up),
 					Time.deltaTime * m_characterConfig.rotationSpeed
 				);
 			}
@@ -51,15 +44,5 @@ public class CharacterGraphics : MonoBehaviour
 				transform.transform.position.z
 			);
 		}
-	}
-
-	public void Initialize(Transform aimingLookAt)
-	{
-		m_aimingLookAt = aimingLookAt;
-	}
-
-	private void UpdateMoveInput(Vector2 input)
-	{
-		m_moveInput = input;
 	}
 }

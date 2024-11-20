@@ -3,7 +3,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 
-public class Lever : Interactible
+public class Lever : Interactable
 {
 	[Header("Internal references")]
     [SerializeField] private GameObject _target;

@@ -14,6 +14,7 @@ public class NewCharacterConfig : ScriptableObject
 
 
 	public GameObject pfCamera;
+	public Backpack pfBackpack;
 
 
 	[Header("Movement")]
@@ -47,4 +48,9 @@ public class NewCharacterConfig : ScriptableObject
 
     [Tooltip("Height that the character will automaticly step on")]
     public float StepOnHeight;
+
+
+	[Header("Debug")]
+	[Tooltip("If true, the character starts the play mode with a backpack.")]
+	public bool startWithBag;
 }

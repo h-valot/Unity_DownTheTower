@@ -1,7 +1,7 @@
 using DG.Tweening;
 using UnityEngine;
 
-public class MemoryCristal : Interactible
+public class MemoryCristal : Interactable
 {
     [SerializeField] private GameObject _firstDoor;
     [SerializeField] private GameObject _secondDoor;

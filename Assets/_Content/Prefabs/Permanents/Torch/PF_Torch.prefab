@@ -192,7 +192,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e5cbb02d6223ce1469e3fb4d5d131fd6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _craftType: 1
+  Type: 1
   _light: {fileID: 1720485948228762332}
   _rigidbody: {fileID: 5666824575402529614}
   _meshRenderer: {fileID: 7272609494548576517}
@@ -207,8 +207,6 @@ MonoBehaviour:
   _rsoCharacterPosition: {fileID: 11400000, guid: 7cfc39952cca0d6478396ad49ab9e0db,
     type: 2}
   _isInHand: 0
-  _lightPercent: 0
-  _emitColor: {r: 0, g: 0, b: 0, a: 0}
 --- !u!54 &5666824575402529614
 Rigidbody:
   m_ObjectHideFlags: 0

@@ -1,4 +1,8 @@
+using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using DG.Tweening.Core.Easing;
 using UnityEngine;
 
 public class NewCharacterMotor : MonoBehaviour
@@ -13,7 +17,8 @@ public class NewCharacterMotor : MonoBehaviour
 	[SerializeField] private Transform m_harness;
 	[SerializeField] private Transform m_aimingLookTo;
 	[SerializeField] private Transform m_cameraTarget;
-	[SerializeField] private CharacterGraphics m_graphics;
+	[SerializeField] private Transform m_backpackAnchor;
+	[SerializeField] private CharacterGraphics m_characterGraphics;
 
 	[Header("Scriptable references")]
     [SerializeField] private NewCharacterConfig m_characterConfig;
@@ -24,6 +29,10 @@ public class NewCharacterMotor : MonoBehaviour
     [SerializeField] private RSE_Jump m_rseJump;
 	[SerializeField] private RSE_Craft m_rseCraft;
 	[SerializeField] private RSE_Throw m_rseThrow;
+	[SerializeField] private RSE_Interact m_rseInteract;
+	[SerializeField] private RSE_Recycle m_rseRecycle;
+	[SerializeField] private RSE_CanInteract m_rseCanInteract;
+	[SerializeField] private RSE_CanRecycle m_rseCanRecycle;
 	[Space(5)]
 	[SerializeField] private RSO_MovementDatas m_rsoMovementDatas;
 	[SerializeField] private RSO_CameraStyle m_rsoCameraStyle;
@@ -40,7 +49,7 @@ public class NewCharacterMotor : MonoBehaviour
     private RaycastHit[] m_raycastHits;
 
 	// - Camera -
-	private CameraMotor m_camera;
+	private CameraMotor m_cameraMotor;
 
 	// - Movement -
 	private bool m_isGrounded;
@@ -54,6 +63,8 @@ public class NewCharacterMotor : MonoBehaviour
     private BehaviorState m_currentState;
 
 	// - Craft state -
+	private bool m_hasBackpack;
+	private Backpack m_backpack;
 	private CraftType m_craftType;
 	private Coroutine m_craftCoroutine;
 	private Permanent m_handObject;
@@ -62,6 +73,9 @@ public class NewCharacterMotor : MonoBehaviour
 
 	// - Rope state -
 	private Rope m_rope;
+
+	// - Interaction -
+	private List<Interactable> m_interactables = new List<Interactable>();
 
 	#endregion
 
@@ -77,10 +91,12 @@ public class NewCharacterMotor : MonoBehaviour
 		CheckGround();
         DetermineState();
 
-		m_camera = Instantiate(m_characterConfig.pfCamera, transform.position, Quaternion.identity, null).GetComponentInChildren<CameraMotor>();
-		m_camera.Initialize(m_aimingLookTo, m_cameraTarget);
+		m_cameraMotor = Instantiate(m_characterConfig.pfCamera, transform.position, Quaternion.identity, null).GetComponentInChildren<CameraMotor>();
+		m_cameraMotor.Initialize(m_aimingLookTo, m_cameraTarget);
 
-		m_graphics.Initialize(m_aimingLookTo);
+		m_characterGraphics.Initialize(m_aimingLookTo, m_rigidbody);
+
+		GetBackpackDebug();
 	}
 
     private void OnDestroy()
@@ -89,7 +105,7 @@ public class NewCharacterMotor : MonoBehaviour
         m_characterConfig.OnConfigChanged -= UpdateDrag;
     }
 
-    void FixedUpdate()
+    private void FixedUpdate()
 	{
 		CheckGround();
         DetermineState();
@@ -105,8 +121,10 @@ public class NewCharacterMotor : MonoBehaviour
         _movementDatas.dataToString.Add(m_currentState.ToString());
         m_rsoMovementDatas.value = _movementDatas;
 
-		if (m_isAiming) m_handObject.PreviewThrow(m_camera.transform);
+		if (m_isAiming) m_handObject.PreviewThrow(m_cameraMotor.transform);
 	}
+
+#if UNITY_EDITOR
 
     private void OnDrawGizmos()
     {
@@ -120,14 +138,11 @@ public class NewCharacterMotor : MonoBehaviour
         }
     }
 
+#endif
+
     #endregion
 
     #region INPUTS
-
-    private void UpdateMoveInput(Vector2 input)
-    {
-        m_moveInput = input;
-    }
 
     private void UnsubscibeAllInputs()
     {
@@ -135,6 +150,8 @@ public class NewCharacterMotor : MonoBehaviour
         m_rseJump.action -= Jump;
 		m_rseCraft.action -= ToggleCraft;
 		m_rseThrow.action -= ToggleAim;
+		m_rseRecycle.action -= Recycle;
+		m_rseInteract.action -= Interact;
 	}
 
     private void SubscribeStateInputs()
@@ -146,6 +163,8 @@ public class NewCharacterMotor : MonoBehaviour
                 m_rseJump.action += Jump;
 				m_rseCraft.action += ToggleCraft;
 				m_rseThrow.action += ToggleAim;
+				m_rseRecycle.action += Recycle;
+				m_rseInteract.action += Interact;
 				break;
 
             case BehaviorState.FALL:
@@ -164,28 +183,40 @@ public class NewCharacterMotor : MonoBehaviour
 				m_rseThrow.action += ToggleAim;
 				break;
         }
+	}
+
+	private void UpdateMoveInput(Vector2 input)
+	{
+		m_moveInput = input;
+	}
+
+	private void UpdateWalkRun(bool ispressed)
+	{
+		m_isRunning = ispressed;
     }
 
-    private void UpdateWalkRun(bool ispressed)
-    {
-        if (ispressed)
-        {
-            m_isRunning = true;
-        }
-        else
-        {
-            m_isRunning = false;
-        }
-    }
+	public void ToggleCraftInput(bool enable)
+	{
+		if (enable)
+		{
+			m_rseCraft.action += ToggleCraft;
+			m_rseRecycle.action += Recycle;
+		}
+		else
+		{
+			m_rseCraft.action -= ToggleCraft;
+			m_rseRecycle.action -= Recycle;
+		}
+	}
 
-    #endregion
+	#endregion
 
-    #region STATE MACHINE
+	#region STATE MACHINE
 
-    /// <summary>
-    /// Determine which behavior state the player should be and trigger a switch of state if neccessary.
-    /// </summary>
-    private void DetermineState()
+	/// <summary>
+	/// Determine which behavior state the player should be and trigger a switch of state if neccessary.
+	/// </summary>
+	private void DetermineState()
     {
         if (m_currentState != BehaviorState.LOCOMOTION && m_isGrounded && !m_isCrafting)
         {
@@ -342,7 +373,7 @@ public class NewCharacterMotor : MonoBehaviour
 
         if  (m_moveInput != Vector2.zero)
         {
-            Vector3 _desiredSpeed = (m_camera.PlanarRight * m_moveInput.x + m_camera.PlanarForward * m_moveInput.y).normalized;
+            Vector3 _desiredSpeed = (m_cameraMotor.PlanarRight * m_moveInput.x + m_cameraMotor.PlanarForward * m_moveInput.y).normalized;
             _desiredSpeed *= m_characterConfig.walkSpeed;
             m_rigidbody.AddForce(_desiredSpeed - m_rigidbody.velocity, ForceMode.Acceleration);
         }
@@ -389,7 +420,7 @@ public class NewCharacterMotor : MonoBehaviour
 
         if (m_moveInput != Vector2.zero)
         {
-            Vector3 _desiredSpeed = (m_camera.PlanarRight * m_moveInput.x + m_camera.PlanarForward * m_moveInput.y).normalized;
+            Vector3 _desiredSpeed = (m_cameraMotor.PlanarRight * m_moveInput.x + m_cameraMotor.PlanarForward * m_moveInput.y).normalized;
 
             //orient speed along slope
             Vector3 _slopeRight = Vector3.Cross(Vector3.up, m_groundNormal);
@@ -420,7 +451,7 @@ public class NewCharacterMotor : MonoBehaviour
         if(m_raycastHits.Length > 1 && m_moveInput != Vector2.zero)
         {
             Vector3 _stepOnHeightTarget = transform.position;
-            Vector3 _moveInput3D = (m_camera.PlanarRight * m_moveInput.x + m_camera.PlanarForward * m_moveInput.y).normalized;
+            Vector3 _moveInput3D = (m_cameraMotor.PlanarRight * m_moveInput.x + m_cameraMotor.PlanarForward * m_moveInput.y).normalized;
 
             foreach (RaycastHit _hit in m_raycastHits)
             {
@@ -555,7 +586,7 @@ public class NewCharacterMotor : MonoBehaviour
 			StopCoroutine(m_craftCoroutine);
 			m_craftCoroutine = null;
 			
-			// if (_backpack != null) _backpack.EndCrafting();
+			if (m_backpack != null) m_backpack.EndCrafting();
 		}
 	}
 
@@ -596,7 +627,7 @@ public class NewCharacterMotor : MonoBehaviour
 			m_handSocket.transform
 		);
 
-		// _backpack.EndCrafting();
+		m_backpack.EndCrafting();
 		m_craftCoroutine = null;
 	}
 
@@ -618,7 +649,7 @@ public class NewCharacterMotor : MonoBehaviour
 		else
 		{
 			// Assert: object can't be thrown
-			if (!m_handObject.Throw(m_camera.transform)) return;
+			if (!m_handObject.Throw(m_cameraMotor.transform)) return;
 
 			// Exception: rope attachment
 			m_rope = m_handObject as Rope;
@@ -643,6 +674,135 @@ public class NewCharacterMotor : MonoBehaviour
 		to = from;
 		to.transform.rotation = socket.transform.rotation;
 		from = toCache;
+	}
+
+	#endregion
+
+	#region INTERACTION
+
+	private void Interact()
+	{
+		// Assertion
+		if (m_interactables.Count == 0 || m_currentState != BehaviorState.LOCOMOTION) return;
+
+		GetNearestInteractable()?.InteractionTrigger();
+	}
+
+	private void Recycle()
+	{
+		// Assertion
+		if (m_interactables.Count == 0 || m_currentState != BehaviorState.LOCOMOTION) return;
+
+		Interactable interactable = GetNearestInteractable();
+
+		// Assert: interactable isn't valid
+		if (!interactable || !interactable.IsRecyclable) return;
+
+		Remove(interactable, doRecycle: true);
+	}
+
+	/// <summary>
+	/// 	Add the given interactable into the interactable list.
+	/// </summary>
+	public void Add(Interactable interactable)
+	{
+		m_interactables.Add(interactable);
+	}
+
+	/// <summary>
+	/// 	Remove the given interactable from the interactable list.
+	/// 	The character will no longer be able to interact with it.
+	/// </summary>
+	public void Remove(Interactable interactable, bool doRecycle = false)
+	{
+		interactable.IsValid = false;
+		m_interactables.Remove(interactable);
+
+		CheckShowInteract();
+		CheckShowRecycle(false);
+
+		if (doRecycle) interactable.Recycle();
+	}
+
+	/// <summary>
+	/// 	Return the nearest interactable in front of the character.
+	/// </summary>
+	private Interactable GetNearestInteractable()
+	{
+		// - Get interactable in front of the character -
+		var counter = 0;
+		foreach (var interactable in m_interactables)
+		{
+			// Assertion
+			if (!interactable) continue;
+
+			Vector3 towardsInteract = interactable.transform.position - transform.position;
+
+			interactable.IsValid = Vector3.Dot(
+				new Vector3(m_characterGraphics.transform.forward.x, 0, m_characterGraphics.transform.forward.z).normalized,
+				new Vector3(towardsInteract.x, 0, towardsInteract.z).normalized
+			) > 0.5f;
+			
+			if (interactable.IsValid) counter++;
+		}
+
+		// Assert: there is no interactable in front of the character.
+		if (counter == 0) return null;
+
+		// - Get the nearest interactable object from the character -
+		var nearest = m_interactables.FirstOrDefault(i => i.IsValid);
+		foreach (var valid in m_interactables.Where(i => i.IsValid))
+		{
+			if ((valid.transform.position - transform.position).sqrMagnitude <
+				(nearest.transform.position - transform.position).sqrMagnitude)
+			{
+				nearest = valid;
+			}
+		}
+		return nearest;
+	}
+
+	private void CheckShowInteract()
+	{
+		m_rseCanInteract.Call(
+			m_interactables.Count(i => i.IsValid) > 0
+			&& m_currentState == BehaviorState.LOCOMOTION
+		);
+	}
+
+	private void CheckShowRecycle(bool isRecyclable)
+	{
+		m_rseCanRecycle.Call(
+			isRecyclable
+			&& m_currentState == BehaviorState.LOCOMOTION
+		);
+	}
+
+	#endregion
+
+	#region BACKPACK
+
+	private void GetBackpackDebug()
+	{
+		// Assertion
+		if (m_characterConfig.startWithBag) return;
+
+		m_backpack = FindAnyObjectByType<Backpack>();
+		if (m_backpack == null) m_backpack = Instantiate(m_characterConfig.pfBackpack);
+		m_backpack.ForceSetupBackpack(this);
+	}
+
+	public void Pickup(Backpack backpack)
+	{
+		m_backpack = backpack;
+		m_hasBackpack = true;
+
+		ToggleCraftInput(m_hasBackpack);
+		m_backpack.transform.SetParent(m_backpackAnchor.transform, false);
+		m_backpack.transform.localPosition = Vector3.zero;
+		m_backpack.transform.localRotation = Quaternion.identity;
+		m_backpack.transform.localScale = Vector3.one;
+		Remove(m_backpack);
 	}
 
 	#endregion

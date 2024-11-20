@@ -5,17 +5,17 @@ public class GameManager : MonoBehaviour
 {
 	[Header("Tweakable values")]
 	[Required("A Game Start must be assigned to start the game. If there is no in the scene, you can find the prefab here: Content/Prefabs/LevelDesign")]
-	[SerializeField] private GameStart _gameStart;
+	[SerializeField] private GameStart m_gameStart;
 
 	[Header("Scriptables references")]
-	[SerializeField] private RSO_PlayerDeath _rsoPlayerDeath;
-	[SerializeField] private RSO_GamePaused _rsoGamePaused;
+	[SerializeField] private RSO_CharacterDeath m_rsoCharacterDeath;
+	[SerializeField] private RSO_GamePaused m_rsoGamePaused;
 
 	private void Start()
 	{
 		Restart();
 		Cursor.lockState = CursorLockMode.Locked;
-		_rsoGamePaused.value = false;
+		m_rsoGamePaused.value = false;
     }
 
 	/// <summary>
@@ -24,7 +24,7 @@ public class GameManager : MonoBehaviour
 	/// </summary>
 	private void Restart()
 	{
-		_gameStart.SpawnCharacter();
+		m_gameStart.SpawnCharacter();
 	}
 
 	/// <summary>
@@ -38,18 +38,18 @@ public class GameManager : MonoBehaviour
 
 	private void HandleDeath()
 	{
-		if (!_rsoPlayerDeath.value) return;
+		if (!m_rsoCharacterDeath.value) return;
 
         Restart();
 	}
 
 	private void OnEnable()
 	{
-		_rsoPlayerDeath.OnChanged += HandleDeath;
+		m_rsoCharacterDeath.OnChanged += HandleDeath;
 	}
 
 	private void OnDisable()
 	{
-		_rsoPlayerDeath.OnChanged -= HandleDeath;
+		m_rsoCharacterDeath.OnChanged -= HandleDeath;
 	}
 }

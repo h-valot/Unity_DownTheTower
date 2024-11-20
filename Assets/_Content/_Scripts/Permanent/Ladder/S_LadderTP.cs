@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class LadderTP : Interactible
+public class LadderTP : Interactable
 {
 	[Header("Scriptable references")]
 	[SerializeField] private RSE_SetCharacterPosition _rseSetCharacterPosition;
