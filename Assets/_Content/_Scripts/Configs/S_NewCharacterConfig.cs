@@ -41,7 +41,7 @@ public class NewCharacterConfig : ScriptableObject
     [Tooltip("Force used to make player jump")]
     public float jumpForce;
     [Tooltip("While falling, factor applied to the force used to make player move")]
-    public float fallingForceFactor;
+    public float fallingControlFactor;
 
 
     [Header("Ground")]

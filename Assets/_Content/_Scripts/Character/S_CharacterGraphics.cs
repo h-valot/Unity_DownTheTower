@@ -13,12 +13,14 @@ public class CharacterGraphics : MonoBehaviour
 
 	private const float k_MinimumThreshold = 0.1f;
 
-	public void Initialize(Transform aimingLookAt, Rigidbody rigidbody)
+	public void Initialize(Transform aimingLookAt, Rigidbody rigidbody, Quaternion startRotation)
 	{
 		m_aimingLookAt = aimingLookAt;
 		m_rigidbody = rigidbody;
 		m_isInitialized = true;
-	}
+
+		transform.localRotation = startRotation;
+    }
 
 	private void LateUpdate()
     {

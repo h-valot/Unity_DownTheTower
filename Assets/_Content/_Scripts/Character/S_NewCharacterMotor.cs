@@ -78,23 +78,22 @@ public class NewCharacterMotor : MonoBehaviour
 
 	#region MONOBEHAVIOR
 
-	private void Awake()
+    public void Initialize(Quaternion startRotation)
     {
         // Update drag in rigidbody if changed in characterConfig
         m_characterConfig.OnConfigChanged += UpdateDrag;
         // Layer mask to remove character for cast, use ~_layerMaskToIgnore
         m_layerMaskToIgnore |= 1 << LayerMask.NameToLayer("Character");
 
-		CheckGround();
-        DetermineState();
+        m_rigidbody.position = Vector3.zero;
 
-		m_cameraMotor = Instantiate(m_characterConfig.pfCamera, transform.position, Quaternion.identity, null).GetComponentInChildren<CameraMotor>();
-		m_cameraMotor.Initialize(m_aimingLookTo, m_cameraTarget);
+        m_cameraMotor = Instantiate(m_characterConfig.pfCamera, transform.position, Quaternion.identity, null).GetComponentInChildren<CameraMotor>();
+        m_cameraMotor.Initialize(m_aimingLookTo, m_cameraTarget, startRotation);
 
-		m_characterGraphics.Initialize(m_aimingLookTo, m_rigidbody);
+        m_characterGraphics.Initialize(m_aimingLookTo, m_rigidbody, startRotation);
 
-		GetBackpackDebug();
-	}
+        GetBackpackDebug();
+    }
 
     private void OnEnable()
     {
@@ -111,6 +110,12 @@ public class NewCharacterMotor : MonoBehaviour
 
     private void FixedUpdate()
 	{
+        //tkt fréro c'est pour pas soft lock le spherecast de detection du sol
+        if (m_rigidbody.position == Vector3.zero)
+        {
+            m_rigidbody.position = new Vector3(0.01f, 0f, 0f);
+        }
+
 		CheckGround();
         DetermineState();
         FixedUpdateState();
@@ -542,7 +547,7 @@ public class NewCharacterMotor : MonoBehaviour
         }
 
         //apply final force to move character, auto clamp the speed by substractiong actual speed to desired speed
-        m_rigidbody.AddForce((desiredSpeedForce - m_rigidbody.velocity) * m_characterConfig.fallingForceFactor, ForceMode.Acceleration);
+        m_rigidbody.AddForce((desiredSpeedForce - m_rigidbody.velocity) * m_characterConfig.fallingControlFactor, ForceMode.Acceleration);
     }
 
     #endregion

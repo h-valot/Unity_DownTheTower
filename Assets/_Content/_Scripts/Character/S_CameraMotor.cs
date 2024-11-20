@@ -45,7 +45,7 @@ public class CameraMotor : MonoBehaviour
 		m_rsoCharacterDeath.OnChanged -= HandleDeath;
 	}
 
-	public void Initialize(Transform aimingLookAt, Transform cameraTarget)
+	public void Initialize(Transform aimingLookAt, Transform cameraTarget, Quaternion startRotation)
 	{
 		m_cameraTarget = cameraTarget;
 		m_aimingCamera.Follow = cameraTarget;
@@ -57,7 +57,8 @@ public class CameraMotor : MonoBehaviour
 		PlanarRight = new Vector3(transform.right.x, 0, transform.right.z);
 
 		m_rsoCameraStyle.value = m_characterConfig.startingStyle;
-		m_cinemachineTargetYaw = m_cameraTarget.rotation.eulerAngles.y;
+		m_cinemachineTargetYaw = startRotation.eulerAngles.y;
+		HandleRotation();
 	}
 
 	private void HandleRotation()
