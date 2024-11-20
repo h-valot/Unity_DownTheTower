@@ -1,5 +1,8 @@
 using System.Collections;
 using UnityEngine;
+using Unity.Mathematics;
+using Unity.VisualScripting;
+using DG.Tweening;
 
 public class NewCharacterMotor : MonoBehaviour
 {
@@ -47,7 +50,6 @@ public class NewCharacterMotor : MonoBehaviour
     private Vector3 m_groundNormal;
     private bool m_isRunning;
     private bool m_hasRope;
-    private bool m_hasJump;
     private bool m_isCrafting;
 
     // - State machine -
@@ -74,19 +76,23 @@ public class NewCharacterMotor : MonoBehaviour
         // Layer mask to remove character for cast, use ~_layerMaskToIgnore
         m_layerMaskToIgnore |= 1 << LayerMask.NameToLayer("Character");
 
-		CheckGround();
-        DetermineState();
-
 		m_camera = Instantiate(m_characterConfig.pfCamera, transform.position, Quaternion.identity, null).GetComponentInChildren<CameraMotor>();
 		m_camera.Initialize(m_aimingLookTo, m_cameraTarget);
 
 		m_graphics.Initialize(m_aimingLookTo);
 	}
 
-    private void OnDestroy()
+    private void OnEnable()
+    {
+        CheckGround();
+        DetermineState();
+    }
+
+    private void OnDisable()
     {
         UnsubscibeAllInputs();
         m_characterConfig.OnConfigChanged -= UpdateDrag;
+        m_currentState = BehaviorState.NONE;
     }
 
     void FixedUpdate()
@@ -368,6 +374,9 @@ public class NewCharacterMotor : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Update drag based on behavior state to allow the player to fall faster
+    /// </summary>
     private void UpdateDrag()
     {
         if (m_currentState == BehaviorState.LOCOMOTION)
@@ -410,40 +419,67 @@ public class NewCharacterMotor : MonoBehaviour
         }
     }
 
-    private void Jump(bool input)
-    {
-        m_rigidbody.AddForce(Vector3.up * m_characterConfig.jumpForce, ForceMode.Impulse);
-    }
-
+    /// <summary>
+    /// (1) Check if there is valid points to step on
+    /// (2) Select the highest point among the point in front the character
+    /// (3) On the selected point, check if there is really a object to step on if front
+    /// (4) Check if there there is a flat surface to step onto (<45°)
+    /// </summary>
     private void HandleStepOn()
     {
-        if(m_raycastHits.Length > 1 && m_moveInput != Vector2.zero)
+        if (m_raycastHits.Length > 1 && m_moveInput != Vector2.zero)
         {
-            Vector3 _stepOnHeightTarget = transform.position;
-            Vector3 _moveInput3D = (m_camera.PlanarRight * m_moveInput.x + m_camera.PlanarForward * m_moveInput.y).normalized;
+            Vector3 stepOnTarget = transform.position;
+            Vector3 moveInput3D = (m_camera.PlanarRight * m_moveInput.x + m_camera.PlanarForward * m_moveInput.y).normalized;
 
             foreach (RaycastHit _hit in m_raycastHits)
             {
-                Vector3 _hitDirection = _hit.point - transform.position;
-                _hitDirection = new Vector3(_hitDirection.x, 0, _hitDirection.z);
+                Vector3 hitDirection = _hit.point - transform.position;
+                hitDirection = new Vector3(hitDirection.x, 0, hitDirection.z);
 
                 //check if hit is in front of character
-                if (Vector3.Dot(_moveInput3D,_hitDirection) > 0.1)
+                if (Vector3.Dot(moveInput3D,hitDirection) > 0.15)
                 {
-                    if (_hit.point.y - transform.position.y < m_characterConfig.StepOnHeight)
+                    if (_hit.point.y - transform.position.y < m_characterConfig.stepOnHeight)
                     {
-                        if (_hit.point.y > _stepOnHeightTarget.y)
+                        //We take the highest that is higher than skin width to not trigger step on very small objects
+                        if (_hit.point.y > stepOnTarget.y && _hit.point.y > transform.position.y + m_characterConfig.skinWidth)
                         {
-                            _stepOnHeightTarget = _hit.point;
+                            stepOnTarget = _hit.point;
                         }
                     }
                 }
             }
 
-            if(_stepOnHeightTarget != transform.position)
+            if(stepOnTarget != transform.position)
             {
-                m_rigidbody.position = _stepOnHeightTarget;
+                //Check if there is really an object to step on in the speed direction, to prevent steping on end of slope
+                Vector3 start = new Vector3(m_rigidbody.position.x, m_rigidbody.position.y + m_characterConfig.skinWidth, m_rigidbody.position.z);
+                Vector3 direction = m_rigidbody.velocity.normalized;
+                float distance = m_collider.radius * 2;
+                if (Physics.Raycast(start, direction, distance, ~m_layerMaskToIgnore))
+                {
+                    //Check if there is a flat surface to step on (<45°)
+                    start = stepOnTarget + (new Vector3(stepOnTarget.x, 0, stepOnTarget.z) - new Vector3(m_rigidbody.position.x, 0, m_rigidbody.position.z)).normalized * m_characterConfig.skinWidth + new Vector3(0, m_characterConfig.skinWidth, 0);
+                    direction = Vector3.down;
+                    distance = m_characterConfig.skinWidth * 2;
+                    if (Physics.Raycast(start, direction, distance, ~m_layerMaskToIgnore))
+                    {
+                        m_rigidbody.position = new Vector3(m_rigidbody.position.x, stepOnTarget.y, m_rigidbody.position.z);
+                    }
+                }
             }
+        }
+    }
+
+    /// <summary>
+    /// If the input is pressed add a vertical impulse to the player
+    /// </summary>
+    private void Jump(bool isPressed)
+    {
+        if (isPressed)
+        {
+            m_rigidbody.AddForce(Vector3.up * m_characterConfig.jumpForce, ForceMode.Impulse);
         }
     }
 

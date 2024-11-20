@@ -46,5 +46,5 @@ public class NewCharacterConfig : ScriptableObject
     public float skinWidth;
 
     [Tooltip("Height that the character will automaticly step on")]
-    public float StepOnHeight;
+    public float stepOnHeight;
 }
