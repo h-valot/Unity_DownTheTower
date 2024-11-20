@@ -26,7 +26,7 @@ public class OldCharacterMotor : MonoBehaviour
 	[Foldout("Scriptable references")] [SerializeField] private TorchConfig m_torchConfig;
 	[Foldout("Scriptable references")] [SerializeField] private RSO_CharacterForward m_rsoCharacterForward;
 	[Foldout("Scriptable references")] [SerializeField] private RSO_CharacterPosition m_rsoCharacterPosition;
-	[Foldout("Scriptable references")] [SerializeField] private RSO_PlayerDeath m_rsoPlayerDeath;
+	[Foldout("Scriptable references")] [SerializeField] private RSO_CharacterDeath m_rsoPlayerDeath;
 	[Foldout("Scriptable references")] [SerializeField] private RSO_CharacterState m_rsoCharacterState;
 	[Foldout("Scriptable references")] [SerializeField] private RSO_GamePaused m_rsoGamePaused;
 	[Foldout("Scriptable references")] [SerializeField] private RSE_Run m_rseRun;
@@ -108,8 +108,8 @@ public class OldCharacterMotor : MonoBehaviour
 	private float m_fallHeight;
 
 	// - interact -
-	private List<Interactible> m_interactables;
-	private List<Interactible> m_validInteractibles;
+	private List<Interactable> m_interactables;
+	private List<Interactable> m_validInteractibles;
 
 	// - throw -
 	public bool Aiming { get; private set; }
@@ -135,8 +135,8 @@ public class OldCharacterMotor : MonoBehaviour
 	private void Start()
     {
         // creation of the interaction list
-        m_interactables = new List<Interactible>();
-        m_validInteractibles = new List<Interactible>();
+        m_interactables = new List<Interactable>();
+        m_validInteractibles = new List<Interactable>();
 
 		m_raycastLayerMask |= (1 << LayerMask.NameToLayer("Default"));
 		m_raycastLayerMask |= (1 << LayerMask.NameToLayer("Collision_NoRaycast"));
@@ -150,7 +150,7 @@ public class OldCharacterMotor : MonoBehaviour
             {
                 Backpack = Instantiate(m_PF_backpack, new Vector3(0, 0, 0), Quaternion.identity).GetComponent<Backpack>(); 
             }
-            Backpack.ForceSetupBackpack(this);
+            // Backpack.ForceSetupBackpack(this);
         }
 
         IsJumpProlonged = Triome.FALSE;
@@ -1165,9 +1165,9 @@ public class OldCharacterMotor : MonoBehaviour
 	{
 		if (m_interactables.Count > 0)
 		{
-			Interactible nearest = GetNearestInteractible();
+			Interactable nearest = GetNearestInteractible();
 			CheckShowInteract();
-			if (nearest != null) CheckShowRecycle(nearest.isRecyclable);
+			if (nearest != null) CheckShowRecycle(nearest.IsRecyclable);
 			else CheckShowRecycle(false);
 		}
 
@@ -2105,7 +2105,7 @@ public class OldCharacterMotor : MonoBehaviour
 		// Assertion
 		if (m_interactables.Count == 0 || _currentState != AnimationState.LOCOMOTION) return;
 
-		Interactible nearest = GetNearestInteractible();
+		Interactable nearest = GetNearestInteractible();
 		if (nearest != null) nearest.InteractionTrigger();
     }
 
@@ -2114,23 +2114,20 @@ public class OldCharacterMotor : MonoBehaviour
 		// Assertion
         if (m_interactables.Count == 0 || _currentState != AnimationState.LOCOMOTION) return;
 
-        Interactible interactible = GetNearestInteractible();
+        Interactable interactible = GetNearestInteractible();
 
 		// Assertion
         if (interactible == null) return;
+        if (!interactible.IsRecyclable) return;
 
-        if (interactible.isRecyclable
-        && interactible.objectToRecycle != null)
-        {
-            m_interactables.Remove(interactible);
-            m_validInteractibles.Remove(interactible);
-            Destroy(interactible.objectToRecycle);
-            CheckShowInteract();
-            CheckShowRecycle(false);
-        }
+		m_interactables.Remove(interactible);
+		m_validInteractibles.Remove(interactible);
+		CheckShowInteract();
+		CheckShowRecycle(false);
+		interactible.Recycle();
     }
 
-    private Interactible GetNearestInteractible()
+    private Interactable GetNearestInteractible()
 	{
 		m_validInteractibles = FilterInteractiblesByAngle();
 		if (m_validInteractibles.Count == 0) return null;
@@ -2138,9 +2135,9 @@ public class OldCharacterMotor : MonoBehaviour
 		return FilterInteractiblesByDistance();
     }
 
-	private List<Interactible> FilterInteractiblesByAngle()
+	private List<Interactable> FilterInteractiblesByAngle()
 	{
-		List<Interactible> validInteractibles = new List<Interactible>();
+		List<Interactable> validInteractibles = new List<Interactable>();
 
         for (int i = 0; i < m_interactables.Count; i++)
         {
@@ -2161,9 +2158,9 @@ public class OldCharacterMotor : MonoBehaviour
 		return validInteractibles;
     }
 
-	private Interactible FilterInteractiblesByDistance()
+	private Interactable FilterInteractiblesByDistance()
 	{
-		Interactible nearestInteractible = m_validInteractibles[0];
+		Interactable nearestInteractible = m_validInteractibles[0];
 
         for (int i = 1; i < m_validInteractibles.Count; i++)
         {
@@ -2177,12 +2174,12 @@ public class OldCharacterMotor : MonoBehaviour
 		return nearestInteractible;
     }
 
-    public void AddToInteractList(Interactible _interactibleObject)
+    public void AddToInteractList(Interactable _interactibleObject)
     {
         m_interactables.Add(_interactibleObject);
     }
 
-    public void RemoveFromInteractList(Interactible _interactibleObject)
+    public void RemoveFromInteractList(Interactable _interactibleObject)
     {
         m_interactables.Remove(_interactibleObject);
 		m_validInteractibles.Remove(_interactibleObject);

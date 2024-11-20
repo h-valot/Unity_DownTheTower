@@ -21,7 +21,7 @@ public class Rope : Permanent
 	[HideInInspector] public List<Vector3> folds = new List<Vector3>();
 
 	private List<RopeLine> _ropeLines = new List<RopeLine>();
-	private List<Interactible> _interactibles = new List<Interactible>();
+	private List<Interactable> _interactibles = new List<Interactable>();
 	private Transform _characterHarness;
 
 	#region default functions
@@ -195,7 +195,7 @@ public class Rope : Permanent
 		{
 			if (_interactibles.Count - 1 < i) 
 			{
-				Interactible newInteractible = Instantiate(_ropeConfig.pfRopeInteractible, folds[i], Quaternion.identity, transform);
+				Interactable newInteractible = Instantiate(_ropeConfig.pfRopeInteractible, folds[i], Quaternion.identity, transform);
 				newInteractible.OnInteracted += Teleport;
 				_interactibles.Add(newInteractible);
 				continue;

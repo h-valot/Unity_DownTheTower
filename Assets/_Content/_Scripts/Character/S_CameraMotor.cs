@@ -11,10 +11,8 @@ public class CameraMotor : MonoBehaviour
 	[SerializeField] private OldCharacterConfig m_characterConfig;
 	[Space(5)]
 	[SerializeField] private RSE_Look m_rseLook;
-	[SerializeField] private RSE_Move m_rseMove;
 	[Space(5)]
-	[SerializeField] private RSO_ControlScheme m_rsoControlScheme;
-	[SerializeField] private RSO_PlayerDeath m_rsoPlayerDeath;
+	[SerializeField] private RSO_CharacterDeath m_rsoCharacterDeath;
 	[SerializeField] private RSO_CameraStyle m_rsoCameraStyle;
 
 	// - Private variables -
@@ -37,14 +35,14 @@ public class CameraMotor : MonoBehaviour
 	{
 		m_rseLook.action += UpdateLookInput;
 		m_rsoCameraStyle.OnChanged += SwitchStyle;
-		m_rsoPlayerDeath.OnChanged += HandleDeath;
+		m_rsoCharacterDeath.OnChanged += HandleDeath;
 	}
 
 	private void OnDisable()
 	{
 		m_rseLook.action -= UpdateLookInput;
 		m_rsoCameraStyle.OnChanged -= SwitchStyle;
-		m_rsoPlayerDeath.OnChanged -= HandleDeath;
+		m_rsoCharacterDeath.OnChanged -= HandleDeath;
 	}
 
 	public void Initialize(Transform aimingLookAt, Transform cameraTarget)
@@ -69,7 +67,7 @@ public class CameraMotor : MonoBehaviour
 		m_cinemachineTargetPitch = Matha.ClampAngle(m_cinemachineTargetPitch, m_characterConfig.bottomClamp, m_characterConfig.topClamp);
 
 		// Stops the camera if the character is dead
-		if (m_rsoPlayerDeath.value) return;
+		if (m_rsoCharacterDeath.value) return;
 
 		// Cinemachine will follow this target
 		m_cameraTarget.rotation = Quaternion.Euler(m_cinemachineTargetPitch, m_cinemachineTargetYaw, 0.0f);
@@ -102,7 +100,7 @@ public class CameraMotor : MonoBehaviour
 
 	private void HandleDeath()
 	{
-		if (!m_rsoPlayerDeath.value) return;
+		if (!m_rsoCharacterDeath.value) return;
 
 		// Set parent as scene root 
 		m_cameraTarget.transform.parent = null;

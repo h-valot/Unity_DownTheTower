@@ -66,9 +66,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fb279576b33499e49ad4ce12b53e105c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isRecyclable: 1
-  objectToRecycle: {fileID: 7852830467894126418}
-  displayGizmos: 0
+  m_isRecyclable: 0
+  m_objectToRecycle: {fileID: 0}
+  m_displayGizmos: 0
 --- !u!1 &1405004917174353549
 GameObject:
   m_ObjectHideFlags: 0
@@ -135,9 +135,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8eb9daa02bad9de418962b4b2005e291, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isRecyclable: 1
-  objectToRecycle: {fileID: 7852830467894126418}
-  displayGizmos: 0
+  m_isRecyclable: 0
+  m_objectToRecycle: {fileID: 0}
+  m_displayGizmos: 0
   _rseSetCharacterPosition: {fileID: 11400000, guid: 9f7fa66ba769124408276a00ed758ed6,
     type: 2}
   _teleportTo: {x: 0, y: 0, z: 0}
@@ -312,9 +312,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8eb9daa02bad9de418962b4b2005e291, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isRecyclable: 1
-  objectToRecycle: {fileID: 7852830467894126418}
-  displayGizmos: 0
+  m_isRecyclable: 0
+  m_objectToRecycle: {fileID: 0}
+  m_displayGizmos: 0
   _rseSetCharacterPosition: {fileID: 11400000, guid: 9f7fa66ba769124408276a00ed758ed6,
     type: 2}
   _teleportTo: {x: 0, y: 0, z: 0}
@@ -482,7 +482,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d53bdc7d1085db641a4abb2974ae6bc7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _craftType: 2
+  Type: 2
   _ladderMesh: {fileID: 1809890234750479058}
   _previewLadder: {fileID: 5666288028482100349}
   _previewLadderRenderer: {fileID: 3086255435021717960}

@@ -3,24 +3,21 @@ using UnityEngine;
 public class GameStart : MonoBehaviour
 {
 	[Header("Tweakable values")]
-	[SerializeField] private GameObject _pfPlayer;
+	[SerializeField] private GameObject m_pfCharacter;
 
 	[Header("Scriptable references")]
-	[SerializeField] private RSO_PlayerDeath _rsoPlayerDeath;
+	[SerializeField] private RSO_CharacterDeath m_rsoCharacterDeath;
 
-	[Header("External references")]
-	[SerializeField] private Transform _levelDesigneSpan;
-
-	private GameObject _currentCharacter;
+	private GameObject m_currentCharacter;
 
 	/// <summary>
 	/// 	Destroy the former character if exists.
 	/// </summary>
 	public void RemoveFormerCharacter()
 	{
-		if (_currentCharacter is null) return;
+		if (!m_currentCharacter) return;
 
-		Destroy(_currentCharacter);
+		Destroy(m_currentCharacter);
 	}
 
 	public void SpawnCharacter()
@@ -28,10 +25,10 @@ public class GameStart : MonoBehaviour
 		RemoveFormerCharacter();
 
 		// Reset player related rso values
-		_rsoPlayerDeath.value = false;
+		m_rsoCharacterDeath.value = false;
 
 		// Instantiate the prefab of the player
-		_currentCharacter = Instantiate(_pfPlayer, transform.position, transform.rotation, _levelDesigneSpan);
+		m_currentCharacter = Instantiate(m_pfCharacter, transform.position, transform.rotation, null);
 
 		Debug.Log($"GAME_START: Player instantiated.");
 	}

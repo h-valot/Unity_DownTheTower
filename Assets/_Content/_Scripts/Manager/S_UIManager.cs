@@ -4,32 +4,33 @@ using UnityEngine.UI;
 
 public class UIManager : MonoBehaviour
 {
-    [Header("Internal References")]
-    [SerializeField] private GameObject _pausePanel;
-    [SerializeField] private Image _deathPanelIMG;
+    [Header("Internal references")]
+    [SerializeField] private GameObject m_pausePanel;
+    [SerializeField] private Image m_imgDeathPanel;
 
-    [Header("External References")]
-    [SerializeField] private RSE_Pause _rsePause;
-    [SerializeField] private RSE_ToggleInputs _rseToggleInputs;
-    [SerializeField] private RSO_GamePaused _rsoGamePaused;
-    [SerializeField] private RSO_PlayerDeath _rsoPlayerDeath;
+    [Header("Scriptable references")]
+    [SerializeField] private RSE_Pause m_rsePause;
+    [SerializeField] private RSE_ToggleInputs m_rseToggleInputs;
+	[Space(5)]
+    [SerializeField] private RSO_GamePaused m_rsoGamePaused;
+    [SerializeField] private RSO_CharacterDeath m_rsoCharacterDeath;
 
     private void OnEnable()
     {
-        _rsePause.action += TogglePause;
-        _rsoPlayerDeath.OnChanged += DeathFade;
+        m_rsePause.action += TogglePause;
+        m_rsoCharacterDeath.OnChanged += DeathFade;
     }
 
     private void OnDisable()
     {
-        _rsePause.action -= TogglePause;
-        _rsoPlayerDeath.OnChanged -= DeathFade;
+        m_rsePause.action -= TogglePause;
+        m_rsoCharacterDeath.OnChanged -= DeathFade;
     }
 
     private void TogglePause()
     {
-        _rsoGamePaused.value = !_rsoGamePaused.value;
-        if (_rsoGamePaused.value)
+        m_rsoGamePaused.value = !m_rsoGamePaused.value;
+        if (m_rsoGamePaused.value)
         {
             Time.timeScale = 0f;
         }
@@ -37,24 +38,24 @@ public class UIManager : MonoBehaviour
         {
             Time.timeScale = 1f;
         }
-        _rseToggleInputs.Call();
-        _pausePanel.SetActive(_rsoGamePaused.value);
+        m_rseToggleInputs.Call();
+        m_pausePanel.SetActive(m_rsoGamePaused.value);
     }
 
     private void DeathFade()
     {
-        if (!_rsoPlayerDeath.value) return;
+        if (!m_rsoCharacterDeath.value) return;
 
-        _deathPanelIMG.gameObject.SetActive(true);
+        m_imgDeathPanel.gameObject.SetActive(true);
 
-        DOTweenModuleUI.DOFade(_deathPanelIMG, 0, 5)
+        DOTweenModuleUI.DOFade(m_imgDeathPanel, 0, 5)
                        .SetEase(Ease.InExpo)
                        .OnComplete(ResetDeathFade);
     }
 
     private void ResetDeathFade()
     {
-        _deathPanelIMG.gameObject.SetActive(false);
-        _deathPanelIMG.color = Color.black;
+        m_imgDeathPanel.gameObject.SetActive(false);
+        m_imgDeathPanel.color = Color.black;
     }
 }

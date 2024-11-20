@@ -113,19 +113,13 @@ public class InputManager : MonoBehaviour
     {
 		if (value.Get<float>() >= 0.05f)
 		{
-			if (!_throw)
-			{
-                _throw = true;
-                _rseThrow.Call(_throw);
-            }
+			_throw = !_throw;
+			_rseThrow.Call(_throw);
 		}
 		else
 		{
-            if (_throw)
-            {
-                _throw = false;
-                _rseThrow.Call(_throw);
-            }
+			_throw = !_throw;
+			_rseThrow.Call(_throw);
         }
 	}
 
@@ -134,7 +128,7 @@ public class InputManager : MonoBehaviour
 		_rseToggleInHand.Call();
 	}
 
-	public void OnInteract()
+	public void OnInteract(InputValue value)
 	{
 		_rseInteract.Call();
 	}
@@ -159,7 +153,7 @@ public class InputManager : MonoBehaviour
         _rseCraft.Call(CraftType.ROPE, value.isPressed);
 	}
 
-    public void OnRecycle()
+    public void OnRecycle(InputValue value)
     {
         _rseRecycle.Call();
     }

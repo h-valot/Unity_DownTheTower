@@ -1,84 +1,84 @@
 using DG.Tweening;
 using UnityEngine;
 
-public class Backpack : Interactible
+public class Backpack : Interactable
 {
     [Header("Internal Variables")]
-    [SerializeField] private MeshRenderer _mesh;
-    [SerializeField] private SphereCollider _sphereCollider;
-
-    [Header("External Variables")]
-    [SerializeField] private RSO_PlayerDeath _rsoPlayerDeath;
+    [SerializeField] private MeshRenderer m_mesh;
+    [SerializeField] private SphereCollider m_sphereCollider;
 
     [Header("Scriptable references")]
-    [SerializeField] private OldCharacterConfig _characterConfig;
+    [SerializeField] private NewCharacterConfig m_characterConfig;
+	[Space(5)]
+	[SerializeField] private RSO_CharacterDeath m_rsoCharacterDeath;
 
-    // PRIVATE VARIABLES
-    private OldCharacterMotor _character;
-    private bool _isPickedUp = false;
-    private Vector3 _startPosition;
-    private Vector3 _startRotation;
-    private Vector3 _startScale;
+	private NewCharacterMotor m_character;
+    private bool m_isPickedUp = false;
+    private Vector3 m_startPosition;
+    private Vector3 m_startRotation;
+    private Vector3 m_startScale;
 
     private void Awake()
     {
-        _startPosition = transform.position;
-        _startRotation = transform.eulerAngles;
-        _startScale = transform.localScale;
-        _mesh.material.SetFloat("_craftingPercent", 1f);
+        m_startPosition = transform.position;
+        m_startRotation = transform.eulerAngles;
+        m_startScale = transform.localScale;
+        m_mesh.material.SetFloat("_craftingPercent", 1f);
     }
 
     private void OnEnable()
     {
-        _rsoPlayerDeath.OnChanged += ResetBackpack;
+        m_rsoCharacterDeath.OnChanged += ResetBackpack;
     }
 
     private void OnDisable()
     {
-        _rsoPlayerDeath.OnChanged -= ResetBackpack;
+        m_rsoCharacterDeath.OnChanged -= ResetBackpack;
     }
 
     public override void OnTriggerEnter(Collider other)
     {
-        if (other.TryGetComponent<OldCharacterMotor>(out _character) && !_isPickedUp)
+        if (other.TryGetComponent(out m_character) 
+		&& !m_isPickedUp)
         {
-            _character.AddToInteractList(this);
+            m_character.Add(interactable: this);
         }
     }
 
     public override void InteractionTrigger()
     {
-        _isPickedUp = true;
-        _character.PickupBackpack(true, this);
-        _sphereCollider.enabled = false;
+        m_isPickedUp = true;
+        m_character.Pickup(this);
+        m_sphereCollider.enabled = false;
     }
 
     private void ResetBackpack()
     {
-        if (!_rsoPlayerDeath.value)
-        {
-            transform.position = _startPosition;
-            transform.rotation = Quaternion.Euler(_startRotation);
-            transform.localScale = _startScale;
-            _isPickedUp = false;
-            _sphereCollider.enabled = true;
-        }
+        if (m_rsoCharacterDeath.value) return;
+
+		transform.position = m_startPosition;
+		transform.rotation = Quaternion.Euler(m_startRotation);
+		transform.localScale = m_startScale;
+		m_isPickedUp = false;
+		m_sphereCollider.enabled = true;
     }
 
-    public void ForceSetupBackpack(OldCharacterMotor _tmpCharacter)
-    {
-        _character = _tmpCharacter;
-        InteractionTrigger();
-    }
+	public void ForceSetupBackpack(NewCharacterMotor character)
+	{
+		m_character = character;
+		InteractionTrigger();
+	}
 
-    public void StartCrafting(float _craftTime)
+	public void StartCrafting(float craftTime)
     {
-        _mesh.material.DOFloat(0f, "_craftingPercent", _craftTime).SetEase(Ease.Linear).SetId(gameObject.GetInstanceID() +"craftingPercent");
+        m_mesh.material.DOFloat(0f, "_craftingPercent", craftTime)
+					   .SetEase(Ease.Linear)
+					   .SetId(gameObject.GetInstanceID() +"craftingPercent");
     }
 
     public void EndCrafting()
     {
         DOTween.Kill(gameObject.GetInstanceID() + "craftingPercent");
-        _mesh.material.SetFloat("_craftingPercent", 1f);
+        m_mesh.material.SetFloat("_craftingPercent", 1f);
     }
 }
