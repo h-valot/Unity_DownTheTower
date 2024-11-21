@@ -42,6 +42,8 @@ public class NewCharacterConfig : ScriptableObject
     public float jumpForce;
     [Tooltip("While falling, factor applied to the force used to make player move")]
     public float fallingControlFactor;
+    [Tooltip("Time after start falling while the player can still jump")]
+    public float CoyoteTime;
 
 
     [Header("Ground")]

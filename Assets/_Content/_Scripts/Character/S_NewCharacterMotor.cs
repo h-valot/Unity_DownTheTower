@@ -49,10 +49,15 @@ public class NewCharacterMotor : MonoBehaviour
 	// - Camera -
 	private CameraMotor m_cameraMotor;
 
-	// - Movement -
+    // - Ground -
 	private bool m_isGrounded;
     private Vector3 m_groundNormal;
+    private float m_coyoteTime;
+
+
+	// - Movement -
     private bool m_isRunning;
+    private bool m_hasJumped;
     private bool m_hasRope;
     private bool m_isCrafting;
 
@@ -178,7 +183,7 @@ public class NewCharacterMotor : MonoBehaviour
 
             case BehaviorState.FALL:
                 m_rseMove.action += UpdateMoveInput;
-				m_rseThrow.action += ToggleAim;
+                m_rseThrow.action += ToggleAim;
 				break;
 
             case BehaviorState.CRAFT:
@@ -377,6 +382,26 @@ public class NewCharacterMotor : MonoBehaviour
         }
     }
 
+    private void StartCoyoteTime()
+    {
+        if (!m_hasJumped)
+        {
+            m_coyoteTime = m_characterConfig.CoyoteTime;
+            m_rseJump.action += Jump;
+        }
+    }
+
+    private void UpdateCoyoteTime()
+    {
+        if (m_hasJumped || m_coyoteTime <= 0)
+        {
+            m_rseJump.action -= Jump;
+            return;
+        }
+
+        m_coyoteTime -= Time.fixedDeltaTime;
+    }
+
     #endregion    
     
     #region MOVEMENT
@@ -516,13 +541,18 @@ public class NewCharacterMotor : MonoBehaviour
     }
 
     /// <summary>
-    /// If the input is pressed add a vertical impulse to the player
+    /// If the input is pressed and If the player hasn't jumped:
+    /// Add a vertical impulse to the player
     /// </summary>
     private void Jump(bool isPressed)
     {
         if (isPressed)
         {
-            m_rigidbody.AddForce(Vector3.up * m_characterConfig.jumpForce, ForceMode.Impulse);
+            if(!m_hasJumped)
+            {
+                m_rigidbody.AddForce(Vector3.up * m_characterConfig.jumpForce, ForceMode.Impulse);
+                m_hasJumped = true;
+            }
         }
     }
 
@@ -578,16 +608,18 @@ public class NewCharacterMotor : MonoBehaviour
     {
         UpdateDrag();
         SetFriction();
+        StartCoyoteTime();
     }
 
     private void FixedUpdateFallState()
     {
+        UpdateCoyoteTime();
         MoveFalling();
     }
 
     private void ExitFallState()
     {
-
+        m_hasJumped = false;
     }
 
     #endregion
