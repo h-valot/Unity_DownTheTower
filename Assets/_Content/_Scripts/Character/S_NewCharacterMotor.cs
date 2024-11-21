@@ -1,6 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 public class NewCharacterMotor : MonoBehaviour
@@ -15,7 +13,6 @@ public class NewCharacterMotor : MonoBehaviour
 	[SerializeField] private Transform m_harness;
 	[SerializeField] private Transform m_aimingLookTo;
 	[SerializeField] private Transform m_cameraTarget;
-	[SerializeField] private Transform m_backpackAnchor;
 	[SerializeField] private CharacterGraphics m_characterGraphics;
 
 	[Header("Scriptable references")]
@@ -27,13 +24,13 @@ public class NewCharacterMotor : MonoBehaviour
     [SerializeField] private RSE_Jump m_rseJump;
 	[SerializeField] private RSE_Craft m_rseCraft;
 	[SerializeField] private RSE_Throw m_rseThrow;
-	[SerializeField] private RSE_Interact m_rseInteract;
-	[SerializeField] private RSE_Recycle m_rseRecycle;
-	[SerializeField] private RSE_CanInteract m_rseCanInteract;
-	[SerializeField] private RSE_CanRecycle m_rseCanRecycle;
+	[SerializeField] private RSE_BackpackCrafting m_rseBackpackCrafting;
 	[Space(5)]
 	[SerializeField] private RSO_MovementDatas m_rsoMovementDatas;
 	[SerializeField] private RSO_CameraStyle m_rsoCameraStyle;
+	[SerializeField] private RSO_CraftInputLocked m_rsoCraftInputLocked;
+	[SerializeField] private RSO_RecycleInputLocked m_rsoRecycleInputLocked;
+	[SerializeField] private RSO_CharacterState m_rsoCharacterState;
 
 	#endregion
 
@@ -61,12 +58,7 @@ public class NewCharacterMotor : MonoBehaviour
     private bool m_hasRope;
     private bool m_isCrafting;
 
-    // - State machine -
-    private BehaviorState m_currentState;
-
 	// - Craft state -
-	private bool m_hasBackpack;
-	private Backpack m_backpack;
 	private CraftType m_craftType;
 	private Coroutine m_craftCoroutine;
 	private Permanent m_handObject;
@@ -75,9 +67,6 @@ public class NewCharacterMotor : MonoBehaviour
 
 	// - Rope state -
 	private Rope m_rope;
-
-	// - Interaction -
-	private List<Interactable> m_interactables = new List<Interactable>();
 
 	#endregion
 
@@ -97,8 +86,9 @@ public class NewCharacterMotor : MonoBehaviour
 
         m_characterGraphics.Initialize(m_aimingLookTo, m_rigidbody, startRotation);
 
-        GetBackpackDebug();
-    }
+		m_rsoCraftInputLocked.value = false;
+		m_rsoRecycleInputLocked.value = false;
+	}
 
     private void OnEnable()
     {
@@ -110,7 +100,7 @@ public class NewCharacterMotor : MonoBehaviour
     {
         UnsubscibeAllInputs();
         m_characterConfig.OnConfigChanged -= UpdateDrag;
-        m_currentState = BehaviorState.NONE;
+        m_rsoCharacterState.value = BehaviorState.NONE;
     }
 
     private void FixedUpdate()
@@ -132,7 +122,7 @@ public class NewCharacterMotor : MonoBehaviour
 
         _movementDatas.dataToString.Add((Mathf.Round(m_rigidbody.velocity.magnitude * 100f) / 100f).ToString());
         _movementDatas.dataToString.Add(m_isGrounded.ToString());
-        _movementDatas.dataToString.Add(m_currentState.ToString());
+        _movementDatas.dataToString.Add(m_rsoCharacterState.value.ToString());
         m_rsoMovementDatas.value = _movementDatas;
 
 		if (m_isAiming) m_handObject.PreviewThrow(m_cameraMotor.transform);
@@ -164,21 +154,17 @@ public class NewCharacterMotor : MonoBehaviour
         m_rseJump.action -= Jump;
 		m_rseCraft.action -= ToggleCraft;
 		m_rseThrow.action -= ToggleAim;
-		m_rseRecycle.action -= Recycle;
-		m_rseInteract.action -= Interact;
 	}
 
     private void SubscribeStateInputs()
     {
-        switch (m_currentState)
+		switch (m_rsoCharacterState.value)
         {
             case BehaviorState.LOCOMOTION:
                 m_rseMove.action += UpdateMoveInput;
                 m_rseJump.action += Jump;
 				m_rseCraft.action += ToggleCraft;
 				m_rseThrow.action += ToggleAim;
-				m_rseRecycle.action += Recycle;
-				m_rseInteract.action += Interact;
 				break;
 
             case BehaviorState.FALL:
@@ -209,20 +195,6 @@ public class NewCharacterMotor : MonoBehaviour
 		m_isRunning = ispressed;
     }
 
-	public void ToggleCraftInput(bool enable)
-	{
-		if (enable)
-		{
-			m_rseCraft.action += ToggleCraft;
-			m_rseRecycle.action += Recycle;
-		}
-		else
-		{
-			m_rseCraft.action -= ToggleCraft;
-			m_rseRecycle.action -= Recycle;
-		}
-	}
-
 	#endregion
 
 	#region STATE MACHINE
@@ -232,19 +204,19 @@ public class NewCharacterMotor : MonoBehaviour
 	/// </summary>
 	private void DetermineState()
     {
-        if (m_currentState != BehaviorState.LOCOMOTION && m_isGrounded && !m_isCrafting)
+        if (m_rsoCharacterState.value != BehaviorState.LOCOMOTION && m_isGrounded && !m_isCrafting)
         {
             SwitchState(BehaviorState.LOCOMOTION);
         }
-        else if (m_currentState != BehaviorState.FALL && !m_isGrounded && !m_hasRope)
+        else if (m_rsoCharacterState.value != BehaviorState.FALL && !m_isGrounded && !m_hasRope)
         {
             SwitchState(BehaviorState.FALL);
         }
-        else if (m_currentState != BehaviorState.ROPE && !m_isGrounded && m_hasRope)
+        else if (m_rsoCharacterState.value != BehaviorState.ROPE && !m_isGrounded && m_hasRope)
         {
             SwitchState(BehaviorState.ROPE);
         }
-        else if (m_currentState != BehaviorState.CRAFT && m_currentState == BehaviorState.LOCOMOTION && m_isCrafting)
+        else if (m_rsoCharacterState.value != BehaviorState.CRAFT && m_rsoCharacterState.value == BehaviorState.LOCOMOTION && m_isCrafting)
         {
             SwitchState(BehaviorState.CRAFT);
         }
@@ -267,10 +239,10 @@ public class NewCharacterMotor : MonoBehaviour
     /// <param name="newState">New state to trigger</param>
     private void EnterState(BehaviorState newState)
     {
-        m_currentState = newState;
+		m_rsoCharacterState.value = newState;
 		SubscribeStateInputs();
 
-		switch (m_currentState)
+		switch (m_rsoCharacterState.value)
         {
             case BehaviorState.LOCOMOTION:
                 EnterLocomotionState();
@@ -295,7 +267,7 @@ public class NewCharacterMotor : MonoBehaviour
     /// </summary>
     private void FixedUpdateState()
     {
-        switch (m_currentState)
+        switch (m_rsoCharacterState.value)
         {
             case BehaviorState.LOCOMOTION:
                 FixedUpdateLocomotionState();
@@ -322,7 +294,7 @@ public class NewCharacterMotor : MonoBehaviour
 	{
 		UnsubscibeAllInputs();
 
-		switch (m_currentState)
+		switch (m_rsoCharacterState.value)
         {
             case BehaviorState.LOCOMOTION:
                 ExitLocomotionState();
@@ -443,11 +415,11 @@ public class NewCharacterMotor : MonoBehaviour
     /// </summary>
     private void UpdateDrag()
     {
-        if (m_currentState == BehaviorState.LOCOMOTION)
+        if (m_rsoCharacterState.value == BehaviorState.LOCOMOTION)
         {
             m_rigidbody.drag = m_characterConfig.dragGround;
         }
-        else if (m_currentState == BehaviorState.FALL || m_currentState == BehaviorState.ROPE)
+        else if (m_rsoCharacterState.value == BehaviorState.FALL || m_rsoCharacterState.value == BehaviorState.ROPE)
         {
             m_rigidbody.drag = m_characterConfig.dragFall;
         }
@@ -663,10 +635,6 @@ public class NewCharacterMotor : MonoBehaviour
 			{
 				if (m_handObject.Type == CraftType.TORCH)
 				{
-					// _handObject.transform.SetParent(_robotSocket, false);
-					// _robotObject = _handObject;
-					// _handObject = null;
-
 					SwitchObjects(ref m_handObject, ref m_robotObject, m_robotSocket);
 				}
 				else if (m_handObject.Type != CraftType.ROPE)
@@ -689,16 +657,16 @@ public class NewCharacterMotor : MonoBehaviour
 		{
 			StopCoroutine(m_craftCoroutine);
 			m_craftCoroutine = null;
-			
-			if (m_backpack != null) m_backpack.EndCrafting();
+
+			m_rseBackpackCrafting.Call(false, -1);
 		}
 	}
 
 	private void ToggleCraft(CraftType craftType, bool isInputPressed)
 	{
 		// Prevent switching to craft state if not in locomotion or crafting state or already crafting another item
-		if (m_currentState != BehaviorState.LOCOMOTION 
-		|| m_currentState != BehaviorState.CRAFT)
+		if (m_rsoCharacterState.value != BehaviorState.LOCOMOTION 
+		|| m_rsoCharacterState.value != BehaviorState.CRAFT)
 		{
 			// If craft button is pressed
 			if (isInputPressed)
@@ -719,8 +687,7 @@ public class NewCharacterMotor : MonoBehaviour
 	/// </summary>
 	private IEnumerator Craft(CraftType craftType, float duration)
 	{
-		// Wait the crafting duration
-		// if (_backpack != null) _backpack.StartCrafting(duration);
+		m_rseBackpackCrafting.Call(true, duration);
 
 		yield return new WaitForSeconds(duration);
 
@@ -731,7 +698,7 @@ public class NewCharacterMotor : MonoBehaviour
 			m_handSocket.transform
 		);
 
-		m_backpack.EndCrafting();
+		m_rseBackpackCrafting.Call(false, -1);
 		m_craftCoroutine = null;
 	}
 
@@ -778,135 +745,6 @@ public class NewCharacterMotor : MonoBehaviour
 		to = from;
 		to.transform.rotation = socket.transform.rotation;
 		from = toCache;
-	}
-
-	#endregion
-
-	#region INTERACTION
-
-	private void Interact()
-	{
-		// Assertion
-		if (m_interactables.Count == 0 || m_currentState != BehaviorState.LOCOMOTION) return;
-
-		GetNearestInteractable()?.InteractionTrigger();
-	}
-
-	private void Recycle()
-	{
-		// Assertion
-		if (m_interactables.Count == 0 || m_currentState != BehaviorState.LOCOMOTION) return;
-
-		Interactable interactable = GetNearestInteractable();
-
-		// Assert: interactable isn't valid
-		if (!interactable || !interactable.IsRecyclable) return;
-
-		Remove(interactable, doRecycle: true);
-	}
-
-	/// <summary>
-	/// 	Add the given interactable into the interactable list.
-	/// </summary>
-	public void Add(Interactable interactable)
-	{
-		m_interactables.Add(interactable);
-	}
-
-	/// <summary>
-	/// 	Remove the given interactable from the interactable list.
-	/// 	The character will no longer be able to interact with it.
-	/// </summary>
-	public void Remove(Interactable interactable, bool doRecycle = false)
-	{
-		interactable.IsValid = false;
-		m_interactables.Remove(interactable);
-
-		CheckShowInteract();
-		CheckShowRecycle(false);
-
-		if (doRecycle) interactable.Recycle();
-	}
-
-	/// <summary>
-	/// 	Return the nearest interactable in front of the character.
-	/// </summary>
-	private Interactable GetNearestInteractable()
-	{
-		// - Get interactable in front of the character -
-		var counter = 0;
-		foreach (var interactable in m_interactables)
-		{
-			// Assertion
-			if (!interactable) continue;
-
-			Vector3 towardsInteract = interactable.transform.position - transform.position;
-
-			interactable.IsValid = Vector3.Dot(
-				new Vector3(m_characterGraphics.transform.forward.x, 0, m_characterGraphics.transform.forward.z).normalized,
-				new Vector3(towardsInteract.x, 0, towardsInteract.z).normalized
-			) > 0.5f;
-			
-			if (interactable.IsValid) counter++;
-		}
-
-		// Assert: there is no interactable in front of the character.
-		if (counter == 0) return null;
-
-		// - Get the nearest interactable object from the character -
-		var nearest = m_interactables.FirstOrDefault(i => i.IsValid);
-		foreach (var valid in m_interactables.Where(i => i.IsValid))
-		{
-			if ((valid.transform.position - transform.position).sqrMagnitude <
-				(nearest.transform.position - transform.position).sqrMagnitude)
-			{
-				nearest = valid;
-			}
-		}
-		return nearest;
-	}
-
-	private void CheckShowInteract()
-	{
-		m_rseCanInteract.Call(
-			m_interactables.Count(i => i.IsValid) > 0
-			&& m_currentState == BehaviorState.LOCOMOTION
-		);
-	}
-
-	private void CheckShowRecycle(bool isRecyclable)
-	{
-		m_rseCanRecycle.Call(
-			isRecyclable
-			&& m_currentState == BehaviorState.LOCOMOTION
-		);
-	}
-
-	#endregion
-
-	#region BACKPACK
-
-	private void GetBackpackDebug()
-	{
-		// Assertion
-		if (m_characterConfig.startWithBag) return;
-
-		m_backpack = FindAnyObjectByType<Backpack>();
-		if (m_backpack == null) m_backpack = Instantiate(m_characterConfig.pfBackpack);
-		m_backpack.ForceSetupBackpack(this);
-	}
-
-	public void Pickup(Backpack backpack)
-	{
-		m_backpack = backpack;
-		m_hasBackpack = true;
-
-		ToggleCraftInput(m_hasBackpack);
-		m_backpack.transform.SetParent(m_backpackAnchor.transform, false);
-		m_backpack.transform.localPosition = Vector3.zero;
-		m_backpack.transform.localRotation = Quaternion.identity;
-		m_backpack.transform.localScale = Vector3.one;
-		Remove(m_backpack);
 	}
 
 	#endregion

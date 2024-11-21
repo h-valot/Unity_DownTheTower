@@ -14,7 +14,7 @@ public class SoundManager : MonoBehaviour
         _rsePlaySound.action -= PlaySound;
     }
 
-    private void PlaySound(Sound sound)
+    private void PlaySound(SoundConfig sound)
     {
 
     }

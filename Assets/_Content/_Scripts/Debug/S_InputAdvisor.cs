@@ -2,57 +2,57 @@ using UnityEngine;
 
 public class InputAdvisor : MonoBehaviour
 {
-
     [Header("Internal References")]
-    [SerializeField] private GameObject graphicInteract;
-    [SerializeField] private GameObject graphicRecycle;
-    [SerializeField] private GameObject inputPanel;
-    [SerializeField] private GameObject ropeInputs;
-    [SerializeField] private GameObject locomotionInputs;
+    [SerializeField] private GameObject m_graphicInteract;
+    [SerializeField] private GameObject m_graphicRecycle;
+    [SerializeField] private GameObject m_inputPanel;
+    [SerializeField] private GameObject m_ropeInputs;
+    [SerializeField] private GameObject m_locomotionInputs;
 
     [Header("External References")]
-    [SerializeField] private RSE_CanInteract _rseCanInteract;
-    [SerializeField] private RSE_CanRecycle _rseCanRecycle;
-    [SerializeField] private RSO_CharacterState _rsoCharacterState;
-    [SerializeField] private RSE_HideUI _rseHideUI;
+    [SerializeField] private RSE_HideUI m_rseHideUI;
+	[Space(5)]
+    [SerializeField] private RSO_CharacterState m_rsoCharacterState;
+	[SerializeField] private RSO_InteractableValid m_rsoInteractableValid;
+	[SerializeField] private RSO_InteractableRecyclable m_rsoInteractableRecyclable;
 
-    private bool isUIactive = true;
+	private bool m_isActive = true;
 
     private void OnEnable()
     {
-        _rseCanInteract.action += ToggleInteract;
-        _rseCanRecycle.action += ToggleRecycle;
-        _rseHideUI.action += ToggleUI;
-        _rsoCharacterState.OnChanged += SwitchAdvisorInputs;
+        m_rseHideUI.action += ToggleUI;
+		m_rsoInteractableValid.OnChanged += ToggleInteract;
+		m_rsoInteractableRecyclable.OnChanged += ToggleRecycle;
+        m_rsoCharacterState.OnChanged += SwitchAdvisorInputs;
     }
 
     private void OnDisable()
     {
-        _rseCanInteract.action -= ToggleInteract;
-        _rseCanRecycle.action -= ToggleRecycle;
-        _rseHideUI.action -= ToggleUI;
-        _rsoCharacterState.OnChanged -= SwitchAdvisorInputs;
+        m_rseHideUI.action -= ToggleUI;
+		m_rsoInteractableValid.OnChanged -= ToggleInteract;
+		m_rsoInteractableRecyclable.OnChanged -= ToggleRecycle;
+        m_rsoCharacterState.OnChanged -= SwitchAdvisorInputs;
     }
 
-    private void ToggleInteract(bool isActive)
+    private void ToggleInteract()
     {
-        graphicInteract.SetActive(isActive);
+        m_graphicInteract.SetActive(m_rsoInteractableValid.value);
     }
 
-    private void ToggleRecycle(bool isActive)
+    private void ToggleRecycle()
     {
-        graphicRecycle.SetActive(isActive);
+        m_graphicRecycle.SetActive(m_rsoInteractableRecyclable.value);
     }
 
     private void ToggleUI()
     {
-        isUIactive = !isUIactive;
-        inputPanel.SetActive(isUIactive);
+        m_isActive = !m_isActive;
+        m_inputPanel.SetActive(m_isActive);
     }
 
     private void SwitchAdvisorInputs()
     {
-        ropeInputs.SetActive(_rsoCharacterState.value == AnimationState.ROPE);
-        locomotionInputs.SetActive(!(_rsoCharacterState.value == AnimationState.ROPE));
+        m_ropeInputs.SetActive(m_rsoCharacterState.value == BehaviorState.ROPE);
+        m_locomotionInputs.SetActive(m_rsoCharacterState.value != BehaviorState.ROPE);
     }
 }

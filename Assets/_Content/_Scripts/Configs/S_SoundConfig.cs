@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu]
-public class Sound : ScriptableObject
+[CreateAssetMenu(fileName = "Sound", menuName = "Configs/Sound")]
+public class SoundConfig : ScriptableObject
 {
     public string soundName;
     public SoundType soundType;
@@ -16,11 +16,4 @@ public class Sound : ScriptableObject
     [Header("Pitch")]
     [Range(0, 2)] public float minPitch = 1f;
     [Range(0, 2)] public float maxPitch = 1f;
-
-}
-
-public enum SoundType
-{
-    MUSIC,
-    SFX
 }

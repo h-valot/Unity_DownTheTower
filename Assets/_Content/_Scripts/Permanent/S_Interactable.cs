@@ -8,7 +8,7 @@ public class Interactable : MonoBehaviour
 	[Tooltip("If set as true destroys the `Object To Recycle` on interaction triggered. Otherwise, don't.")]
 	[SerializeField] private bool m_isRecyclable;
 
-	[EnableIf("isRecyclable")]
+	[EnableIf("m_isRecyclable")]
 	[Tooltip("The object that will be destroy when interacted if `Is Recyclable` is true.")]
 	[SerializeField] private GameObject m_objectToRecycle;
 
@@ -23,6 +23,7 @@ public class Interactable : MonoBehaviour
 	/// </summary>
 	public virtual void InteractionTrigger() 
 	{
+		print($"{name}: interacted");
 		OnInteracted?.Invoke();
 	}
 
@@ -32,10 +33,10 @@ public class Interactable : MonoBehaviour
 	/// </summary>
     public virtual void OnTriggerEnter(Collider collider)
     {
-		// Assert: the collided object isn't the character motor.
-        if (!collider.TryGetComponent<NewCharacterMotor>(out var character))
-
-		character.Add(this);
+		if (collider.TryGetComponent<CharacterInteract>(out var character))
+		{
+			character.Add(this);
+		}
 	}
 
 	/// <summary>
@@ -44,10 +45,10 @@ public class Interactable : MonoBehaviour
 	/// </summary>
 	public virtual void OnTriggerExit(Collider collider)
 	{
-		// Assert: the collided object isn't the character motor.
-		if (!collider.TryGetComponent<NewCharacterMotor>(out var character))
-			
-		character.Remove(this);
+		if (collider.TryGetComponent<CharacterInteract>(out var character))
+		{
+			character.Remove(this);
+		}
 	}
 
 	/// <summary>

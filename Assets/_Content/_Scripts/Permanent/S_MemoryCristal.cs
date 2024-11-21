@@ -3,34 +3,40 @@ using UnityEngine;
 
 public class MemoryCristal : Interactable
 {
-    [SerializeField] private GameObject _firstDoor;
-    [SerializeField] private GameObject _secondDoor;
-    [SerializeField] private Vector3 _openvector;
+	[Header("Tweakable values")]
+    [SerializeField] private Vector3 m_direction;
+	[SerializeField] private float m_duration;
 
-    private bool _doorOpen;
+	[Header("External references")]
+    [SerializeField] private Transform m_firstDoor;
+    [SerializeField] private Transform m_secondDoor;
+
+    private bool m_doorOpen;
+
     private void Start()
-    {
-        _firstDoor.transform.position += _openvector;
-    }
+	{
+		// Assertion
+		if (!m_firstDoor || !m_secondDoor) return;
+
+		Animation(m_firstDoor, m_direction, 0f);
+		Animation(m_secondDoor, -m_direction, 0f);
+	}
 
     public override void InteractionTrigger()
     {
-        if (!_doorOpen)
-        {
-            MoveDoor(true, -_openvector);
-            MoveDoor(false, _openvector);
-            _doorOpen = true;
-        }
+		base.InteractionTrigger();
+
+		// Assertions
+		if (!m_firstDoor || !m_secondDoor) return;
+        if (m_doorOpen) return;
+
+		Animation(m_firstDoor, -m_direction, m_duration);
+		Animation(m_secondDoor, m_direction, m_duration);
+		m_doorOpen = true;
     }
 
-    public void MoveDoor(bool isFirst, Vector3 direction)
+    private void Animation(Transform transform, Vector3 direction, float duration)
     {
-        if (isFirst) _firstDoor.transform.DOMove(_firstDoor.transform.position + direction, 3f);
-        else _secondDoor.transform.DOMove(_secondDoor.transform.position + direction, 3f);
-    }
-
-    private void Animation()
-    {
-        
-    }
+		m_firstDoor.DOMove(transform.position + direction, duration);
+	}
 }

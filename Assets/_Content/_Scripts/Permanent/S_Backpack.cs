@@ -8,15 +8,14 @@ public class Backpack : Interactable
     [SerializeField] private SphereCollider m_sphereCollider;
 
     [Header("Scriptable references")]
-    [SerializeField] private NewCharacterConfig m_characterConfig;
-	[Space(5)]
 	[SerializeField] private RSO_CharacterDeath m_rsoCharacterDeath;
+	[SerializeField] private RSE_BackpackCrafting m_rsoPackbackCrafting;
 
-	private NewCharacterMotor m_character;
-    private bool m_isPickedUp = false;
+	private CharacterInteract m_characterInteract;
     private Vector3 m_startPosition;
     private Vector3 m_startRotation;
     private Vector3 m_startScale;
+    private bool m_isPickedUp;
 
     private void Awake()
     {
@@ -29,56 +28,65 @@ public class Backpack : Interactable
     private void OnEnable()
     {
         m_rsoCharacterDeath.OnChanged += ResetBackpack;
-    }
+		m_rsoPackbackCrafting.action += HandleCrafting;
+	}
 
     private void OnDisable()
     {
         m_rsoCharacterDeath.OnChanged -= ResetBackpack;
-    }
+		m_rsoPackbackCrafting.action -= HandleCrafting;
+	}
 
-    public override void OnTriggerEnter(Collider other)
+    public override void OnTriggerEnter(Collider collider)
     {
-        if (other.TryGetComponent(out m_character) 
-		&& !m_isPickedUp)
-        {
-            m_character.Add(interactable: this);
-        }
+		// Assertions
+		if (m_isPickedUp) return;
+        if (!collider.TryGetComponent(out m_characterInteract)) return;
+		
+		m_characterInteract.Add(this);
     }
 
     public override void InteractionTrigger()
     {
         m_isPickedUp = true;
-        m_character.Pickup(this);
-        m_sphereCollider.enabled = false;
-    }
+		m_characterInteract.Pickup(this);
+	}
 
     private void ResetBackpack()
     {
+		// Assertion
         if (m_rsoCharacterDeath.value) return;
 
-		transform.position = m_startPosition;
-		transform.rotation = Quaternion.Euler(m_startRotation);
+		transform.SetPositionAndRotation(m_startPosition, Quaternion.Euler(m_startRotation));
 		transform.localScale = m_startScale;
+
 		m_isPickedUp = false;
 		m_sphereCollider.enabled = true;
     }
 
-	public void ForceSetupBackpack(NewCharacterMotor character)
+	public void ForceSetupBackpack(CharacterInteract characterInteract)
 	{
-		m_character = character;
+		m_characterInteract = characterInteract;
 		InteractionTrigger();
 	}
 
-	public void StartCrafting(float craftTime)
-    {
-        m_mesh.material.DOFloat(0f, "_craftingPercent", craftTime)
-					   .SetEase(Ease.Linear)
-					   .SetId(gameObject.GetInstanceID() +"craftingPercent");
-    }
+	public void ToggleCollider(bool isEnabled)
+	{
+		m_sphereCollider.enabled = isEnabled;
+	}
 
-    public void EndCrafting()
-    {
-        DOTween.Kill(gameObject.GetInstanceID() + "craftingPercent");
-        m_mesh.material.SetFloat("_craftingPercent", 1f);
-    }
+	public void HandleCrafting(bool isStarting, float duration)
+	{
+		if (isStarting)
+		{
+			m_mesh.material.DOFloat(0f, "_craftingPercent", duration)
+						   .SetEase(Ease.Linear)
+						   .SetId(gameObject.GetInstanceID() + "craftingPercent");
+		}
+		else
+		{
+			DOTween.Kill(gameObject.GetInstanceID() + "craftingPercent");
+			m_mesh.material.SetFloat("_craftingPercent", 1f);
+		}
+	}
 }

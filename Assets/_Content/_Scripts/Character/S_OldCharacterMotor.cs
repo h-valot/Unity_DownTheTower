@@ -38,8 +38,7 @@ public class OldCharacterMotor : MonoBehaviour
 	[Foldout("Scriptable references")] [SerializeField] private RSE_Craft m_rseCraft;
 	[Foldout("Scriptable references")] [SerializeField] private RSE_Interact m_rseInteract;
 	[Foldout("Scriptable references")] [SerializeField] private RSE_CancelAction m_rseCancelAction;
-	[Foldout("Scriptable references")] [SerializeField] private RSE_CanInteract m_rseCanInteract;
-	[Foldout("Scriptable references")] [SerializeField] private RSE_CanRecycle m_rseCanRecycle;
+	[Foldout("Scriptable references")] [SerializeField] private RSO_RecycleInputLocked m_rsoRecycleInputLocked;
 	[Foldout("Scriptable references")] [SerializeField] private RSE_Recycle m_rseRecycle;
 	[Foldout("Scriptable references")] [SerializeField] private RSE_ToggleInputs m_rseToggleInputs;
 	[Foldout("Scriptable references")] [SerializeField] private RSE_KillCharacter m_rseKillCharacter;
@@ -249,7 +248,7 @@ public class OldCharacterMotor : MonoBehaviour
 	{
 		ExitCurrentState();
 		EnterState(newState);
-        m_rsoCharacterState.value = newState;
+        // m_rsoCharacterState.value = newState;
 
     }
 
@@ -481,12 +480,14 @@ public class OldCharacterMotor : MonoBehaviour
 	{
 		Backpack = _newBackpack;
         HasBackpack = true;
+		
+		RemoveFromInteractList(Backpack);
         ToggleCraftInput(HasBackpack);
+
 		Backpack.transform.SetParent(m_backpackAnchor.transform, false);
 		Backpack.transform.localPosition = Vector3.zero;
 		Backpack.transform.localRotation = Quaternion.identity;
 		Backpack.transform.localScale = Vector3.one;
-		RemoveFromInteractList(Backpack);
     }
 
 	#endregion
@@ -942,6 +943,8 @@ public class OldCharacterMotor : MonoBehaviour
     /// </summary>
     private void SubscribeInputs()
 	{
+		ToggleCraftInput(HasBackpack);
+
 		m_rseRun.action += Run;
 		m_rseJump.action += Jump;
 		m_rseCancelAction.action += CancelAction;
@@ -957,7 +960,6 @@ public class OldCharacterMotor : MonoBehaviour
                 m_rseCraft.action += ToggleCraft;
                 m_rseToggleInHand.action += ToggleInHand;
                 m_rseInteract.action += Interact;
-				ToggleCraftInput(HasBackpack);
                 break;
             case AnimationState.JUMP:
                 m_rseMove.action += Move;
@@ -1394,11 +1396,6 @@ public class OldCharacterMotor : MonoBehaviour
     /// </summary>
     private IEnumerator Craft(CraftType _objectToCraft, float _craftDuration)
     {
-		// wait the crafting duration
-		if(Backpack != null)
-		{
-			Backpack.StartCrafting(_craftDuration);
-		}
 
         yield return new WaitForSeconds(_craftDuration);
 
@@ -1421,7 +1418,6 @@ public class OldCharacterMotor : MonoBehaviour
 				break;
 		}
 
-        Backpack.EndCrafting();
 
         CraftInHand.transform.position = m_handSocket.transform.position;
 
@@ -1434,10 +1430,6 @@ public class OldCharacterMotor : MonoBehaviour
         {
             StopCoroutine(m_craftCoroutine);
             m_craftCoroutine = null;
-			if(Backpack != null)
-			{
-				Backpack.EndCrafting();
-			}
         }
 
 		m_canJump = true;
@@ -2190,15 +2182,15 @@ public class OldCharacterMotor : MonoBehaviour
 
 	private void CheckShowInteract()
 	{
-		m_rseCanInteract.Call(
-			m_validInteractibles.Count > 0 
-			&& _currentState == AnimationState.LOCOMOTION
-		);
+		// m_rseCanInteract.value = (
+		// 	m_validInteractibles.Count > 0 
+		// 	&& _currentState == AnimationState.LOCOMOTION
+		// );
     }
 
 	private void CheckShowRecycle(bool isRecyclable)
 	{ 
-		m_rseCanRecycle.Call(
+		m_rsoRecycleInputLocked.value = (
 			isRecyclable 
 			&& _currentState == AnimationState.LOCOMOTION
 		);
