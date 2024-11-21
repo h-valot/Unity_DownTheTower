@@ -27,8 +27,6 @@ public class DeathTrigger : MonoBehaviour
                     }
                     _GuardianRef.destroyTorchCoroutine = StartCoroutine(_GuardianRef.DestroyTorchTime(_torchCheckRef.gameObject));
                 }
-        }
-
-        
+        } 
     }
 }

@@ -5,13 +5,10 @@ public class BigCollider : MonoBehaviour
 {
     [SerializeField] private Guardian _guardianRef;
 
-
     private void OnTriggerEnter(Collider other)
     {
         if (other.TryGetComponent<Torch>(out var _torchCheckRef))
         {
-            //_guardianRef.MakeTorchRef(_torchCheckRef);
-            //_guardianRef.TargetStayIn();
             _guardianRef.AddToPotentialTargets(_torchCheckRef.gameObject);
         }
 
@@ -22,16 +19,9 @@ public class BigCollider : MonoBehaviour
                 if ((_playerCheckRef._craftInHand._craftType == CraftType.TORCH && _playerCheckRef._craftInHand.StateInHand())
                 || (_playerCheckRef._craftInRobot._craftType == CraftType.TORCH && _playerCheckRef._craftInRobot.StateInHand()))
                 {
-                    //_guardianRef.MakePLayerRef(_playerCheckRef);
-                    //_guardianRef.TargetStayIn();
                     _guardianRef.AddToPotentialTargets(_playerCheckRef.gameObject);
                 }
             }
-
-            //if (_playerCheckRef._craftInHand == null)
-            //{
-            //    _guardianRef.AddToPotentialTargets(_playerCheckRef.gameObject);
-            //}
         }
     }
 
@@ -39,7 +29,6 @@ public class BigCollider : MonoBehaviour
     {
         if (other.TryGetComponent<Torch>(out var _torchCheckRef))
         {
-            //_guardianRef.TargetExit();
             _guardianRef.RemovePotentialTargets(_torchCheckRef.gameObject);
         }
 

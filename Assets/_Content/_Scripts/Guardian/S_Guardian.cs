@@ -10,73 +10,52 @@ public class Guardian : MonoBehaviour
 {
     #region Declarations
 
-    [SerializeField] private PathPatrol _pathPatrol; // ref à reconstruire
+    // --- PUBLIC ---
+
+    [Header("Active or passive Guardian")]
     [SerializeField] public bool _isActif;
 
-    [Header("Scriptable references")]
+    // --- PRIVATE ---
+
+    [Header("Internal References")]
     [SerializeField] private GuardianConfig _guardianConfig;
-
-    [Header("Debug References")]
-    [SerializeField] private TextMeshProUGUI _GuardianTarget;
-    [SerializeField] private TextMeshProUGUI _dictionnayCountText;
-
-    private NavMeshAgent _agent;
-    private CharacterMotor _playerRef;
-    private Torch _torchRef;
-    private bool _isPlayerTarget;
-    private Coroutine _coroutine;
-    private Coroutine _coroutineUpdate;
-    private bool _aggro;
-    private GameObject _actualTarget;
-    private float _playerDistance;
-    private float _torchDistance;
-    private bool _isPlayerSeen = false;
-    [SerializeField] private float _timeToDestroy;
-    [SerializeField] private float _killTime;
-
-    public float timeToDesaggro;
-
-    public Material _aggroMaterial;
-    public Material _scanMaterial;
-    public Material _dormantMaterial;
-    private float _aggroColor = 1;
-    private float _scanColor = 2;
-    private float _dormantColor = 3;
-
-
-    public GameObject _colliderDeath;
-
-    public GameObject _scanCube;
-
-    //raycast
+    [SerializeField] private PathPatrol _pathPatrol;
+    [SerializeField] private GameObject _scanCube;
     [SerializeField] private GameObject _raycastEyes;
+    private NavMeshAgent _agent;
 
-    //Height
-    float headHeight;
-    float eyesHeight;
-    float feetHeight;
+    // Targeting
+    private GameObject _actualTarget;
+    private bool _aggro;
 
-    // --- WIP ---
-
-    // --- A mettre en config ---
-
-    public float resetAggroCD;
-    public float shiftToPatrolCD;
-    public float shiftToPursuitCD;
-    
-    // Private ---
-
-    Dictionary<GameObject, ClassGuardianTarget> _potentialTarget = new Dictionary<GameObject, ClassGuardianTarget> ();
+    // Coroutines
     private Coroutine _aggroCoroutine = null;
     private Coroutine _shiftCoroutine;
     private bool _shiftIsFinished = true;
     public Coroutine destroyTorchCoroutine;
 
+    // Heigth
+    private float headHeight;
+    private float eyesHeight;
+    private float feetHeight;
+
+    // Graphics
+    private float _aggroColor = 1;
+    private float _scanColor = 2;
+    private float _dormantColor = 3; // pas encore appelée
+
+    // Struct
+
+    Dictionary<GameObject, ClassGuardianTarget> _potentialTarget = new Dictionary<GameObject, ClassGuardianTarget>();
     public class ClassGuardianTarget
     {
         public int activeColliders;
-        public bool isSeen;
     }
+
+    // debug
+    [Header("Debug References")]
+    [SerializeField] private TextMeshProUGUI _GuardianTarget;
+    [SerializeField] private TextMeshProUGUI _dictionnayCountText;
 
     #endregion
 
@@ -140,7 +119,7 @@ public class Guardian : MonoBehaviour
 
     public IEnumerator DestroyTorchTime(GameObject _torchRef)
     {
-        yield return new WaitForSecondsRealtime(_timeToDestroy);
+        yield return new WaitForSecondsRealtime(_guardianConfig.timeToDestroy);
         DestroyedTarget(_torchRef);
         destroyTorchCoroutine = null;
     }
@@ -173,30 +152,13 @@ public class Guardian : MonoBehaviour
             if (hitDataHead.transform == _objectRef.transform || hitDataEyes.transform == _objectRef.transform || hitDataFeet.transform == _objectRef.transform ||  hitDatatorch.collider.TryGetComponent<Torch>(out var torch)
                 || hitDatatorch.collider.TryGetComponent<TorchPointLight>(out var torchPointLight))
             {
-                _isPlayerSeen = true;
                 return true;
             }
             else
             {
-                _isPlayerSeen = false;
                 return false;
             }
         }
-        //else if (_objectRef != null)
-        //{
-        //    Physics.Linecast(_raycastEyes.transform.position, _objectRef.transform.position, out var hitDatatorch);
-        //    // UnityEngine.Debug.DrawRay(_raycastEyes.transform.position, (_torchRef.transform.position - _raycastEyes.transform.position).normalized, Color.red);
-
-        //    if (hitDatatorch.collider.TryGetComponent<Torch>(out var torch)
-        //        || hitDatatorch.collider.TryGetComponent<TorchPointLight>(out var torchPointLight))
-        //    {
-        //        return true;
-        //    }
-        //    else
-        //    {
-        //        return false;
-        //    }
-        // }
         else { return false; }
     }
     private void CheckPlayerHeight(GameObject _objectRef)
@@ -219,7 +181,6 @@ public class Guardian : MonoBehaviour
             _potentialTarget.Add(_targetRef, new ClassGuardianTarget());
         }
         IncreaseActiveColliders(_targetRef);
-        //CheckForTargets();
     }
 
     public void RemovePotentialTargets(GameObject _targetRef)
@@ -234,7 +195,6 @@ public class Guardian : MonoBehaviour
                 {
                     _potentialTarget.Remove(_targetRef);
                 }
-                //CheckForTargets();
             }
         }
     }
@@ -318,7 +278,6 @@ public class Guardian : MonoBehaviour
                         _aggroCoroutine = StartCoroutine(WaitForAggroReset());
                     }
                     _aggroCoroutine = StartCoroutine(WaitForAggroReset());
-                    Debug.Log("sortie 2");
                 }
             }
         }
@@ -331,7 +290,6 @@ public class Guardian : MonoBehaviour
                 _aggroCoroutine = StartCoroutine(WaitForAggroReset());
             }
             _aggroCoroutine = StartCoroutine(WaitForAggroReset());
-            Debug.Log("sortie 1");
         }
     }
 
@@ -366,7 +324,7 @@ public class Guardian : MonoBehaviour
 
     private IEnumerator WaitForAggroReset()
     {
-        yield return new WaitForSeconds(resetAggroCD);
+        yield return new WaitForSeconds(_guardianConfig.resetAggroCD);
         if (_potentialTarget.Count < 1)
         {
             UpdateTarget(null);
@@ -377,7 +335,7 @@ public class Guardian : MonoBehaviour
 
     private IEnumerator ShiftToPatrol()
     {
-        yield return new WaitForSeconds(shiftToPatrolCD);
+        yield return new WaitForSeconds(_guardianConfig.shiftToPatrolCD);
         GetBackToPatrol();
     }
 
@@ -386,7 +344,7 @@ public class Guardian : MonoBehaviour
         _actualTarget = this.gameObject;
         _aggro = true;
         ChangeColor(_aggroColor);
-        yield return new WaitForSeconds(shiftToPursuitCD);
+        yield return new WaitForSeconds(_guardianConfig.shiftToPursuitCD);
         UpdateTarget(_target);
         _shiftIsFinished = true;
     }
@@ -404,17 +362,17 @@ public class Guardian : MonoBehaviour
 
             if (X == 1)
             {
-                my_renderer.material = _aggroMaterial;
+                my_renderer.material = _guardianConfig.aggroMaterial;
             }
 
             if (X == 2)
             {
-                my_renderer.material = _scanMaterial;
+                my_renderer.material = _guardianConfig.scanMaterial;
             }
 
             if (X == 3)
             {
-                my_renderer.material = _dormantMaterial;
+                my_renderer.material = _guardianConfig.dormantMaterial;
             }
         }
     }

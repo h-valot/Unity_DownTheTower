@@ -4,19 +4,20 @@ using UnityEngine;
 using UnityEngine.AI;
 
 public class PathPatrol : MonoBehaviour
-{
+{ 
+    [Header("Internal reference")]
     [SerializeField] public Guardian _guardianRef;
 
-    //private
-    public NavMeshAgent _agent;
+    // public
+    [Header("Patrol Path")]
+    [SerializeField] private Transform[] _patrolPoints;
 
-    //public
-    public Transform[] _patrolPoints;
-    public int _targetPoint;
-    public bool _aggro;
-    public bool dontPatrol;
+    // private
+    private NavMeshAgent _agent;
+    private bool _aggro;
+    private bool dontPatrol;
+    private int _targetPoint;
 
-    // Start is called before the first frame update
     void Start()
     {
         _agent = GetComponent<NavMeshAgent>();
