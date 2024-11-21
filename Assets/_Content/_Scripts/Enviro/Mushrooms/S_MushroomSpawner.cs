@@ -1,0 +1,105 @@
+using NaughtyAttributes;
+using Obi;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using Unity.Mathematics;
+using UnityEditor.PackageManager;
+using UnityEngine;
+
+public class MushroomSpawner : MonoBehaviour
+{
+
+    [Header("Sphere Properties")]
+    [SerializeField] private float _radius = 1;
+    [SerializeField] private float _density = 5;
+
+    [Header("Mushroom Placement Properties")]
+    [SerializeField] private float _minDotAngle = 0.2f;
+
+    [Header("Mushroom Properties")]
+    [SerializeField] private GameObject _mushroomPrefab;
+    [SerializeField] private float _minSizeMultiplier = 0.5f;
+    [SerializeField] private float _maxSizeMultiplier = 1.5f;
+
+    public List<GameObject> mushroomList = new List<GameObject>();
+
+    [Button]
+    public void Draw()
+    {
+        Clear();
+
+        float phi = Mathf.PI * (Mathf.Sqrt(5f) - 1f);
+        int samples = GetRaycastSamples();
+
+        LayerMask raycastLayerMask = new LayerMask();
+        raycastLayerMask |= (1 << LayerMask.NameToLayer("NoCollision_NoRaycast"));
+
+        for (int i = 0; i < samples; i++)
+        {
+            float y = 1f - ((float)i / ((float)samples - 1f)) * 2f;
+            float yRadius = Mathf.Sqrt(1 - y * y);
+
+            float theta = phi * i;
+
+            float x = Mathf.Cos(theta) * yRadius;
+            float z = Mathf.Sin(theta) * yRadius;
+
+            Vector3 localDirection = new Vector3(x, y, z);
+            if (Physics.Raycast(transform.position, localDirection, out RaycastHit hitInfo, _radius, ~raycastLayerMask)) SpawnMushroom(hitInfo);
+        }
+    }
+
+    [Button] 
+    public void Clear()
+    {
+        while(mushroomList.Count > 0)
+        {
+            GameObject tempMushroom = mushroomList[0];
+            mushroomList.RemoveAt(0);
+            DestroyImmediate(tempMushroom);
+        }
+    }
+
+    private Vector3 GetNextRayDirection()
+    {
+
+        return Vector3.forward;
+    }
+
+    private int GetRaycastSamples()
+    {
+        float area = 4 * Mathf.PI * Mathf.Pow(_radius, 2);
+        return Mathf.RoundToInt(area * _density);
+    }
+
+    private void SpawnMushroom(RaycastHit hitInfo)
+    {
+        float scale = UnityEngine.Random.Range(_minSizeMultiplier, _maxSizeMultiplier);
+
+        if (!IsNormalFacingOrigin(hitInfo) || !HasEnoughRoom(hitInfo, _mushroomPrefab.transform.localScale.x / 2)) return;
+
+        GameObject newMushroom = Instantiate(_mushroomPrefab, hitInfo.point, Quaternion.FromToRotation(Vector3.up, hitInfo.normal), transform);
+        newMushroom.transform.localScale = new Vector3(newMushroom.transform.localScale.x * scale, newMushroom.transform.localScale.y * scale, newMushroom.transform.localScale.z * scale);
+        mushroomList.Add(newMushroom);
+        
+    }
+
+    private bool HasEnoughRoom(RaycastHit hitInfo, float radius)
+    {
+        RaycastHit[] hitList = Physics.SphereCastAll(hitInfo.point, radius, Vector3.zero);
+        return hitList.Length < 1;
+    }
+
+    private bool IsNormalFacingOrigin(RaycastHit hitInfo)
+    {
+        Vector3 rayDirection = (transform.position - hitInfo.point).normalized;
+        return _minDotAngle <= Vector3.Dot(rayDirection, hitInfo.normal);
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.magenta;
+        Gizmos.DrawWireSphere(transform.position, _radius);
+    }
+}
