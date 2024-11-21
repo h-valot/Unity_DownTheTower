@@ -78,7 +78,7 @@ public class CharacterInput : MonoBehaviour
 
 	public void OnMove(InputValue value)
 	{
-		_move = value.Get<Vector2>();
+        _move = value.Get<Vector2>();
 		_rseMove.Call(_move);
 	}
 
@@ -175,4 +175,9 @@ public class CharacterInput : MonoBehaviour
 	{
 		_rseHideUI.Call();
 	}
+
+    public void OnPause()
+    {
+       _rsePause.Call();
+    }
 }
