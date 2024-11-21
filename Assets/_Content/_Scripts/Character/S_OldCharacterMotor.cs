@@ -38,8 +38,7 @@ public class OldCharacterMotor : MonoBehaviour
 	[Foldout("Scriptable references")] [SerializeField] private RSE_Craft m_rseCraft;
 	[Foldout("Scriptable references")] [SerializeField] private RSE_Interact m_rseInteract;
 	[Foldout("Scriptable references")] [SerializeField] private RSE_CancelAction m_rseCancelAction;
-	[Foldout("Scriptable references")] [SerializeField] private RSO_CanInteract m_rseCanInteract;
-	[Foldout("Scriptable references")] [SerializeField] private RSO_CanRecycle m_rseCanRecycle;
+	[Foldout("Scriptable references")] [SerializeField] private RSO_RecycleInputLocked m_rsoRecycleInputLocked;
 	[Foldout("Scriptable references")] [SerializeField] private RSE_Recycle m_rseRecycle;
 	[Foldout("Scriptable references")] [SerializeField] private RSE_ToggleInputs m_rseToggleInputs;
 	[Foldout("Scriptable references")] [SerializeField] private RSE_KillCharacter m_rseKillCharacter;
@@ -2183,15 +2182,15 @@ public class OldCharacterMotor : MonoBehaviour
 
 	private void CheckShowInteract()
 	{
-		m_rseCanInteract.value = (
-			m_validInteractibles.Count > 0 
-			&& _currentState == AnimationState.LOCOMOTION
-		);
+		// m_rseCanInteract.value = (
+		// 	m_validInteractibles.Count > 0 
+		// 	&& _currentState == AnimationState.LOCOMOTION
+		// );
     }
 
 	private void CheckShowRecycle(bool isRecyclable)
 	{ 
-		m_rseCanRecycle.value = (
+		m_rsoRecycleInputLocked.value = (
 			isRecyclable 
 			&& _currentState == AnimationState.LOCOMOTION
 		);

@@ -12,36 +12,36 @@ public class InputAdvisor : MonoBehaviour
     [Header("External References")]
     [SerializeField] private RSE_HideUI m_rseHideUI;
 	[Space(5)]
-    [SerializeField] private RSO_CanInteract m_rsoCanInteract;
-    [SerializeField] private RSO_CanRecycle m_rsoCanRecycle;
     [SerializeField] private RSO_CharacterState m_rsoCharacterState;
+	[SerializeField] private RSO_InteractableValid m_rsoInteractableValid;
+	[SerializeField] private RSO_InteractableRecyclable m_rsoInteractableRecyclable;
 
-    private bool m_isActive = true;
+	private bool m_isActive = true;
 
     private void OnEnable()
     {
-        m_rsoCanInteract.OnChanged += ToggleInteract;
-        m_rsoCanRecycle.OnChanged += ToggleRecycle;
         m_rseHideUI.action += ToggleUI;
+		m_rsoInteractableValid.OnChanged += ToggleInteract;
+		m_rsoInteractableRecyclable.OnChanged += ToggleRecycle;
         m_rsoCharacterState.OnChanged += SwitchAdvisorInputs;
     }
 
     private void OnDisable()
     {
-        m_rsoCanInteract.OnChanged -= ToggleInteract;
-        m_rsoCanRecycle.OnChanged -= ToggleRecycle;
         m_rseHideUI.action -= ToggleUI;
+		m_rsoInteractableValid.OnChanged -= ToggleInteract;
+		m_rsoInteractableRecyclable.OnChanged -= ToggleRecycle;
         m_rsoCharacterState.OnChanged -= SwitchAdvisorInputs;
     }
 
     private void ToggleInteract()
     {
-        m_graphicInteract.SetActive(m_rsoCanInteract.value);
+        m_graphicInteract.SetActive(m_rsoInteractableValid.value);
     }
 
     private void ToggleRecycle()
     {
-        m_graphicRecycle.SetActive(m_rsoCanRecycle.value);
+        m_graphicRecycle.SetActive(m_rsoInteractableRecyclable.value);
     }
 
     private void ToggleUI()

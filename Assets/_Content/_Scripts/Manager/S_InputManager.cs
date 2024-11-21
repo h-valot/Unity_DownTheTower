@@ -25,9 +25,8 @@ public class InputManager : MonoBehaviour
 	[SerializeField] private RSE_Climb m_rseClimb;
 	[Space(5)]
 	[SerializeField] private RSO_GamePaused m_rsoGamePaused;
-	[SerializeField] private RSO_CanCraft m_rsoCanCraft;
-	[SerializeField] private RSO_CanRecycle m_rsoCanRecycle;
-	[SerializeField] private RSO_CanInteract m_rsoCanInteract;
+	[SerializeField] private RSO_CraftInputLocked m_rsoCraftInputLocked;
+	[SerializeField] private RSO_RecycleInputLocked m_rsoRecycleInputLocked;
 
 	private Vector2 m_move;
 	private Vector2 m_look;
@@ -35,6 +34,13 @@ public class InputManager : MonoBehaviour
 	private bool m_throw;
 	private bool m_jump;
 	private bool m_climb;
+
+	private void Awake()
+	{
+		// Reset values
+		m_rsoCraftInputLocked.value = false;
+		m_rsoRecycleInputLocked.value = false;
+	}
 
 	private void Start()
 	{
@@ -135,9 +141,6 @@ public class InputManager : MonoBehaviour
 
 	public void OnInteract(InputValue value)
 	{
-		// Assertion
-		if (!m_rsoCanInteract.value) return;
-
 		m_rseInteract.Call();
 	}
 
@@ -149,7 +152,7 @@ public class InputManager : MonoBehaviour
     public void OnCraftTorch(InputValue value)
     {
 		// Assertion
-		if (!m_rsoCanCraft.value) return;
+		if (!m_rsoCraftInputLocked.value) return;
 
         m_rseCraft.Call(CraftType.TORCH, value.isPressed);
     }
@@ -157,7 +160,7 @@ public class InputManager : MonoBehaviour
     public void OnCraftLadder(InputValue value)
 	{
 		// Assertion
-		if (!m_rsoCanCraft.value) return;
+		if (!m_rsoCraftInputLocked.value) return;
 
 		m_rseCraft.Call(CraftType.DEPRECATED_LADDER, value.isPressed);
     }
@@ -165,7 +168,7 @@ public class InputManager : MonoBehaviour
     public void OnCraftRope(InputValue value)
 	{
 		// Assertion
-		if (!m_rsoCanCraft.value) return;
+		if (!m_rsoCraftInputLocked.value) return;
 
 		m_rseCraft.Call(CraftType.ROPE, value.isPressed);
 	}
@@ -173,7 +176,7 @@ public class InputManager : MonoBehaviour
     public void OnRecycle(InputValue value)
 	{
 		// Assertion
-		if (!m_rsoCanRecycle.value) return;
+		if (!m_rsoRecycleInputLocked.value) return;
 
 		m_rseRecycle.Call();
     }

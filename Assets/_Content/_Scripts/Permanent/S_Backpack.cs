@@ -50,8 +50,7 @@ public class Backpack : Interactable
     {
         m_isPickedUp = true;
 		m_characterInteract.Pickup(this);
-        m_sphereCollider.enabled = false;
-    }
+	}
 
     private void ResetBackpack()
     {
@@ -69,6 +68,11 @@ public class Backpack : Interactable
 	{
 		m_characterInteract = characterInteract;
 		InteractionTrigger();
+	}
+
+	public void ToggleCollider(bool isEnabled)
+	{
+		m_sphereCollider.enabled = isEnabled;
 	}
 
 	public void HandleCrafting(bool isStarting, float duration)

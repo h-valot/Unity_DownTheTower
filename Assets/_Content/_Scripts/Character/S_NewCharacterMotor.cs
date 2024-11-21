@@ -28,8 +28,9 @@ public class NewCharacterMotor : MonoBehaviour
 	[Space(5)]
 	[SerializeField] private RSO_MovementDatas m_rsoMovementDatas;
 	[SerializeField] private RSO_CameraStyle m_rsoCameraStyle;
-	[SerializeField] private RSO_CanCraft m_rsoCanCraft;
-	[SerializeField] private RSO_CanRecycle m_rsoCanRecycle;
+	[SerializeField] private RSO_CraftInputLocked m_rsoCraftInputLocked;
+	[SerializeField] private RSO_RecycleInputLocked m_rsoRecycleInputLocked;
+	[SerializeField] private RSO_CharacterState m_rsoCharacterState;
 
 	#endregion
 
@@ -51,9 +52,6 @@ public class NewCharacterMotor : MonoBehaviour
     private bool m_isRunning;
     private bool m_hasRope;
     private bool m_isCrafting;
-
-    // - State machine -
-    private BehaviorState m_currentState;
 
 	// - Craft state -
 	private CraftType m_craftType;
@@ -84,8 +82,8 @@ public class NewCharacterMotor : MonoBehaviour
 
 		m_characterGraphics.Initialize(m_aimingLookTo, m_rigidbody);
 
-		m_rsoCanCraft.value = false;
-		m_rsoCanRecycle.value = false;
+		m_rsoCraftInputLocked.value = false;
+		m_rsoRecycleInputLocked.value = false;
 	}
 
     private void OnEnable()
@@ -98,7 +96,7 @@ public class NewCharacterMotor : MonoBehaviour
     {
         UnsubscibeAllInputs();
         m_characterConfig.OnConfigChanged -= UpdateDrag;
-        m_currentState = BehaviorState.NONE;
+        m_rsoCharacterState.value = BehaviorState.NONE;
     }
 
     private void FixedUpdate()
@@ -114,7 +112,7 @@ public class NewCharacterMotor : MonoBehaviour
 
         _movementDatas.dataToString.Add((Mathf.Round(m_rigidbody.velocity.magnitude * 100f) / 100f).ToString());
         _movementDatas.dataToString.Add(m_isGrounded.ToString());
-        _movementDatas.dataToString.Add(m_currentState.ToString());
+        _movementDatas.dataToString.Add(m_rsoCharacterState.value.ToString());
         m_rsoMovementDatas.value = _movementDatas;
 
 		if (m_isAiming) m_handObject.PreviewThrow(m_cameraMotor.transform);
@@ -150,7 +148,7 @@ public class NewCharacterMotor : MonoBehaviour
 
     private void SubscribeStateInputs()
     {
-		switch (m_currentState)
+		switch (m_rsoCharacterState.value)
         {
             case BehaviorState.LOCOMOTION:
                 m_rseMove.action += UpdateMoveInput;
@@ -196,19 +194,19 @@ public class NewCharacterMotor : MonoBehaviour
 	/// </summary>
 	private void DetermineState()
     {
-        if (m_currentState != BehaviorState.LOCOMOTION && m_isGrounded && !m_isCrafting)
+        if (m_rsoCharacterState.value != BehaviorState.LOCOMOTION && m_isGrounded && !m_isCrafting)
         {
             SwitchState(BehaviorState.LOCOMOTION);
         }
-        else if (m_currentState != BehaviorState.FALL && !m_isGrounded && !m_hasRope)
+        else if (m_rsoCharacterState.value != BehaviorState.FALL && !m_isGrounded && !m_hasRope)
         {
             SwitchState(BehaviorState.FALL);
         }
-        else if (m_currentState != BehaviorState.ROPE && !m_isGrounded && m_hasRope)
+        else if (m_rsoCharacterState.value != BehaviorState.ROPE && !m_isGrounded && m_hasRope)
         {
             SwitchState(BehaviorState.ROPE);
         }
-        else if (m_currentState != BehaviorState.CRAFT && m_currentState == BehaviorState.LOCOMOTION && m_isCrafting)
+        else if (m_rsoCharacterState.value != BehaviorState.CRAFT && m_rsoCharacterState.value == BehaviorState.LOCOMOTION && m_isCrafting)
         {
             SwitchState(BehaviorState.CRAFT);
         }
@@ -231,10 +229,10 @@ public class NewCharacterMotor : MonoBehaviour
     /// <param name="newState">New state to trigger</param>
     private void EnterState(BehaviorState newState)
     {
-        m_currentState = newState;
+		m_rsoCharacterState.value = newState;
 		SubscribeStateInputs();
 
-		switch (m_currentState)
+		switch (m_rsoCharacterState.value)
         {
             case BehaviorState.LOCOMOTION:
                 EnterLocomotionState();
@@ -259,7 +257,7 @@ public class NewCharacterMotor : MonoBehaviour
     /// </summary>
     private void FixedUpdateState()
     {
-        switch (m_currentState)
+        switch (m_rsoCharacterState.value)
         {
             case BehaviorState.LOCOMOTION:
                 FixedUpdateLocomotionState();
@@ -286,7 +284,7 @@ public class NewCharacterMotor : MonoBehaviour
 	{
 		UnsubscibeAllInputs();
 
-		switch (m_currentState)
+		switch (m_rsoCharacterState.value)
         {
             case BehaviorState.LOCOMOTION:
                 ExitLocomotionState();
@@ -382,11 +380,11 @@ public class NewCharacterMotor : MonoBehaviour
     /// </summary>
     private void UpdateDrag()
     {
-        if (m_currentState == BehaviorState.LOCOMOTION)
+        if (m_rsoCharacterState.value == BehaviorState.LOCOMOTION)
         {
             m_rigidbody.drag = m_characterConfig.dragGround;
         }
-        else if (m_currentState == BehaviorState.FALL || m_currentState == BehaviorState.ROPE)
+        else if (m_rsoCharacterState.value == BehaviorState.FALL || m_rsoCharacterState.value == BehaviorState.ROPE)
         {
             m_rigidbody.drag = m_characterConfig.dragFall;
         }
@@ -567,10 +565,6 @@ public class NewCharacterMotor : MonoBehaviour
 			{
 				if (m_handObject.Type == CraftType.TORCH)
 				{
-					// _handObject.transform.SetParent(_robotSocket, false);
-					// _robotObject = _handObject;
-					// _handObject = null;
-
 					SwitchObjects(ref m_handObject, ref m_robotObject, m_robotSocket);
 				}
 				else if (m_handObject.Type != CraftType.ROPE)
@@ -601,8 +595,8 @@ public class NewCharacterMotor : MonoBehaviour
 	private void ToggleCraft(CraftType craftType, bool isInputPressed)
 	{
 		// Prevent switching to craft state if not in locomotion or crafting state or already crafting another item
-		if (m_currentState != BehaviorState.LOCOMOTION 
-		|| m_currentState != BehaviorState.CRAFT)
+		if (m_rsoCharacterState.value != BehaviorState.LOCOMOTION 
+		|| m_rsoCharacterState.value != BehaviorState.CRAFT)
 		{
 			// If craft button is pressed
 			if (isInputPressed)
