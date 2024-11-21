@@ -3,7 +3,7 @@ using UnityEngine;
 public class CharacterGlow : MonoBehaviour
 {
     [Header("Scriptables references")]
-    [SerializeField] private OldCharacterConfig m_characterConfig;
+    [SerializeField] private NewCharacterConfig m_characterConfig;
 	[Space(5)]
     [SerializeField] private RSO_CharacterPosition m_rsoCharacterPosition;
 
@@ -12,13 +12,13 @@ public class CharacterGlow : MonoBehaviour
 		UpdateGlowGlobalParameters();
 
         m_rsoCharacterPosition.OnChanged += UpdateCharPositionShaderGlobalParameter;
-        m_characterConfig.OnHierarchyChanged += UpdateGlowGlobalParameters;
+        m_characterConfig.OnConfigChanged += UpdateGlowGlobalParameters;
 	}
 
     private void OnDisable()
     {
         m_rsoCharacterPosition.OnChanged -= UpdateCharPositionShaderGlobalParameter;
-        m_characterConfig.OnHierarchyChanged -= UpdateGlowGlobalParameters;
+        m_characterConfig.OnConfigChanged -= UpdateGlowGlobalParameters;
     }
 
     private void UpdateCharPositionShaderGlobalParameter()

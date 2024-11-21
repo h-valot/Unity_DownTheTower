@@ -1,4 +1,5 @@
 using System.Collections;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class NewCharacterMotor : MonoBehaviour
@@ -24,6 +25,9 @@ public class NewCharacterMotor : MonoBehaviour
     [SerializeField] private RSE_Jump m_rseJump;
 	[SerializeField] private RSE_Craft m_rseCraft;
 	[SerializeField] private RSE_Throw m_rseThrow;
+	[SerializeField] private RSE_Run m_rseRun;
+	[SerializeField] private RSE_Climb m_rseClimb;
+	[SerializeField] private RSE_Cancel m_rseCancel;
 	[SerializeField] private RSE_BackpackCrafting m_rseBackpackCrafting;
 	[Space(5)]
 	[SerializeField] private RSO_MovementDatas m_rsoMovementDatas;
@@ -31,6 +35,7 @@ public class NewCharacterMotor : MonoBehaviour
 	[SerializeField] private RSO_CraftInputLocked m_rsoCraftInputLocked;
 	[SerializeField] private RSO_RecycleInputLocked m_rsoRecycleInputLocked;
 	[SerializeField] private RSO_CharacterState m_rsoCharacterState;
+	[SerializeField] private RSO_CharacterPosition m_rsoCharacterPosition;
 
 	#endregion
 
@@ -51,11 +56,10 @@ public class NewCharacterMotor : MonoBehaviour
     private Vector3 m_groundNormal;
     private float m_coyoteTime;
 
-
 	// - Movement -
     private bool m_isRunning;
     private bool m_hasJumped;
-    private bool m_hasRope;
+    private bool HasRope => m_rope && m_rope.IsPlaced;
     private bool m_isCrafting;
 
 	// - Craft state -
@@ -66,13 +70,15 @@ public class NewCharacterMotor : MonoBehaviour
 	private bool m_isAiming;
 
 	// - Rope state -
-	private Rope m_rope;
+	private bool m_isHolding;
+	private bool m_isClimbing;
+	public bool IsJumpingPressed { get; private set; }
 
 	#endregion
 
 	#region MONOBEHAVIOR
 
-    public void Initialize(Quaternion startRotation)
+	public void Initialize(Quaternion startRotation)
     {
         // Update drag in rigidbody if changed in characterConfig
         m_characterConfig.OnConfigChanged += UpdateDrag;
@@ -105,11 +111,13 @@ public class NewCharacterMotor : MonoBehaviour
 
     private void FixedUpdate()
 	{
-        //tkt fréro c'est pour pas soft lock le spherecast de detection du sol
+        // Tkt fréro c'est pour pas soft lock le spherecast de detection du sol
         if (m_rigidbody.position == Vector3.zero)
         {
             m_rigidbody.position = new Vector3(0.01f, 0f, 0f);
         }
+
+		if (m_rope && m_rope.IsPlaced) m_rope.UpdateHoldLength();
 
 		CheckGround();
         DetermineState();
@@ -128,9 +136,9 @@ public class NewCharacterMotor : MonoBehaviour
 		if (m_isAiming) m_handObject.PreviewThrow(m_cameraMotor.transform);
 	}
 
-    #if UNITY_EDITOR
+#if UNITY_EDITOR
 
-    private void OnDrawGizmos()
+	private void OnDrawGizmos()
     {
         Gizmos.color = Color.cyan;
         if(m_raycastHits != null)
@@ -139,10 +147,16 @@ public class NewCharacterMotor : MonoBehaviour
             {
                 Gizmos.DrawSphere(_hit.point, 0.05f);
             }
-        }
-    }
+		}
 
-    #endif
+		if (m_rope && m_rope.IsPlaced)
+		{
+			Gizmos.color = Color.magenta;
+			Gizmos.DrawWireSphere(m_rope.Folds[^1], m_rope.HoldLength);
+		}
+	}
+
+#endif
 
     #endregion
 
@@ -151,9 +165,13 @@ public class NewCharacterMotor : MonoBehaviour
     private void UnsubscibeAllInputs()
     {
         m_rseMove.action -= UpdateMoveInput;
-        m_rseJump.action -= Jump;
+		m_rseRun.action -= UpdateRunInput;
+		m_rseJump.action -= Jump;
 		m_rseCraft.action -= ToggleCraft;
 		m_rseThrow.action -= ToggleAim;
+		m_rseClimb.action -= UpdateClimbInput;
+
+		m_rseCancel.action -= CancelRope;
 	}
 
     private void SubscribeStateInputs()
@@ -162,6 +180,7 @@ public class NewCharacterMotor : MonoBehaviour
         {
             case BehaviorState.LOCOMOTION:
                 m_rseMove.action += UpdateMoveInput;
+				m_rseRun.action += UpdateRunInput;
                 m_rseJump.action += Jump;
 				m_rseCraft.action += ToggleCraft;
 				m_rseThrow.action += ToggleAim;
@@ -169,7 +188,8 @@ public class NewCharacterMotor : MonoBehaviour
 
             case BehaviorState.FALL:
                 m_rseMove.action += UpdateMoveInput;
-                m_rseThrow.action += ToggleAim;
+				m_rseRun.action += UpdateRunInput;
+				m_rseThrow.action += ToggleAim;
 				break;
 
             case BehaviorState.CRAFT:
@@ -178,9 +198,10 @@ public class NewCharacterMotor : MonoBehaviour
 
             case BehaviorState.ROPE:
 				m_rseMove.action += UpdateMoveInput;
-				// _rseJump.action += Jump;
-				m_rseCraft.action += ToggleCraft;
+				m_rseRun.action += UpdateRunInput;
 				m_rseThrow.action += ToggleAim;
+				m_rseClimb.action += UpdateClimbInput;
+				m_rseCancel.action += CancelRope;
 				break;
         }
 	}
@@ -190,10 +211,52 @@ public class NewCharacterMotor : MonoBehaviour
 		m_moveInput = input;
 	}
 
-	private void UpdateWalkRun(bool ispressed)
+	private void UpdateRunInput(bool ispressed)
 	{
 		m_isRunning = ispressed;
+		Holding(m_isRunning);
     }
+
+	private void Holding(bool isHolding)
+	{
+		if (IsJumpingPressed && !isHolding) return;
+
+		if (m_rope == null)
+		{
+			m_isHolding = false;
+			return;
+		}
+
+		// Handle both hold methods
+		switch (m_characterConfig.ropeHoldingMethod)
+		{
+			case RopeHolding.HOLD_TO_STOP:
+				ToggleRopeHolding(isHolding);
+				break;
+
+			case RopeHolding.HOLD_TO_LET_GO:
+				ToggleRopeHolding(!isHolding);
+				break;
+		}
+
+		m_isHolding = isHolding;
+	}
+
+	private void Holding(Triome isHolding)
+	{
+		if (isHolding == Triome.NEITHER)
+		{
+			print("CHARACTER_MOTOR: Assert - isHolding value is equal to NEITHER.");
+			return;
+		}
+
+		Holding(isHolding == Triome.TRUE);
+	}
+
+	private void UpdateClimbInput(bool isClimbing)
+	{
+		m_isClimbing = isClimbing;
+	}
 
 	#endregion
 
@@ -208,11 +271,11 @@ public class NewCharacterMotor : MonoBehaviour
         {
             SwitchState(BehaviorState.LOCOMOTION);
         }
-        else if (m_rsoCharacterState.value != BehaviorState.FALL && !m_isGrounded && !m_hasRope)
+        else if (m_rsoCharacterState.value != BehaviorState.FALL && !m_isGrounded && !HasRope)
         {
             SwitchState(BehaviorState.FALL);
         }
-        else if (m_rsoCharacterState.value != BehaviorState.ROPE && !m_isGrounded && m_hasRope)
+        else if (m_rsoCharacterState.value != BehaviorState.ROPE && !m_isGrounded && HasRope)
         {
             SwitchState(BehaviorState.ROPE);
         }
@@ -378,18 +441,6 @@ public class NewCharacterMotor : MonoBehaviour
     
     #region MOVEMENT
 
-    private void Move()
-    {
-        SetFriction();
-
-        if  (m_moveInput != Vector2.zero)
-        {
-            Vector3 _desiredSpeed = (m_cameraMotor.PlanarRight * m_moveInput.x + m_cameraMotor.PlanarForward * m_moveInput.y).normalized;
-            _desiredSpeed *= m_characterConfig.walkSpeed;
-            m_rigidbody.AddForce(_desiredSpeed - m_rigidbody.velocity, ForceMode.Acceleration);
-        }
-    }
-
     /// <summary>
     /// if player is not moving and grounded:
     /// Set the friction to a high value to prevent sliding on slope while immobile
@@ -440,21 +491,14 @@ public class NewCharacterMotor : MonoBehaviour
         {
             Vector3 desiredSpeed = (m_cameraMotor.PlanarRight * m_moveInput.x + m_cameraMotor.PlanarForward * m_moveInput.y).normalized;
 
-            //orient speed along slope
+            // Orient speed along slope
             Vector3 slopeRight = Vector3.Cross(Vector3.up, m_groundNormal);
             desiredSpeed = Quaternion.AngleAxis(Vector3.SignedAngle(Vector3.up, m_groundNormal, slopeRight), slopeRight) * desiredSpeed;
 
-            //set desired speed magnitude based on walk/run state
-            if (m_isRunning)
-            {
-                desiredSpeed *= m_characterConfig.runSpeed;
-            }
-            else
-            {
-                desiredSpeed *= m_characterConfig.walkSpeed;
-            }
+            // Set desired speed magnitude based on walk/run state
+            desiredSpeed *= m_isRunning ? m_characterConfig.runSpeed : m_characterConfig.walkSpeed;
 
-            //apply final force to move character, auto clamp the speed by substractiong actual speed to desired speed
+            // Apply final force to move character, auto clamp the speed by substractiong actual speed to desired speed
             m_rigidbody.AddForce(desiredSpeed - m_rigidbody.velocity, ForceMode.Acceleration);
         }
     }
@@ -463,7 +507,7 @@ public class NewCharacterMotor : MonoBehaviour
     /// (1) Check if there is valid points to step on
     /// (2) Select the highest point among the point in front the character
     /// (3) On the selected point, check if there is really a object to step on if front
-    /// (4) Check if there there is a flat surface to step onto (<45�)
+    /// (4) Check if there there is a flat surface to step onto (<45 degrees)
     /// </summary>
     private void HandleStepOn()
     {
@@ -477,12 +521,12 @@ public class NewCharacterMotor : MonoBehaviour
                 Vector3 hitDirection = _hit.point - transform.position;
                 hitDirection = new Vector3(hitDirection.x, 0, hitDirection.z);
 
-                //check if hit is in front of character
+                // Check if hit is in front of character
                 if (Vector3.Dot(moveInput3D, hitDirection) > 0.15)
                 {
                     if (_hit.point.y - transform.position.y < m_characterConfig.stepOnHeight)
                     {
-                        //We take the highest that is higher than skin width to not trigger step on very small objects
+                        // We take the highest that is higher than skin width to not trigger step on very small objects
                         if (_hit.point.y > stepOnTarget.y && _hit.point.y > transform.position.y + m_characterConfig.skinWidth)
                         {
                             stepOnTarget = _hit.point;
@@ -491,15 +535,15 @@ public class NewCharacterMotor : MonoBehaviour
                 }
             }
 
-            if(stepOnTarget != transform.position)
+            if (stepOnTarget != transform.position)
             {
-                //Check if there is really an object to step on in the speed direction, to prevent steping on end of slope
+                // Check if there is really an object to step on in the speed direction, to prevent steping on end of slope
                 Vector3 start = new Vector3(m_rigidbody.position.x, m_rigidbody.position.y + m_characterConfig.skinWidth, m_rigidbody.position.z);
                 Vector3 direction = m_rigidbody.velocity.normalized;
                 float distance = m_collider.radius * 2;
                 if (Physics.Raycast(start, direction, distance, ~m_layerMaskToIgnore))
                 {
-                    //Check if there is a flat surface to step on (<45�)
+                    // Check if there is a flat surface to step on (<45 degrees)
                     start = stepOnTarget + (new Vector3(stepOnTarget.x, 0, stepOnTarget.z) - new Vector3(m_rigidbody.position.x, 0, m_rigidbody.position.z)).normalized * m_characterConfig.skinWidth + new Vector3(0, m_characterConfig.skinWidth, 0);
                     direction = Vector3.down;
                     distance = m_characterConfig.skinWidth * 2;
@@ -518,14 +562,12 @@ public class NewCharacterMotor : MonoBehaviour
     /// </summary>
     private void Jump(bool isPressed)
     {
-        if (isPressed)
-        {
-            if(!m_hasJumped)
-            {
-                m_rigidbody.AddForce(Vector3.up * m_characterConfig.jumpForce, ForceMode.Impulse);
-                m_hasJumped = true;
-            }
-        }
+		// Assertions
+        if (!isPressed) return;
+		if(m_hasJumped) return;
+
+		m_rigidbody.AddForce(Vector3.up * m_characterConfig.jumpForce, ForceMode.Impulse);
+		m_hasJumped = true;
     }
 
     /// <summary>
@@ -538,7 +580,7 @@ public class NewCharacterMotor : MonoBehaviour
     {
         Vector3 desiredSpeedForce = (m_cameraMotor.PlanarRight * m_moveInput.x + m_cameraMotor.PlanarForward * m_moveInput.y).normalized;
 
-        //set desired speed magnitude based on walk/run state
+        // Set desired speed magnitude based on walk/run state
         if (m_isRunning)
         {
             desiredSpeedForce *= m_characterConfig.runSpeed;
@@ -548,7 +590,7 @@ public class NewCharacterMotor : MonoBehaviour
             desiredSpeedForce *= m_characterConfig.walkSpeed;
         }
 
-        //apply final force to move character, auto clamp the speed by substractiong actual speed to desired speed
+        // Apply final force to move character, auto clamp the speed by substractiong actual speed to desired speed
         m_rigidbody.AddForce((desiredSpeedForce - m_rigidbody.velocity) * m_characterConfig.fallingControlFactor, ForceMode.Acceleration);
     }
 
@@ -572,11 +614,11 @@ public class NewCharacterMotor : MonoBehaviour
 
     }
 
-    #endregion
+	#endregion
 
-    #region FALL STATE
+	#region FALL STATE
 
-    private void EnterFallState()
+	private void EnterFallState()
     {
         UpdateDrag();
         SetFriction();
@@ -594,24 +636,139 @@ public class NewCharacterMotor : MonoBehaviour
         m_hasJumped = false;
     }
 
-    #endregion
+	#endregion
 
-    #region ROPE STATE
+	#region ROPE STATE
 
-    private void EnterRopeState()
+	private Rope m_rope;
+
+	private bool m_ropeConstraintAppliedLastly;
+	private Vector3 m_positionStartFall;
+
+	private const float k_fallingForcesThreshold = 0.2f;
+
+	private void EnterRopeState()
 	{
-		UpdateDrag();
+
 	}
 
-    private void FixedUpdateRopeState()
+	private void FixedUpdateRopeState()
 	{
-		Move();
+		if (IsFallingWithRope())
+		{
+			FixedUpdateFallState();
+			return;
+		}
+
+		MoveRope();
 	}
 
-    private void ExitRopeState()
-    {
-		
-    }
+	private void ExitRopeState()
+	{
+
+	}
+
+	private void MoveRope()
+	{
+
+	}
+
+	private bool m_isCancelling;
+	private Coroutine m_cancelRopeCoroutine;
+	private float m_cancelRopeTimer;
+	private float k_cancelRopeThreshold;
+
+	private void CancelRope(bool isPressed)
+	{
+		m_isCancelling = isPressed;
+
+		if (m_isCancelling) 
+		{
+			m_cancelRopeCoroutine = StartCoroutine(StartCancellingRope());
+		}
+		else if (!m_isCancelling 
+		&& m_cancelRopeCoroutine != null)
+		{
+			StopCoroutine(m_cancelRopeCoroutine);
+		}
+	}
+
+	private IEnumerator StartCancellingRope()
+	{
+		while (m_cancelRopeTimer < k_cancelRopeThreshold)
+		{
+			m_cancelRopeTimer += Time.deltaTime;
+			yield return null;
+		}
+
+		DesequipRope();
+	}
+
+	/// <summary>
+	/// 	Is the character falling based on the rope holding method.
+	/// </summary>
+	private bool IsFallingWithRope()
+	{
+		// Assert: the character is falling if there is no more rope
+		if (m_rope == null) return true;
+
+		bool isFalling = false;
+		switch (m_characterConfig.ropeHoldingMethod)
+		{
+			case RopeHolding.HOLD_TO_STOP:
+				isFalling = !m_isHolding;
+				break;
+
+			case RopeHolding.HOLD_TO_LET_GO:
+				if (m_isHolding)
+				{
+					isFalling = true;
+				}
+				else
+				{
+					// If the character IS NOT holding the rope, let it fall till it reaches the rope limit constraint
+					isFalling = (m_rope.Folds[^1] - m_rsoCharacterPosition.value).magnitude < m_rope.HoldLength - k_fallingForcesThreshold;
+				}
+				break;
+		}
+		return isFalling;
+	}
+
+	/// <summary>
+	/// 	Detach the rope from the character.
+	/// </summary>
+	private void DesequipRope()
+	{
+		m_rope.Detach();
+		m_rope = null;
+		m_isHolding = false;
+	}
+
+	private void ToggleRopeHolding(bool enable)
+	{
+		if (enable)
+		{
+			m_rope.UpdateHoldLength();
+			if (m_rope.HoldLength == -1) DesequipRope(); // handle error code 
+		}
+		else
+		{
+			// Reset the gravity velocity
+			m_positionStartFall = m_rsoCharacterPosition.value;
+
+			if (m_ropeConstraintAppliedLastly && IsJumpingPressed) DesequipRope();
+
+			ApplyFreeRopeForce(IsJumpingPressed
+				? m_characterConfig.jumpOffRopeModifier
+				: m_characterConfig.freeFallFromRopeModifier
+			);
+		}
+	}
+
+	private void ApplyFreeRopeForce(float modifier)
+	{
+		m_rigidbody.AddForce(m_rigidbody.velocity.normalized * m_rigidbody.velocity.magnitude * modifier, ForceMode.Impulse);
+	}
 
 	#endregion
 
@@ -653,6 +810,7 @@ public class NewCharacterMotor : MonoBehaviour
 
     private void ExitCraftState()
     {
+		print("exit");
 		if (m_craftCoroutine != null)
 		{
 			StopCoroutine(m_craftCoroutine);
@@ -660,6 +818,8 @@ public class NewCharacterMotor : MonoBehaviour
 
 			m_rseBackpackCrafting.Call(false, -1);
 		}
+
+		m_isCrafting = false;
 	}
 
 	private void ToggleCraft(CraftType craftType, bool isInputPressed)
@@ -724,7 +884,7 @@ public class NewCharacterMotor : MonoBehaviour
 
 			// Exception: rope attachment
 			m_rope = m_handObject as Rope;
-			if (m_rope != null) m_rope?.Attach(m_harness);
+			if (m_rope != null) m_rope?.Attach(m_rigidbody);
 
 			m_handObject = null;
 			SwitchObjects(ref m_robotObject, ref m_handObject, m_handSocket);

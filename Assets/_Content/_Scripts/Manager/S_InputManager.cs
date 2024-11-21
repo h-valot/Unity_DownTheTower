@@ -14,7 +14,7 @@ public class InputManager : MonoBehaviour
 	[SerializeField] private RSE_Jump m_rseJump;
 	[SerializeField] private RSE_Run m_rseRun;
 	[SerializeField] private RSE_Interact m_rseInteract;
-	[SerializeField] private RSE_CancelAction m_rseCancelAction;
+	[SerializeField] private RSE_Cancel m_rseCancelAction;
     [SerializeField] private RSE_Craft m_rseCraft;
 	[SerializeField] private RSE_Throw m_rseThrow;
     [SerializeField] private RSE_ToggleInHand m_rseToggleInHand;

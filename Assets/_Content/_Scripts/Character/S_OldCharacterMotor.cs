@@ -37,7 +37,7 @@ public class OldCharacterMotor : MonoBehaviour
 	[Foldout("Scriptable references")] [SerializeField] private RSE_ToggleInHand m_rseToggleInHand;
 	[Foldout("Scriptable references")] [SerializeField] private RSE_Craft m_rseCraft;
 	[Foldout("Scriptable references")] [SerializeField] private RSE_Interact m_rseInteract;
-	[Foldout("Scriptable references")] [SerializeField] private RSE_CancelAction m_rseCancelAction;
+	[Foldout("Scriptable references")] [SerializeField] private RSE_Cancel m_rseCancelAction;
 	[Foldout("Scriptable references")] [SerializeField] private RSO_RecycleInputLocked m_rsoRecycleInputLocked;
 	[Foldout("Scriptable references")] [SerializeField] private RSE_Recycle m_rseRecycle;
 	[Foldout("Scriptable references")] [SerializeField] private RSE_ToggleInputs m_rseToggleInputs;
@@ -225,11 +225,11 @@ public class OldCharacterMotor : MonoBehaviour
 
         if (_rope)
         {
-            if (_rope.isPlaced)
+            if (_rope.IsPlaced)
             {
 				// Magenta: rope limit & start position
                 Gizmos.color = Color.magenta;
-                Gizmos.DrawWireSphere(_rope.folds[^1], _rope.holdLength);
+                Gizmos.DrawWireSphere(_rope.Folds[^1], _rope.HoldLength);
 				Gizmos.DrawWireCube(_gizmoStartPendulumPosition, new Vector3(.5f, .5f, .5f));
 			}
         }
@@ -422,7 +422,7 @@ public class OldCharacterMotor : MonoBehaviour
 
 			// If the character is attached to a rope, switch to Rope state instead
 			// This state handles free fall and rope-attached fall.
-			if (_rope != null && _rope.isPlaced && _rope.isConnected 
+			if (_rope != null && _rope.IsPlaced && _rope.IsConnected 
 			&& _currentState != AnimationState.ROPE && _currentState != AnimationState.FALL)
 			{
 				SwitchState(AnimationState.ROPE);
@@ -1120,13 +1120,13 @@ public class OldCharacterMotor : MonoBehaviour
 
 	private void Holding(Triome isHolding)
 	{
-		if (isHolding == Triome.NONE) 
+		if (isHolding == Triome.NEITHER) 
 		{
-			print("CHARACTER_MOTOR: Assert - isHolding value is equal to NONE.");
+			print("CHARACTER_MOTOR: Assert - isHolding value is equal to NEITHER.");
 			return;
 		}
 
-		Holding(isHolding.ToBool());
+		Holding(isHolding == Triome.TRUE);
 	}
 
 	private void Climb(bool isClimbing)
@@ -1148,7 +1148,7 @@ public class OldCharacterMotor : MonoBehaviour
 		// Do various things based on the context
 
 		// Rope context
-		if (_rope != null && _rope.isPlaced)
+		if (_rope != null && _rope.IsPlaced)
 		{
 			DesequipRope();
 		}
@@ -1480,7 +1480,7 @@ public class OldCharacterMotor : MonoBehaviour
 	private float _currentClimbSpeed;
 
 	// Jump-off & free fall
-	public Triome _isJumpProlongedCached = Triome.NONE;
+	public Triome _isJumpProlongedCached = Triome.NEITHER;
 	private float _currTime;
 	private Coroutine _ropeConstraintTimer;
 	public bool _ropeConstraintAppliedLastly;
@@ -1503,7 +1503,7 @@ public class OldCharacterMotor : MonoBehaviour
 	{
 		m_rseCraft.action -= ToggleCraft;
 
-		_isJumpProlongedCached = Triome.NONE;
+		_isJumpProlongedCached = Triome.NEITHER;
 
 		_rope.UpdateHoldLength();
 		
@@ -1552,7 +1552,7 @@ public class OldCharacterMotor : MonoBehaviour
 	private void ExitRopeState()
 	{
 		_isHolding = false;
-		_isJumpProlongedCached = Triome.NONE;
+		_isJumpProlongedCached = Triome.NEITHER;
 
 		// Update inputs subscriptions
 		ToggleCraftInput(HasBackpack);
@@ -1682,8 +1682,8 @@ public class OldCharacterMotor : MonoBehaviour
 					angle: m_characterConfig.ropeOffsetAngle,
 					axis: m_characterDirection.right,
 					direction: -m_characterDirection.forward,
-					origin: _rope.folds[^1],
-					radius: _rope.holdLength,
+					origin: _rope.Folds[^1],
+					radius: _rope.HoldLength,
 					starting: m_rsoCharacterPosition.value
 				);
 
@@ -1758,9 +1758,9 @@ public class OldCharacterMotor : MonoBehaviour
 		// ---- CHARACTER IS HOLDING THE ROPE ----
 
 		// Populate useful varaibles
-		Vector3 verticalPoint = _rope.folds[^1] + Vector3.down * _rope.holdLength;
+		Vector3 verticalPoint = _rope.Folds[^1] + Vector3.down * _rope.HoldLength;
 		Vector3 towardsVertical = (m_rsoCharacterPosition.value - verticalPoint).normalized;
-		_towardsCharacter = (m_rsoCharacterPosition.value - _rope.folds[^1]).normalized;
+		_towardsCharacter = (m_rsoCharacterPosition.value - _rope.Folds[^1]).normalized;
 
 		// Get input related data
 		_ropeInputDirection = m_cameraTransform.forward * m_moveInput.y + m_cameraTransform.right * m_moveInput.x;
@@ -1800,7 +1800,7 @@ public class OldCharacterMotor : MonoBehaviour
 				else
 				{
 					// If the character IS NOT holding the rope, let it fall till it reaches the rope limit constraint
-					isFalling = (_rope.folds[^1] - m_rsoCharacterPosition.value).magnitude < _rope.holdLength - _FALLING_FORCES_THRESHOLD;
+					isFalling = (_rope.Folds[^1] - m_rsoCharacterPosition.value).magnitude < _rope.HoldLength - _FALLING_FORCES_THRESHOLD;
 				}
 				break;
 		}
@@ -1848,7 +1848,7 @@ public class OldCharacterMotor : MonoBehaviour
 		_pendulumVelocity += Vector3.down * gravityForce * Time.fixedDeltaTime;
 
 		// Cache pivot and bob positions
-		Vector3 pivotPositionCache = _rope.folds[^1];
+		Vector3 pivotPositionCache = _rope.Folds[^1];
 		Vector3 bobPositionCache = m_rsoCharacterPosition.value;
 
 		// Get bob's position after applying gravity force
@@ -1856,8 +1856,8 @@ public class OldCharacterMotor : MonoBehaviour
 		float distanceAfterGravity = Vector3.Distance(pivotPositionCache, bobPositionCache + auxiliaryMovementDelta);
 
 		// The bob acceleration is mesured in this statement. Returning an updated `m_CurrentVelocity`
-		if (distanceAfterGravity > _rope.holdLength
-		|| Mathf.Approximately(distanceAfterGravity, _rope.holdLength))
+		if (distanceAfterGravity > _rope.HoldLength
+		|| Mathf.Approximately(distanceAfterGravity, _rope.HoldLength))
 		{
 			Vector3 tensionDirection = (pivotPositionCache - bobPositionCache).normalized;
 
@@ -1866,7 +1866,7 @@ public class OldCharacterMotor : MonoBehaviour
 			float tensionForce = gravityForce * Mathf.Cos(Mathf.Deg2Rad * inclinationAngle);
 
 			// Generate the counter force to make the bob stay within the circle : centripetal force
-			tensionForce += m_characterConfig.mass * Mathf.Pow(_pendulumVelocity.magnitude, 2) / _rope.holdLength;
+			tensionForce += m_characterConfig.mass * Mathf.Pow(_pendulumVelocity.magnitude, 2) / _rope.HoldLength;
 
 			// Apply the tension to `m_CurrentVelocity`
 			_pendulumVelocity += tensionDirection * tensionForce * Time.fixedDeltaTime;
@@ -1887,16 +1887,16 @@ public class OldCharacterMotor : MonoBehaviour
 				angle: m_characterConfig.ropeOffsetAngle,
 				axis: m_cameraTransform.forward,
 				direction: m_cameraTransform.right,
-				origin: _rope.folds[^1],
-				radius: _rope.holdLength,
+				origin: _rope.Folds[^1],
+				radius: _rope.HoldLength,
 				starting: m_rsoCharacterPosition.value
 			) - m_rsoCharacterPosition.value).normalized * m_moveInput.x +
 			(Vector3Extention.GetPositionOnCercle(
 				angle: m_characterConfig.ropeOffsetAngle,
 				axis: m_cameraTransform.right,
 				direction: m_cameraTransform.forward,
-				origin: _rope.folds[^1],
-				radius: _rope.holdLength,
+				origin: _rope.Folds[^1],
+				radius: _rope.HoldLength,
 				starting: m_rsoCharacterPosition.value
 			) - m_rsoCharacterPosition.value).normalized * m_moveInput.y;
 
@@ -1905,8 +1905,8 @@ public class OldCharacterMotor : MonoBehaviour
 				angle: m_characterConfig.ropeOffsetAngle,
 				axis: m_cameraTransform.forward,
 				direction: m_cameraTransform.right,
-				origin: _rope.folds[^1],
-				radius: _rope.holdLength,
+				origin: _rope.Folds[^1],
+				radius: _rope.HoldLength,
 				starting: m_rsoCharacterPosition.value
 			) - m_rsoCharacterPosition.value).normalized * m_moveInput.x;
 
@@ -1950,15 +1950,15 @@ public class OldCharacterMotor : MonoBehaviour
 		}
 
 		// Get the distance between the current character's position and the position of the last fold
-		Vector3 towardCharacter = m_rsoCharacterPosition.value - _rope.folds[^1];
+		Vector3 towardCharacter = m_rsoCharacterPosition.value - _rope.Folds[^1];
 
 		// Re-snap the character's position within the spherical constraint
-		if (towardCharacter.magnitude > _rope.holdLength)
+		if (towardCharacter.magnitude > _rope.HoldLength)
 		{
 			if (_ropeConstraintTimer != null) StopCoroutine(_ropeConstraintTimer);
 			_ropeConstraintTimer = StartCoroutine(AddRopeConstraintTimer());
 
-			transform.position = _rope.folds[^1] + towardCharacter.normalized * _rope.holdLength;
+			transform.position = _rope.Folds[^1] + towardCharacter.normalized * _rope.HoldLength;
 
 			// Transform position of the character controller has been modified outside the movement function
 			// Call this unity function to synchronize transform to avoid glitchy movement effects
@@ -2005,7 +2005,7 @@ public class OldCharacterMotor : MonoBehaviour
 		if (enable)
 		{
 			_rope.UpdateHoldLength();
-			if (_rope.holdLength == -1) DesequipRope(); // handle error code 
+			if (_rope.HoldLength == -1) DesequipRope(); // handle error code 
 		}
 		else
 		{
@@ -2070,8 +2070,8 @@ public class OldCharacterMotor : MonoBehaviour
                 if (CraftInHand.Throw(m_thirdPersonCamera.transform))
                 {
                     // rope attachment exception
-                    _rope = CraftInHand as Rope;
-                    if (_rope != null) _rope?.Attach(m_harness);
+                    // _rope = CraftInHand as Rope;
+                    // if (_rope != null) _rope?.Attach(m_harness);
 
                     CraftInHand = null;
                     if (CraftInRobot != null)
