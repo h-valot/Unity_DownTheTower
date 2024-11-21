@@ -153,22 +153,25 @@ public class Guardian : MonoBehaviour
 
     #region LoSCheck
 
-    bool CheckRaycast()
+    bool CheckRaycast(GameObject _objectRef)
     {
-        if (_isPlayerTarget && _playerRef != null)
+        if (_objectRef != null)
         {
-            CheckPlayerHeight();
-            Physics.Raycast(_raycastEyes.transform.position, ((_playerRef.transform.position + new Vector3(0, headHeight, 0)) - _raycastEyes.transform.position).normalized, out var hitDataHead);
-            UnityEngine.Debug.DrawRay(_raycastEyes.transform.position, ((_playerRef.transform.position + new Vector3(0, headHeight, 0)) - _raycastEyes.transform.position).normalized, Color.red);
+            CheckPlayerHeight(_objectRef);
+            Physics.Raycast(_raycastEyes.transform.position, ((_objectRef.transform.position + new Vector3(0, headHeight, 0)) - _raycastEyes.transform.position).normalized, out var hitDataHead);
+            UnityEngine.Debug.DrawRay(_raycastEyes.transform.position, ((_objectRef.transform.position + new Vector3(0, headHeight, 0)) - _raycastEyes.transform.position).normalized, Color.red);
             Debug.Log(hitDataHead.transform.name);
 
-            Physics.Raycast(_raycastEyes.transform.position, ((_playerRef.transform.position + new Vector3(0, eyesHeight, 0)) - _raycastEyes.transform.position).normalized, out var hitDataEyes);
-            UnityEngine.Debug.DrawRay(_raycastEyes.transform.position, ((_playerRef.transform.position + new Vector3(0, eyesHeight, 0)) - _raycastEyes.transform.position).normalized, Color.red);
+            Physics.Raycast(_raycastEyes.transform.position, ((_objectRef.transform.position + new Vector3(0, eyesHeight, 0)) - _raycastEyes.transform.position).normalized, out var hitDataEyes);
+            UnityEngine.Debug.DrawRay(_raycastEyes.transform.position, ((_objectRef.transform.position + new Vector3(0, eyesHeight, 0)) - _raycastEyes.transform.position).normalized, Color.red);
 
-            Physics.Raycast(_raycastEyes.transform.position, ((_playerRef.transform.position + new Vector3(0, feetHeight, 0)) - _raycastEyes.transform.position).normalized, out var hitDataFeet);
-            UnityEngine.Debug.DrawRay(_raycastEyes.transform.position, ((_playerRef.transform.position + new Vector3(0, feetHeight, 0)) - _raycastEyes.transform.position).normalized, Color.red);
+            Physics.Raycast(_raycastEyes.transform.position, ((_objectRef.transform.position + new Vector3(0, feetHeight, 0)) - _raycastEyes.transform.position).normalized, out var hitDataFeet);
+            UnityEngine.Debug.DrawRay(_raycastEyes.transform.position, ((_objectRef.transform.position + new Vector3(0, feetHeight, 0)) - _raycastEyes.transform.position).normalized, Color.red);
 
-            if (hitDataHead.transform == _playerRef.transform || hitDataEyes.transform == _playerRef.transform || hitDataFeet.transform == _playerRef.transform)
+            Physics.Linecast(_raycastEyes.transform.position, _objectRef.transform.position, out var hitDatatorch);
+
+            if (hitDataHead.transform == _objectRef.transform || hitDataEyes.transform == _objectRef.transform || hitDataFeet.transform == _objectRef.transform ||  hitDatatorch.collider.TryGetComponent<Torch>(out var torch)
+                || hitDatatorch.collider.TryGetComponent<TorchPointLight>(out var torchPointLight))
             {
                 _isPlayerSeen = true;
                 return true;
@@ -179,29 +182,31 @@ public class Guardian : MonoBehaviour
                 return false;
             }
         }
-        else if (_torchRef != null)
-        {
-            Physics.Linecast(_raycastEyes.transform.position, _torchRef.transform.position, out var hitDatatorch);
-            // UnityEngine.Debug.DrawRay(_raycastEyes.transform.position, (_torchRef.transform.position - _raycastEyes.transform.position).normalized, Color.red);
+        //else if (_objectRef != null)
+        //{
+        //    Physics.Linecast(_raycastEyes.transform.position, _objectRef.transform.position, out var hitDatatorch);
+        //    // UnityEngine.Debug.DrawRay(_raycastEyes.transform.position, (_torchRef.transform.position - _raycastEyes.transform.position).normalized, Color.red);
 
-            if (hitDatatorch.collider.TryGetComponent<Torch>(out var torch)
-                || hitDatatorch.collider.TryGetComponent<TorchPointLight>(out var torchPointLight))
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
+        //    if (hitDatatorch.collider.TryGetComponent<Torch>(out var torch)
+        //        || hitDatatorch.collider.TryGetComponent<TorchPointLight>(out var torchPointLight))
+        //    {
+        //        return true;
+        //    }
+        //    else
+        //    {
+        //        return false;
+        //    }
+        // }
         else { return false; }
     }
-    private void CheckPlayerHeight()
+    private void CheckPlayerHeight(GameObject _objectRef)
     {
-        CharacterController CharacterControllerRef = _playerRef.GetComponent<CharacterController>();
-        headHeight = CharacterControllerRef.height*0.8f;
-        eyesHeight = CharacterControllerRef.height*0.5f;
-        feetHeight = CharacterControllerRef.height*0.2f;
+        if (_objectRef.TryGetComponent<CharacterController>(out var _characterControllerRef))
+        {
+            headHeight = _characterControllerRef.height * 0.8f;
+            eyesHeight = _characterControllerRef.height * 0.5f;
+            feetHeight = _characterControllerRef.height * 0.2f;
+        }
     }
 
     #endregion
@@ -277,7 +282,10 @@ public class Guardian : MonoBehaviour
                         {
                             if (_objectRef != null)
                             {
-                                _distance.Add(_objectRef, Vector3.Distance(this.transform.position, _objectRef.transform.position));
+                                if (CheckRaycast(_objectRef))
+                                {
+                                    _distance.Add(_objectRef, Vector3.Distance(this.transform.position, _objectRef.transform.position));
+                                }                              
                             }
                             else
                             {
