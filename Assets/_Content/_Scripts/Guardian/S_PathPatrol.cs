@@ -21,6 +21,7 @@ public class PathPatrol : MonoBehaviour
     {
         _agent = GetComponent<NavMeshAgent>();
         _targetPoint = 0;
+        Patrolling();
     }
 
     // Update is called once per frame
@@ -30,48 +31,44 @@ public class PathPatrol : MonoBehaviour
         {
             if (_guardianRef.IsActif() == true)
             {
-                Patrolling();
+                IncreaseTargetInt();
                 GetAggro();
             }
         }
-        
     }
 
     void Patrolling()
     {
         if (_aggro == false)
         {
-            if ((transform.position - _patrolPoints[_targetPoint].position).magnitude <= 0.5f)
-            {
-                IncreaseTargetInt();
-            }
             _agent.destination = _patrolPoints[_targetPoint].transform.position;
         }
 
     }
     void IncreaseTargetInt()
     {
-        _targetPoint++;
-        if(_targetPoint >= _patrolPoints.Length)
+        if ((transform.position - _patrolPoints[_targetPoint].position).magnitude <= 0.5f)
         {
-            _targetPoint = 0;
+            _targetPoint++;
+            if (_targetPoint >= _patrolPoints.Length)
+            {
+                _targetPoint = 0;
+            }
+            if (_aggro == false) 
+            {
+                Patrolling();
+            }
         }
     }
 
     public void GoingBackToPatrol()
     {
-        Debug.Log("Je tente de revenir en patrouille");
         GetAggro();
-        
         if (_aggro == false)
             {
-                Debug.Log("Patrol mode");
                 Patrolling();
-                //_agent.destination = _patrolPoints[_targetPoint].transform.position;
                 dontPatrol = false;
             }
-        
-        
     }
 
     void GetAggro()

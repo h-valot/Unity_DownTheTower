@@ -10,13 +10,13 @@ public class Guardian : MonoBehaviour
 {
     #region Declarations
 
-    [SerializeField] private PathPatrol _pathPatrol;
+    [SerializeField] private PathPatrol _pathPatrol; // ref à reconstruire
     [SerializeField] public bool _isActif;
 
     [Header("Scriptable references")]
     [SerializeField] private GuardianConfig _guardianConfig;
 
-    [Header("External references")]
+    [Header("Debug References")]
     [SerializeField] private TextMeshProUGUI _GuardianTarget;
     [SerializeField] private TextMeshProUGUI _dictionnayCountText;
 
@@ -60,12 +60,16 @@ public class Guardian : MonoBehaviour
 
     // --- A mettre en config ---
 
-    public float ResetAggroCD;
+    public float resetAggroCD;
+    public float shiftToPatrolCD;
+    public float shiftToPursuitCD;
     
     // Private ---
 
     Dictionary<GameObject, ClassGuardianTarget> _potentialTarget = new Dictionary<GameObject, ClassGuardianTarget> ();
     private Coroutine _aggroCoroutine = null;
+    private Coroutine _shiftCoroutine;
+    private bool _shiftIsFinished = true;
     public Coroutine destroyTorchCoroutine;
 
     public class ClassGuardianTarget
@@ -89,7 +93,10 @@ public class Guardian : MonoBehaviour
         _dictionnayCountText.text = "Dictionnaire count = " + _potentialTarget.Count.ToString();
         if (destroyTorchCoroutine == null)
         {
-            CheckForTargets();
+            if (_aggroCoroutine == null)
+            {
+                CheckForTargets();
+            }
         }
         if (_actualTarget != null)
         {
@@ -247,7 +254,7 @@ public class Guardian : MonoBehaviour
 
     #endregion
 
-    #region Target Manager
+    #region Behavior Manager
 
     private void CheckForTargets()
     {
@@ -280,7 +287,16 @@ public class Guardian : MonoBehaviour
                         if (_distance.Count > 0)
                         {
                             var keyAndValue = _distance.OrderBy(kvp => kvp.Value).First();
-                            UpdateTarget(keyAndValue.Key.gameObject);
+                            if(_shiftCoroutine == null)
+                            {
+                                _shiftIsFinished = false;
+                                _shiftCoroutine = StartCoroutine(ShifToPursuit(keyAndValue.Key.gameObject));
+                            }
+                            else if(_shiftIsFinished == true)
+                            {
+                                UpdateTarget(keyAndValue.Key.gameObject);
+                            }
+                            
                         }
                     }
 
@@ -288,56 +304,83 @@ public class Guardian : MonoBehaviour
 
                 else
                 {
-                    if (_aggroCoroutine == null)
+                    if (_aggroCoroutine != null)
                     {
                         StopCoroutine(WaitForAggroReset());
                         _aggroCoroutine = StartCoroutine(WaitForAggroReset());
                     }
+                    _aggroCoroutine = StartCoroutine(WaitForAggroReset());
+                    Debug.Log("sortie 2");
                 }
             }
         }
 
-        else
+        else if (_aggro == true)
         {
-            if (_aggroCoroutine == null)
+            if (_aggroCoroutine != null)
             {
                 StopCoroutine(WaitForAggroReset());
                 _aggroCoroutine = StartCoroutine(WaitForAggroReset());
             }
+            _aggroCoroutine = StartCoroutine(WaitForAggroReset());
+            Debug.Log("sortie 1");
         }
-    }
-
-    private IEnumerator WaitForAggroReset()
-    {
-        yield return new WaitForSeconds(ResetAggroCD);
-        if (_potentialTarget.Count < 1)
-        {
-            UpdateTarget(null);
-        }
-        _aggroCoroutine = null;
     }
 
     private void UpdateTarget(GameObject _objectRef)
     {
 
-
         if (_objectRef != null)
         {
             _actualTarget = _objectRef;
             _GuardianTarget.text = _actualTarget.ToString();
-            ChangeColor(_aggroColor);
         }
         else if (_objectRef == null)
         {
             _actualTarget = _objectRef;
             ChangeColor(_scanColor);
             _GuardianTarget.text = "None";
+            StartCoroutine(ShiftToPatrol());
         }
     }
 
     private void SetDestination()
     {
         _agent.destination = _actualTarget.transform.position;
+    }
+
+    private void GetBackToPatrol()
+    {
+        _aggro = false;
+        _shiftCoroutine = null;
+        _pathPatrol.GoingBackToPatrol();
+    }
+
+    private IEnumerator WaitForAggroReset()
+    {
+        yield return new WaitForSeconds(resetAggroCD);
+        if (_potentialTarget.Count < 1)
+        {
+            UpdateTarget(null);
+        }
+        _aggroCoroutine = null;
+        Debug.Log("Coroutine aggro reset");
+    }
+
+    private IEnumerator ShiftToPatrol()
+    {
+        yield return new WaitForSeconds(shiftToPatrolCD);
+        GetBackToPatrol();
+    }
+
+    private IEnumerator ShifToPursuit(GameObject _target)
+    {
+        _actualTarget = this.gameObject;
+        _aggro = true;
+        ChangeColor(_aggroColor);
+        yield return new WaitForSeconds(shiftToPursuitCD);
+        UpdateTarget(_target);
+        _shiftIsFinished = true;
     }
 
     #endregion
@@ -370,6 +413,4 @@ public class Guardian : MonoBehaviour
 
     #endregion
 
-
-    
 }
