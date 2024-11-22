@@ -22,7 +22,8 @@ public class NewCharacterMotor : MonoBehaviour
 	[Space(5)]
     [SerializeField] private RSE_Move m_rseMove;
     [SerializeField] private RSE_Jump m_rseJump;
-	[SerializeField] private RSE_Craft m_rseCraft;
+    [SerializeField] private RSE_Run m_rseRun;
+    [SerializeField] private RSE_Craft m_rseCraft;
 	[SerializeField] private RSE_Throw m_rseThrow;
 	[SerializeField] private RSE_BackpackCrafting m_rseBackpackCrafting;
 	[Space(5)]
@@ -152,7 +153,8 @@ public class NewCharacterMotor : MonoBehaviour
     {
         m_rseMove.action -= UpdateMoveInput;
         m_rseJump.action -= Jump;
-		m_rseCraft.action -= ToggleCraft;
+        m_rseRun.action -= UpdateWalkRun;
+        m_rseCraft.action -= ToggleCraft;
 		m_rseThrow.action -= ToggleAim;
 	}
 
@@ -163,12 +165,14 @@ public class NewCharacterMotor : MonoBehaviour
             case BehaviorState.LOCOMOTION:
                 m_rseMove.action += UpdateMoveInput;
                 m_rseJump.action += Jump;
-				m_rseCraft.action += ToggleCraft;
+                m_rseRun.action += UpdateWalkRun;
+                m_rseCraft.action += ToggleCraft;
 				m_rseThrow.action += ToggleAim;
 				break;
 
             case BehaviorState.FALL:
                 m_rseMove.action += UpdateMoveInput;
+                m_rseRun.action += UpdateWalkRun;
                 m_rseThrow.action += ToggleAim;
 				break;
 
@@ -178,8 +182,8 @@ public class NewCharacterMotor : MonoBehaviour
 
             case BehaviorState.ROPE:
 				m_rseMove.action += UpdateMoveInput;
-				// _rseJump.action += Jump;
-				m_rseCraft.action += ToggleCraft;
+                // _rseJump.action += Jump;
+                m_rseCraft.action += ToggleCraft;
 				m_rseThrow.action += ToggleAim;
 				break;
         }
