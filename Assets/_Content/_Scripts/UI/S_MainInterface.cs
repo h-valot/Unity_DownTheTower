@@ -5,7 +5,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UIManager : MonoBehaviour
+public class MainInterface : MonoBehaviour
 {
     [Header("Internal References")]
     [SerializeField] private GameObject _pausePanel;
