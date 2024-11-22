@@ -229,7 +229,7 @@ public class OldCharacterMotor : MonoBehaviour
             {
 				// Magenta: rope limit & start position
                 Gizmos.color = Color.magenta;
-                Gizmos.DrawWireSphere(_rope.Folds[^1], _rope.HoldLength);
+                Gizmos.DrawWireSphere(_rope.CurrentFold, _rope.HoldLength);
 				Gizmos.DrawWireCube(_gizmoStartPendulumPosition, new Vector3(.5f, .5f, .5f));
 			}
         }
@@ -1682,7 +1682,7 @@ public class OldCharacterMotor : MonoBehaviour
 					angle: m_characterConfig.ropeOffsetAngle,
 					axis: m_characterDirection.right,
 					direction: -m_characterDirection.forward,
-					origin: _rope.Folds[^1],
+					origin: _rope.CurrentFold,
 					radius: _rope.HoldLength,
 					starting: m_rsoCharacterPosition.value
 				);
@@ -1758,9 +1758,9 @@ public class OldCharacterMotor : MonoBehaviour
 		// ---- CHARACTER IS HOLDING THE ROPE ----
 
 		// Populate useful varaibles
-		Vector3 verticalPoint = _rope.Folds[^1] + Vector3.down * _rope.HoldLength;
+		Vector3 verticalPoint = _rope.CurrentFold + Vector3.down * _rope.HoldLength;
 		Vector3 towardsVertical = (m_rsoCharacterPosition.value - verticalPoint).normalized;
-		_towardsCharacter = (m_rsoCharacterPosition.value - _rope.Folds[^1]).normalized;
+		_towardsCharacter = (m_rsoCharacterPosition.value - _rope.CurrentFold).normalized;
 
 		// Get input related data
 		_ropeInputDirection = m_cameraTransform.forward * m_moveInput.y + m_cameraTransform.right * m_moveInput.x;
@@ -1800,7 +1800,7 @@ public class OldCharacterMotor : MonoBehaviour
 				else
 				{
 					// If the character IS NOT holding the rope, let it fall till it reaches the rope limit constraint
-					isFalling = (_rope.Folds[^1] - m_rsoCharacterPosition.value).magnitude < _rope.HoldLength - _FALLING_FORCES_THRESHOLD;
+					isFalling = (_rope.CurrentFold - m_rsoCharacterPosition.value).magnitude < _rope.HoldLength - _FALLING_FORCES_THRESHOLD;
 				}
 				break;
 		}
@@ -1848,7 +1848,7 @@ public class OldCharacterMotor : MonoBehaviour
 		_pendulumVelocity += Vector3.down * gravityForce * Time.fixedDeltaTime;
 
 		// Cache pivot and bob positions
-		Vector3 pivotPositionCache = _rope.Folds[^1];
+		Vector3 pivotPositionCache = _rope.CurrentFold;
 		Vector3 bobPositionCache = m_rsoCharacterPosition.value;
 
 		// Get bob's position after applying gravity force
@@ -1887,7 +1887,7 @@ public class OldCharacterMotor : MonoBehaviour
 				angle: m_characterConfig.ropeOffsetAngle,
 				axis: m_cameraTransform.forward,
 				direction: m_cameraTransform.right,
-				origin: _rope.Folds[^1],
+				origin: _rope.CurrentFold,
 				radius: _rope.HoldLength,
 				starting: m_rsoCharacterPosition.value
 			) - m_rsoCharacterPosition.value).normalized * m_moveInput.x +
@@ -1895,7 +1895,7 @@ public class OldCharacterMotor : MonoBehaviour
 				angle: m_characterConfig.ropeOffsetAngle,
 				axis: m_cameraTransform.right,
 				direction: m_cameraTransform.forward,
-				origin: _rope.Folds[^1],
+				origin: _rope.CurrentFold,
 				radius: _rope.HoldLength,
 				starting: m_rsoCharacterPosition.value
 			) - m_rsoCharacterPosition.value).normalized * m_moveInput.y;
@@ -1905,7 +1905,7 @@ public class OldCharacterMotor : MonoBehaviour
 				angle: m_characterConfig.ropeOffsetAngle,
 				axis: m_cameraTransform.forward,
 				direction: m_cameraTransform.right,
-				origin: _rope.Folds[^1],
+				origin: _rope.CurrentFold,
 				radius: _rope.HoldLength,
 				starting: m_rsoCharacterPosition.value
 			) - m_rsoCharacterPosition.value).normalized * m_moveInput.x;
@@ -1950,7 +1950,7 @@ public class OldCharacterMotor : MonoBehaviour
 		}
 
 		// Get the distance between the current character's position and the position of the last fold
-		Vector3 towardCharacter = m_rsoCharacterPosition.value - _rope.Folds[^1];
+		Vector3 towardCharacter = m_rsoCharacterPosition.value - _rope.CurrentFold;
 
 		// Re-snap the character's position within the spherical constraint
 		if (towardCharacter.magnitude > _rope.HoldLength)
@@ -1958,7 +1958,7 @@ public class OldCharacterMotor : MonoBehaviour
 			if (_ropeConstraintTimer != null) StopCoroutine(_ropeConstraintTimer);
 			_ropeConstraintTimer = StartCoroutine(AddRopeConstraintTimer());
 
-			transform.position = _rope.Folds[^1] + towardCharacter.normalized * _rope.HoldLength;
+			transform.position = _rope.CurrentFold + towardCharacter.normalized * _rope.HoldLength;
 
 			// Transform position of the character controller has been modified outside the movement function
 			// Call this unity function to synchronize transform to avoid glitchy movement effects
