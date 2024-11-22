@@ -667,7 +667,7 @@ public class NewCharacterMotor : MonoBehaviour
 			return;
 		}
 
-		if (m_rope.GetTotalLength() > m_ropeConfig.maxLength)
+		if (m_rope.GetTotalLength() > m_ropeConfig.MaxLength)
 		{
 			DesequipRope();
 			return;
@@ -838,7 +838,7 @@ public class NewCharacterMotor : MonoBehaviour
 					Destroy(m_handObject.gameObject);
 				}
 			}
-			m_craftCoroutine = StartCoroutine(Craft(CraftType.ROPE, m_ropeConfig.craftingDuration));
+			m_craftCoroutine = StartCoroutine(Craft(CraftType.ROPE, m_ropeConfig.CraftingDuration));
 		}
 	}
 
@@ -890,7 +890,7 @@ public class NewCharacterMotor : MonoBehaviour
 		yield return new WaitForSeconds(duration);
 
 		m_handObject = Instantiate(
-			craftType == CraftType.TORCH ? (Permanent)m_torchConfig.pfTorch : (Permanent)m_ropeConfig.pfRope, 
+			craftType == CraftType.TORCH ? (Permanent)m_torchConfig.pfTorch : (Permanent)m_ropeConfig.PfRope, 
 			m_handSocket.transform.position,
 			Quaternion.identity,
 			m_handSocket.transform

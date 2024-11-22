@@ -1362,17 +1362,17 @@ public class OldCharacterMotor : MonoBehaviour
                         CraftInHand.transform.SetParent(m_robotHandSocket, false);
                         CraftInRobot = CraftInHand;
                         CraftInHand = null;
-                        m_craftCoroutine = StartCoroutine(Craft(CraftType.ROPE, m_ropeConfig.craftingDuration));
+                        m_craftCoroutine = StartCoroutine(Craft(CraftType.ROPE, m_ropeConfig.CraftingDuration));
                     }
                     else if (CraftInHand.Type != CraftType.ROPE)
                     {
                         Destroy(CraftInHand.gameObject);
-                        m_craftCoroutine = StartCoroutine(Craft(CraftType.ROPE, m_ropeConfig.craftingDuration));
+                        m_craftCoroutine = StartCoroutine(Craft(CraftType.ROPE, m_ropeConfig.CraftingDuration));
                     }
                 }
                 else
                 {
-                    m_craftCoroutine = StartCoroutine(Craft(CraftType.ROPE, m_ropeConfig.craftingDuration));
+                    m_craftCoroutine = StartCoroutine(Craft(CraftType.ROPE, m_ropeConfig.CraftingDuration));
                 }
                 break;
         }
@@ -1414,7 +1414,7 @@ public class OldCharacterMotor : MonoBehaviour
                 break;
 
 			case CraftType.ROPE:
-				CraftInHand = Instantiate(m_ropeConfig.pfRope, m_handSocket.transform);
+				CraftInHand = Instantiate(m_ropeConfig.PfRope, m_handSocket.transform);
 				break;
 		}
 
@@ -1726,7 +1726,7 @@ public class OldCharacterMotor : MonoBehaviour
 	private void HandleRopeLength()
 	{
 		// Assert: total rope length is smaller than the max length
-		if (_rope.GetTotalLength() <= m_ropeConfig.maxLength) return;
+		if (_rope.GetTotalLength() <= m_ropeConfig.MaxLength) return;
 
 		DesequipRope();
 	}
