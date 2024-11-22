@@ -57,6 +57,7 @@ public class NewCharacterConfig : ScriptableObject
 
 	[Header("Rope")]
 	public RopeHolding ropeHoldingMethod;
+	public float cancelRopeDuration;
 	public float againstWallRayCastLength;
 	public LayerMask againstWallLayerToInclude;
 	public float jumpOffWallForce;

@@ -1,5 +1,4 @@
 using System.Collections;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class NewCharacterMotor : MonoBehaviour
@@ -73,6 +72,9 @@ public class NewCharacterMotor : MonoBehaviour
 	private bool m_isHolding;
 	private bool m_isClimbing;
 	public bool IsJumpingPressed { get; private set; }
+	private bool m_isCancellingRope;
+	private Coroutine m_cancelRopeCoroutine;
+	private float m_cancelRopeTimer;
 
 	#endregion
 
@@ -166,16 +168,16 @@ public class NewCharacterMotor : MonoBehaviour
     {
         m_rseMove.action -= UpdateMoveInput;
 		m_rseRun.action -= UpdateRunInput;
+		m_rseRun.action -= UpdateHoldInput;
 		m_rseJump.action -= Jump;
 		m_rseCraft.action -= ToggleCraft;
 		m_rseThrow.action -= ToggleAim;
 		m_rseClimb.action -= UpdateClimbInput;
-
 		m_rseCancel.action -= CancelRope;
 	}
 
     private void SubscribeStateInputs()
-    {
+	{
 		switch (m_rsoCharacterState.value)
         {
             case BehaviorState.LOCOMOTION:
@@ -184,9 +186,18 @@ public class NewCharacterMotor : MonoBehaviour
                 m_rseJump.action += Jump;
 				m_rseCraft.action += ToggleCraft;
 				m_rseThrow.action += ToggleAim;
+				m_rseCancel.action += CancelRope;
 				break;
 
-            case BehaviorState.FALL:
+			case BehaviorState.ROPE:
+				m_rseMove.action += UpdateMoveInput;
+				m_rseRun.action += UpdateHoldInput;
+				m_rseThrow.action += ToggleAim;
+				m_rseClimb.action += UpdateClimbInput;
+				m_rseCancel.action += CancelRope;
+				break;
+
+			case BehaviorState.FALL:
                 m_rseMove.action += UpdateMoveInput;
 				m_rseRun.action += UpdateRunInput;
 				m_rseThrow.action += ToggleAim;
@@ -194,14 +205,6 @@ public class NewCharacterMotor : MonoBehaviour
 
             case BehaviorState.CRAFT:
 				m_rseCraft.action += ToggleCraft;
-				break;
-
-            case BehaviorState.ROPE:
-				m_rseMove.action += UpdateMoveInput;
-				m_rseRun.action += UpdateRunInput;
-				m_rseThrow.action += ToggleAim;
-				m_rseClimb.action += UpdateClimbInput;
-				m_rseCancel.action += CancelRope;
 				break;
         }
 	}
@@ -211,13 +214,12 @@ public class NewCharacterMotor : MonoBehaviour
 		m_moveInput = input;
 	}
 
-	private void UpdateRunInput(bool ispressed)
+	private void UpdateRunInput(bool isPressed)
 	{
-		m_isRunning = ispressed;
-		Holding(m_isRunning);
+		m_isRunning = isPressed;
     }
 
-	private void Holding(bool isHolding)
+	private void UpdateHoldInput(bool isHolding)
 	{
 		if (IsJumpingPressed && !isHolding) return;
 
@@ -242,7 +244,7 @@ public class NewCharacterMotor : MonoBehaviour
 		m_isHolding = isHolding;
 	}
 
-	private void Holding(Triome isHolding)
+	private void UpdateHoldInput(Triome isHolding)
 	{
 		if (isHolding == Triome.NEITHER)
 		{
@@ -250,7 +252,7 @@ public class NewCharacterMotor : MonoBehaviour
 			return;
 		}
 
-		Holding(isHolding == Triome.TRUE);
+		UpdateHoldInput(isHolding == Triome.TRUE);
 	}
 
 	private void UpdateClimbInput(bool isClimbing)
@@ -673,20 +675,18 @@ public class NewCharacterMotor : MonoBehaviour
 
 	}
 
-	private bool m_isCancelling;
-	private Coroutine m_cancelRopeCoroutine;
-	private float m_cancelRopeTimer;
-	private float k_cancelRopeThreshold;
-
 	private void CancelRope(bool isPressed)
 	{
-		m_isCancelling = isPressed;
+		if (!HasRope) return;
 
-		if (m_isCancelling) 
+		m_isCancellingRope = isPressed;
+
+		if (m_isCancellingRope) 
 		{
+			m_cancelRopeTimer = 0f;
 			m_cancelRopeCoroutine = StartCoroutine(StartCancellingRope());
 		}
-		else if (!m_isCancelling 
+		else if (!m_isCancellingRope 
 		&& m_cancelRopeCoroutine != null)
 		{
 			StopCoroutine(m_cancelRopeCoroutine);
@@ -695,7 +695,7 @@ public class NewCharacterMotor : MonoBehaviour
 
 	private IEnumerator StartCancellingRope()
 	{
-		while (m_cancelRopeTimer < k_cancelRopeThreshold)
+		while (m_cancelRopeTimer < m_characterConfig.cancelRopeDuration)
 		{
 			m_cancelRopeTimer += Time.deltaTime;
 			yield return null;
@@ -767,7 +767,7 @@ public class NewCharacterMotor : MonoBehaviour
 
 	private void ApplyFreeRopeForce(float modifier)
 	{
-		m_rigidbody.AddForce(m_rigidbody.velocity.normalized * m_rigidbody.velocity.magnitude * modifier, ForceMode.Impulse);
+		m_rigidbody.AddForce(m_rigidbody.velocity.magnitude * modifier * m_rigidbody.velocity.normalized, ForceMode.Impulse);
 	}
 
 	#endregion
@@ -810,7 +810,6 @@ public class NewCharacterMotor : MonoBehaviour
 
     private void ExitCraftState()
     {
-		print("exit");
 		if (m_craftCoroutine != null)
 		{
 			StopCoroutine(m_craftCoroutine);
@@ -884,7 +883,7 @@ public class NewCharacterMotor : MonoBehaviour
 
 			// Exception: rope attachment
 			m_rope = m_handObject as Rope;
-			if (m_rope != null) m_rope?.Attach(m_rigidbody);
+			if (m_rope != null) m_rope?.Attach(m_harness, m_rigidbody);
 
 			m_handObject = null;
 			SwitchObjects(ref m_robotObject, ref m_handObject, m_handSocket);

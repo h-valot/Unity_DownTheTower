@@ -21,7 +21,7 @@ public class Rope : Permanent
 	private List<Vector3> m_folds = new List<Vector3>();
 	private List<RopeLine> m_ropeLines = new List<RopeLine>();
 	private List<Interactable> m_interactibles = new List<Interactable>();
-	private Rigidbody m_characterRigidbody;
+	private Transform m_characterHarness;
 	private SoftJointLimit m_linearLimit;
 
 	public bool IsConnected => m_isConnected;
@@ -132,9 +132,9 @@ public class Rope : Permanent
 
 	#region ROPE
 
-	public void Attach(Rigidbody rigidbody)
+	public void Attach(Transform harness, Rigidbody rigidbody)
 	{
-		m_characterRigidbody = rigidbody;
+		m_characterHarness = harness;
 		m_joint.connectedBody = rigidbody;
 		m_isConnected = true;
 	}
@@ -142,13 +142,14 @@ public class Rope : Permanent
 	public void Detach()
 	{
 		// Assertion
-		if (m_characterRigidbody == null || !m_isConnected) return;
+		if (m_characterHarness == null || !m_isConnected) return;
 
 		// Add a final fold to spawn an interactible on it.
-		m_folds.Add(m_characterRigidbody.position.CutDigits(2));
+		m_folds.Add(m_characterHarness.position.CutDigits(2));
 		HandleInteractibles();
 
-		m_characterRigidbody = null;
+		m_characterHarness = null;
+		m_joint.connectedBody = null;
 		m_isConnected = false;
 	}
 
@@ -158,10 +159,10 @@ public class Rope : Permanent
 	public void HandleFolds()
 	{
 		// Assert: character ref null
-		if (m_characterRigidbody == null) return;
+		if (m_characterHarness == null) return;
 
 		// Add fold if a collider stands between the character and the last fold
-		if (Physics.Linecast(m_characterRigidbody.position, m_folds[^1], out var addHit, ~m_ropeConfig.foldLayerToIgnore))
+		if (Physics.Linecast(m_characterHarness.position, m_folds[^1], out var addHit, ~m_ropeConfig.foldLayerToIgnore))
 		{
 			Vector3 approximatePoint = addHit.point.CutDigits(2);
 
@@ -182,7 +183,7 @@ public class Rope : Permanent
 		// Remove the last fold from the list if there is no collider 
 		// that stands between the character and the previous last fold.
 		if (m_folds.Count >= 2
-		&& !Physics.Linecast(m_characterRigidbody.position, m_folds[^2], out var removeHit, ~m_ropeConfig.foldLayerToIgnore))
+		&& !Physics.Linecast(m_characterHarness.position, m_folds[^2], out var removeHit, ~m_ropeConfig.foldLayerToIgnore))
 		{
 			m_holdLength = GetLastFoldHarnessDistance() + (m_folds[^2] - m_folds[^1]).magnitude;
 			m_folds.Remove(m_folds[^1]);
@@ -259,13 +260,13 @@ public class Rope : Permanent
 	{
 		// Assertions
 		if (!m_isPlaced) return 0;
-		if (m_characterRigidbody == null) return 0;
+		if (m_characterHarness == null) return 0;
 
 		float output = 0;
 		for (int i = 0; i < m_folds.Count; i++)
 		{
 			Vector3 nextPosition = i + 1 >= m_folds.Count
-				? m_characterRigidbody.position
+				? m_characterHarness.position
 				: m_folds[i + 1];
 
 			output += (m_folds[i] - nextPosition).magnitude;
@@ -277,7 +278,7 @@ public class Rope : Permanent
 	{
 		// Assertions
 		if (!m_isPlaced) return -1;
-		if (m_characterRigidbody == null) return -1;
+		if (m_characterHarness == null) return -1;
 
 		// Note that we do not connect the last fold to the harness
 		// but the character's current position. This avoids re-centering
@@ -294,7 +295,7 @@ public class Rope : Permanent
 	{
 		// Assertions
 		if (!m_isPlaced) return;
-		if (m_characterRigidbody == null) return;
+		if (m_characterHarness == null) return;
 
 		// Clear lists
 		if (m_ropeLines.Count >= 1)
@@ -321,7 +322,7 @@ public class Rope : Permanent
 		for (int i = 0; i < m_folds.Count; i++)
 		{
 			RopeLine newRopeLine = Instantiate(m_ropeConfig.pfRopeLine);
-			newRopeLine.SetPositions(m_folds[i], i + 1 >= m_folds.Count ? m_characterRigidbody.position : m_folds[i + 1]);
+			newRopeLine.SetPositions(m_folds[i], i + 1 >= m_folds.Count ? m_characterHarness.position : m_folds[i + 1]);
 			newRopeLine.SetColor(material);
 			m_ropeLines.Add(newRopeLine);
 		}

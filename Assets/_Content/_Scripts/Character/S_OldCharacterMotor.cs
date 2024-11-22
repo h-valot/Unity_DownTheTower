@@ -37,7 +37,7 @@ public class OldCharacterMotor : MonoBehaviour
 	[Foldout("Scriptable references")] [SerializeField] private RSE_ToggleInHand m_rseToggleInHand;
 	[Foldout("Scriptable references")] [SerializeField] private RSE_Craft m_rseCraft;
 	[Foldout("Scriptable references")] [SerializeField] private RSE_Interact m_rseInteract;
-	[Foldout("Scriptable references")] [SerializeField] private RSE_Cancel m_rseCancelAction;
+	[Foldout("Scriptable references")] [SerializeField] private RSE_Cancel m_rseCancel;
 	[Foldout("Scriptable references")] [SerializeField] private RSO_RecycleInputLocked m_rsoRecycleInputLocked;
 	[Foldout("Scriptable references")] [SerializeField] private RSE_Recycle m_rseRecycle;
 	[Foldout("Scriptable references")] [SerializeField] private RSE_ToggleInputs m_rseToggleInputs;
@@ -947,7 +947,7 @@ public class OldCharacterMotor : MonoBehaviour
 
 		m_rseRun.action += Run;
 		m_rseJump.action += Jump;
-		m_rseCancelAction.action += CancelAction;
+		m_rseCancel.action += CancelAction;
 		m_rseKillCharacter.action += HandleDeath;
 		m_rseClimb.action += Climb;
 		m_rseSetCharacterPosition.action += ForceCharacterPosition;
@@ -1004,7 +1004,7 @@ public class OldCharacterMotor : MonoBehaviour
         m_rseThrow.action -= ToggleAim;
         m_rseCraft.action -= ToggleCraft;
         m_rseToggleInHand.action -= ToggleInHand;
-        m_rseCancelAction.action -= CancelAction;
+        m_rseCancel.action -= CancelAction;
         m_rseInteract.action -= Interact;
 		m_rseKillCharacter.action -= HandleDeath;
         m_rseRecycle.action -= Recycle;
@@ -1030,7 +1030,7 @@ public class OldCharacterMotor : MonoBehaviour
 	{
 		if (m_rsoGamePaused.value)
 		{
-			CancelAction();
+			CancelAction(true);
 			UnsubscribeInputs();
 		}
 		else
@@ -1142,7 +1142,7 @@ public class OldCharacterMotor : MonoBehaviour
 		CraftInHand?.ToggleInHand();
 	}
 
-	private void CancelAction()
+	private void CancelAction(bool isPressed)
 	{
 		// The cancel action is contextual
 		// Do various things based on the context
