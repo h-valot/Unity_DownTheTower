@@ -37,7 +37,7 @@ public class OldCharacterMotor : MonoBehaviour
 	[Foldout("Scriptable references")] [SerializeField] private RSE_ToggleInHand m_rseToggleInHand;
 	[Foldout("Scriptable references")] [SerializeField] private RSE_Craft m_rseCraft;
 	[Foldout("Scriptable references")] [SerializeField] private RSE_Interact m_rseInteract;
-	[Foldout("Scriptable references")] [SerializeField] private RSE_CancelAction m_rseCancelAction;
+	[Foldout("Scriptable references")] [SerializeField] private RSE_Cancel m_rseCancel;
 	[Foldout("Scriptable references")] [SerializeField] private RSO_RecycleInputLocked m_rsoRecycleInputLocked;
 	[Foldout("Scriptable references")] [SerializeField] private RSE_Recycle m_rseRecycle;
 	[Foldout("Scriptable references")] [SerializeField] private RSE_ToggleInputs m_rseToggleInputs;
@@ -92,7 +92,7 @@ public class OldCharacterMotor : MonoBehaviour
 	// - prolonged-jump -
 	public bool IsJumpingPressed { get; private set; }
     private float m_prolongedJumpTimer = 0f;
-	public Triome IsJumpProlonged { get; private set; }
+	// public Triome IsJumpProlonged { get; private set; }
 
 	// - fall -
 	public bool IsGrounded { get; private set; }
@@ -151,8 +151,6 @@ public class OldCharacterMotor : MonoBehaviour
             }
             // Backpack.ForceSetupBackpack(this);
         }
-
-        IsJumpProlonged = Triome.FALSE;
     }
 
 	private void Update()
@@ -225,11 +223,11 @@ public class OldCharacterMotor : MonoBehaviour
 
         if (_rope)
         {
-            if (_rope.isPlaced)
+            if (_rope.IsPlaced)
             {
 				// Magenta: rope limit & start position
                 Gizmos.color = Color.magenta;
-                Gizmos.DrawWireSphere(_rope.folds[^1], _rope.holdLength);
+                Gizmos.DrawWireSphere(_rope.CurrentFold, _rope.HoldLength);
 				Gizmos.DrawWireCube(_gizmoStartPendulumPosition, new Vector3(.5f, .5f, .5f));
 			}
         }
@@ -422,7 +420,7 @@ public class OldCharacterMotor : MonoBehaviour
 
 			// If the character is attached to a rope, switch to Rope state instead
 			// This state handles free fall and rope-attached fall.
-			if (_rope != null && _rope.isPlaced && _rope.isConnected 
+			if (_rope != null && _rope.IsPlaced && _rope.IsConnected 
 			&& _currentState != AnimationState.ROPE && _currentState != AnimationState.FALL)
 			{
 				SwitchState(AnimationState.ROPE);
@@ -947,7 +945,7 @@ public class OldCharacterMotor : MonoBehaviour
 
 		m_rseRun.action += Run;
 		m_rseJump.action += Jump;
-		m_rseCancelAction.action += CancelAction;
+		m_rseCancel.action += CancelAction;
 		m_rseKillCharacter.action += HandleDeath;
 		m_rseClimb.action += Climb;
 		m_rseSetCharacterPosition.action += ForceCharacterPosition;
@@ -1004,7 +1002,7 @@ public class OldCharacterMotor : MonoBehaviour
         m_rseThrow.action -= ToggleAim;
         m_rseCraft.action -= ToggleCraft;
         m_rseToggleInHand.action -= ToggleInHand;
-        m_rseCancelAction.action -= CancelAction;
+        m_rseCancel.action -= CancelAction;
         m_rseInteract.action -= Interact;
 		m_rseKillCharacter.action -= HandleDeath;
         m_rseRecycle.action -= Recycle;
@@ -1030,7 +1028,7 @@ public class OldCharacterMotor : MonoBehaviour
 	{
 		if (m_rsoGamePaused.value)
 		{
-			CancelAction();
+			CancelAction(true);
 			UnsubscribeInputs();
 		}
 		else
@@ -1067,15 +1065,14 @@ public class OldCharacterMotor : MonoBehaviour
 		if (!IsJumpingPressed) 
 		{
 			m_prolongedJumpTimer = 0f;
-			IsJumpProlonged = Triome.FALSE;
+			// IsJumpProlonged = Triome.FALSE;
 			return;
 		}
 
 		m_prolongedJumpTimer += Time.deltaTime;
-		if (m_prolongedJumpTimer >= _HOLDING_KEY_THRESHOLD
-		&& IsJumpProlonged == Triome.FALSE)
+		if (m_prolongedJumpTimer >= _HOLDING_KEY_THRESHOLD)
 		{
-			IsJumpProlonged = Triome.TRUE;
+			// IsJumpProlonged = Triome.TRUE;
 		}
 	}
 
@@ -1118,17 +1115,6 @@ public class OldCharacterMotor : MonoBehaviour
 		_isHolding = isHolding;
 	}
 
-	private void Holding(Triome isHolding)
-	{
-		if (isHolding == Triome.NONE) 
-		{
-			print("CHARACTER_MOTOR: Assert - isHolding value is equal to NONE.");
-			return;
-		}
-
-		Holding(isHolding.ToBool());
-	}
-
 	private void Climb(bool isClimbing)
 	{
 		_isClimbing = isClimbing;
@@ -1142,13 +1128,13 @@ public class OldCharacterMotor : MonoBehaviour
 		CraftInHand?.ToggleInHand();
 	}
 
-	private void CancelAction()
+	private void CancelAction(bool isPressed)
 	{
 		// The cancel action is contextual
 		// Do various things based on the context
 
 		// Rope context
-		if (_rope != null && _rope.isPlaced)
+		if (_rope != null && _rope.IsPlaced)
 		{
 			DesequipRope();
 		}
@@ -1362,17 +1348,17 @@ public class OldCharacterMotor : MonoBehaviour
                         CraftInHand.transform.SetParent(m_robotHandSocket, false);
                         CraftInRobot = CraftInHand;
                         CraftInHand = null;
-                        m_craftCoroutine = StartCoroutine(Craft(CraftType.ROPE, m_ropeConfig.craftingDuration));
+                        m_craftCoroutine = StartCoroutine(Craft(CraftType.ROPE, m_ropeConfig.CraftingDuration));
                     }
                     else if (CraftInHand.Type != CraftType.ROPE)
                     {
                         Destroy(CraftInHand.gameObject);
-                        m_craftCoroutine = StartCoroutine(Craft(CraftType.ROPE, m_ropeConfig.craftingDuration));
+                        m_craftCoroutine = StartCoroutine(Craft(CraftType.ROPE, m_ropeConfig.CraftingDuration));
                     }
                 }
                 else
                 {
-                    m_craftCoroutine = StartCoroutine(Craft(CraftType.ROPE, m_ropeConfig.craftingDuration));
+                    m_craftCoroutine = StartCoroutine(Craft(CraftType.ROPE, m_ropeConfig.CraftingDuration));
                 }
                 break;
         }
@@ -1414,7 +1400,7 @@ public class OldCharacterMotor : MonoBehaviour
                 break;
 
 			case CraftType.ROPE:
-				CraftInHand = Instantiate(m_ropeConfig.pfRope, m_handSocket.transform);
+				CraftInHand = Instantiate(m_ropeConfig.PfRope, m_handSocket.transform);
 				break;
 		}
 
@@ -1445,15 +1431,6 @@ public class OldCharacterMotor : MonoBehaviour
 
 	#region rope state
 
-	// [x] Climb the rope
-	// [x] Jump off the rope on motion
-	// [x] Re-equip an already-used rope (debug version)
-	// [ ] In partial suspension, make the character able to jump off the wall
-	// [ ] In partial suspension, make the character unable to move while off the wall
-	// [ ] In partial suspension, make the character unable to be snap against a cambered wall 
-	// [ ] In complete suspension, make the character pivot with the rope inclination
-	// [ ] Lerp the rope stop deceleration
-
 	#region variables
 
 	[Header("Rope")]
@@ -1480,7 +1457,7 @@ public class OldCharacterMotor : MonoBehaviour
 	private float _currentClimbSpeed;
 
 	// Jump-off & free fall
-	public Triome _isJumpProlongedCached = Triome.NONE;
+	// public Triome _isJumpProlongedCached = Triome.NEITHER;
 	private float _currTime;
 	private Coroutine _ropeConstraintTimer;
 	public bool _ropeConstraintAppliedLastly;
@@ -1503,7 +1480,7 @@ public class OldCharacterMotor : MonoBehaviour
 	{
 		m_rseCraft.action -= ToggleCraft;
 
-		_isJumpProlongedCached = Triome.NONE;
+		// _isJumpProlongedCached = Triome.NEITHER;
 
 		_rope.UpdateHoldLength();
 		
@@ -1552,7 +1529,7 @@ public class OldCharacterMotor : MonoBehaviour
 	private void ExitRopeState()
 	{
 		_isHolding = false;
-		_isJumpProlongedCached = Triome.NONE;
+		// _isJumpProlongedCached = Triome.NEITHER;
 
 		// Update inputs subscriptions
 		ToggleCraftInput(HasBackpack);
@@ -1597,10 +1574,10 @@ public class OldCharacterMotor : MonoBehaviour
 	{
 		// Assertions
 		if (m_characterConfig.ropeHoldingMethod != RopeHolding.HOLD_TO_LET_GO) return;
-		if (_isJumpProlongedCached == IsJumpProlonged) return;
+		// if (_isJumpProlongedCached == IsJumpProlonged) return;
 
-		_isJumpProlongedCached = IsJumpProlonged;
-		Holding(_isJumpProlongedCached);
+		// _isJumpProlongedCached = IsJumpProlonged;
+		// Holding(_isJumpProlongedCached);
 	}
 
 	/// <summary>
@@ -1682,8 +1659,8 @@ public class OldCharacterMotor : MonoBehaviour
 					angle: m_characterConfig.ropeOffsetAngle,
 					axis: m_characterDirection.right,
 					direction: -m_characterDirection.forward,
-					origin: _rope.folds[^1],
-					radius: _rope.holdLength,
+					origin: _rope.CurrentFold,
+					radius: _rope.HoldLength,
 					starting: m_rsoCharacterPosition.value
 				);
 
@@ -1726,7 +1703,7 @@ public class OldCharacterMotor : MonoBehaviour
 	private void HandleRopeLength()
 	{
 		// Assert: total rope length is smaller than the max length
-		if (_rope.GetTotalLength() <= m_ropeConfig.maxLength) return;
+		if (_rope.GetTotalLength() <= m_ropeConfig.MaxLength) return;
 
 		DesequipRope();
 	}
@@ -1758,9 +1735,9 @@ public class OldCharacterMotor : MonoBehaviour
 		// ---- CHARACTER IS HOLDING THE ROPE ----
 
 		// Populate useful varaibles
-		Vector3 verticalPoint = _rope.folds[^1] + Vector3.down * _rope.holdLength;
+		Vector3 verticalPoint = _rope.CurrentFold + Vector3.down * _rope.HoldLength;
 		Vector3 towardsVertical = (m_rsoCharacterPosition.value - verticalPoint).normalized;
-		_towardsCharacter = (m_rsoCharacterPosition.value - _rope.folds[^1]).normalized;
+		_towardsCharacter = (m_rsoCharacterPosition.value - _rope.CurrentFold).normalized;
 
 		// Get input related data
 		_ropeInputDirection = m_cameraTransform.forward * m_moveInput.y + m_cameraTransform.right * m_moveInput.x;
@@ -1800,7 +1777,7 @@ public class OldCharacterMotor : MonoBehaviour
 				else
 				{
 					// If the character IS NOT holding the rope, let it fall till it reaches the rope limit constraint
-					isFalling = (_rope.folds[^1] - m_rsoCharacterPosition.value).magnitude < _rope.holdLength - _FALLING_FORCES_THRESHOLD;
+					isFalling = (_rope.CurrentFold - m_rsoCharacterPosition.value).magnitude < _rope.HoldLength - _FALLING_FORCES_THRESHOLD;
 				}
 				break;
 		}
@@ -1848,7 +1825,7 @@ public class OldCharacterMotor : MonoBehaviour
 		_pendulumVelocity += Vector3.down * gravityForce * Time.fixedDeltaTime;
 
 		// Cache pivot and bob positions
-		Vector3 pivotPositionCache = _rope.folds[^1];
+		Vector3 pivotPositionCache = _rope.CurrentFold;
 		Vector3 bobPositionCache = m_rsoCharacterPosition.value;
 
 		// Get bob's position after applying gravity force
@@ -1856,8 +1833,8 @@ public class OldCharacterMotor : MonoBehaviour
 		float distanceAfterGravity = Vector3.Distance(pivotPositionCache, bobPositionCache + auxiliaryMovementDelta);
 
 		// The bob acceleration is mesured in this statement. Returning an updated `m_CurrentVelocity`
-		if (distanceAfterGravity > _rope.holdLength
-		|| Mathf.Approximately(distanceAfterGravity, _rope.holdLength))
+		if (distanceAfterGravity > _rope.HoldLength
+		|| Mathf.Approximately(distanceAfterGravity, _rope.HoldLength))
 		{
 			Vector3 tensionDirection = (pivotPositionCache - bobPositionCache).normalized;
 
@@ -1866,7 +1843,7 @@ public class OldCharacterMotor : MonoBehaviour
 			float tensionForce = gravityForce * Mathf.Cos(Mathf.Deg2Rad * inclinationAngle);
 
 			// Generate the counter force to make the bob stay within the circle : centripetal force
-			tensionForce += m_characterConfig.mass * Mathf.Pow(_pendulumVelocity.magnitude, 2) / _rope.holdLength;
+			tensionForce += m_characterConfig.mass * Mathf.Pow(_pendulumVelocity.magnitude, 2) / _rope.HoldLength;
 
 			// Apply the tension to `m_CurrentVelocity`
 			_pendulumVelocity += tensionDirection * tensionForce * Time.fixedDeltaTime;
@@ -1887,16 +1864,16 @@ public class OldCharacterMotor : MonoBehaviour
 				angle: m_characterConfig.ropeOffsetAngle,
 				axis: m_cameraTransform.forward,
 				direction: m_cameraTransform.right,
-				origin: _rope.folds[^1],
-				radius: _rope.holdLength,
+				origin: _rope.CurrentFold,
+				radius: _rope.HoldLength,
 				starting: m_rsoCharacterPosition.value
 			) - m_rsoCharacterPosition.value).normalized * m_moveInput.x +
 			(Vector3Extention.GetPositionOnCercle(
 				angle: m_characterConfig.ropeOffsetAngle,
 				axis: m_cameraTransform.right,
 				direction: m_cameraTransform.forward,
-				origin: _rope.folds[^1],
-				radius: _rope.holdLength,
+				origin: _rope.CurrentFold,
+				radius: _rope.HoldLength,
 				starting: m_rsoCharacterPosition.value
 			) - m_rsoCharacterPosition.value).normalized * m_moveInput.y;
 
@@ -1905,8 +1882,8 @@ public class OldCharacterMotor : MonoBehaviour
 				angle: m_characterConfig.ropeOffsetAngle,
 				axis: m_cameraTransform.forward,
 				direction: m_cameraTransform.right,
-				origin: _rope.folds[^1],
-				radius: _rope.holdLength,
+				origin: _rope.CurrentFold,
+				radius: _rope.HoldLength,
 				starting: m_rsoCharacterPosition.value
 			) - m_rsoCharacterPosition.value).normalized * m_moveInput.x;
 
@@ -1950,15 +1927,15 @@ public class OldCharacterMotor : MonoBehaviour
 		}
 
 		// Get the distance between the current character's position and the position of the last fold
-		Vector3 towardCharacter = m_rsoCharacterPosition.value - _rope.folds[^1];
+		Vector3 towardCharacter = m_rsoCharacterPosition.value - _rope.CurrentFold;
 
 		// Re-snap the character's position within the spherical constraint
-		if (towardCharacter.magnitude > _rope.holdLength)
+		if (towardCharacter.magnitude > _rope.HoldLength)
 		{
 			if (_ropeConstraintTimer != null) StopCoroutine(_ropeConstraintTimer);
 			_ropeConstraintTimer = StartCoroutine(AddRopeConstraintTimer());
 
-			transform.position = _rope.folds[^1] + towardCharacter.normalized * _rope.holdLength;
+			transform.position = _rope.CurrentFold + towardCharacter.normalized * _rope.HoldLength;
 
 			// Transform position of the character controller has been modified outside the movement function
 			// Call this unity function to synchronize transform to avoid glitchy movement effects
@@ -2005,7 +1982,7 @@ public class OldCharacterMotor : MonoBehaviour
 		if (enable)
 		{
 			_rope.UpdateHoldLength();
-			if (_rope.holdLength == -1) DesequipRope(); // handle error code 
+			if (_rope.HoldLength == -1) DesequipRope(); // handle error code 
 		}
 		else
 		{
@@ -2070,8 +2047,8 @@ public class OldCharacterMotor : MonoBehaviour
                 if (CraftInHand.Throw(m_thirdPersonCamera.transform))
                 {
                     // rope attachment exception
-                    _rope = CraftInHand as Rope;
-                    if (_rope != null) _rope?.Attach(m_harness);
+                    // _rope = CraftInHand as Rope;
+                    // if (_rope != null) _rope?.Attach(m_harness);
 
                     CraftInHand = null;
                     if (CraftInRobot != null)

@@ -131,6 +131,9 @@ public class CharacterInteract : MonoBehaviour
 
 	private void CheckInteractableValidity()
 	{
+		// Assertion
+		if (m_interactables == null) return;
+
 		m_rsoInteractableValid.value =
 			m_interactables.Count(i => i.IsValid) > 0
 			&& m_rsoCharacterState.value == BehaviorState.LOCOMOTION;

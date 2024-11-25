@@ -80,7 +80,7 @@ public class CameraMotor : MonoBehaviour
 		m_thirdPersonCamera.gameObject.SetActive(false);
 
 		if (m_rsoCameraStyle.value == CameraStyle.BASIC) m_thirdPersonCamera.gameObject.SetActive(true);
-		if (m_rsoCameraStyle.value == CameraStyle.AIMING) m_thirdPersonCamera.gameObject.SetActive(true);
+		if (m_rsoCameraStyle.value == CameraStyle.AIMING) m_aimingCamera.gameObject.SetActive(true);
 	}
 
 	public void CalculatePlanarVectors()

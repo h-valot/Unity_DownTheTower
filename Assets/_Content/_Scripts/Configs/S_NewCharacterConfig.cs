@@ -4,13 +4,12 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "NewCharacterConfig", menuName = "Configs/New character")]
 public class NewCharacterConfig : ScriptableObject
 {
-    public Action OnConfigChanged;
-
     /// <summary>
 	/// 	Unity in-built editor function called whenever the scriptable object is updated.
     /// 	Used to apply change to drag immediatly to rigidbody.
 	/// </summary>
 	public void OnValidate() => OnConfigChanged?.Invoke();
+	public Action OnConfigChanged;
 
 
 	public GameObject pfCamera;
@@ -40,8 +39,10 @@ public class NewCharacterConfig : ScriptableObject
     [Header("Jump")]
     [Tooltip("Force used to make player jump")]
     public float jumpForce;
+
     [Tooltip("While falling, factor applied to the force used to make player move")]
     public float fallingControlFactor;
+
     [Tooltip("Time after start falling while the player can still jump")]
     public float CoyoteTime;
 
@@ -52,6 +53,31 @@ public class NewCharacterConfig : ScriptableObject
 
     [Tooltip("Height that the character will automaticly step on")]
     public float stepOnHeight;
+
+
+	[Header("Rope")]
+	public RopeHolding ropeHoldingMethod;
+	public float cancelRopeDuration;
+	public float againstWallRayCastLength;
+	public LayerMask againstWallLayerToInclude;
+	public float jumpOffWallForce;
+	public float ropeOffsetAngle;
+	public float partialSuspensionSpeed;
+	public float completeSuspensionSpeed;
+	public float maxSideAngle;
+	public float climbAcceleration;
+	public float maxClimbSpeed;
+	public float freeFallFromRopeModifier;
+	public float jumpOffRopeModifier;
+	public float jumpRopeDuration;
+	public float ropeMovementForce;
+
+
+	[Header("Glow")]
+	public float glowHeight;
+	public float glowRadius;
+	public float glowStrength;
+	public Color glowColor;
 
 
 	[Header("Debug")]

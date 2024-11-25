@@ -3,6 +3,8 @@ using UnityEngine.InputSystem;
 
 public class InputManager : MonoBehaviour
 {
+	#region REFERENCES
+
 	[Header("Internal references")]
 	[SerializeField] private PlayerInput m_playerInput;
 
@@ -14,7 +16,7 @@ public class InputManager : MonoBehaviour
 	[SerializeField] private RSE_Jump m_rseJump;
 	[SerializeField] private RSE_Run m_rseRun;
 	[SerializeField] private RSE_Interact m_rseInteract;
-	[SerializeField] private RSE_CancelAction m_rseCancelAction;
+	[SerializeField] private RSE_Cancel m_rseCancel;
     [SerializeField] private RSE_Craft m_rseCraft;
 	[SerializeField] private RSE_Throw m_rseThrow;
     [SerializeField] private RSE_ToggleInHand m_rseToggleInHand;
@@ -28,12 +30,20 @@ public class InputManager : MonoBehaviour
 	[SerializeField] private RSO_CraftInputLocked m_rsoCraftInputLocked;
 	[SerializeField] private RSO_RecycleInputLocked m_rsoRecycleInputLocked;
 
+	#endregion
+
+	#region VARIABLES
+
 	private Vector2 m_move;
 	private Vector2 m_look;
 	private bool m_run;
 	private bool m_throw;
 	private bool m_jump;
 	private bool m_climb;
+
+	#endregion
+
+	#region MONOBEHAVIOR
 
 	private void Awake()
 	{
@@ -78,6 +88,10 @@ public class InputManager : MonoBehaviour
 	{
 		m_rseToggleCursor.action -= OnEnableCursor;
 	}
+
+	# endregion
+
+	#region ACTION LISTENER
 
 	public void OnMove(InputValue value)
 	{
@@ -144,9 +158,9 @@ public class InputManager : MonoBehaviour
 		m_rseInteract.Call();
 	}
 
-    public void OnCancelAction()
+    public void OnCancel(InputValue value)
     {
-        m_rseCancelAction.Call();
+        m_rseCancel.Call(value.isPressed);
     }
 
     public void OnCraftTorch(InputValue value)
@@ -197,4 +211,6 @@ public class InputManager : MonoBehaviour
 	{
 		m_rseHideUI.Call();
 	}
+
+	#endregion
 }

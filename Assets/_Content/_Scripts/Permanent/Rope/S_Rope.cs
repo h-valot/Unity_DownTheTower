@@ -4,103 +4,123 @@ using UnityEngine;
 
 public class Rope : Permanent
 {
+	#region REFERENCES
+
 	[Header("Internal references")]
-	[SerializeField] private Transform _ropeAttach;
-	[SerializeField] private MeshRenderer _previewMeshRendered;
-	[SerializeField] private GameObject _previewGameObject;
+	[SerializeField] private Transform m_ropeAttach;
+	[SerializeField] private MeshRenderer m_previewMeshRendered;
+	[SerializeField] private GameObject m_previewGameObject;
+	[SerializeField] private ConfigurableJoint m_joint;
 
 	[Header("Scriptable references")]
-	[SerializeField] private RopeConfig _ropeConfig;
-	[SerializeField] private RSO_CharacterPosition _rsoCharacterPosition;
-	[SerializeField] private RSE_SetCharacterPosition _rseSetCharacterPosition;
+	[SerializeField] private RopeConfig m_ropeConfig;
+	[SerializeField] private RSE_SetCharacterPosition m_rseSetCharacterPosition;
+	[SerializeField] private RSO_CharacterPosition m_rsoCharacterPosition;
 
-	// ---- PUBLIC VARIABLES ----
-	[HideInInspector] public bool isConnected;
-	[HideInInspector] public bool isPlaced;
-	[HideInInspector] public float holdLength;
-	[HideInInspector] public List<Vector3> folds = new List<Vector3>();
+	#endregion
 
-	private List<RopeLine> _ropeLines = new List<RopeLine>();
-	private List<Interactable> _interactibles = new List<Interactable>();
-	private Transform _characterHarness;
+	#region VARIABLES
 
-	#region default functions
+	private bool m_isConnected;
+	private bool m_isPlaced;
+	public float m_holdLength;
+	private List<Vector3> m_folds = new List<Vector3>();
+	private List<RopeLine> m_ropeLines = new List<RopeLine>();
+	private List<Interactable> m_interactibles = new List<Interactable>();
+	private Transform m_characterHarness;
+	private SoftJointLimit m_linearLimit;
 
-	public void Update()
+	public bool IsConnected => m_isConnected;
+	public bool IsPlaced => m_isPlaced;
+	public float HoldLength => m_holdLength;
+	public Vector3 CurrentFold => m_folds[^1];
+	public Vector3 LastFold 
+	{ 
+		get { 
+			if (m_folds.Count >= 2) return m_folds[^2];
+			else return Vector3.zero;
+		}
+	}
+
+	#endregion
+
+	#region MONOBEHAVIOR
+
+	private void Update()
 	{
 		// Assertions
-		if (!isConnected) return;
-		if (!isPlaced) return;
+		if (!m_isConnected) return;
+		if (!m_isPlaced) return;
 
 		HandleFolds();
+		HandleJoint();
 		HandleInteractibles();
-		HandleEnd();
 		DrawLines();
 	}
 
 	#endregion
 
-	#region permanent & placement functions
+	#region PERMANENT
 
 	public override void InitializePreview()
 	{
-		_previewGameObject.SetActive(true);
-		_previewGameObject.transform.rotation = Quaternion.identity;
+		m_previewGameObject.SetActive(true);
+		m_previewGameObject.transform.rotation = Quaternion.identity;
 	}
 
 	public override void PreviewThrow(Transform cameraTransform)
 	{
 		if (Physics.Raycast(
 			cameraTransform.position, 
-			GetPositionRayDirection(cameraTransform, _ropeConfig.cameraOffsetAngle, _ropeConfig.maxCameraDownwardClamp), 
+			GetPositionRayDirection(cameraTransform, m_ropeConfig.CameraOffsetAngle, m_ropeConfig.MaxCameraDownwardClamp), 
 			out var hitInfo, 
-			_ropeConfig.maxDistFromCamera, 
-			~_ropeConfig.layersToIgnore))
+			m_ropeConfig.MaxDistFromCamera, 
+			~m_ropeConfig.DeployLayersToIgnore))
 		{
-			if (!_previewGameObject.activeInHierarchy)
+			if (!m_previewGameObject.activeInHierarchy)
 			{
-				_previewGameObject.SetActive(true);
+				m_previewGameObject.SetActive(true);
 			}
 
-			// update preview position
-			_previewGameObject.transform.position = new Vector3(hitInfo.point.x, hitInfo.point.y + _ropeConfig.heightLimit / 2, hitInfo.point.z);
+			// Update preview position
+			m_previewGameObject.transform.position = new Vector3(hitInfo.point.x, hitInfo.point.y + m_ropeConfig.HeightLimit / 2, hitInfo.point.z);
 
 			UpdateColor(isDeployable: 
-				IsGroundFlat(hitInfo, _ropeConfig.maxGroundAngle) 
-				&& !IsCeiling(hitInfo, _ropeConfig.heightLimit) 
-				&& !IsSpaceInFront(hitInfo, cameraTransform, _ropeConfig.minDistanceFromWall)
+				IsGroundFlat(hitInfo, m_ropeConfig.MaxGroundAngle) 
+				&& !IsCeiling(hitInfo, m_ropeConfig.HeightLimit) 
+				&& !IsSpaceInFront(hitInfo, cameraTransform, m_ropeConfig.MinDistanceFromWall)
 			);
 		}
 		else
 		{
 			UpdateColor(isDeployable: false);
 
-			if (_previewGameObject.activeInHierarchy) 
+			if (m_previewGameObject.activeInHierarchy) 
 			{
-				_previewGameObject.SetActive(false);
+				m_previewGameObject.SetActive(false);
 			}
 		}
 	}
 
 	private void UpdateColor(bool isDeployable)
 	{
-		_previewMeshRendered.material.SetFloat("_colorSwitch", isDeployable ? 1f : 0f);
+		m_previewMeshRendered.material.SetFloat("_colorSwitch", isDeployable ? 1f : 0f);
 	}
 
 	public override bool Throw(Transform cameraTransform)
 	{
-		_previewGameObject.SetActive(false);
+		m_previewGameObject.SetActive(false);
 
 		if (Physics.Raycast(
 			cameraTransform.position,
-			GetPositionRayDirection(cameraTransform, _ropeConfig.cameraOffsetAngle, _ropeConfig.maxCameraDownwardClamp),
+			GetPositionRayDirection(cameraTransform, m_ropeConfig.CameraOffsetAngle, m_ropeConfig.MaxCameraDownwardClamp),
 			out var hitInfo,
-			_ropeConfig.maxDistFromCamera,
-			~_ropeConfig.layersToIgnore))
+			m_ropeConfig.MaxDistFromCamera,
+			~m_ropeConfig.DeployLayersToIgnore))
 		{
-			if (IsGroundFlat(hitInfo, _ropeConfig.cameraOffsetAngle) 
-				&& !IsCeiling(hitInfo, _ropeConfig.heightLimit) 
-				&& !IsSpaceInFront(hitInfo, cameraTransform, _ropeConfig.minDistanceFromWall))
+			if (IsGroundFlat(hitInfo, m_ropeConfig.MaxGroundAngle) 
+				&& !IsCeiling(hitInfo, m_ropeConfig.HeightLimit) 
+				&& !IsSpaceInFront(hitInfo, cameraTransform, m_ropeConfig.MinDistanceFromWall))
 			{
 				transform.SetParent(null, true);
 				Deploy(cameraTransform, hitInfo.point);
@@ -116,114 +136,104 @@ public class Rope : Permanent
 		transform.eulerAngles = new Vector3(0, cameraTransform.rotation.eulerAngles.y, 0);
 		transform.DOJump(deployPoint, 1f, 0, 0.3f).OnComplete(() =>
 		{
-			// rope custom initialization commands 
-			folds = new List<Vector3>() { _ropeAttach.position.CutDigits(2) };
-			isPlaced = true;
+			// Rope custom initialization commands 
+			m_folds = new List<Vector3>() { m_ropeAttach.position.CutDigits(2) };
+			m_isPlaced = true;
 		});
 	}
 
 	#endregion
 
-	#region rope managment
+	#region ROPE
 
-	public void Attach(Transform harness)
+	public void Attach(Transform harness, Rigidbody rigidbody)
 	{
-		_characterHarness = harness;
-		isConnected = true;
+		m_characterHarness = harness;
+		m_joint.connectedBody = rigidbody;
+		m_isConnected = true;
 	}
 
 	public void Detach()
 	{
 		// Assertion
-		if (_characterHarness == null || !isConnected) return;
+		if (m_characterHarness == null || !m_isConnected) return;
 
 		// Add a final fold to spawn an interactible on it.
-		folds.Add(_characterHarness.position.CutDigits(2));
+		m_folds.Add(m_characterHarness.position.CutDigits(2));
 		HandleInteractibles();
 
-		_characterHarness = null;
-		isConnected = false;
+		m_isConnected = false;
+		m_joint.connectedBody = null;
+		m_characterHarness = null;
 	}
 
 	/// <summary>
-	/// 	Check rope folding using raycasts.
+	/// Check rope folding using raycasts.
 	/// </summary>
 	public void HandleFolds()
 	{
-		// Assert: character ref null
-		if (_characterHarness == null) return;
-
 		// Add fold if a collider stands between the character and the last fold
-		if (Physics.Linecast(_characterHarness.position, folds[^1], out var addHit, ~_ropeConfig.foldLayerToIgnore))
+		if (Physics.Linecast(m_characterHarness.position, CurrentFold, out var addHit, m_ropeConfig.FoldLayerToInclude))
 		{
-			Vector3 approximatePoint = addHit.point.CutDigits(2);
+			Vector3 offsetPoint = addHit.point + addHit.normal * m_ropeConfig.FoldOffset;
+			Vector3 approximatePoint = offsetPoint.CutDigits(2);
 
-			if (folds.Count >= 2)
+			if (m_folds.Count >= 2)
 			{
 				// Minimal distance between two fold point to be register
-				if ((folds[^1] - folds[^2]).magnitude >= _ropeConfig.minFoldDistance)
+				if ((CurrentFold - LastFold).magnitude >= m_ropeConfig.MinFoldDistance)
 				{
-					folds.AddUnique(approximatePoint, UpdateHoldLength);
+					m_folds.AddUnique(approximatePoint, UpdateHoldLength);
 				}
 			}
 			else
 			{
-				folds.AddUnique(approximatePoint, UpdateHoldLength);
+				m_folds.AddUnique(approximatePoint, UpdateHoldLength);
 			}
 		}
 
 		// Remove the last fold from the list if there is no collider 
 		// that stands between the character and the previous last fold.
-		if (folds.Count >= 2
-		&& !Physics.Linecast(_characterHarness.position, folds[^2], out var removeHit, ~_ropeConfig.foldLayerToIgnore))
+		if (m_folds.Count >= 2
+		&& !Physics.Linecast(m_characterHarness.position, LastFold, out var removeHit, m_ropeConfig.FoldLayerToInclude))
 		{
-			holdLength = GetLastFoldHarnessDistance() + (folds[^2] - folds[^1]).magnitude;
-			folds.Remove(folds[^1]);
+			ChangeHoldLength((LastFold - CurrentFold).magnitude);
+			m_folds.Remove(CurrentFold);
 		}
 	}
 
 	public void HandleInteractibles()
 	{
-		for (int i = _interactibles.Count - 1; i >= folds.Count - 1; i--)
+		for (int i = m_interactibles.Count - 1; i >= m_folds.Count - 1; i--)
 		{
-			_interactibles[i].OnInteracted -= Teleport;
-			Destroy(_interactibles[i].gameObject);
-			_interactibles.RemoveAt(i);
+			m_interactibles[i].OnInteracted -= Teleport;
+			Destroy(m_interactibles[i].gameObject);
+			m_interactibles.RemoveAt(i);
 		}
 
-		for (int i = 0; i < folds.Count; i++)
+		for (int i = 0; i < m_folds.Count; i++)
 		{
-			if (_interactibles.Count - 1 < i) 
+			if (m_interactibles.Count - 1 < i) 
 			{
-				Interactable newInteractible = Instantiate(_ropeConfig.pfRopeInteractible, folds[i], Quaternion.identity, transform);
+				Interactable newInteractible = Instantiate(m_ropeConfig.PfRopeInteractible, m_folds[i], Quaternion.identity, transform);
 				newInteractible.OnInteracted += Teleport;
-				_interactibles.Add(newInteractible);
+				m_interactibles.Add(newInteractible);
 				continue;
 			}
 
-			_interactibles[i].transform.position = folds[i];
+			m_interactibles[i].transform.position = m_folds[i];
 		}
 	}
 
 	public void Teleport()
 	{
-		_rseSetCharacterPosition.Call(_ropeAttach.transform.position, Quaternion.identity);
+		m_rseSetCharacterPosition.Call(transform.position, Quaternion.identity);
+		Destroy(gameObject);
 	}
 
 	/// <summary>
-	/// 	Detach the rope from the player if its total length is greater than the limit.
-	/// </summary>
-	private void HandleEnd()
-	{
-		// Assert: total rope length is smaller than the max length
-		if (GetTotalLength() <= _ropeConfig.maxLength) return;
-
-		Detach();
-	}
-
-	/// <summary>
-	/// 	Opdate hold rope radius to be the distance between the character rope attach 
-	/// 	position and the last fold of the rope. Only if allowed.
+	/// Update hold rope radius to be the distance between the character rope attach 
+	/// position and the last fold of the rope. Only if allowed.
 	/// </summary>
 	/// <param name="isAllowed">Is it allowed to update hold rope radius</param>
 	public void UpdateHoldLength(bool isAllowed = true)
@@ -231,81 +241,93 @@ public class Rope : Permanent
 		// Assert: is it not allowed
 		if (!isAllowed) return;
 
-		holdLength = GetLastFoldHarnessDistance();
+		m_holdLength = GetLastFoldHarnessDistance();
+		HandleJoint();
+	}
+
+	public void ChangeHoldLength(float amount)
+	{
+		m_holdLength += amount;
+		HandleJoint();
+	}
+
+	public void SetHoldLength(float length)
+	{
+		m_holdLength = length;
+		HandleJoint();
+	}
+
+	private void HandleJoint()
+	{
+		m_joint.transform.position = CurrentFold;
+		m_linearLimit.limit = m_holdLength;
+		m_joint.linearLimit = m_linearLimit;
 	}
 
 	/// <summary>
-	/// 	Current distance between the character's position and the base of the rope.
+	/// Current distance between the character's position and the base of the rope.
 	/// </summary>
 	public float GetTotalLength()
 	{
-		// Assertions
-		if (!isPlaced) return 0;
-		if (_characterHarness == null) return 0;
+		// Assertion
+		if (!m_isConnected) return 0;
 
 		float output = 0;
-		for (int i = 0; i < folds.Count; i++)
+		for (int i = 0; i < m_folds.Count; i++)
 		{
-			Vector3 nextPosition = i + 1 >= folds.Count
-				? _characterHarness.position
-				: folds[i + 1];
+			Vector3 nextPosition = i + 1 >= m_folds.Count
+				? m_characterHarness.position
+				: m_folds[i + 1];
 
-			output += (folds[i] - nextPosition).magnitude;
+			output += (m_folds[i] - nextPosition).magnitude;
 		}
 		return output;
 	}
 
 	public float GetLastFoldHarnessDistance()
 	{
-		// Assertions
-		if (!isPlaced) return -1;
-		if (_characterHarness == null) return -1;
+		// Assertion
+		if (!m_isConnected) return -1;
 
 		// Note that we do not connect the last fold to the harness
 		// but the character's current position. This avoids re-centering
 		// issue if spamming holding rope key
-		return (folds[^1] - _rsoCharacterPosition.value).magnitude;
-	}
-	
-	public void ChangeHoldLength(float amount)
-	{
-		holdLength += amount;
+		return (CurrentFold - m_rsoCharacterPosition.value).magnitude;
 	}
 
 	private void DrawLines()
 	{
-		// Assertions
-		if (!isPlaced) return;
-		if (_characterHarness == null) return;
+		// Assertion
+		if (!m_characterHarness) return;
 
 		// Clear lists
-		if (_ropeLines.Count >= 1)
+		if (m_ropeLines.Count >= 1)
 		{
-			for (int i = _ropeLines.Count - 1; i >= 0; i--)
+			for (int i = m_ropeLines.Count - 1; i >= 0; i--)
 			{
-				Destroy(_ropeLines[i].gameObject);
+				Destroy(m_ropeLines[i].gameObject);
 			}
-			_ropeLines = new List<RopeLine>();
+			m_ropeLines = new List<RopeLine>();
 		}
 
 		// Get material based in the total distance
-		Material material = _ropeConfig.dangerMaterial;
-		if (GetTotalLength() <= _ropeConfig.maxLength / 2f)
+		Material material = m_ropeConfig.DangerMaterial;
+		if (GetTotalLength() <= m_ropeConfig.MaxLength / 2f)
 		{
-			material = _ropeConfig.safeMaterial;
+			material = m_ropeConfig.SafeMaterial;
 		}
-		else if (GetTotalLength() <= 3 * (_ropeConfig.maxLength / 4f))
+		else if (GetTotalLength() <= 3 * (m_ropeConfig.MaxLength / 4f))
 		{
-			material = _ropeConfig.midMaterial;
+			material = m_ropeConfig.MidMaterial;
 		}
 
 		// Draw lines 
-		for (int i = 0; i < folds.Count; i++)
+		for (int i = 0; i < m_folds.Count; i++)
 		{
-			RopeLine newRopeLine = Instantiate(_ropeConfig.pfRopeLine);
-			newRopeLine.SetPositions(folds[i], i + 1 >= folds.Count ? _characterHarness.position : folds[i + 1]);
+			RopeLine newRopeLine = Instantiate(m_ropeConfig.PfRopeLine, transform);
+			newRopeLine.SetPositions(m_folds[i], i + 1 >= m_folds.Count ? m_characterHarness.position : m_folds[i + 1]);
 			newRopeLine.SetColor(material);
-			_ropeLines.Add(newRopeLine);
+			m_ropeLines.Add(newRopeLine);
 		}
 	}
 

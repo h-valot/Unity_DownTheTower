@@ -362,7 +362,7 @@ public class Torch : Permanent
                     _hasChangedColor = false;
                 }
             }
-            if (_rsoCharacterPosition.value.y - transform.position.y > _characterConfig.lethalHeight + _ropeConfig.maxLength)
+            if (_rsoCharacterPosition.value.y - transform.position.y > _characterConfig.lethalHeight + _ropeConfig.MaxLength)
             {
                 _rsoTorchManager.value.RemoveTorchFromList(this);
                 DeactivateTorch();
