@@ -1,40 +1,40 @@
 using System.Collections;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 public class NewCharacterMotor : MonoBehaviour
 {
     #region REFERENCES
 
-    [Header("Internal references")]
-    [SerializeField] private Rigidbody m_rigidbody;
-    [SerializeField] private CapsuleCollider m_collider;
-	[SerializeField] private Transform m_handSocket;
-	[SerializeField] private Transform m_robotSocket;
-	[SerializeField] private Transform m_harness;
-	[SerializeField] private Transform m_aimingLookTo;
-	[SerializeField] private Transform m_cameraTarget;
-	[SerializeField] private CharacterGraphics m_characterGraphics;
+	[FoldoutGroup("Internal")] [SerializeField] private Rigidbody m_rigidbody;
+	[FoldoutGroup("Internal")] [SerializeField] private CapsuleCollider m_collider;
+	[FoldoutGroup("Internal")] [SerializeField] private Transform m_handSocket;
+	[FoldoutGroup("Internal")] [SerializeField] private Transform m_robotSocket;
+	[FoldoutGroup("Internal")] [SerializeField] private Transform m_harness;
+	[FoldoutGroup("Internal")] [SerializeField] private Transform m_aimingLookTo;
+	[FoldoutGroup("Internal")] [SerializeField] private Transform m_cameraTarget;
+	[FoldoutGroup("Internal")] [SerializeField] private CharacterGraphics m_characterGraphics;
 
-	[Header("Scriptable references")]
-    [SerializeField] private NewCharacterConfig m_characterConfig;
-	[SerializeField] private TorchConfig m_torchConfig;
-	[SerializeField] private RopeConfig m_ropeConfig;
-	[Space(5)]
-    [SerializeField] private RSE_Move m_rseMove;
-    [SerializeField] private RSE_Jump m_rseJump;
-	[SerializeField] private RSE_Craft m_rseCraft;
-	[SerializeField] private RSE_Throw m_rseThrow;
-	[SerializeField] private RSE_Run m_rseRun;
-	[SerializeField] private RSE_Climb m_rseClimb;
-	[SerializeField] private RSE_Cancel m_rseCancel;
-	[SerializeField] private RSE_BackpackCrafting m_rseBackpackCrafting;
-	[Space(5)]
-	[SerializeField] private RSO_MovementDatas m_rsoMovementDatas;
-	[SerializeField] private RSO_CameraStyle m_rsoCameraStyle;
-	[SerializeField] private RSO_CraftInputLocked m_rsoCraftInputLocked;
-	[SerializeField] private RSO_RecycleInputLocked m_rsoRecycleInputLocked;
-	[SerializeField] private RSO_CharacterState m_rsoCharacterState;
-	[SerializeField] private RSO_CharacterPosition m_rsoCharacterPosition;
+	[FoldoutGroup("SSO")] [SerializeField] private NewCharacterConfig m_characterConfig;
+	[FoldoutGroup("SSO")] [SerializeField] private TorchConfig m_torchConfig;
+	[FoldoutGroup("SSO")] [SerializeField] private RopeConfig m_ropeConfig;
+
+	[FoldoutGroup("RSE")] [SerializeField] private RSE_Move m_rseMove;
+	[FoldoutGroup("RSE")] [SerializeField] private RSE_Jump m_rseJump;
+	[FoldoutGroup("RSE")] [SerializeField] private RSE_Craft m_rseCraft;
+	[FoldoutGroup("RSE")] [SerializeField] private RSE_Throw m_rseThrow;
+	[FoldoutGroup("RSE")] [SerializeField] private RSE_Run m_rseRun;
+	[FoldoutGroup("RSE")] [SerializeField] private RSE_Climb m_rseClimb;
+	[FoldoutGroup("RSE")] [SerializeField] private RSE_Cancel m_rseCancel;
+	[FoldoutGroup("RSE")] [SerializeField] private RSE_BackpackCrafting m_rseBackpackCrafting;
+	[FoldoutGroup("RSE")] [SerializeField] private RSE_SetCharacterPosition m_rseSetCharacterPosition;
+
+	[FoldoutGroup("RSO")] [SerializeField] private RSO_MovementDatas m_rsoMovementDatas;
+	[FoldoutGroup("RSO")] [SerializeField] private RSO_CameraStyle m_rsoCameraStyle;
+	[FoldoutGroup("RSO")] [SerializeField] private RSO_CraftInputLocked m_rsoCraftInputLocked;
+	[FoldoutGroup("RSO")] [SerializeField] private RSO_RecycleInputLocked m_rsoRecycleInputLocked;
+	[FoldoutGroup("RSO")] [SerializeField] private RSO_CharacterState m_rsoCharacterState;
+	[FoldoutGroup("RSO")] [SerializeField] private RSO_CharacterPosition m_rsoCharacterPosition;
 
 	#endregion
 
@@ -180,8 +180,10 @@ public class NewCharacterMotor : MonoBehaviour
     #region INPUTS
 
     private void UnsubscibeAllInputs()
-    {
-        m_rseMove.action -= UpdateMoveInput;
+	{
+		m_rseSetCharacterPosition.action -= SetCharacterPosition; // debug fonction
+
+		m_rseMove.action -= UpdateMoveInput;
 		m_rseRun.action -= UpdateRunInput;
 		m_rseRun.action -= UpdateHoldInput;
 		m_rseJump.action -= Jump;
@@ -194,6 +196,8 @@ public class NewCharacterMotor : MonoBehaviour
 
     private void SubscribeStateInputs()
 	{
+		m_rseSetCharacterPosition.action += SetCharacterPosition; // debug fonction
+
 		switch (m_rsoCharacterState.value)
         {
             case BehaviorState.LOCOMOTION:
@@ -225,6 +229,13 @@ public class NewCharacterMotor : MonoBehaviour
 				m_rseCraft.action += ToggleCraft;
 				break;
         }
+	}
+
+	private void SetCharacterPosition(Vector3 position, Quaternion rotation)
+	{
+		m_rigidbody.velocity = Vector3.zero;
+		m_rigidbody.position = position;
+		m_rigidbody.rotation = rotation;
 	}
 
 	private void UpdateMoveInput(Vector2 input)
@@ -728,8 +739,6 @@ public class NewCharacterMotor : MonoBehaviour
 
 	#region ROPE STATE
 
-	// TODO - Jump off the rope on motion
-	// TODO - Re-equip an already-used rope (debug version)
 	// TODO - In partial suspension, make the character able to jump off the wall
 	// TODO - In partial suspension, make the character unable to move while off the wall
 	// TODO - In partial suspension, make the character unable to be snap against a cambered wall 
