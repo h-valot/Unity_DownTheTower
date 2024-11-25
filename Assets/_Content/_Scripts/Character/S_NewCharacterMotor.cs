@@ -653,6 +653,14 @@ public class NewCharacterMotor : MonoBehaviour
 
 	#region ROPE STATE
 
+	// TODO - Jump off the rope on motion
+	// TODO - Re-equip an already-used rope (debug version)
+	// TODO - In partial suspension, make the character able to jump off the wall
+	// TODO - In partial suspension, make the character unable to move while off the wall
+	// TODO - In partial suspension, make the character unable to be snap against a cambered wall 
+	// TODO - In complete suspension, make the character pivot with the rope inclination
+	// TODO - Lerp the rope stop deceleration
+
 	private void EnterRopeState()
 	{
 		EnterFallState();

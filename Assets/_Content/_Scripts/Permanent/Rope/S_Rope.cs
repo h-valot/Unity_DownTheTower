@@ -173,7 +173,7 @@ public class Rope : Permanent
 	public void HandleFolds()
 	{
 		// Add fold if a collider stands between the character and the last fold
-		if (Physics.Linecast(m_characterHarness.position, CurrentFold, out var addHit, ~m_ropeConfig.FoldLayerToInclude))
+		if (Physics.Linecast(m_characterHarness.position, CurrentFold, out var addHit, m_ropeConfig.FoldLayerToInclude))
 		{
 			Vector3 approximatePoint = addHit.point.CutDigits(2);
 
@@ -194,7 +194,7 @@ public class Rope : Permanent
 		// Remove the last fold from the list if there is no collider 
 		// that stands between the character and the previous last fold.
 		if (m_folds.Count >= 2
-		&& !Physics.Linecast(m_characterHarness.position, LastFold, out var removeHit, ~m_ropeConfig.FoldLayerToInclude))
+		&& !Physics.Linecast(m_characterHarness.position, LastFold, out var removeHit, m_ropeConfig.FoldLayerToInclude))
 		{
 			ChangeHoldLength((LastFold - CurrentFold).magnitude);
 			m_folds.Remove(CurrentFold);

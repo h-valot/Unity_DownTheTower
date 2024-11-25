@@ -111,6 +111,9 @@ MonoBehaviour:
     type: 2}
   m_rsoCharacterPosition: {fileID: 11400000, guid: 7cfc39952cca0d6478396ad49ab9e0db,
     type: 2}
+  m_isHolding: 0
+  m_isClimbing: 0
+  m_currentClimbSpeed: 0
 --- !u!114 &4970598091221463380
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -298,6 +301,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: PF_HPPC_Graphics
+      objectReference: {fileID: 0}
+    - target: {fileID: 3977834962296761591, guid: 7544e1a2ef9f92846a2661054cf72879,
+        type: 3}
+      propertyPath: m_Layer
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 8789223992376889300, guid: 7544e1a2ef9f92846a2661054cf72879,
         type: 3}

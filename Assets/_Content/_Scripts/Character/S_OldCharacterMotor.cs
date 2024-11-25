@@ -1445,15 +1445,6 @@ public class OldCharacterMotor : MonoBehaviour
 
 	#region rope state
 
-	// [x] Climb the rope
-	// [x] Jump off the rope on motion
-	// [x] Re-equip an already-used rope (debug version)
-	// [ ] In partial suspension, make the character able to jump off the wall
-	// [ ] In partial suspension, make the character unable to move while off the wall
-	// [ ] In partial suspension, make the character unable to be snap against a cambered wall 
-	// [ ] In complete suspension, make the character pivot with the rope inclination
-	// [ ] Lerp the rope stop deceleration
-
 	#region variables
 
 	[Header("Rope")]

@@ -28,7 +28,7 @@ MonoBehaviour:
   skinWidth: 0.05
   stepOnHeight: 0.36
   ropeHoldingMethod: 1
-  cancelRopeDuration: 0
+  cancelRopeDuration: 0.15
   againstWallRayCastLength: 1
   againstWallLayerToInclude:
     serializedVersion: 2
@@ -38,10 +38,10 @@ MonoBehaviour:
   partialSuspensionSpeed: 50
   completeSuspensionSpeed: 75
   maxSideAngle: 60
-  climbAcceleration: 0
-  maxClimbSpeed: 0
-  freeFallFromRopeModifier: 0
-  jumpOffRopeModifier: 0
+  climbAcceleration: 1
+  maxClimbSpeed: 5
+  freeFallFromRopeModifier: 0.9
+  jumpOffRopeModifier: 1.2
   glowHeight: 2
   glowRadius: 1
   glowStrength: 0.1
