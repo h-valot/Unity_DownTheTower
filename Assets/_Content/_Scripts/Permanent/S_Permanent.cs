@@ -73,22 +73,22 @@ public class Permanent : MonoBehaviour
 	}
 
 	/// <summary>
-	/// 	compares the normal vector of the ground with a up vector.
+	/// Compares the normal vector of the ground with a up vector.
 	/// </summary>
-	/// <param name="hit">raycast hit info</param>
-	/// <param name="maxGroundAngle">max dot product tolerated angle</param>
-	/// <returns>true if the dot product angle is less than the given one.</returns>
+	/// <param name="hit">Raycast hit info</param>
+	/// <param name="maxGroundAngle">Max dot product tolerated angle</param>
+	/// <returns>True if the dot product angle is less than the given one.</returns>
 	protected bool IsGroundFlat(RaycastHit hit, float maxGroundAngle)
 	{
-		return Vector3.Dot(hit.normal, Vector3.up) <= maxGroundAngle;
+		return Vector3.Dot(hit.normal, Vector3.up) >= maxGroundAngle;
 	}
 
 	/// <summary>
-	/// 	check that there is enough space above the premanent preview position.
+	/// Check that there is enough space above the premanent preview position.
 	/// </summary>
-	/// <param name="hit">raycast hit info</param>
-	/// <param name="maxHeight">max height tolerated</param>
-	/// <returns>true if the raycast of a length equals to the given height do not touch a collider.</returns>
+	/// <param name="hit">Raycast hit info</param>
+	/// <param name="maxHeight">Max height tolerated</param>
+	/// <returns>True if the raycast of a length equals to the given height do not touch a collider.</returns>
 	protected bool IsCeiling(RaycastHit hit, float maxHeight)
 	{
 		return Physics.Raycast(hit.point + GROUND_RAY_OFFSET, Vector3.up, maxHeight - GROUND_RAY_OFFSET.y);
@@ -96,12 +96,12 @@ public class Permanent : MonoBehaviour
 
 
 	/// <summary>
-	/// 	check that there is space in from of the permanent preview.
+	/// Check that there is space in from of the permanent preview.
 	/// </summary>
-	/// <param name="hit">raycast hit info</param>
-	/// <param name="cameraTransform">transform of the camera</param>
-	/// <param name="minDistanceFromWall">minimum tolerated distance from the preview permanent and a collider in front of it</param>
-	/// <returns>true if the space does not contains any collider.</returns>
+	/// <param name="hit">Raycast hit info</param>
+	/// <param name="cameraTransform">Transform of the camera</param>
+	/// <param name="minDistanceFromWall">Minimum tolerated distance from the preview permanent and a collider in front of it</param>
+	/// <returns>True if the space does not contains any collider.</returns>
 	protected bool IsSpaceInFront(RaycastHit hit, Transform cameraTransform, float minDistanceFromWall)
 	{
 		return Physics.Raycast(hit.point + GROUND_RAY_OFFSET,

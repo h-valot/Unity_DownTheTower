@@ -83,4 +83,16 @@ public class NewCharacterConfig : ScriptableObject
 	[Header("Debug")]
 	[Tooltip("If true, the character starts the play mode with a backpack.")]
 	public bool startWithBag;
+
+	// Status
+	public float lethalHeight;
+	
+	public float stunHeight;
+	public AnimationCurve stunDuration;
+
+	public float slowHeight;
+	public AnimationCurve slowDuration;
+	public float slowTimePostStun;
+	public AnimationCurve slowPercentage;
+	public float maxSlowTime;
 }

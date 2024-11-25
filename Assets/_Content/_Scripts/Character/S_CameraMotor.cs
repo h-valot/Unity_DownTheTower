@@ -105,5 +105,8 @@ public class CameraMotor : MonoBehaviour
 
 		// Set parent as scene root 
 		m_cameraTarget.transform.parent = null;
+
+		// Debug
+		Destroy(transform.parent.gameObject);
 	}
 }

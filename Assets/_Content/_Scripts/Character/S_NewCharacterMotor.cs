@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using Sirenix.OdinInspector;
 using UnityEngine;
@@ -28,6 +29,7 @@ public class NewCharacterMotor : MonoBehaviour
 	[FoldoutGroup("RSE")] [SerializeField] private RSE_Cancel m_rseCancel;
 	[FoldoutGroup("RSE")] [SerializeField] private RSE_BackpackCrafting m_rseBackpackCrafting;
 	[FoldoutGroup("RSE")] [SerializeField] private RSE_SetCharacterPosition m_rseSetCharacterPosition;
+	[FoldoutGroup("RSE")] [SerializeField] private RSE_KillCharacter m_rseKillCharacter;
 
 	[FoldoutGroup("RSO")] [SerializeField] private RSO_MovementDatas m_rsoMovementDatas;
 	[FoldoutGroup("RSO")] [SerializeField] private RSO_CameraStyle m_rsoCameraStyle;
@@ -35,6 +37,7 @@ public class NewCharacterMotor : MonoBehaviour
 	[FoldoutGroup("RSO")] [SerializeField] private RSO_RecycleInputLocked m_rsoRecycleInputLocked;
 	[FoldoutGroup("RSO")] [SerializeField] private RSO_CharacterState m_rsoCharacterState;
 	[FoldoutGroup("RSO")] [SerializeField] private RSO_CharacterPosition m_rsoCharacterPosition;
+	[FoldoutGroup("RSO")] [SerializeField] private RSO_CharacterDeath m_rsoCharacterDeath;
 
 	#endregion
 
@@ -52,11 +55,18 @@ public class NewCharacterMotor : MonoBehaviour
 
     // - Ground -
 	private bool m_isGrounded;
-    private Vector3 m_groundNormal;
+	private Vector3 m_groundNormal;
     private float m_coyoteTime;
+	private Vector3 m_positionStartFall;
+	private float m_fallHeight;
+	private bool m_isStunned;
+	private float m_stunTimer;
+	private bool m_isSlowed;
+	private float m_slowTimer;
+	private bool m_isSlowedPostStun;
 
 	// - Movement -
-    private bool m_isRunning;
+	private bool m_isRunning;
     private bool m_hasJumped;
 	public bool IsJumpingPressed { get; private set; }
 	private bool m_isCrafting;
@@ -89,7 +99,6 @@ public class NewCharacterMotor : MonoBehaviour
 	private float m_currentClimbSpeed;
 
 	// Misc
-	private Vector3 m_positionStartFall;
 	private const float k_fallingForcesThreshold = 0.2f;
 
 	#endregion
@@ -136,7 +145,8 @@ public class NewCharacterMotor : MonoBehaviour
         }
 
 		CheckGround();
-        DetermineState();
+		UpdateStatus();
+		DetermineState();
         FixedUpdateState();
 
 		m_rsoCharacterPosition.value = m_rigidbody.position;
@@ -182,7 +192,8 @@ public class NewCharacterMotor : MonoBehaviour
 
     private void UnsubscibeAllInputs()
 	{
-		m_rseSetCharacterPosition.action -= SetCharacterPosition; // debug fonction
+		m_rseSetCharacterPosition.action -= SetCharacterPosition;
+		m_rseKillCharacter.action -= HandleDeath;
 
 		m_rseMove.action -= UpdateMoveInput;
 		m_rseRun.action -= UpdateRunInput;
@@ -197,7 +208,8 @@ public class NewCharacterMotor : MonoBehaviour
 
     private void SubscribeStateInputs()
 	{
-		m_rseSetCharacterPosition.action += SetCharacterPosition; // debug fonction
+		m_rseSetCharacterPosition.action += SetCharacterPosition;
+		m_rseKillCharacter.action += HandleDeath;
 
 		switch (m_rsoCharacterState.value)
         {
@@ -345,8 +357,8 @@ public class NewCharacterMotor : MonoBehaviour
 				direction: -m_characterGraphics.transform.forward,
 				origin: m_rope.CurrentFold,
 				radius: m_rope.HoldLength,
-				starting: m_rsoCharacterPosition.value
-			) - m_rsoCharacterPosition.value).normalized;
+				starting: m_rigidbody.position
+			) - m_rigidbody.position).normalized;
 
 			m_rigidbody.AddForce(direction * force, ForceMode.Impulse);
 		}
@@ -368,8 +380,8 @@ public class NewCharacterMotor : MonoBehaviour
 	private void DetermineState()
     {
         if (m_rsoCharacterState.value != BehaviorState.LOCOMOTION && m_isGrounded && !m_isCrafting)
-        {
-            SwitchState(BehaviorState.LOCOMOTION);
+		{
+			SwitchState(BehaviorState.LOCOMOTION);
         }
         else if (m_rsoCharacterState.value != BehaviorState.FALL && !m_isGrounded && !IsRopeValid)
         {
@@ -516,8 +528,69 @@ public class NewCharacterMotor : MonoBehaviour
             }
         }
     }
+	
+	private void ApplyFallHeight()
+	{
+		m_fallHeight = Math.Abs(m_rigidbody.position.y - m_positionStartFall.y);
+		if (m_fallHeight >= m_characterConfig.lethalHeight)
+		{
+			HandleDeath();
+		}
+		else if (m_fallHeight >= m_characterConfig.stunHeight)
+		{
+			// Stun the character for x secondes
+			m_isStunned = true;
 
-    private void StartCoyoteTime()
+			// Cross product to get the stun mitiged value on a 0-1 scale
+			float stunMitigedValue = (m_fallHeight - m_characterConfig.stunHeight) / (m_characterConfig.lethalHeight - m_characterConfig.stunHeight);
+			m_stunTimer = m_characterConfig.stunDuration.Evaluate(stunMitigedValue);
+		}
+		else if (m_fallHeight >= m_characterConfig.slowHeight)
+		{
+			// Slow the character for x secondes by y percent
+			m_isSlowed = true;
+
+			// Cross product to get the slow mitiged value on a 0-1 scale
+			float slowMitigedValue = (m_fallHeight - m_characterConfig.slowHeight) / (m_characterConfig.stunHeight - m_characterConfig.slowHeight);
+			m_slowTimer = m_characterConfig.slowDuration.Evaluate(slowMitigedValue);
+		}
+	}
+
+	private void UpdateStatus()
+	{
+		if (m_isStunned)
+		{
+			m_stunTimer -= Time.deltaTime;
+
+			if (m_stunTimer <= 0)
+			{
+				m_isStunned = false;
+				m_isSlowed = true;
+				m_isSlowedPostStun = true;
+				m_slowTimer = m_characterConfig.slowTimePostStun;
+			}
+		}
+
+		if (m_isSlowed)
+		{
+			m_slowTimer -= Time.deltaTime;
+
+			if (m_slowTimer <= 0)
+			{
+				m_isSlowed = false;
+				m_isSlowedPostStun = false;
+			}
+		}
+	}
+
+	private void HandleDeath()
+	{
+		if (IsRopeValid) DesequipRope();
+		m_rsoCharacterDeath.value = true;
+		Destroy(gameObject);
+	}
+
+	private void StartCoyoteTime()
     {
         if (!m_hasJumped)
         {
@@ -591,15 +664,32 @@ public class NewCharacterMotor : MonoBehaviour
         {
             Vector3 desiredSpeed = (m_cameraMotor.PlanarRight * m_moveInput.x + m_cameraMotor.PlanarForward * m_moveInput.y).normalized;
 
-            // Orient speed along slope
-            Vector3 slopeRight = Vector3.Cross(Vector3.up, m_groundNormal);
+			// Orient speed along slope
+			Vector3 slopeRight = Vector3.Cross(Vector3.up, m_groundNormal);
             desiredSpeed = Quaternion.AngleAxis(Vector3.SignedAngle(Vector3.up, m_groundNormal, slopeRight), slopeRight) * desiredSpeed;
 
             // Set desired speed magnitude based on walk/run state
             desiredSpeed *= m_isRunning ? m_characterConfig.runSpeed : m_characterConfig.walkSpeed;
 
-            // Apply final force to move character, auto clamp the speed by substractiong actual speed to desired speed
-            m_rigidbody.AddForce(desiredSpeed - m_rigidbody.velocity, ForceMode.Acceleration);
+			// Apply speed modifiers
+			if (m_isStunned)
+			{
+				desiredSpeed = Vector3.zero;
+			}
+			else if (m_isSlowed)
+			{
+				if (!m_isSlowedPostStun)
+				{
+					desiredSpeed *= m_characterConfig.slowPercentage.Evaluate((m_characterConfig.maxSlowTime - m_slowTimer) / m_characterConfig.maxSlowTime);
+				}
+				else
+				{
+					desiredSpeed *= m_characterConfig.slowPercentage.Evaluate((m_characterConfig.slowTimePostStun - m_slowTimer) / m_characterConfig.slowTimePostStun);
+				}
+			}
+
+			// Apply final force to move character, auto clamp the speed by substractiong actual speed to desired speed
+			m_rigidbody.AddForce(desiredSpeed - m_rigidbody.velocity, ForceMode.Acceleration);
         }
     }
 
@@ -701,6 +791,7 @@ public class NewCharacterMotor : MonoBehaviour
     private void EnterLocomotionState()
     {
         UpdateDrag();
+		ApplyFallHeight();
 	}
 
     private void FixedUpdateLocomotionState()
@@ -711,7 +802,7 @@ public class NewCharacterMotor : MonoBehaviour
 
     private void ExitLocomotionState()
     {
-
+		m_positionStartFall = m_rigidbody.position;
 	}
 
 	#endregion
@@ -786,16 +877,16 @@ public class NewCharacterMotor : MonoBehaviour
 				direction: m_cameraTarget.right,
 				origin: m_rope.CurrentFold,
 				radius: m_rope.HoldLength,
-				starting: m_rsoCharacterPosition.value
-			) - m_rsoCharacterPosition.value).normalized * m_moveInput.x +
+				starting: m_rigidbody.position
+			) - m_rigidbody.position).normalized * m_moveInput.x +
 			(Vector3Extention.GetPositionOnCercle(
 				angle: m_characterConfig.ropeOffsetAngle,
 				axis: m_cameraTarget.right,
 				direction: m_cameraTarget.forward,
 				origin: m_rope.CurrentFold,
 				radius: m_rope.HoldLength,
-				starting: m_rsoCharacterPosition.value
-			) - m_rsoCharacterPosition.value).normalized * m_moveInput.y;
+				starting: m_rigidbody.position
+			) - m_rigidbody.position).normalized * m_moveInput.y;
 
 		m_rigidbody.AddForce(direction * m_characterConfig.ropeMovementForce, ForceMode.Acceleration);
 	}
@@ -847,7 +938,7 @@ public class NewCharacterMotor : MonoBehaviour
 				else
 				{
 					// If the character IS NOT holding the rope, let it fall till it reaches the rope limit constraint
-					isFalling = (m_rope.CurrentFold - m_rsoCharacterPosition.value).magnitude < m_rope.HoldLength - k_fallingForcesThreshold;
+					isFalling = (m_rope.CurrentFold - m_rigidbody.position).magnitude < m_rope.HoldLength - k_fallingForcesThreshold;
 				}
 				break;
 		}
@@ -867,7 +958,7 @@ public class NewCharacterMotor : MonoBehaviour
 
 		if (!isEnabled)
 		{
-			m_positionStartFall = m_rsoCharacterPosition.value;
+			m_positionStartFall = m_rigidbody.position;
 
 			ApplyFreeRopeForce(IsJumpingPressed
 				? m_characterConfig.jumpOffRopeModifier

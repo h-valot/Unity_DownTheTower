@@ -94,7 +94,6 @@ MonoBehaviour:
   m_ropeConfig: {fileID: 11400000, guid: ebd551676fad39148a6ccab29ef4ebce, type: 2}
   m_rseMove: {fileID: 11400000, guid: 4c899dda7396ed24c8e3d098dfe89471, type: 2}
   m_rseJump: {fileID: 11400000, guid: d6896f12727744441bfeccf04390e194, type: 2}
-  m_rseRun: {fileID: 11400000, guid: c137e572374debb4488914fb65cbdf94, type: 2}
   m_rseCraft: {fileID: 11400000, guid: a5a67e5b9e43b3e47b905af27b5b8657, type: 2}
   m_rseThrow: {fileID: 11400000, guid: 9c0f340dc33672b4ca20f5f1cf2f8528, type: 2}
   m_rseRun: {fileID: 11400000, guid: c137e572374debb4488914fb65cbdf94, type: 2}
@@ -104,6 +103,7 @@ MonoBehaviour:
     type: 2}
   m_rseSetCharacterPosition: {fileID: 11400000, guid: 9f7fa66ba769124408276a00ed758ed6,
     type: 2}
+  m_rseKillCharacter: {fileID: 11400000, guid: 38188b704256e78469e87ce8957c4651, type: 2}
   m_rsoMovementDatas: {fileID: 11400000, guid: 46a30bfbc28dee740ba4e77a36571da1, type: 2}
   m_rsoCameraStyle: {fileID: 11400000, guid: 54ea121d351e9664dbe3f636e336b041, type: 2}
   m_rsoCraftInputLocked: {fileID: 11400000, guid: ba99262b68e265745895dad5161e1ec6,
@@ -114,9 +114,8 @@ MonoBehaviour:
     type: 2}
   m_rsoCharacterPosition: {fileID: 11400000, guid: 7cfc39952cca0d6478396ad49ab9e0db,
     type: 2}
-  m_isHolding: 0
-  m_isClimbing: 0
-  m_currentClimbSpeed: 0
+  m_rsoCharacterDeath: {fileID: 11400000, guid: 52795416a18d6764ab55f73b88f71b83,
+    type: 2}
 --- !u!114 &4970598091221463380
 MonoBehaviour:
   m_ObjectHideFlags: 0

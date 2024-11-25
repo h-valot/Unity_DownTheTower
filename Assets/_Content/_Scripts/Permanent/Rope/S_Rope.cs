@@ -104,7 +104,7 @@ public class Rope : Permanent
 
 	private void UpdateColor(bool isDeployable)
 	{
-		m_previewMeshRendered.material.SetFloat("_colorSwitch", isDeployable ? 1f : 0f);
+		m_previewMeshRendered.material.SetFloat("_colorSwitch", isDeployable ? 0f : 1f);
 	}
 
 	public override bool Throw(Transform cameraTransform)
