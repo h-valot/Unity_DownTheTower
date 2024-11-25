@@ -409,11 +409,12 @@ public class Torch : Permanent
         }
     }
 
-    private void DestroyTorch()
+    public void DestroyTorch()
     {
         DOTween.Kill(gameObject.GetInstanceID() + "light");
         DOTween.Kill(gameObject.GetInstanceID() + "feedback");
         DOTween.Kill(gameObject.GetInstanceID());
+        _rsoCharacterPosition.OnChanged -= UpdateTorchFeedback;
         Destroy(gameObject);
     }
 

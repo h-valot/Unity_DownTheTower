@@ -126,7 +126,8 @@ public class Guardian : MonoBehaviour
 
     public void DestroyedTarget(GameObject _torchRef)
     {
-        GameObject.Destroy(_torchRef);
+        _torchRef.TryGetComponent<Torch>(out var _scriptRef);
+        _scriptRef.DestroyTorch();
     }
     #endregion
 
@@ -149,8 +150,7 @@ public class Guardian : MonoBehaviour
 
             Physics.Linecast(_raycastEyes.transform.position, _objectRef.transform.position, out var hitDatatorch);
 
-            if (hitDataHead.transform == _objectRef.transform || hitDataEyes.transform == _objectRef.transform || hitDataFeet.transform == _objectRef.transform ||  hitDatatorch.collider.TryGetComponent<Torch>(out var torch)
-                || hitDatatorch.collider.TryGetComponent<TorchPointLight>(out var torchPointLight))
+            if (hitDataHead.transform == _objectRef.transform || hitDataEyes.transform == _objectRef.transform || hitDataFeet.transform == _objectRef.transform ||  hitDatatorch.collider.TryGetComponent<Torch>(out var torch))
             {
                 return true;
             }
