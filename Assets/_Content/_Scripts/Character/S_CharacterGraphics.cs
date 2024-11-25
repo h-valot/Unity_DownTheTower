@@ -41,10 +41,11 @@ public class CharacterGraphics : MonoBehaviour
 		else if (m_rsoCameraStyle.value == CameraStyle.AIMING)
 		{
 			transform.forward = m_aimingLookAt.position - new Vector3(
-				transform.transform.position.x, 
+				transform.position.x, 
 				m_aimingLookAt.position.y, 
-				transform.transform.position.z
+				transform.position.z
 			);
+			transform.forward = -transform.forward;
 		}
 	}
 }
