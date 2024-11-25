@@ -71,7 +71,7 @@ public class NewCharacterMotor : MonoBehaviour
 	// - Rope state -
 	private Rope m_rope;
 	private RopeState m_ropeState;
-	public bool m_isHolding;
+	private bool m_isHolding;
 	private bool IsRopeValid => m_rope && m_rope.IsPlaced;
 
 	// Cancel
@@ -79,17 +79,18 @@ public class NewCharacterMotor : MonoBehaviour
 	private Coroutine m_cancelRopeCoroutine;
 	private float m_cancelRopeTimer;
 
+	// Jump
+	private bool m_isJumpingRope;
+	private Coroutine m_jumpRopeCoroutine;
+	private float m_jumpRopeTimer;
+
 	// Climbing
-	public bool m_isClimbing;
-	public float m_currentClimbSpeed;
+	private bool m_isClimbing;
+	private float m_currentClimbSpeed;
 
 	// Misc
-	private bool m_ropeConstraintAppliedLastly;
 	private Vector3 m_positionStartFall;
 	private const float k_fallingForcesThreshold = 0.2f;
-	private bool m_isJumpingRope;
-	private float m_jumpRopeTimer;
-	private Coroutine m_jumpRopeCoroutine;
 
 	#endregion
 
@@ -778,7 +779,25 @@ public class NewCharacterMotor : MonoBehaviour
 
 	private void HandleRopeMovement()
 	{
-		// TODO
+		Vector3 direction =
+			(Vector3Extention.GetPositionOnCercle(
+				angle: m_characterConfig.ropeOffsetAngle,
+				axis: m_cameraTarget.forward,
+				direction: m_cameraTarget.right,
+				origin: m_rope.CurrentFold,
+				radius: m_rope.HoldLength,
+				starting: m_rsoCharacterPosition.value
+			) - m_rsoCharacterPosition.value).normalized * m_moveInput.x +
+			(Vector3Extention.GetPositionOnCercle(
+				angle: m_characterConfig.ropeOffsetAngle,
+				axis: m_cameraTarget.right,
+				direction: m_cameraTarget.forward,
+				origin: m_rope.CurrentFold,
+				radius: m_rope.HoldLength,
+				starting: m_rsoCharacterPosition.value
+			) - m_rsoCharacterPosition.value).normalized * m_moveInput.y;
+
+		m_rigidbody.AddForce(direction * m_characterConfig.ropeMovementForce, ForceMode.Acceleration);
 	}
 
 	private void HandleRopeClimbing()

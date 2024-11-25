@@ -70,6 +70,7 @@ public class NewCharacterConfig : ScriptableObject
 	public float freeFallFromRopeModifier;
 	public float jumpOffRopeModifier;
 	public float jumpRopeDuration;
+	public float ropeMovementForce;
 
 
 	[Header("Glow")]

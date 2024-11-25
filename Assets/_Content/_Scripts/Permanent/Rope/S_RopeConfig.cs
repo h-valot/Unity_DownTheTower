@@ -36,6 +36,11 @@ public class RopeConfig : ScriptableObject
 	public LayerMask FoldLayerToInclude;
 
 	[FoldoutGroup("Global settings")]
+	[InfoBox("The distance between the accurate fold hit point and the offsetted fold.")]
+	/// <summary> The distance between the accurate fold hit point and the offsetted fold. </summary>
+	public float FoldOffset = 0.2f;
+
+	[FoldoutGroup("Global settings")]
 	[InfoBox("The distance between two following folds can't be smaller than the given float.")]
 	/// <summary> The distance between two following folds can't be smaller than the given float. </summary>
 	public float MinFoldDistance = 0.25f;

@@ -24,7 +24,7 @@ public class Rope : Permanent
 	private bool m_isConnected;
 	private bool m_isPlaced;
 	public float m_holdLength;
-	public List<Vector3> m_folds = new List<Vector3>();
+	private List<Vector3> m_folds = new List<Vector3>();
 	private List<RopeLine> m_ropeLines = new List<RopeLine>();
 	private List<Interactable> m_interactibles = new List<Interactable>();
 	private Transform m_characterHarness;
@@ -175,7 +175,8 @@ public class Rope : Permanent
 		// Add fold if a collider stands between the character and the last fold
 		if (Physics.Linecast(m_characterHarness.position, CurrentFold, out var addHit, m_ropeConfig.FoldLayerToInclude))
 		{
-			Vector3 approximatePoint = addHit.point.CutDigits(2);
+			Vector3 offsetPoint = addHit.point + addHit.normal * m_ropeConfig.FoldOffset;
+			Vector3 approximatePoint = offsetPoint.CutDigits(2);
 
 			if (m_folds.Count >= 2)
 			{
@@ -226,7 +227,8 @@ public class Rope : Permanent
 
 	public void Teleport()
 	{
-		m_rseSetCharacterPosition.Call(m_ropeAttach.transform.position, Quaternion.identity);
+		m_rseSetCharacterPosition.Call(transform.position, Quaternion.identity);
+		Destroy(gameObject);
 	}
 
 	/// <summary>
@@ -322,7 +324,7 @@ public class Rope : Permanent
 		// Draw lines 
 		for (int i = 0; i < m_folds.Count; i++)
 		{
-			RopeLine newRopeLine = Instantiate(m_ropeConfig.PfRopeLine);
+			RopeLine newRopeLine = Instantiate(m_ropeConfig.PfRopeLine, transform);
 			newRopeLine.SetPositions(m_folds[i], i + 1 >= m_folds.Count ? m_characterHarness.position : m_folds[i + 1]);
 			newRopeLine.SetColor(material);
 			m_ropeLines.Add(newRopeLine);
