@@ -1,3 +1,4 @@
+using EnhancedHierarchy.Icons;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -142,7 +143,7 @@ public class CharacterMotor : MonoBehaviour
 		_raycastLayerMask |= (1 << LayerMask.NameToLayer("Default"));
 		_raycastLayerMask |= (1 << LayerMask.NameToLayer("Collision_NoRaycast"));
 
-		SwitchState(AnimationState.LOCOMOTION);
+        SwitchState(AnimationState.LOCOMOTION);
 
         if (_characterConfig.startWithBag)
         {

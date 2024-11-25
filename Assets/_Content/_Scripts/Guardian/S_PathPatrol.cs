@@ -4,23 +4,25 @@ using UnityEngine;
 using UnityEngine.AI;
 
 public class PathPatrol : MonoBehaviour
-{
-    [SerializeField] private Guardian _guardianRef;
+{ 
+    [Header("Internal reference")]
+    [SerializeField] public Guardian _guardianRef;
 
-    //private
+    // public
+    [Header("Patrol Path")]
+    [SerializeField] private Transform[] _patrolPoints;
+
+    // private
     private NavMeshAgent _agent;
+    private bool _aggro;
+    private bool dontPatrol;
+    private int _targetPoint;
 
-    //public
-    public Transform[] _patrolPoints;
-    public int _targetPoint;
-    public bool _aggro;
-    public bool dontPatrol;
-
-    // Start is called before the first frame update
     void Start()
     {
         _agent = GetComponent<NavMeshAgent>();
         _targetPoint = 0;
+        Patrolling();
     }
 
     // Update is called once per frame
@@ -30,47 +32,44 @@ public class PathPatrol : MonoBehaviour
         {
             if (_guardianRef.IsActif() == true)
             {
-                Patrolling();
+                IncreaseTargetInt();
                 GetAggro();
             }
         }
-        
     }
 
     void Patrolling()
     {
         if (_aggro == false)
         {
-            _guardianRef.ChangeColor(2f);
-            if ((transform.position - _patrolPoints[_targetPoint].position).magnitude <= 0.1f)
-            {
-                IncreaseTargetInt();
-            }
             _agent.destination = _patrolPoints[_targetPoint].transform.position;
         }
 
     }
     void IncreaseTargetInt()
     {
-        _targetPoint++;
-        if(_targetPoint >= _patrolPoints.Length)
+        if ((transform.position - _patrolPoints[_targetPoint].position).magnitude <= 0.5f)
         {
-            _targetPoint = 0;
+            _targetPoint++;
+            if (_targetPoint >= _patrolPoints.Length)
+            {
+                _targetPoint = 0;
+            }
+            if (_aggro == false) 
+            {
+                Patrolling();
+            }
         }
     }
 
     public void GoingBackToPatrol()
     {
-        if (dontPatrol == false)
-        {
-            if (_aggro == false)
+        GetAggro();
+        if (_aggro == false)
             {
-                Debug.Log("retour en patrouille");
-                _agent.destination = _patrolPoints[_targetPoint].transform.position;
+                Patrolling();
+                dontPatrol = false;
             }
-        }
-        
-        
     }
 
     void GetAggro()
