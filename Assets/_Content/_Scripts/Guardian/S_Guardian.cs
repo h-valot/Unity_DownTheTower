@@ -53,9 +53,9 @@ public class Guardian : MonoBehaviour
     }
 
     // debug
-    [Header("Debug References")]
-    [SerializeField] private TextMeshProUGUI _GuardianTarget;
-    [SerializeField] private TextMeshProUGUI _dictionnayCountText;
+    //[Header("Debug References")]                                                   Uncomment to Debug
+    //[SerializeField] private TextMeshProUGUI _GuardianTarget;
+    //[SerializeField] private TextMeshProUGUI _dictionnayCountText;
 
     #endregion
 
@@ -69,7 +69,7 @@ public class Guardian : MonoBehaviour
 
     private void Update()
     {
-        _dictionnayCountText.text = "Dictionnaire count = " + _potentialTarget.Count.ToString();
+        //_dictionnayCountText.text = "Dictionnaire count = " + _potentialTarget.Count.ToString(); Uncomment to Debug
         if (destroyTorchCoroutine == null)
         {
             if (_aggroCoroutine == null)
@@ -299,13 +299,13 @@ public class Guardian : MonoBehaviour
         if (_objectRef != null)
         {
             _actualTarget = _objectRef;
-            _GuardianTarget.text = _actualTarget.ToString();
+            //_GuardianTarget.text = _actualTarget.ToString(); Uncomment to Debug
         }
         else if (_objectRef == null)
         {
             _actualTarget = _objectRef;
             ChangeColor(_scanColor);
-            _GuardianTarget.text = "None";
+            //_GuardianTarget.text = "None"; Uncomment to Debug
             StartCoroutine(ShiftToPatrol());
         }
     }
