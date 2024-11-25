@@ -70,8 +70,9 @@ public class NewCharacterMotor : MonoBehaviour
 
 	// - Rope state -
 	private Rope m_rope;
+	private RopeState m_ropeState;
 	public bool m_isHolding;
-	private bool HasRope => m_rope && m_rope.IsPlaced;
+	private bool IsRopeValid => m_rope && m_rope.IsPlaced;
 
 	// Cancel
 	private bool m_isCancellingRope;
@@ -86,6 +87,9 @@ public class NewCharacterMotor : MonoBehaviour
 	private bool m_ropeConstraintAppliedLastly;
 	private Vector3 m_positionStartFall;
 	private const float k_fallingForcesThreshold = 0.2f;
+	private bool m_isJumpingRope;
+	private float m_jumpRopeTimer;
+	private Coroutine m_jumpRopeCoroutine;
 
 	#endregion
 
@@ -181,6 +185,7 @@ public class NewCharacterMotor : MonoBehaviour
 		m_rseRun.action -= UpdateRunInput;
 		m_rseRun.action -= UpdateHoldInput;
 		m_rseJump.action -= Jump;
+		m_rseJump.action -= JumpRope;
 		m_rseCraft.action -= ToggleCraft;
 		m_rseThrow.action -= ToggleAim;
 		m_rseClimb.action -= UpdateClimbInput;
@@ -195,6 +200,7 @@ public class NewCharacterMotor : MonoBehaviour
                 m_rseMove.action += UpdateMoveInput;
 				m_rseRun.action += UpdateRunInput;
                 m_rseJump.action += Jump;
+				m_rseJump.action += JumpRope; // the rope jump can start while grounded
 				m_rseCraft.action += ToggleCraft;
 				m_rseThrow.action += ToggleAim;
 				m_rseCancel.action += CancelRope;
@@ -204,6 +210,7 @@ public class NewCharacterMotor : MonoBehaviour
 				m_rseMove.action += UpdateMoveInput;
 				m_rseRun.action += UpdateHoldInput;
 				m_rseThrow.action += ToggleAim;
+				m_rseJump.action += JumpRope;
 				m_rseClimb.action += UpdateClimbInput;
 				m_rseCancel.action += CancelRope;
 				break;
@@ -255,20 +262,88 @@ public class NewCharacterMotor : MonoBehaviour
 		m_isHolding = isHolding;
 	}
 
-	private void UpdateHoldInput(Triome isHolding)
-	{
-		if (isHolding == Triome.NEITHER)
-		{
-			print("CHARACTER_MOTOR: Assert - isHolding value is equal to NEITHER.");
-			return;
-		}
-
-		UpdateHoldInput(isHolding == Triome.TRUE);
-	}
-
 	private void UpdateClimbInput(bool isClimbing)
 	{
 		m_isClimbing = isClimbing;
+	}
+
+	private void CancelRope(bool isPressed)
+	{
+		if (!IsRopeValid) return;
+
+		m_isCancellingRope = isPressed;
+
+		if (m_isCancellingRope)
+		{
+			m_cancelRopeTimer = 0f;
+			m_cancelRopeCoroutine = StartCoroutine(StartCancellingRope());
+		}
+		else if (!m_isCancellingRope
+		&& m_cancelRopeCoroutine != null)
+		{
+			StopCoroutine(m_cancelRopeCoroutine);
+		}
+	}
+
+	private IEnumerator StartCancellingRope()
+	{
+		while (m_cancelRopeTimer < m_characterConfig.cancelRopeDuration)
+		{
+			m_cancelRopeTimer += Time.deltaTime;
+			yield return null;
+		}
+		DesequipRope();
+	}
+
+	private void JumpRope(bool isPressed)
+	{
+		if (!IsRopeValid) return;
+
+		m_isJumpingRope = isPressed;
+
+		if (m_isJumpingRope)
+		{
+			m_jumpRopeTimer = 0f;
+			m_jumpRopeCoroutine = StartCoroutine(ApplyJumpForce());
+		}
+		else
+		{
+			if (m_jumpRopeCoroutine != null) StopCoroutine(m_jumpRopeCoroutine);
+			ToggleRopeConstraint(m_characterConfig.ropeHoldingMethod == RopeHolding.HOLD_TO_LET_GO ? !m_isHolding : m_isHolding);
+		}
+	}
+
+	private IEnumerator ApplyJumpForce()
+	{
+		while (m_jumpRopeTimer < m_characterConfig.jumpRopeDuration)
+		{
+			m_jumpRopeTimer += Time.deltaTime;
+			yield return null;
+		}
+
+		if (!m_isGrounded
+		&& m_ropeState == RopeState.PARTIAL_SUSPENSION)
+		{
+			ToggleRopeConstraint(false);
+
+			float force = m_characterConfig.jumpOffWallForce;
+			Vector3 direction = (Vector3Extention.GetPositionOnCercle(
+				angle: m_characterConfig.ropeOffsetAngle,
+				axis: m_characterGraphics.transform.right,
+				direction: -m_characterGraphics.transform.forward,
+				origin: m_rope.CurrentFold,
+				radius: m_rope.HoldLength,
+				starting: m_rsoCharacterPosition.value
+			) - m_rsoCharacterPosition.value).normalized;
+
+			m_rigidbody.AddForce(direction * force, ForceMode.Impulse);
+		}
+
+		while (m_isJumpingRope)
+		{
+			ToggleRopeConstraint(false);
+			yield return null;
+		}
 	}
 
 	#endregion
@@ -284,11 +359,11 @@ public class NewCharacterMotor : MonoBehaviour
         {
             SwitchState(BehaviorState.LOCOMOTION);
         }
-        else if (m_rsoCharacterState.value != BehaviorState.FALL && !m_isGrounded && !HasRope)
+        else if (m_rsoCharacterState.value != BehaviorState.FALL && !m_isGrounded && !IsRopeValid)
         {
             SwitchState(BehaviorState.FALL);
         }
-        else if (m_rsoCharacterState.value != BehaviorState.ROPE && !m_isGrounded && HasRope)
+        else if (m_rsoCharacterState.value != BehaviorState.ROPE && !m_isGrounded && IsRopeValid)
         {
             SwitchState(BehaviorState.ROPE);
         }
@@ -724,34 +799,6 @@ public class NewCharacterMotor : MonoBehaviour
 		m_rope.ChangeHoldLength(-clampedClimbSpeed * Time.fixedDeltaTime);
 	}
 
-	private void CancelRope(bool isPressed)
-	{
-		if (!HasRope) return;
-
-		m_isCancellingRope = isPressed;
-
-		if (m_isCancellingRope) 
-		{
-			m_cancelRopeTimer = 0f;
-			m_cancelRopeCoroutine = StartCoroutine(StartCancellingRope());
-		}
-		else if (!m_isCancellingRope 
-		&& m_cancelRopeCoroutine != null)
-		{
-			StopCoroutine(m_cancelRopeCoroutine);
-		}
-	}
-
-	private IEnumerator StartCancellingRope()
-	{
-		while (m_cancelRopeTimer < m_characterConfig.cancelRopeDuration)
-		{
-			m_cancelRopeTimer += Time.deltaTime;
-			yield return null;
-		}
-		DesequipRope();
-	}
-
 	private bool IsFallingWithRope()
 	{
 		// Assert: the character is falling if there is no more rope
@@ -804,7 +851,7 @@ public class NewCharacterMotor : MonoBehaviour
 	private void ToggleRopeConstraint(bool isEnabled)
 	{
 		// Assertion
-		if (!HasRope) return;
+		if (!IsRopeValid) return;
 
 		if (isEnabled) m_rope.UpdateHoldLength();
 		else m_rope.SetHoldLength(9999);

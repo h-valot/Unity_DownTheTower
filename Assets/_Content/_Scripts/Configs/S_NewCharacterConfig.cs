@@ -69,6 +69,7 @@ public class NewCharacterConfig : ScriptableObject
 	public float maxClimbSpeed;
 	public float freeFallFromRopeModifier;
 	public float jumpOffRopeModifier;
+	public float jumpRopeDuration;
 
 
 	[Header("Glow")]

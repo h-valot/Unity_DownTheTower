@@ -4,7 +4,7 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "RopeConfig", menuName = "Configs/Rope")]
 public class RopeConfig : ScriptableObject
 {
-	#region Prefabs
+	#region PREFAB
 
 	[FoldoutGroup("Prefabs")]
 	[InfoBox("The prefab of the rope.")]
@@ -23,7 +23,7 @@ public class RopeConfig : ScriptableObject
 
 	#endregion
 
-	#region Global settings
+	#region GLOBAL SETTINGS
 
 	[FoldoutGroup("Global settings")]
 	[InfoBox("The max length of the rope. If this length is exceeded, the character will be detach from it.")]
@@ -42,7 +42,7 @@ public class RopeConfig : ScriptableObject
 
 	#endregion
 
-	#region Deployment
+	#region DEPLOYMENT
 
 	[FoldoutGroup("Deployment")]
 	[InfoBox("Duration the permanent will take to be crafted.")]
@@ -87,7 +87,7 @@ public class RopeConfig : ScriptableObject
 
 	#endregion
 
-	#region Debug
+	#region DEBUG
 
 	[FoldoutGroup("Debug")]
 	[InfoBox("Material applied to the rope line if the total length is less or equal than half of the max length.")]

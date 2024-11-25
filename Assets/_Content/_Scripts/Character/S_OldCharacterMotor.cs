@@ -92,7 +92,7 @@ public class OldCharacterMotor : MonoBehaviour
 	// - prolonged-jump -
 	public bool IsJumpingPressed { get; private set; }
     private float m_prolongedJumpTimer = 0f;
-	public Triome IsJumpProlonged { get; private set; }
+	// public Triome IsJumpProlonged { get; private set; }
 
 	// - fall -
 	public bool IsGrounded { get; private set; }
@@ -151,8 +151,6 @@ public class OldCharacterMotor : MonoBehaviour
             }
             // Backpack.ForceSetupBackpack(this);
         }
-
-        IsJumpProlonged = Triome.FALSE;
     }
 
 	private void Update()
@@ -1067,15 +1065,14 @@ public class OldCharacterMotor : MonoBehaviour
 		if (!IsJumpingPressed) 
 		{
 			m_prolongedJumpTimer = 0f;
-			IsJumpProlonged = Triome.FALSE;
+			// IsJumpProlonged = Triome.FALSE;
 			return;
 		}
 
 		m_prolongedJumpTimer += Time.deltaTime;
-		if (m_prolongedJumpTimer >= _HOLDING_KEY_THRESHOLD
-		&& IsJumpProlonged == Triome.FALSE)
+		if (m_prolongedJumpTimer >= _HOLDING_KEY_THRESHOLD)
 		{
-			IsJumpProlonged = Triome.TRUE;
+			// IsJumpProlonged = Triome.TRUE;
 		}
 	}
 
@@ -1116,17 +1113,6 @@ public class OldCharacterMotor : MonoBehaviour
 		}
 
 		_isHolding = isHolding;
-	}
-
-	private void Holding(Triome isHolding)
-	{
-		if (isHolding == Triome.NEITHER) 
-		{
-			print("CHARACTER_MOTOR: Assert - isHolding value is equal to NEITHER.");
-			return;
-		}
-
-		Holding(isHolding == Triome.TRUE);
 	}
 
 	private void Climb(bool isClimbing)
@@ -1471,7 +1457,7 @@ public class OldCharacterMotor : MonoBehaviour
 	private float _currentClimbSpeed;
 
 	// Jump-off & free fall
-	public Triome _isJumpProlongedCached = Triome.NEITHER;
+	// public Triome _isJumpProlongedCached = Triome.NEITHER;
 	private float _currTime;
 	private Coroutine _ropeConstraintTimer;
 	public bool _ropeConstraintAppliedLastly;
@@ -1494,7 +1480,7 @@ public class OldCharacterMotor : MonoBehaviour
 	{
 		m_rseCraft.action -= ToggleCraft;
 
-		_isJumpProlongedCached = Triome.NEITHER;
+		// _isJumpProlongedCached = Triome.NEITHER;
 
 		_rope.UpdateHoldLength();
 		
@@ -1543,7 +1529,7 @@ public class OldCharacterMotor : MonoBehaviour
 	private void ExitRopeState()
 	{
 		_isHolding = false;
-		_isJumpProlongedCached = Triome.NEITHER;
+		// _isJumpProlongedCached = Triome.NEITHER;
 
 		// Update inputs subscriptions
 		ToggleCraftInput(HasBackpack);
@@ -1588,10 +1574,10 @@ public class OldCharacterMotor : MonoBehaviour
 	{
 		// Assertions
 		if (m_characterConfig.ropeHoldingMethod != RopeHolding.HOLD_TO_LET_GO) return;
-		if (_isJumpProlongedCached == IsJumpProlonged) return;
+		// if (_isJumpProlongedCached == IsJumpProlonged) return;
 
-		_isJumpProlongedCached = IsJumpProlonged;
-		Holding(_isJumpProlongedCached);
+		// _isJumpProlongedCached = IsJumpProlonged;
+		// Holding(_isJumpProlongedCached);
 	}
 
 	/// <summary>
