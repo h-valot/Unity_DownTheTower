@@ -1,10 +1,5 @@
 using NaughtyAttributes;
-using Obi;
-using System;
-using System.Collections;
 using System.Collections.Generic;
-using Unity.Mathematics;
-using UnityEditor.PackageManager;
 using UnityEngine;
 
 public class MushroomBatch : MonoBehaviour
