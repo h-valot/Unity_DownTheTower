@@ -1,6 +1,4 @@
 using DG.Tweening;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Elevator : MonoBehaviour
@@ -40,16 +38,17 @@ public class Elevator : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.TryGetComponent<CharacterMotor>(out var _character))
+        if (other.TryGetComponent<CharacterMotor>(out var character))
         {
-            _character.transform.parent = transform;
+            character.transform.parent = transform;
         }
     }
+
     private void OnTriggerExit(Collider other)
     {
-        if (other.TryGetComponent<CharacterMotor>(out var _character))
+        if (other.TryGetComponent<CharacterMotor>(out var character))
         {
-            _character.transform.parent = null;
+            character.transform.parent = null;
         }
     }
 }

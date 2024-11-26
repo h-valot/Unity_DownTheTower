@@ -3,7 +3,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 
-public class LeverOld : Interactible
+public class LeverOld : Interactable
 {
 
     [SerializeField] private GameObject _target;

@@ -1,1108 +1,276 @@
-using EnhancedHierarchy.Icons;
 using System;
 using System.Collections;
-using System.Collections.Generic;
-using NaughtyAttributes;
-using Unity.VisualScripting;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 public class CharacterMotor : MonoBehaviour
 {
-	#region exposed variables
+	#region REFERENCES
 
-	[Foldout("Internal references")] [SerializeField] private Transform _cameraTransform;
-	[Foldout("Internal references")] [SerializeField] private Transform _characterDirection;
-	[Foldout("Internal references")] [SerializeField] private Transform _handSocket;
-	[Foldout("Internal references")] [SerializeField] private Transform _robotHandSocket;
-	[Foldout("Internal references")] [SerializeField] private Transform _harness;
-	[Foldout("Internal references")] [SerializeField] private CharacterController _controller;
-	[Foldout("Internal references")] [SerializeField] private GameObject _backpackAnchor;
+	[Header("References")]
+	[SerializeField] private Rigidbody m_rigidbody;
+	[SerializeField] private CapsuleCollider m_collider;
+	[SerializeField] private Transform m_handSocket;
+	[SerializeField] private Transform m_robotSocket;
+	[SerializeField] private Transform m_harness;
+	[SerializeField] private Transform m_aimingLookTo;
+	[SerializeField] private Transform m_cameraTarget;
+	[SerializeField] private CharacterGraphics m_characterGraphics;
 
-	[Foldout("External references")] [SerializeField] private ThirdPersonCamera _thirdPersonCamera;
-	[Foldout("External references")] [SerializeField] private GameObject _PF_backpack;
+	[FoldoutGroup("SSO")][SerializeField] private SSO_Character m_ssoCharacter;
+	[FoldoutGroup("SSO")][SerializeField] private SSO_Torch m_ssoTorch;
+	[FoldoutGroup("SSO")][SerializeField] private SSO_Rope m_ssoRope;
 
-	[Foldout("Scriptable references")] [SerializeField] private CharacterConfig _characterConfig;
-	[Foldout("Scriptable references")] [SerializeField] private LadderConfig _ladderConfig;
-	[Foldout("Scriptable references")] [SerializeField] private RopeConfig _ropeConfig;
-	[Foldout("Scriptable references")] [SerializeField] private TorchConfig _torchConfig;
-	[Foldout("Scriptable references")] [SerializeField] private RSO_CharacterForward _rsoCharacterForward;
-	[Foldout("Scriptable references")] [SerializeField] private RSO_CharacterPosition _rsoCharacterPosition;
-	[Foldout("Scriptable references")] [SerializeField] private RSO_PlayerDeath _rsoPlayerDeath;
-	[Foldout("Scriptable references")] [SerializeField] private RSO_CharacterState _rsoCharacterState;
-	[Foldout("Scriptable references")] [SerializeField] private RSO_GamePaused _rsoGamePaused;
-	[Foldout("Scriptable references")] [SerializeField] private RSE_Run _rseRun;
-	[Foldout("Scriptable references")] [SerializeField] private RSE_Look _rseLook;
-	[Foldout("Scriptable references")] [SerializeField] private RSE_Move _rseMove;
-	[Foldout("Scriptable references")] [SerializeField] private RSE_Jump _rseJump;
-	[Foldout("Scriptable references")] [SerializeField] private RSE_Throw _rseThrow;
-	[Foldout("Scriptable references")] [SerializeField] private RSE_ToggleInHand _rseToggleInHand;
-	[Foldout("Scriptable references")] [SerializeField] private RSE_Craft _rseCraft;
-	[Foldout("Scriptable references")] [SerializeField] private RSE_Interact _rseInteract;
-	[Foldout("Scriptable references")] [SerializeField] private RSE_CancelAction _rseCancelAction;
-	[Foldout("Scriptable references")] [SerializeField] private RSE_CanInteract _rseCanInteract;
-	[Foldout("Scriptable references")] [SerializeField] private RSE_CanRecycle _rseCanRecycle;
-	[Foldout("Scriptable references")] [SerializeField] private RSE_Recycle _rseRecycle;
-	[Foldout("Scriptable references")] [SerializeField] private RSE_ToggleInputs _rseToggleInputs;
-	[Foldout("Scriptable references")] [SerializeField] private RSE_KillCharacter _rseKillCharacter;
-	[Foldout("Scriptable references")] [SerializeField] private RSE_Climb _rseClimb;
-	[Foldout("Scriptable references")] [SerializeField] private RSE_SetCharacterPosition _rseSetCharacterPosition;
+	[FoldoutGroup("RSE")][SerializeField] private RSE_Move m_rseMove;
+	[FoldoutGroup("RSE")][SerializeField] private RSE_Jump m_rseJump;
+	[FoldoutGroup("RSE")][SerializeField] private RSE_Craft m_rseCraft;
+	[FoldoutGroup("RSE")][SerializeField] private RSE_Throw m_rseThrow;
+	[FoldoutGroup("RSE")][SerializeField] private RSE_Run m_rseRun;
+	[FoldoutGroup("RSE")][SerializeField] private RSE_Climb m_rseClimb;
+	[FoldoutGroup("RSE")][SerializeField] private RSE_Cancel m_rseCancel;
+	[FoldoutGroup("RSE")][SerializeField] private RSE_BackpackCrafting m_rseBackpackCrafting;
+	[FoldoutGroup("RSE")][SerializeField] private RSE_SetCharacterPosition m_rseSetCharacterPosition;
+	[FoldoutGroup("RSE")][SerializeField] private RSE_KillCharacter m_rseKillCharacter;
+	[FoldoutGroup("RSE")][SerializeField] private RSE_InitializeCamera m_rseInitializeCamera;
 
-	#endregion
-
-	#region runtime variables
-
-	// Debug header to separate possible private variables set public to be debugged
-	[Header("Debug")]
-
-	// ----- PRIVATE VARIABLES -----
-	// - animation -
-	public AnimationState _currentState;
-
-	// - move -
-	[HideInInspector] public float _planarSpeed;
-	private Vector2 _moveInput;
-	private float _targetPlanarSpeed;
-	private float _gravitySpeed;
-	private Vector3 _movement;
-	private bool _isRunning;
-	private float _coyoteTime;
-
-	// - slope -
-	private float _slopePercentage;
-
-	// - status -
-	private float _stunTimer;
-	private float _slowTimer;
-
-	// - ground -
-	private Vector3 _origin;
-    private Vector3 _planarForward;
-    private Vector3 _planarRight;
-	private bool _isGroundedLastFrame = true;
-	private LayerMask _raycastLayerMask;
-    private RaycastHit[] _groundHits = new RaycastHit[5];
-	private float _discriminantForward;
-    private float _discriminantRight;
-
-    // - jump -
-    private bool _wantJump;
-	private bool _canJump = true;
-	private bool _isJumping;
-	private RaycastHit[] _edgeHits;
-	private RaycastHit _edgeHit;
-
-	// - prolonged-jump -
-	public bool _isJumpingPressed;
-	private float _prolongedJumpTimer = 0f;
-	public Triome _isJumpProlonged = Triome.FALSE;
-
-	// - fall -
-	public bool _isGrounded;
-	private bool[] _groundChecks = new bool[5];
-	private bool _isStunned = false;
-	private bool _isSlowed = false;
-	private bool _isSlowedPostStun = false;
-
-	// - momentum - 
-	private Vector3 _positionStartFall;
-	private Vector3 _lastGroundedPlanarForward;
-	private float _fallHeight;
-
-	// - interact -
-	private List<Interactible> _interactables;
-	private List<Interactible> _validInteractibles;
-
-	// - throw -
-	[HideInInspector] public bool _aiming;
-
-	// - craft -
-	private bool _crafting = false;
-	private CraftType _objectToCraft = CraftType.NONE;
-	private Coroutine _craftCoroutine;
-
-	// - permanent -
-	[HideInInspector] public bool _hasBackpack;
-	[HideInInspector] public Backpack _backpack;
-	[HideInInspector] public float ropeLength;
-	[HideInInspector] public Permanent _craftInHand;
-	[HideInInspector] public Permanent _craftInRobot;
-
-	// ---- CONSTS ----
-	private const float _HOLDING_KEY_THRESHOLD = 0.2f;
+	[FoldoutGroup("RSO")][SerializeField] private RSO_MovementDatas m_rsoMovementDatas;
+	[FoldoutGroup("RSO")][SerializeField] private RSO_CameraStyle m_rsoCameraStyle;
+	[FoldoutGroup("RSO")][SerializeField] private RSO_CraftInputLocked m_rsoCraftInputLocked;
+	[FoldoutGroup("RSO")][SerializeField] private RSO_RecycleInputLocked m_rsoRecycleInputLocked;
+	[FoldoutGroup("RSO")][SerializeField] private RSO_CharacterState m_rsoCharacterState;
+	[FoldoutGroup("RSO")][SerializeField] private RSO_CharacterPosition m_rsoCharacterPosition;
+	[FoldoutGroup("RSO")][SerializeField] private RSO_CharacterDeath m_rsoCharacterDeath;
+	[FoldoutGroup("RSO")][SerializeField] private RSO_CameraForward m_rsoCameraForward;
+	[FoldoutGroup("RSO")][SerializeField] private RSO_CameraRight m_rsoCameraRight;
+	[FoldoutGroup("RSO")][SerializeField] private RSO_CameraTransform m_rsoCameraTransform;
 
 	#endregion
 
-	#region monobehaviour functions
+	#region VARIABLES
 
-	private void Start()
+	// - Inputs -
+	private Vector2 m_moveInput = new Vector2();
+
+    // - Collisions -
+    private LayerMask m_layerMaskToIgnore;
+    private RaycastHit[] m_raycastHits;
+
+    // - Ground -
+	private bool m_isGrounded;
+	private Vector3 m_groundNormal;
+    private float m_coyoteTime;
+	private Vector3 m_positionStartFall;
+	private float m_fallHeight;
+	private bool m_isStunned;
+	private float m_stunTimer;
+	private bool m_isSlowed;
+	private float m_slowTimer;
+	private bool m_isSlowedPostStun;
+
+	// - Movement -
+	private bool m_isRunning;
+    private bool m_hasJumped;
+	public bool IsJumpingPressed { get; private set; }
+	private bool m_isCrafting;
+
+	// - Craft state -
+	private CraftType m_craftType;
+	private Coroutine m_craftCoroutine;
+	[HideInInspector] public Permanent HandObject;
+	[HideInInspector] public Permanent RobotObject;
+	[HideInInspector] public bool IsAiming;
+
+	// - Rope state -
+	private Rope m_rope;
+	private RopeState m_ropeState;
+	private bool m_isHolding;
+	private bool IsRopeValid => m_rope && m_rope.IsPlaced;
+
+	// Cancel
+	private bool m_isCancellingRope;
+	private Coroutine m_cancelRopeCoroutine;
+	private float m_cancelRopeTimer;
+
+	// Jump
+	private bool m_isJumpingRope;
+	private Coroutine m_jumpRopeCoroutine;
+
+	// Climbing
+	private bool m_isClimbing;
+	private float m_currentClimbSpeed;
+
+	// Misc
+	private const float k_fallingForcesThreshold = 0.2f;
+
+	#endregion
+
+	#region MONOBEHAVIOR
+
+	public void Initialize(Quaternion startRotation)
     {
-        // creation of the interaction list
-        _interactables = new List<Interactible>();
-        _validInteractibles = new List<Interactible>();
+        // Update drag in rigidbody if changed in characterConfig
+        m_ssoCharacter.OnConfigChanged += UpdateDrag;
+        // Layer mask to remove character for cast, use ~_layerMaskToIgnore
+        m_layerMaskToIgnore |= 1 << LayerMask.NameToLayer("Character");
 
-		_raycastLayerMask |= (1 << LayerMask.NameToLayer("Default"));
-		_raycastLayerMask |= (1 << LayerMask.NameToLayer("Collision_NoRaycast"));
+		m_rseInitializeCamera.Call(m_aimingLookTo, m_cameraTarget, startRotation);
+        m_characterGraphics.Initialize(m_aimingLookTo, m_rigidbody, startRotation);
 
-        SwitchState(AnimationState.LOCOMOTION);
+		m_rigidbody.position = Vector3.zero;
+		m_rsoCraftInputLocked.value = false;
+		m_rsoRecycleInputLocked.value = false;
+	}
 
-        if (_characterConfig.startWithBag)
-        {
-			_backpack = FindAnyObjectByType<Backpack>();
-            if (_backpack == null)
-            {
-                _backpack = Instantiate(_PF_backpack, new Vector3(0, 0, 0), Quaternion.identity).GetComponent<Backpack>(); 
-            }
-            _backpack.ForceSetupBackpack(this);
-        }
+    private void OnEnable()
+    {
+        CheckGround();
+        DetermineState();
     }
 
-	private void Update()
+    private void OnDisable()
+    {
+        UnsubscibeAllInputs();
+        m_ssoCharacter.OnConfigChanged -= UpdateDrag;
+        m_rsoCharacterState.value = BehaviorState.NONE;
+    }
+
+    private void FixedUpdate()
 	{
-		CalculateOriginForwardRight();
+        // Tkt fréro c'est pour pas soft lock le spherecast de detection du sol
+        if (m_rigidbody.position == Vector3.zero)
+        {
+            m_rigidbody.position = new Vector3(0.01f, 0f, 0f);
+        }
+
 		CheckGround();
-		CheckCoyoteTime();
-		UpdateStatus(); 
-		CheckProlongedJump();
+		UpdateStatus();
+		DetermineState();
+        FixedUpdateState();
 
-		VerifyState();
-
-		UpdateCurrentState();
-    }
+		m_rsoCharacterPosition.value = m_rigidbody.position;
+	}
 
     private void LateUpdate()
     {
-        LateUpdateCurrentState();
-		if (_aiming)
-		{
-            _craftInHand.PreviewThrow(_thirdPersonCamera.transform);
-        }
-    }
+		MovementDatas _movementDatas = new MovementDatas();
 
-    private void OnEnable()
-	{
-        _rseToggleInputs.action += ToggleInputs;
-        SubscribeInputs();
-    }
+        _movementDatas.dataToString.Add((Mathf.Round(m_rigidbody.velocity.magnitude * 100f) / 100f).ToString());
+        _movementDatas.dataToString.Add(m_isGrounded.ToString());
+        _movementDatas.dataToString.Add(m_rsoCharacterState.value.ToString());
+        m_rsoMovementDatas.value = _movementDatas;
 
-	private void OnDisable()
-	{
-		UnsubscribeInputs();
-    }
+		if (IsAiming) HandObject.PreviewThrow(m_rsoCameraTransform.value);
+	}
 
-	#if UNITY_EDITOR
+#if UNITY_EDITOR
+
 	private void OnDrawGizmos()
     {
-        if (_characterConfig.showGroundedDebug)
+        Gizmos.color = Color.cyan;
+        if(m_raycastHits != null)
         {
-            if (_discriminantForward > 0)
+            foreach (RaycastHit _hit in m_raycastHits)
             {
-                Gizmos.color = Color.green;
-                Gizmos.DrawSphere(_groundHits[1].point + (_groundHits[2].point - _groundHits[1].point).normalized *
-                    (-Vector3.Dot((_groundHits[2].point - _groundHits[1].point).normalized, _groundHits[1].point - _origin) + Mathf.Sqrt(_discriminantForward))
-                    , 0.05f);
-                Gizmos.DrawSphere(_groundHits[1].point + (_groundHits[2].point - _groundHits[1].point).normalized *
-                    (-Vector3.Dot((_groundHits[2].point - _groundHits[1].point).normalized, _groundHits[1].point - _origin) - Mathf.Sqrt(_discriminantForward))
-                    , 0.05f);
+                Gizmos.DrawSphere(_hit.point, 0.05f);
             }
-            if (_discriminantRight > 0)
-            {
-                Gizmos.color = Color.green;
-                Gizmos.DrawSphere(_groundHits[3].point + (_groundHits[4].point - _groundHits[3].point).normalized *
-                    (-Vector3.Dot((_groundHits[4].point - _groundHits[3].point).normalized, _groundHits[3].point - _origin) + Mathf.Sqrt(_discriminantRight))
-                    , 0.05f);
-                Gizmos.DrawSphere(_groundHits[3].point + (_groundHits[4].point - _groundHits[3].point).normalized *
-                    (-Vector3.Dot((_groundHits[4].point - _groundHits[3].point).normalized, _groundHits[3].point - _origin) - Mathf.Sqrt(_discriminantRight))
-                    , 0.05f);
-            }
-        }
-		if (_edgeHits != null && (_currentState == AnimationState.FALL || _currentState == AnimationState.JUMP))
+		}
+
+		if (m_rope && m_rope.IsPlaced)
 		{
-            Gizmos.color = Color.cyan;
-            foreach (RaycastHit _hit in _edgeHits)
-            {
-				Gizmos.DrawSphere(_hit.point, 0.05f);
-            }
-        }
-
-        if (_rope)
-        {
-            if (_rope.isPlaced)
-            {
-				// Magenta: rope limit & start position
-                Gizmos.color = Color.magenta;
-                Gizmos.DrawWireSphere(_rope.folds[^1], _rope.holdLength);
-				Gizmos.DrawWireCube(_gizmoStartPendulumPosition, new Vector3(.5f, .5f, .5f));
-			}
-        }
-    }
-	#endif
-
-	#endregion
-
-	#region animation state switch
-
-	/// <summary>
-	/// 	exit current state and enter the given state.
-	/// </summary>
-	/// <param name="newState">state to enter into</param>
-	private void SwitchState(AnimationState newState)
-	{
-		ExitCurrentState();
-		EnterState(newState);
-        _rsoCharacterState.value = newState;
-
-    }
-
-	/// <summary>
-	/// 	call the enter function of the given state.
-	/// </summary>
-	/// <param name="newState">state to enter into</param>
-	private void EnterState(AnimationState newState)
-	{
-		switch (newState)
-		{
-			case AnimationState.LOCOMOTION:
-				EnterLocomotionState();
-				break;
-
-			case AnimationState.JUMP:
-				EnterJumpState();
-				break;
-
-			case AnimationState.FALL:
-				EnterFallState();
-				break;
-
-			case AnimationState.CRAFT:
-				EnterCraftState();
-				break;
-
-			case AnimationState.ROPE:
-				EnterRopeState();
-				break;
-
-			case AnimationState.LADDER:
-				EnterLadderState();
-				break;
-        }
-
-		_currentState = newState;
-
-		CheckShowInteract();
-		CheckShowRecycle(false);
+			Gizmos.color = Color.magenta;
+			Gizmos.DrawWireSphere(m_rope.CurrentFold, m_rope.HoldLength);
+		}
 	}
 
-	/// <summary>
-	/// 	call the update function of the current state.
-	/// </summary>
-	private void UpdateCurrentState()
-	{
-		switch (_currentState)
-		{
-			case AnimationState.LOCOMOTION:
-				UpdateLocomotionState();
-				break;
-
-			case AnimationState.JUMP:
-				UpdateJumpState();
-				break;
-
-			case AnimationState.FALL:
-				UpdateFallState();
-				break;
-
-			case AnimationState.CRAFT:
-				UpdateCraftState();
-				break;
-
-			case AnimationState.ROPE:
-				UpdateRopeState();
-				break;
-
-			case AnimationState.LADDER:
-				UpdateLadderState();
-				break;
-        }
-	}
-
-    /// <summary>
-    /// 	call the late update function of the current state.
-    /// </summary>
-    private void LateUpdateCurrentState()
-	{
-        switch (_currentState)
-        {
-            case AnimationState.LOCOMOTION:
-                LateUpdateLocomotionState();
-                break;
-
-            case AnimationState.JUMP:
-                LateUpdateJumpState();
-                break;
-
-            case AnimationState.FALL:
-                LateUpdateFallState();
-                break;
-
-            case AnimationState.CRAFT:
-                LateUpdateCraftState();
-                break;
-
-            case AnimationState.ROPE:
-                LateUpdateRopeState();
-                break;
-
-            case AnimationState.LADDER:
-                LateUpdateLadderState();
-                break;
-        }
-    }
-
-	/// <summary>
-	/// 	call the exit function of the current state.
-	/// </summary>
-	private void ExitCurrentState()
-	{
-		switch (_currentState)
-		{
-			case AnimationState.LOCOMOTION:
-				ExitLocomotionState();
-				break;
-			
-			case AnimationState.JUMP:
-				ExitJumpState();
-				break;
-			
-			case AnimationState.FALL:
-				ExitFallState();
-				break;
-			
-			case AnimationState.CRAFT:
-				ExitCraftState();
-				break;
-			
-			case AnimationState.ROPE:
-				ExitRopeState();
-				break;
-			
-			case AnimationState.LADDER:
-				ExitLadderState();
-				break;
-        }
-	}
-
-    /// <summary>
-    /// 	Check variable of player to determine new player state.
-    /// </summary>
-    private void VerifyState()
-    {
-		// - CRAFT - from locomotion
-		if (_crafting && _currentState == AnimationState.LOCOMOTION)
-		{
-            SwitchState(AnimationState.CRAFT);
-		}
-
-		// - LOCOMOTION - from crafting
-		else if (!_crafting && _currentState == AnimationState.CRAFT)
-		{
-            SwitchState(AnimationState.LOCOMOTION);
-		}
-
-		// - JUMP -
-		else if (_canJump && _wantJump && (_isGrounded || _coyoteTime > 0f) && _currentState != AnimationState.JUMP)
-        {
-            SwitchState(AnimationState.JUMP);
-            _isJumping = true;
-		}
-
-		// - FALL & ROPE -
-		else if (!_isGrounded && _gravitySpeed <= 0 && (_currentState != AnimationState.FALL || _currentState != AnimationState.ROPE))
-        {
-			// Reset coyote time
-            if (_isGroundedLastFrame) _coyoteTime = _characterConfig.coyoteTime;
-
-			// If the character is attached to a rope, switch to Rope state instead
-			// This state handles free fall and rope-attached fall.
-			if (_rope != null && _rope.isPlaced && _rope.isConnected 
-			&& _currentState != AnimationState.ROPE && _currentState != AnimationState.FALL)
-			{
-				SwitchState(AnimationState.ROPE);
-			}
-
-			// Handle default fall state
-			else if (_currentState != AnimationState.FALL && _currentState != AnimationState.ROPE 
-			|| (_currentState == AnimationState.ROPE && _rope == null))
-			{
-				SwitchState(AnimationState.FALL);
-			}
-		}
-
-		// - LOCOMOTION - default state back up
-		else if (_isGrounded && !_isJumping && _currentState != AnimationState.LOCOMOTION && !_crafting)
-        {
-            ApplyFallHeight();
-            SwitchState(AnimationState.LOCOMOTION);
-		}
-
-		// - SUB-ROPE - defines if the rope suspension is partial or complete
-		if (_currentState == AnimationState.ROPE)
-		{
-			// Update sub-rope state
-			_ropeState = CheckWall()
-				? RopeState.PARTIAL_SUSPENSION
-				: RopeState.COMPLETE_SUSPENSION;
-
-			// Simulate rope sub-jump state by directly calling the rope jump function
-			if (_wantJump) JumpOffWall();
-		}
-
-		// Reset Jump if it is not possible to jump
-		_wantJump = false;
-    }
+#endif
 
     #endregion
 
-    #region misc
+    #region INPUTS
 
-    /// <summary>
-    /// 	kill the character
-    /// </summary>
-    public void HandleDeath()
+    private void UnsubscibeAllInputs()
 	{
-		_rsoPlayerDeath.value = true;
-		Destroy(gameObject);
+		m_rseSetCharacterPosition.action -= SetCharacterPosition;
+		m_rseKillCharacter.action -= HandleDeath;
+
+		m_rseMove.action -= UpdateMoveInput;
+		m_rseRun.action -= UpdateRunInput;
+		m_rseRun.action -= UpdateHoldInput;
+		m_rseJump.action -= Jump;
+		m_rseJump.action -= JumpRope;
+		m_rseCraft.action -= ToggleCraft;
+		m_rseThrow.action -= ToggleAim;
+		m_rseClimb.action -= UpdateClimbInput;
+		m_rseCancel.action -= CancelRope;
 	}
 
-	/// <summary>
-	/// Put the backpack on player back.
-	/// </summary>
-	/// <param name="_skipAnim">Prevent grab backpack animation from playing.</param>
-	public void PickupBackpack(bool _skipAnim, Backpack _newBackpack)
+    private void SubscribeStateInputs()
 	{
-		_backpack = _newBackpack;
-        _hasBackpack = true;
-        ToggleCraftInput(_hasBackpack);
-		_backpack.transform.SetParent(_backpackAnchor.transform, false);
-		_backpack.transform.localPosition = Vector3.zero;
-		_backpack.transform.localRotation = Quaternion.identity;
-		_backpack.transform.localScale = Vector3.one;
-		RemoveFromInteractList(_backpack);
-    }
+		m_rseSetCharacterPosition.action += SetCharacterPosition;
+		m_rseKillCharacter.action += HandleDeath;
 
-	#endregion
-
-	#region movement
-
-	/// <summary>
-	/// 	Force character's tranform position and rotation to the given values.
-	/// </summary>
-	private void ForceCharacterPosition(Vector3 position, Quaternion rotation)
-	{
-		transform.position = position;
-		transform.rotation = rotation;
-		Physics.SyncTransforms();
-	}
-
-	/// <summary>
-	/// 	Determine origin forward and right vectors based on character position, camera and inputs.	
-	/// </summary>
-	private void CalculateOriginForwardRight()
-	{
-		_origin = new Vector3(transform.position.x, transform.position.y + _controller.radius, transform.position.z);
-
-        // Check if ground on 5 points align with player inputs or character direction if no inputs
-        if (_moveInput != Vector2.zero)
-		{
-			//Calculate input forward and right on character plane
-            _planarForward = (new Vector3(_thirdPersonCamera.transform.forward.x, 0, _thirdPersonCamera.transform.forward.z) * _moveInput.y + new Vector3(_thirdPersonCamera.transform.right.x, 0, _thirdPersonCamera.transform.right.z) * _moveInput.x).normalized;
-            _planarRight = new Vector3(-_planarForward.z, 0, _planarForward.x);
-        }
-		else
-		{
-            //Calculate character graphic forward and right on character plane
-            _planarForward = new Vector3(_characterDirection.forward.x, 0, _characterDirection.forward.z).normalized;
-            _planarRight = new Vector3(-_planarForward.z, 0, _planarForward.x);
-        }
-
-	}
-
-	/// <summary>
-	/// 	Use 5 raycasts to check if the character has a collider below it.
-	/// </summary>
-	private void CheckGround()
-    {
-		//Debug Line
-		if (_characterConfig.showGroundedDebug)
-		{
-			UnityEngine.Debug.DrawLine(_origin, new Vector3(_origin.x, _origin.y - _controller.radius * _characterConfig.groundCheckYFactor, _origin.z), Color.red);
-			UnityEngine.Debug.DrawLine(_origin + _planarForward * _controller.radius, new Vector3(_origin.x + _planarForward.x * _controller.radius, _origin.y - _controller.radius * _characterConfig.groundCheckYFactor, _origin.z + _planarForward.z * _controller.radius), Color.red);
-			UnityEngine.Debug.DrawLine(_origin - _planarForward * _controller.radius, new Vector3(_origin.x - _planarForward.x * _controller.radius, _origin.y - _controller.radius * _characterConfig.groundCheckYFactor, _origin.z - _planarForward.z * _controller.radius), Color.red);
-			UnityEngine.Debug.DrawLine(_origin + _planarRight * _controller.radius, new Vector3(_origin.x + _planarRight.x * _controller.radius, _origin.y - _controller.radius * _characterConfig.groundCheckYFactor, _origin.z + _planarRight.z * _controller.radius), Color.red);
-			UnityEngine.Debug.DrawLine(_origin - _planarRight * _controller.radius, new Vector3(_origin.x - _planarRight.x * _controller.radius, _origin.y - _controller.radius * _characterConfig.groundCheckYFactor, _origin.z - _planarRight.z * _controller.radius), Color.red);
-		}
-
-        //Raycast
-        _groundChecks[0] = Physics.Raycast(_origin, Vector3.down, out _groundHits[0], _controller.radius * _characterConfig.groundCheckYFactor, _raycastLayerMask);
-        _groundChecks[1] = Physics.Raycast(_origin + _planarForward * _controller.radius, Vector3.down, out _groundHits[1], _controller.radius * _characterConfig.groundCheckYFactor, _raycastLayerMask);
-        _groundChecks[2] = Physics.Raycast(_origin - _planarForward * _controller.radius, Vector3.down, out _groundHits[2], _controller.radius * _characterConfig.groundCheckYFactor, _raycastLayerMask);
-        _groundChecks[3] = Physics.Raycast(_origin + _planarRight * _controller.radius, Vector3.down, out _groundHits[3], _controller.radius * _characterConfig.groundCheckYFactor, _raycastLayerMask);
-        _groundChecks[4] = Physics.Raycast(_origin - _planarRight * _controller.radius, Vector3.down, out _groundHits[4], _controller.radius * _characterConfig.groundCheckYFactor, _raycastLayerMask);
-
-		_isGroundedLastFrame = _isGrounded;
-		_isGrounded = false;
-		_discriminantForward = -1f;
-		_discriminantRight = -1f;
-
-		//Check if raycast directly below the character hit a surface near enough to consider grounded
-		if (_groundChecks[0])
-		{
-			if ((_groundHits[0].point - _origin).magnitude <= _controller.radius + _characterConfig.skinWidth)
-			{
-				_isGrounded = true;
-			}
-		}
-		//Prevent unnecessary check if we already know the character is grounded
-		if (!_isGrounded)
-		{
-            //Check if the raycast hits Forward/Backward make a line that cross player capsule+skin, which mean the player is grounded
-            if (_groundChecks[1] && _groundChecks[2])
-            {
-                //Debug Line
-                if (_characterConfig.showGroundedDebug)
-                {
-                    UnityEngine.Debug.DrawLine(_groundHits[1].point, _groundHits[2].point, Color.yellow);
-                }
-
-                //discriminant of the equation between the sphere (centered on _origin and radius of _controller.radius+skinWidth) and the line resulting of the hits of the raycasts
-                _discriminantForward = Mathf.Pow(Vector3.Dot((_groundHits[2].point - _groundHits[1].point).normalized, _groundHits[1].point - _origin), 2) - ((_groundHits[1].point - _origin).sqrMagnitude - Mathf.Pow(_controller.radius + _characterConfig.skinWidth, 2));
-                //discriminant > 0 means that the line cross the sphere in at least 2 points (no tangent)
-                if (_discriminantForward > 0)
-                {
-                    _isGrounded = true;
-                }
-            }
-            //Check if the raycast hits Right/Left make a line that cross player capsule+skin, which mean the player is grounded
-            if (_groundChecks[3] && _groundChecks[4])
-            {
-                //Debug Line
-                if (_characterConfig.showGroundedDebug)
-                {
-                    UnityEngine.Debug.DrawLine(_groundHits[3].point, _groundHits[4].point, Color.yellow);
-                }
-                //discriminant of the equation between the sphere (centered on _origin and radius of _controller.radius+skinWidth) and the line resulting of the hits of the raycasts
-                _discriminantRight = Mathf.Pow(Vector3.Dot((_groundHits[4].point - _groundHits[3].point).normalized, _groundHits[3].point - _origin), 2) - ((_groundHits[3].point - _origin).sqrMagnitude - Mathf.Pow(_controller.radius + _characterConfig.skinWidth, 2));
-                //discriminant > 0 means that the line cross the sphere in at least 2 points (no tangent)
-                if (_discriminantRight > 0)
-                {
-                    _isGrounded = true;
-                }
-            }
-        }
-		if (_isJumping && _gravitySpeed <= 0)
-		{
-			_isJumping = false;
-		}
-    }
-
-	/// <summary>
-	///		Check fall height and kill/stun/slow player if necessary
-	/// </summary>
-	private void ApplyFallHeight()
-	{
-        _fallHeight = Math.Abs(_rsoCharacterPosition.value.y - _positionStartFall.y);
-		if (_fallHeight >= _characterConfig.lethalHeight)
+		switch (m_rsoCharacterState.value)
         {
-            HandleDeath();
+            case BehaviorState.LOCOMOTION:
+				m_rseMove.action += UpdateMoveInput;
+				m_rseRun.action += UpdateRunInput;
+				m_rseJump.action += Jump;
+				m_rseJump.action += JumpRope; // the rope jump can start while grounded
+				m_rseCraft.action += ToggleCraft;
+				m_rseThrow.action += ToggleAim;
+				m_rseCancel.action += CancelRope;
+				break;
+
+			case BehaviorState.ROPE:
+				m_rseMove.action += UpdateMoveInput;
+				m_rseRun.action += UpdateHoldInput;
+				m_rseThrow.action += ToggleAim;
+				m_rseJump.action += JumpRope;
+				m_rseClimb.action += UpdateClimbInput;
+				m_rseCancel.action += CancelRope;
+				break;
+
+			case BehaviorState.FALL:
+                m_rseMove.action += UpdateMoveInput;
+				m_rseRun.action += UpdateRunInput;
+				m_rseThrow.action += ToggleAim;
+				break;
+
+            case BehaviorState.CRAFT:
+				m_rseCraft.action += ToggleCraft;
+				break;
         }
-        else if (_fallHeight >= _characterConfig.stunHeight)
-        {
-            // stun the character for x secondes
-            _isStunned = true;
+	}
 
-            // cross product to get the stun mitiged value on a 0-1 scale
-            float stunMitigedValue = (_fallHeight - _characterConfig.stunHeight) / (_characterConfig.lethalHeight - _characterConfig.stunHeight);
-            _stunTimer = _characterConfig.stunDuration.Evaluate(stunMitigedValue);
-        }
-        else if (_fallHeight >= _characterConfig.slowHeight)
-        {
-            // slow the character for x secondes by y percent
-            _isSlowed = true;
+	private void SetCharacterPosition(Vector3 position, Quaternion rotation)
+	{
+		m_rigidbody.velocity = Vector3.zero;
+		m_rigidbody.position = position;
+		m_rigidbody.rotation = rotation;
+	}
 
-            // cross product to get the slow mitiged value on a 0-1 scale
-            float slowMitigedValue = (_fallHeight - _characterConfig.slowHeight) / (_characterConfig.stunHeight - _characterConfig.slowHeight);
-            _slowTimer = _characterConfig.slowDuration.Evaluate(slowMitigedValue);
-        }
+	private void UpdateMoveInput(Vector2 input)
+	{
+		m_moveInput = input;
+	}
+
+	private void UpdateRunInput(bool isPressed)
+	{
+		m_isRunning = isPressed;
     }
 
-	/// <summary>
-	/// 	Update coyote time
-	/// </summary>
-	private void CheckCoyoteTime()
+	private void UpdateHoldInput(bool isHolding)
 	{
-		if (_coyoteTime > 0f)
+		if (IsJumpingPressed && !isHolding) return;
+
+		if (m_rope == null)
 		{
-			_coyoteTime -= Time.deltaTime;
-		}
-	}
-
-	/// <summary>
-	/// 	Set _targetSpeed based on player running input.
-	/// </summary>
-	private void CheckWalkRun()
-	{
-		if(_isRunning)
-		{
-			_targetPlanarSpeed = _characterConfig.runSpeed;
-		}
-		else
-		{
-			_targetPlanarSpeed = _characterConfig.walkSpeed;
-		}
-	}
-
-	/// <summary>
-	/// 	Set the slope angle to the mean angle value amoung 5 raycasts.
-	/// 	Get the slope deceleration or acceleration percentage based on the slope angle.
-	/// </summary>
-	private void ApplySlope()
-	{
-		if (!_isGrounded) return;
-
-		Vector3 _hitsNormalSum = Vector3.zero;
-		int _hitCount = 0;
-
-		for (int _indexHit = 0; _indexHit < 5; _indexHit++)
-		{
-			if (_groundChecks[_indexHit])
-			{
-                _hitsNormalSum += _groundHits[_indexHit].normal;
-				_hitCount++;
-            }
-		}
-
-        // get the slope percentage to calculate slows later in the movement function
-        _slopePercentage = Vector3.Angle(_hitsNormalSum/_hitCount, Vector3.up) / _controller.slopeLimit;
-
-		// signed and scaled percent based on player input direction and mean normal
-		_slopePercentage *= -Vector3.Dot(new Vector3((_hitsNormalSum/_hitCount).x, 0, (_hitsNormalSum/_hitCount).z).normalized, _planarForward)*2;
-
-		_targetPlanarSpeed *= _characterConfig.slopeSpeedModifier.Evaluate(_slopePercentage);
-	}
-
-	/// <summary>
-	/// 	Increase _planarSpeed by minimal jup speed and clamp it to max walk/run speed 
-	/// </summary>
-	private void ApplyJumpImpulsePlanarSpeed()
-	{
-        if (_isRunning)
-		{
-			_planarSpeed = Mathf.Clamp(_planarSpeed+_characterConfig.jumpMinimalPlanarVelocity, 0, _characterConfig.runSpeed);
-		}
-		else
-		{
-			_planarSpeed = Mathf.Clamp(_planarSpeed+_characterConfig.jumpMinimalPlanarVelocity, 0, _characterConfig.walkSpeed);
-		}
-	}
-
-    /// <summary>
-    /// 	Multiply target speed by input magnitude.
-    /// </summary>
-	private void ApplyInputs()
-	{
-        //multiply by input magnitude
-        _targetPlanarSpeed *= Mathf.Clamp(_moveInput.magnitude, 0, 1);
-        // TO DO: remap input magnitude from 0:1 to deadzone:1
-    }
-
-    /// <summary>
-    /// 	Add acceleration or decceleration and clamp it.
-    /// </summary>
-    private void ApplyAcceleration()
-	{
-		// accelerate or decelerate to target speed
-		if (_planarSpeed <= _targetPlanarSpeed)
-		{
-			_planarSpeed = Mathf.Clamp(_planarSpeed + _characterConfig.groundAcceleration*Time.deltaTime, 0, _targetPlanarSpeed);
-		}
-		else
-		{
-			_planarSpeed = Mathf.Clamp(_planarSpeed - _characterConfig.groundDecceleration*Time.deltaTime, _targetPlanarSpeed, _characterConfig.runSpeed);
-		}
-	}
-
-    /// <summary>
-    /// 	Calculate _movement with _planarSpeed and _planarForward.
-    /// </summary>
-    private void CreateMovement()
-	{
-        //calculate _movement to apply to CharacterController
-        _movement += _planarSpeed * _planarForward;
-    }
-
-    /// <summary>
-    /// 	Add positive vertical speed to make character jump
-    /// </summary>
-    private void ApplyJumpImpulseVerticalSpeed()
-	{
-        _gravitySpeed = Mathf.Sqrt(_characterConfig.jumpHeight * -3f * _characterConfig.gravity) + _characterConfig.gravity * Time.deltaTime;
-	}
-
-	/// <summary>
-	///  Call to update timer and status without applying movement modif
-	/// </summary>
-	private void UpdateStatus()
-	{
-		if(_isStunned)
-		{
-			_stunTimer -= Time.deltaTime;
-
-			if (_stunTimer <= 0)
-			{
-				_isStunned = false;
-				_isSlowed = true;
-				_isSlowedPostStun = true;
-				_slowTimer = _characterConfig.slowTimePostStun;
-			}
-		}
-		if(_isSlowed)
-		{
-			_slowTimer -= Time.deltaTime;
-			
-			if (_slowTimer <= 0)
-			{
-				_isSlowed = false;
-				_isSlowedPostStun = false;
-			}
-		}
-	}
-
-	/// <summary>
-	/// Call to update timer and status and applying movement modif
-	/// </summary>
-	private void ApplyStatus()
-	{
-		if(_isStunned)
-		{
-			_movement += Vector3.zero;
-		}
-		else if(_isSlowed)
-		{
-			if(!_isSlowedPostStun)
-			{
-				_movement *= _characterConfig.slowPercentage.Evaluate((_characterConfig.maxSlowTime - _slowTimer)/_characterConfig.maxSlowTime);
-			}
-			else
-			{
-				_movement *= _characterConfig.slowPercentage.Evaluate((_characterConfig.slowTimePostStun - _slowTimer)/_characterConfig.slowTimePostStun);
-			}
-		}
-	}
-
-	/// <summary>
-	/// 	Add fake gravity to snap the character to the floor while going down stairs and slopes.
-	/// </summary>
-	private void ApplySnapGravity()
-	{
-		_movement += new Vector3(_movement.x, _characterConfig.SnapGravity, _movement.z);
-	}
-
-	/// <summary>
-	/// 	Allow the player to slighty turn during falling.
-	/// </summary>
-	private void ApplyAirControl()
-	{
-		//Angle to add based on time since last frame
-		float _airControlAngle = _characterConfig.airControlAngularSpeed * Time.deltaTime;
-		//Factor it based on difference between input and character forward
-		_airControlAngle *= _characterConfig.airControlInputFactor.Evaluate(Vector3.Dot(_planarForward, _lastGroundedPlanarForward));
-		//Sign it
-		float _angleInputForward = Vector3.SignedAngle(_lastGroundedPlanarForward, _planarForward, Vector3.up);
-		_airControlAngle *= _angleInputForward/Mathf.Abs(_angleInputForward);
-		//Apply it to character direction (we use _lastGrounded while in air)
-		_lastGroundedPlanarForward = Quaternion.AngleAxis(_airControlAngle, Vector3.up) * _lastGroundedPlanarForward;
-	}
-
-	/// <summary>
-	/// 	Decrease planar speed while in air, faster if input are not in same direction as fall.
-	/// </summary>
-	private void ApplyDrag()
-	{
-		float _inputOrientationFactor = (-Vector3.Dot(_lastGroundedPlanarForward, _planarForward) + 3f) / 4f;
-		if (_moveInput == Vector2.zero)
-		{
-			_inputOrientationFactor = 0.75f;
-        }
-		_planarSpeed = Mathf.Clamp(_planarSpeed - _characterConfig.dragDecceleration * Time.deltaTime * _inputOrientationFactor, 0, _characterConfig.runSpeed);
-	}
-
-    /// <summary>
-    /// 	Calculate _movement with _planarSpeed and _lastGroundedPlanarForward.
-    /// </summary>
-    private void CreateMovementFall()
-    {
-        _movement += _planarSpeed * _lastGroundedPlanarForward;
-    }
-
-    /// <summary>
-    /// 	handle gravity modifier, and jump delay
-    /// </summary>
-    private void ApplyGravity()
-	{
-		_gravitySpeed += _characterConfig.gravity * Time.deltaTime;
-
-        _movement += new Vector3(_movement.x, _gravitySpeed, _movement.z);
-	}
-
-	/// <summary>
-	///		Detect edges point while falling or jumping
-	/// </summary>
-	private void DetectEdges()
-	{
-		Vector3 _start = new Vector3(transform.position.x, transform.position.y + _controller.height - _controller.radius, transform.position.z);
-		float _radius = _controller.radius + _characterConfig.skinWidth;
-		float _distance = _controller.height - 2 * _controller.radius + _characterConfig.skinWidth;
-        _edgeHits = Physics.SphereCastAll(_start, _controller.radius, Vector3.down, _distance, _raycastLayerMask);
-
-		if (_edgeHits.Length > 0 )
-		{
-            _edgeHit = _edgeHits[0];
-			if(_edgeHit.normal == Vector3.up) _edgeHit = new RaycastHit();
-        }
-		else
-		{
-            _edgeHit = new RaycastHit();
-        }
-    }
-
-	/// <summary>
-	///		Select the edge hit that should have the priority
-	/// </summary>
-	private void SortEdgeHits()
-	{
-		_edgeHit = new RaycastHit();
-
-		foreach (RaycastHit _hit in _edgeHits)
-		{
-
-		}
-
-		for (int i = 1; i < _edgeHits.Length; i++)
-		{
-			//Study only point below character edge climb height
-			if (_edgeHits[i].point.y - transform.position.y < _characterConfig.edgeMaxClimbingHeight)
-			{
-				
-			}
-		}
-	}
-
-	private enum EdgeType 
-	{
-		NONE,
-		HIGH,
-		LOW
-	}
-
-	/// <summary>
-	///		
-	/// </summary>
-	private void ApplyEdgesSpeed()
-	{
-		if (_edgeHit.collider == null) { return;}
-
-        Vector3 _edgeSlopeSlideLeft = Vector3.Cross(_edgeHit.normal, Vector3.up).normalized;
-        Vector3 _edgeSlopeSlideDown = Vector3.Cross(_edgeHit.normal, _edgeSlopeSlideLeft).normalized;
-
-		// UnityEngine.Debug.DrawRay(_rsoCharacterPosition.value, _edgeHit.normal, Color.blue);
-
-		_movement += -_edgeSlopeSlideDown.normalized * _gravitySpeed;
-
-        UnityEngine.Debug.DrawRay(_rsoCharacterPosition.value, - _edgeSlopeSlideDown * _gravitySpeed, Color.cyan);
-    }
-
-	/// <summary>
-	/// 	moves the character towards the input directions 
-	/// </summary>
-	private void HandleMovement()
-	{
-        _controller.Move(_movement * Time.deltaTime);
-		_movement = Vector3.zero;
-
-		// - update variables -
-		if (_rsoCharacterPosition.value != _characterDirection.position) { _rsoCharacterPosition.value = _characterDirection.position; }
-		if (_rsoCharacterForward.value != _characterDirection.forward) { _rsoCharacterForward.value = _characterDirection.forward; }
-    }
-
-    #endregion
-
-    #region inputs
-
-    /// <summary>
-    /// 	Add character behavior to player inputs based on animation state
-    /// </summary>
-    private void SubscribeInputs()
-	{
-		_rseRun.action += Run;
-		_rseJump.action += Jump;
-		_rseCancelAction.action += CancelAction;
-		_rseKillCharacter.action += HandleDeath;
-		_rseClimb.action += Climb;
-		_rseSetCharacterPosition.action += ForceCharacterPosition;
-
-		switch (_currentState)
-        {
-            case AnimationState.LOCOMOTION:
-                _rseMove.action += Move;
-                _rseThrow.action += ToggleAim;
-                _rseCraft.action += ToggleCraft;
-                _rseToggleInHand.action += ToggleInHand;
-                _rseInteract.action += Interact;
-				ToggleCraftInput(_hasBackpack);
-                break;
-            case AnimationState.JUMP:
-                _rseMove.action += Move;
-                _rseThrow.action += ToggleAim;
-                _rseToggleInHand.action += ToggleInHand;
-                _rseInteract.action += Interact;
-                break;
-            case AnimationState.FALL:
-                _rseMove.action += Move;
-                _rseThrow.action += ToggleAim;
-                _rseToggleInHand.action += ToggleInHand;
-                _rseInteract.action += Interact;
-                break;
-            case AnimationState.CRAFT:
-                _rseCraft.action += ToggleCraft;
-                break;
-            case AnimationState.ROPE:
-                _rseMove.action += Move;
-                _rseThrow.action += ToggleAim;
-                _rseCraft.action += ToggleCraft;
-                _rseToggleInHand.action += ToggleInHand;
-                _rseInteract.action += Interact;
-                break;
-            case AnimationState.LADDER:
-                _rseMove.action += Move;
-                _rseThrow.action += ToggleAim;
-                _rseCraft.action += ToggleCraft;
-                _rseToggleInHand.action += ToggleInHand;
-				_rseInteract.action += Interact;
-                break;
-        }
-    }
-
-    /// <summary>
-    /// 	Remove character behavior from player inputs.
-    /// </summary>
-    private void UnsubscribeInputs()
-    {
-        _rseMove.action -= Move;
-        _rseRun.action -= Run;
-        _rseJump.action -= Jump;
-        _rseThrow.action -= ToggleAim;
-        _rseCraft.action -= ToggleCraft;
-        _rseToggleInHand.action -= ToggleInHand;
-        _rseCancelAction.action -= CancelAction;
-        _rseInteract.action -= Interact;
-		_rseKillCharacter.action -= HandleDeath;
-        _rseRecycle.action -= Recycle;
-		_rseClimb.action -= Climb;
-		_rseSetCharacterPosition.action -= ForceCharacterPosition;
-	}
-
-	public void ToggleCraftInput(bool _isActive)
-	{
-		if (_isActive)
-		{
-			_rseCraft.action += ToggleCraft;
-			_rseRecycle.action += Recycle;
-		}
-		else
-		{
-			_rseCraft.action -= ToggleCraft;
-			_rseRecycle.action -= Recycle;
-		}
-    }
-
-	private void ToggleInputs()
-	{
-		if (_rsoGamePaused.value)
-		{
-			CancelAction();
-			UnsubscribeInputs();
-		}
-		else
-		{
-			SubscribeInputs();
-		}
-	}
-
-    /// <summary>
-    /// 	update the movement input when pressed
-    /// </summary>
-    /// <param name="input">input direction value</param>
-    private void Move(Vector2 input)
-	{
-		_moveInput = input;
-	}
-
-	/// <summary>
-	/// 	Set `_wantJump` to true.
-	/// 	Subscribed to RSE_Jump only in locomotion State.
-	/// </summary>
-	/// <param name="isJumping">Is the input pressed.</param>
-	private void Jump(bool isJumping)
-	{
-        _wantJump = isJumping; // Resetted after switch state check
-		_isJumpingPressed = isJumping;
-	}
-
-	/// <summary>
-	/// 	Called in Update(). Check is the jump input is held by the player.
-	/// </summary>
-	private void CheckProlongedJump()
-	{
-		if (!_isJumpingPressed) 
-		{
-			_prolongedJumpTimer = 0f;
-			_isJumpProlonged = Triome.FALSE;
-			return;
-		}
-
-		_prolongedJumpTimer += Time.deltaTime;
-		if (_prolongedJumpTimer >= _HOLDING_KEY_THRESHOLD
-		&& _isJumpProlonged == Triome.FALSE)
-		{
-			_isJumpProlonged = Triome.TRUE;
-		}
-	}
-
-	/// <summary>
-	/// 	update the sprint input value
-	/// </summary>
-	/// <param name="isRunning">is the input pressed</param>
-	private void Run(bool isRunning)
-	{
-		_isRunning = isRunning;
-		Holding(isRunning);
-	}
-
-	/// <summary>
-	///     Update the holding rope input value.
-	/// </summary>
-	/// <param name="isHolding">is the input pressed</param>
-	private void Holding(bool isHolding)
-	{
-		if (_isJumpingPressed && !isHolding) return;
-
-		if (_rope == null)
-		{
-			_isHolding = false;
+			m_isHolding = false;
 			return;
 		}
 
 		// Handle both hold methods
-		switch (_characterConfig.ropeHoldingMethod)
+		switch (m_ssoCharacter.ropeHoldingMethod)
 		{
 			case RopeHolding.HOLD_TO_STOP:
 				ToggleRopeHolding(isHolding);
@@ -1113,1098 +281,833 @@ public class CharacterMotor : MonoBehaviour
 				break;
 		}
 
-		_isHolding = isHolding;
+		m_isHolding = isHolding;
 	}
 
-	private void Holding(Triome isHolding)
+	private void UpdateClimbInput(bool isClimbing)
 	{
-		if (isHolding == Triome.NONE) 
+		m_isClimbing = isClimbing;
+	}
+
+	private void CancelRope(bool isPressed)
+	{
+		if (!IsRopeValid) return;
+
+		m_isCancellingRope = isPressed;
+
+		if (m_isCancellingRope)
 		{
-			print("CHARACTER_MOTOR: Assert - isHolding value is equal to NONE.");
-			return;
+			m_cancelRopeTimer = 0f;
+			m_cancelRopeCoroutine = StartCoroutine(StartCancellingRope());
+		}
+		else if (!m_isCancellingRope
+		&& m_cancelRopeCoroutine != null)
+		{
+			StopCoroutine(m_cancelRopeCoroutine);
+		}
+	}
+
+	private IEnumerator StartCancellingRope()
+	{
+		while (m_cancelRopeTimer < m_ssoCharacter.cancelRopeDuration)
+		{
+			m_cancelRopeTimer += Time.deltaTime;
+			yield return null;
+		}
+		DesequipRope();
+	}
+
+	private void JumpRope(bool isPressed)
+	{
+		if (!IsRopeValid) return;
+
+		m_isJumpingRope = isPressed;
+
+		if (m_isJumpingRope)
+		{
+			m_jumpRopeCoroutine = StartCoroutine(ApplyJumpForce());
+		}
+		else
+		{
+			if (m_jumpRopeCoroutine != null) StopCoroutine(m_jumpRopeCoroutine);
+			ToggleRopeConstraint(m_ssoCharacter.ropeHoldingMethod == RopeHolding.HOLD_TO_LET_GO ? !m_isHolding : m_isHolding);
+		}
+	}
+
+	private IEnumerator ApplyJumpForce()
+	{
+		if (!m_isGrounded
+		&& m_ropeState == RopeState.PARTIAL_SUSPENSION)
+		{
+			ToggleRopeConstraint(false);
+
+			float force = m_ssoCharacter.jumpOffWallForce;
+			Vector3 direction = (Vector3Extention.GetPositionOnCercle(
+				angle: m_ssoCharacter.ropeOffsetAngle,
+				axis: m_characterGraphics.transform.right,
+				direction: -m_characterGraphics.transform.forward,
+				origin: m_rope.CurrentFold,
+				radius: m_rope.HoldLength,
+				starting: m_rigidbody.position
+			) - m_rigidbody.position).normalized;
+
+			m_rigidbody.AddForce(direction * force, ForceMode.Impulse);
 		}
 
-		Holding(isHolding.ToBool());
+		while (m_isJumpingRope)
+		{
+			ToggleRopeConstraint(false);
+			yield return null;
+		}
 	}
 
-	private void Climb(bool isClimbing)
-	{
-		_isClimbing = isClimbing;
-	}
+	#endregion
+
+	#region STATE MACHINE
 
 	/// <summary>
-	/// 	Try to activate permanent object in hand
+	/// Determine which behavior state the player should be and trigger a switch of state if neccessary.
 	/// </summary>
-	private void ToggleInHand()
-	{
-		_craftInHand?.ToggleInHand();
-	}
-
-	private void CancelAction()
-	{
-		// The cancel action is contextual
-		// Do various things based on the context
-
-		// Rope context
-		if (_rope != null && _rope.isPlaced)
+	private void DetermineState()
+    {
+        if (m_rsoCharacterState.value != BehaviorState.LOCOMOTION && m_isGrounded && !m_isCrafting)
 		{
-			DesequipRope();
-		}
-	}
-
-	#endregion
-
-	#region locomotion state
-
-	private void EnterLocomotionState()
-	{
-		
-	}
-
-	private void UpdateLocomotionState()
-	{
-		if (_interactables.Count > 0)
-		{
-			Interactible nearest = GetNearestInteractible();
-			CheckShowInteract();
-			if (nearest != null) CheckShowRecycle(nearest.isRecyclable);
-			else CheckShowRecycle(false);
-		}
-
-		// speed calculations
-		CheckWalkRun();
-		ApplySlope();
-		ApplyInputs();
-		ApplyAcceleration();
-		CreateMovement();
-		ApplyStatus();
-		ApplySnapGravity();
-
-		// move controller
-		HandleMovement();
-	}
-
-	private void LateUpdateLocomotionState()
-	{
-
-	}
-
-
-    private void ExitLocomotionState()
-	{
-		_gravitySpeed = 0;
-		_lastGroundedPlanarForward = _planarForward;
+			SwitchState(BehaviorState.LOCOMOTION);
+        }
+        else if (m_rsoCharacterState.value != BehaviorState.FALL && !m_isGrounded && !IsRopeValid)
+        {
+            SwitchState(BehaviorState.FALL);
+        }
+        else if (m_rsoCharacterState.value != BehaviorState.ROPE && !m_isGrounded && IsRopeValid)
+        {
+            SwitchState(BehaviorState.ROPE);
+        }
+        else if (m_rsoCharacterState.value != BehaviorState.CRAFT && m_rsoCharacterState.value == BehaviorState.LOCOMOTION && m_isCrafting)
+        {
+            SwitchState(BehaviorState.CRAFT);
+        }
     }
 
-	#endregion
-
-	#region jump state
-
-	private void EnterJumpState()
-	{
-        _rseCraft.action -= ToggleCraft;
-
-		_canJump = false;
-
-		if (_isGroundedLastFrame) {CheckWalkRun();}
-		ApplyJumpImpulsePlanarSpeed();
-        if (_isGroundedLastFrame) {ApplyInputs(); };
-        if (_isGroundedLastFrame) {ApplyAcceleration();};
-        ApplyJumpImpulseVerticalSpeed();
-	}
-
-	private void UpdateJumpState()
-	{
-		//ApplyAirControl();
-		ApplyDrag();
-		CreateMovementFall();
-        ApplyGravity();
-
-		DetectEdges();
-
-        HandleMovement();
-	}
-
-	private void LateUpdateJumpState()
-	{
-
-	}
-
-
-    private void ExitJumpState()
-	{
-        ToggleCraftInput(_hasBackpack);
-
-		_canJump = true;
-
-	}
-
-	#endregion
-
-	#region fall state
-
-	private void EnterFallState()
-	{
-		_rseCraft.action -= ToggleCraft;
-
-        _positionStartFall = _rsoCharacterPosition.value;
-
-        if (_isGroundedLastFrame) { CheckWalkRun(); }
-        if (_isGroundedLastFrame) { ApplyInputs(); };
-        if (_isGroundedLastFrame) { ApplyAcceleration(); };
+    /// <summary>
+    /// Switch to new state by triggering old state exit then new state enter
+    /// </summary>
+    /// <param name="newState">New state to switch to</param>
+    private void SwitchState(BehaviorState newState)
+    {
+        ExitState();
+        EnterState(newState);
     }
 
-	private void UpdateFallState()
-	{
-        // ApplyAirControl();
-        ApplyDrag();
-        CreateMovementFall();
-        ApplyGravity();
+    /// <summary>
+    /// (1) Update _currentState value
+    /// (2) Call EnterState method of the new state
+    /// </summary>
+    /// <param name="newState">New state to trigger</param>
+    private void EnterState(BehaviorState newState)
+    {
+		m_rsoCharacterState.value = newState;
+		SubscribeStateInputs();
 
-        DetectEdges();
-		ApplyEdgesSpeed();
+		switch (m_rsoCharacterState.value)
+        {
+            case BehaviorState.LOCOMOTION:
+                EnterLocomotionState();
+                break;
 
-        HandleMovement();
+            case BehaviorState.FALL:
+                EnterFallState();
+                break;
+
+            case BehaviorState.CRAFT:
+                EnterCraftState();
+                break;
+
+            case BehaviorState.ROPE:
+                EnterRopeState();
+                break;
+        }
 	}
 
-	private void LateUpdateFallState()
+    /// <summary>
+    /// Trigger the current state FixedUpdate method
+    /// </summary>
+    private void FixedUpdateState()
+    {
+        switch (m_rsoCharacterState.value)
+        {
+            case BehaviorState.LOCOMOTION:
+                FixedUpdateLocomotionState();
+                break;
+
+            case BehaviorState.FALL:
+                FixedUpdateFallState();
+                break;
+
+            case BehaviorState.CRAFT:
+                FixedUpdateCraftState();
+                break;
+
+            case BehaviorState.ROPE:
+                FixedUpdateRopeState();
+                break;
+        }
+    }
+
+    /// <summary>
+    /// Trigger the current state Exit method
+    /// </summary>
+    private void ExitState()
 	{
+		UnsubscibeAllInputs();
 
-	}
+		switch (m_rsoCharacterState.value)
+        {
+            case BehaviorState.LOCOMOTION:
+                ExitLocomotionState();
+                break;
 
+            case BehaviorState.FALL:
+                ExitFallState();
+                break;
 
-    private void ExitFallState()
-	{
-		ToggleCraftInput(_hasBackpack);
+            case BehaviorState.CRAFT:
+                ExitCraftState();
+                break;
+
+            case BehaviorState.ROPE:
+                ExitRopeState();
+                break;
+		}
 	}
 
     #endregion
 
-    #region craft state
+    #region GROUND
 
-    private void ToggleCraft(CraftType _craftName, bool _isInputPressed)
+    private void CheckGround()
     {
-        //Prevent switching to craft state if not in locomotion or crafting state or already crafting another item
-        if (_currentState != AnimationState.LOCOMOTION || _currentState != AnimationState.CRAFT)
+        m_isGrounded = false;
+        m_groundNormal = Vector3.down;
+
+        Vector3 _start = transform.position + Vector3.up * (m_collider.height - m_collider.radius);
+        float _radius = m_collider.radius + m_ssoCharacter.skinWidth;
+        Vector3 _direction = Vector3.down;
+        float _distance = m_collider.height - 2 * m_collider.radius;
+        m_raycastHits = Physics.SphereCastAll(_start, _radius, _direction, _distance, ~m_layerMaskToIgnore);
+
+        //check each points
+        foreach (RaycastHit hit in m_raycastHits)
         {
-            //If craft button is pressed
-            if (_isInputPressed)
+            //exclude hit point that come from the spherecast spawning inside a collider
+            if (hit.point == Vector3.zero)
             {
-                _objectToCraft = _craftName;
-                _crafting = true;
+                continue;
             }
-            else // if craft button is released
+            //check if it is on the bottom round part of the capsule
+            if (hit.point.y < transform.position.y + m_collider.radius)
             {
-                _crafting = false;
+                float _angle = Vector3.Angle(hit.normal, Vector3.up);
+                if (_angle < 46f)
+                {
+                    m_isGrounded = true;
+                    //take the smallest normal from ground check as the new ground normal
+                    if (Vector3.Dot(hit.normal, Vector3.up) > Vector3.Dot(m_groundNormal, Vector3.up))
+                    {
+                        m_groundNormal = hit.normal;
+                    }
+                }
             }
         }
     }
-
-	private void EnterCraftState()
-	{
-		_rseMove.action -= Move;
-        _rseThrow.action -= ToggleAim;
-		_rseToggleInHand.action -= ToggleInHand;
-        _rseInteract.action -= Interact;
-
-		_canJump = false;
-
-		switch (_objectToCraft)
-        {
-            case CraftType.NONE:
-                break;
-
-            case CraftType.TORCH:
-                if (_craftInHand != null)
-                {
-                    if (_craftInHand._craftType != CraftType.TORCH && _craftInRobot?._craftType != CraftType.TORCH)
-                    {
-                        Destroy(_craftInHand.gameObject);
-                        _craftCoroutine = StartCoroutine(Craft(CraftType.TORCH, _torchConfig.craftingDuration));
-                    }
-                }
-                else
-                {
-                    _craftCoroutine = StartCoroutine(Craft(CraftType.TORCH, _torchConfig.craftingDuration));
-                }
-                break;
-
-            case CraftType.LADDER:
-                if (_craftInHand != null)
-                {
-                    if (_craftInHand._craftType == CraftType.TORCH)
-                    {
-                        _craftInHand.transform.SetParent(_robotHandSocket, false);
-                        _craftInRobot = _craftInHand;
-                        _craftInRobot.transform.rotation = _robotHandSocket.rotation;
-                        _craftInHand = null;
-                        _craftCoroutine = StartCoroutine(Craft(CraftType.LADDER, _torchConfig.craftingDuration));
-                    }
-                    else if (_craftInHand._craftType != CraftType.LADDER)
-                    {
-                        Destroy(_craftInHand.gameObject);
-                        _craftCoroutine = StartCoroutine(Craft(CraftType.LADDER, _torchConfig.craftingDuration));
-                    }
-                }
-                else
-                {
-                    _craftCoroutine = StartCoroutine(Craft(CraftType.LADDER, _torchConfig.craftingDuration));
-                }
-                break;
-
-            case CraftType.ROPE:
-                if (_craftInHand != null)
-                {
-                    if (_craftInHand._craftType == CraftType.TORCH)
-                    {
-                        _craftInHand.transform.SetParent(_robotHandSocket, false);
-                        _craftInRobot = _craftInHand;
-                        _craftInHand = null;
-                        _craftCoroutine = StartCoroutine(Craft(CraftType.ROPE, _ropeConfig.craftingDuration));
-                    }
-                    else if (_craftInHand._craftType != CraftType.ROPE)
-                    {
-                        Destroy(_craftInHand.gameObject);
-                        _craftCoroutine = StartCoroutine(Craft(CraftType.ROPE, _ropeConfig.craftingDuration));
-                    }
-                }
-                else
-                {
-                    _craftCoroutine = StartCoroutine(Craft(CraftType.ROPE, _ropeConfig.craftingDuration));
-                }
-                break;
-        }
-    }
-
-	private void UpdateCraftState()
-	{
-		ApplySlope();
-		ApplyAcceleration();
-		ApplyGravity();
-		HandleMovement();
-	}
 	
-	private void LateUpdateCraftState()
+	private void ApplyFallHeight()
 	{
+		m_fallHeight = Math.Abs(m_rigidbody.position.y - m_positionStartFall.y);
+		if (m_fallHeight >= m_ssoCharacter.lethalHeight)
+		{
+			HandleDeath();
+		}
+		else if (m_fallHeight >= m_ssoCharacter.stunHeight)
+		{
+			// Stun the character for x secondes
+			m_isStunned = true;
 
+			// Cross product to get the stun mitiged value on a 0-1 scale
+			float stunMitigedValue = (m_fallHeight - m_ssoCharacter.stunHeight) / (m_ssoCharacter.lethalHeight - m_ssoCharacter.stunHeight);
+			m_stunTimer = m_ssoCharacter.stunDuration.Evaluate(stunMitigedValue);
+		}
+		else if (m_fallHeight >= m_ssoCharacter.slowHeight)
+		{
+			// Slow the character for x secondes by y percent
+			m_isSlowed = true;
+
+			// Cross product to get the slow mitiged value on a 0-1 scale
+			float slowMitigedValue = (m_fallHeight - m_ssoCharacter.slowHeight) / (m_ssoCharacter.stunHeight - m_ssoCharacter.slowHeight);
+			m_slowTimer = m_ssoCharacter.slowDuration.Evaluate(slowMitigedValue);
+		}
 	}
+
+	private void UpdateStatus()
+	{
+		if (m_isStunned)
+		{
+			m_stunTimer -= Time.deltaTime;
+
+			if (m_stunTimer <= 0)
+			{
+				m_isStunned = false;
+				m_isSlowed = true;
+				m_isSlowedPostStun = true;
+				m_slowTimer = m_ssoCharacter.slowTimePostStun;
+			}
+		}
+
+		if (m_isSlowed)
+		{
+			m_slowTimer -= Time.deltaTime;
+
+			if (m_slowTimer <= 0)
+			{
+				m_isSlowed = false;
+				m_isSlowedPostStun = false;
+			}
+		}
+	}
+
+	private void HandleDeath()
+	{
+		if (IsRopeValid) DesequipRope();
+		m_rsoCharacterDeath.value = true;
+		Destroy(gameObject);
+	}
+
+	private void StartCoyoteTime()
+    {
+        if (!m_hasJumped)
+        {
+            m_coyoteTime = m_ssoCharacter.CoyoteTime;
+            m_rseJump.action += Jump;
+        }
+    }
+
+    private void UpdateCoyoteTime()
+    {
+        if (m_hasJumped || m_coyoteTime <= 0)
+        {
+            m_rseJump.action -= Jump;
+            return;
+        }
+
+        m_coyoteTime -= Time.fixedDeltaTime;
+    }
+
+    #endregion    
+    
+    #region MOVEMENT
 
     /// <summary>
-    /// 	instantiate the torch prefab after the fixed duration.
+    /// if player is not moving and grounded:
+    /// Set the friction to a high value to prevent sliding on slope while immobile
+    /// else
+    /// Set the friction to a low value to slide against wall while falling and walking
     /// </summary>
-    private IEnumerator Craft(CraftType _objectToCraft, float _craftDuration)
+    private void SetFriction()
     {
-		// wait the crafting duration
-		if(_backpack != null)
-		{
-			_backpack.StartCrafting(_craftDuration);
-		}
-
-        yield return new WaitForSeconds(_craftDuration);
-
-		// instantiate the crafted object
-		switch (_objectToCraft)
-		{
-            case CraftType.NONE:
-                break;
-
-            case CraftType.TORCH:
-                _craftInHand = Instantiate(_torchConfig.pfTorch, _handSocket.transform);
-                break;
-
-			case CraftType.LADDER:
-				_craftInHand = Instantiate(_ladderConfig.PF_Ladder, _handSocket.transform);
-                break;
-
-			case CraftType.ROPE:
-				_craftInHand = Instantiate(_ropeConfig.pfRope, _handSocket.transform);
-				break;
-		}
-
-        _backpack.EndCrafting();
-
-        _craftInHand.transform.position = _handSocket.transform.position;
-
-		_craftCoroutine = null;
+        if (m_moveInput == Vector2.zero && m_isGrounded)
+        {
+            m_collider.sharedMaterial.dynamicFriction = m_ssoCharacter.frictionNotMovingGround;
+            m_collider.sharedMaterial.frictionCombine = PhysicMaterialCombine.Maximum;
+        }
+        else
+        {
+            m_collider.sharedMaterial.dynamicFriction = m_ssoCharacter.frictionMovingFalling;
+            m_collider.sharedMaterial.frictionCombine = PhysicMaterialCombine.Minimum;
+        }
     }
 
-    private void ExitCraftState()
-	{
-        if (_craftCoroutine != null)
+    /// <summary>
+    /// Update drag based on behavior state to allow the player to fall faster
+    /// </summary>
+    private void UpdateDrag()
+    {
+        if (m_rsoCharacterState.value == BehaviorState.LOCOMOTION)
         {
-            StopCoroutine(_craftCoroutine);
-            _craftCoroutine = null;
-			if(_backpack != null)
+            m_rigidbody.drag = m_ssoCharacter.dragGround;
+        }
+        else if (m_rsoCharacterState.value == BehaviorState.FALL || m_rsoCharacterState.value == BehaviorState.ROPE)
+        {
+            m_rigidbody.drag = m_ssoCharacter.dragFall;
+        }
+    }
+
+    /// <summary>
+    /// (1) Update friction based on gorunded or not to not slide on slope if immobile
+    /// (2) Calculate desired speed force based on input and camera direction
+    /// (3) Orient speed force on floor
+    /// (4) Multiply desired speed force by walk/run speed
+    /// (5) Apply force and auto clamp it by susubstractiong actual speed to desired speed
+    /// </summary>
+    private void MoveGrounded()
+    {
+        SetFriction();
+
+        if (m_moveInput != Vector2.zero)
+        {
+            Vector3 desiredSpeed = (m_rsoCameraRight.value * m_moveInput.x + m_rsoCameraForward.value * m_moveInput.y).normalized;
+
+			// Orient speed along slope
+			Vector3 slopeRight = Vector3.Cross(Vector3.up, m_groundNormal);
+            desiredSpeed = Quaternion.AngleAxis(Vector3.SignedAngle(Vector3.up, m_groundNormal, slopeRight), slopeRight) * desiredSpeed;
+
+            // Set desired speed magnitude based on walk/run state
+            desiredSpeed *= m_isRunning ? m_ssoCharacter.runSpeed : m_ssoCharacter.walkSpeed;
+
+			// Apply speed modifiers
+			if (m_isStunned)
 			{
-				_backpack.EndCrafting();
+				desiredSpeed = Vector3.zero;
 			}
+			else if (m_isSlowed)
+			{
+				if (!m_isSlowedPostStun)
+				{
+					desiredSpeed *= m_ssoCharacter.slowPercentage.Evaluate((m_ssoCharacter.maxSlowTime - m_slowTimer) / m_ssoCharacter.maxSlowTime);
+				}
+				else
+				{
+					desiredSpeed *= m_ssoCharacter.slowPercentage.Evaluate((m_ssoCharacter.slowTimePostStun - m_slowTimer) / m_ssoCharacter.slowTimePostStun);
+				}
+			}
+
+			// Apply final force to move character, auto clamp the speed by substractiong actual speed to desired speed
+			m_rigidbody.AddForce(desiredSpeed - m_rigidbody.velocity, ForceMode.Acceleration);
+        }
+    }
+
+    /// <summary>
+    /// (1) Check if there is valid points to step on
+    /// (2) Select the highest point among the point in front the character
+    /// (3) On the selected point, check if there is really a object to step on if front
+    /// (4) Check if there there is a flat surface to step onto (<45 degrees)
+    /// </summary>
+    private void HandleStepOn()
+    {
+        if (m_raycastHits.Length > 1 && m_moveInput != Vector2.zero)
+        {
+            Vector3 stepOnTarget = transform.position;
+			Vector3 moveInput3D = (m_rsoCameraRight.value * m_moveInput.x + m_rsoCameraForward.value * m_moveInput.y).normalized;
+
+            foreach (RaycastHit _hit in m_raycastHits)
+            {
+                Vector3 hitDirection = _hit.point - transform.position;
+                hitDirection = new Vector3(hitDirection.x, 0, hitDirection.z);
+
+                // Check if hit is in front of character
+                if (Vector3.Dot(moveInput3D, hitDirection) > 0.15)
+                {
+                    if (_hit.point.y - transform.position.y < m_ssoCharacter.stepOnHeight)
+                    {
+                        // We take the highest that is higher than skin width to not trigger step on very small objects
+                        if (_hit.point.y > stepOnTarget.y && _hit.point.y > transform.position.y + m_ssoCharacter.skinWidth)
+                        {
+                            stepOnTarget = _hit.point;
+                        }
+                    }
+                }
+            }
+
+            if (stepOnTarget != transform.position)
+            {
+                // Check if there is really an object to step on in the speed direction, to prevent steping on end of slope
+                Vector3 start = new Vector3(m_rigidbody.position.x, m_rigidbody.position.y + m_ssoCharacter.skinWidth, m_rigidbody.position.z);
+                Vector3 direction = m_rigidbody.velocity.normalized;
+                float distance = m_collider.radius * 2;
+                if (Physics.Raycast(start, direction, distance, ~m_layerMaskToIgnore))
+                {
+                    // Check if there is a flat surface to step on (<45 degrees)
+                    start = stepOnTarget + (new Vector3(stepOnTarget.x, 0, stepOnTarget.z) - new Vector3(m_rigidbody.position.x, 0, m_rigidbody.position.z)).normalized * m_ssoCharacter.skinWidth + new Vector3(0, m_ssoCharacter.skinWidth, 0);
+                    direction = Vector3.down;
+                    distance = m_ssoCharacter.skinWidth * 2;
+                    if (Physics.Raycast(start, direction, distance, ~m_layerMaskToIgnore))
+                    {
+                        m_rigidbody.position = new Vector3(m_rigidbody.position.x, stepOnTarget.y, m_rigidbody.position.z);
+                    }
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// If the input is pressed and If the player hasn't jumped:
+    /// Add a vertical impulse to the player
+    /// </summary>
+    private void Jump(bool isPressed)
+    {
+		// Assertions
+        if (!isPressed) return;
+		if(m_hasJumped) return;
+
+		m_rigidbody.AddForce(Vector3.up * m_ssoCharacter.jumpForce, ForceMode.Impulse);
+		m_hasJumped = true;
+    }
+
+    /// <summary>
+    /// (1) Calculate desired speed force based on input and camera direction
+    /// (2) Multiply desired speed force by walk/run speed
+    /// (3) Apply force and auto clamp it by susubstractiong actual speed to desired speed
+    /// (4) Multiply said speed force by falling factor
+    /// </summary>
+    private void MoveFalling()
+    {
+		Vector3 desiredSpeedForce = (m_rsoCameraRight.value * m_moveInput.x + m_rsoCameraForward.value * m_moveInput.y).normalized;
+
+        // Set desired speed magnitude based on walk/run state
+        if (m_isRunning)
+        {
+            desiredSpeedForce *= m_ssoCharacter.runSpeed;
+        }
+        else
+        {
+            desiredSpeedForce *= m_ssoCharacter.walkSpeed;
         }
 
-		_canJump = true;
+        // Apply final force to move character, auto clamp the speed by substractiong actual speed to desired speed
+        m_rigidbody.AddForce((desiredSpeedForce - m_rigidbody.velocity) * m_ssoCharacter.fallingControlFactor, ForceMode.Acceleration);
+    }
 
-		_rseMove.action += Move;
-        _rseThrow.action += ToggleAim;
-		_rseToggleInHand.action += ToggleInHand;
-        _rseInteract.action += Interact;
+    #endregion
+
+    #region LOCOMOTION STATE
+
+    private void EnterLocomotionState()
+    {
+        UpdateDrag();
+		ApplyFallHeight();
 	}
 
+    private void FixedUpdateLocomotionState()
+	{
+		HandleStepOn();
+        MoveGrounded();
+    }
+
+    private void ExitLocomotionState()
+    {
+		m_positionStartFall = m_rigidbody.position;
+	}
 
 	#endregion
 
-	#region rope state
+	#region FALL STATE
 
-	// [x] Climb the rope
-	// [x] Jump off the rope on motion
-	// [x] Re-equip an already-used rope (debug version)
-	// [ ] In partial suspension, make the character able to jump off the wall
-	// [ ] In partial suspension, make the character unable to move while off the wall
-	// [ ] In partial suspension, make the character unable to be snap against a cambered wall 
-	// [ ] In complete suspension, make the character pivot with the rope inclination
-	// [ ] Lerp the rope stop deceleration
+	private void EnterFallState()
+    {
+        UpdateDrag();
+        SetFriction();
+        StartCoyoteTime();
+    }
 
-	#region variables
+    private void FixedUpdateFallState()
+    {
+        UpdateCoyoteTime();
+        MoveFalling();
+    }
 
-	[Header("Rope")]
-	public RopeState _ropeState;
-	private bool _isHolding;
-	private bool _isAgainstWall;
-	private bool _canStartSwinging = true;
-	private Rope _rope;
-
-	// ---- PRIVATE VARIABLES ----
-	// Velocities
-	private Vector3 _pendulumVelocity;
-	private Vector3 _verticalVelocity;
-	private Vector3 _suspensionVelocity;
-	private Vector3 _ropeVelocity;
-
-	// Inputs
-	private Vector3 _ropeInputDirection;
-	private bool _inputsPressed;
-	private bool _inputsTowardsVertical;
-
-	// Climb
-	public bool _isClimbing;
-	private float _currentClimbSpeed;
-
-	// Jump-off & free fall
-	public Triome _isJumpProlongedCached = Triome.NONE;
-	private float _currTime;
-	private Coroutine _ropeConstraintTimer;
-	public bool _ropeConstraintAppliedLastly;
-
-	// Mics
-	private Vector3 _towardsCharacter;
-
-	// Gizmos
-	private Vector3 _gizmoStartPendulumPosition;
-
-	// ---- CONST ----
-	private const float _TOWARDS_VERTICAL_THRESHOLD = 0.75f;
-	private const float _FALLING_FORCES_THRESHOLD = 0.2f;
+    private void ExitFallState()
+    {
+        m_hasJumped = false;
+    }
 
 	#endregion
 
-	#region animation-state-related functions
+	#region ROPE STATE
+
+	// TODO - In partial suspension, make the character able to jump off the wall
+	// TODO - In partial suspension, make the character unable to move while off the wall
+	// TODO - In partial suspension, make the character unable to be snap against a cambered wall 
+	// TODO - In complete suspension, make the character pivot with the rope inclination
+	// TODO - Lerp the rope stop deceleration
 
 	private void EnterRopeState()
 	{
-		_rseCraft.action -= ToggleCraft;
-
-		_isJumpProlongedCached = Triome.NONE;
-
-		_rope.UpdateHoldLength();
-		
 		EnterFallState();
+		ToggleRopeConstraint(true);
 	}
 
-	private void UpdateRopeState()
+	private void FixedUpdateRopeState()
 	{
-		// Checks
-		CheckGround();
-		DetectEdges();
-		ApplyEdgesSpeed(); 
-		HandleProlongedJumpOnRope();
-
-		// Assert: there is no equipped rope 
-		if (_rope == null) return;
-
-		// State machine update rope state
-		switch (_ropeState)
+		if (IsFallingWithRope())
 		{
-			case RopeState.PARTIAL_SUSPENSION:
-				UpdateRopePartialSuspensionState();
-				break;
-
-			case RopeState.COMPLETE_SUSPENSION:
-				UpdateRopeCompleteSuspensionState();
-				break;
+			FixedUpdateFallState();
+			return;
 		}
 
-		HandleClimbing();
-		HandleMovement();
+		if (m_rope.GetTotalLength() > m_ssoRope.MaxLength)
+		{
+			DesequipRope();
+			return;
+		}
 
-		// Apply rope holding constraint after the input movements.
-		// This allow to avoid glitchy movements.
-		HandleRopeConstraint();
-
-		// Debug
-		UnityEngine.Debug.DrawRay(_rsoCharacterPosition.value, _ropeVelocity.normalized);
-	}
-
-	private void LateUpdateRopeState()
-	{
-
+		HandleRopeMovement();
+		HandleRopeClimbing();
 	}
 
 	private void ExitRopeState()
 	{
-		_isHolding = false;
-		_isJumpProlongedCached = Triome.NONE;
-
-		// Update inputs subscriptions
-		ToggleCraftInput(_hasBackpack);
-	}
-
-	#endregion
-
-	#region rope-state-related functions
-
-	/// <summary>
-	/// 	Handle movement related to the front wall. 
-	/// 	Left / right, jump, go down the rope movement.
-	/// 	Jumping and falling off the wall on an edge, change from partial to complete suspension state.
-	/// 	Touching the ground, change from partial to grounded state.
-	/// </summary>
-	private void UpdateRopePartialSuspensionState()
-	{
-		// Temporary shortcut
-		UpdateRopeCompleteSuspensionState();
-	}
-
-	/// <summary>
-	/// 	Handle movement in the void suspended to the rope. 
-	/// 	Left / right, forward / backward, go down the rope movement.
-	/// 	Gain support against a wall, change from complete to partial suspension state.
-	/// 	Touching the ground, change from complete to grounded state.
-	/// </summary>
-	private void UpdateRopeCompleteSuspensionState()
-	{
-		HandleRopeMovement();
-		HandleRopeLength();
-	}
-
-	#endregion
-
-	#region rope functions
-
-	/// <summary>
-	/// 	Using a cached variable of '_isJumpProlonged' to switch if the character is holding the rope or not.
-	/// </summary>
-	private void HandleProlongedJumpOnRope()
-	{
-		// Assertions
-		if (_characterConfig.ropeHoldingMethod != RopeHolding.HOLD_TO_LET_GO) return;
-		if (_isJumpProlongedCached == _isJumpProlonged) return;
-
-		_isJumpProlongedCached = _isJumpProlonged;
-		Holding(_isJumpProlongedCached);
-	}
-
-	/// <summary>
-	/// 	Check if there is a collider in front of the character using a raycast.
-	/// </summary>
-	private bool CheckWall()
-	{
-		// Lisibility varaibles
-		Vector3 origin = _rsoCharacterPosition.value + new Vector3(0, 0.5f, 0);
-		float length = _characterConfig.againstWallRayCastLength;
-		LayerMask layerMask = _characterConfig.againstWallLayerToInclude;
-
-		// Raycasts variables
-		bool[] raycastHits = new bool[8];
-		RaycastHit[] raycastInfos = new RaycastHit[8];
-
-		// Raycasts
-		raycastHits[0] = Physics.Raycast(origin, Vector3.forward, out raycastInfos[0], length, layerMask);	// Forward
-		raycastHits[1] = Physics.Raycast(origin, Vector3.right, out raycastInfos[1], length, layerMask);	// Right
-		raycastHits[2] = Physics.Raycast(origin, -Vector3.forward, out raycastInfos[2], length, layerMask);	// Backward
-		raycastHits[3] = Physics.Raycast(origin, -Vector3.right, out raycastInfos[3], length, layerMask);	// Left
-		raycastHits[4] = Physics.Raycast(origin, (Vector3.forward + Vector3.right).normalized, out raycastInfos[4], length, layerMask);	// Forward-Right
-		raycastHits[5] = Physics.Raycast(origin, (Vector3.forward - Vector3.right).normalized, out raycastInfos[5], length, layerMask);	// Forward-Left
-		raycastHits[6] = Physics.Raycast(origin, (-Vector3.forward + Vector3.right).normalized, out raycastInfos[6], length, layerMask);// Backward-Right
-		raycastHits[7] = Physics.Raycast(origin, (-Vector3.forward - Vector3.right).normalized, out raycastInfos[7], length, layerMask);// Backward-Left
-
-		// Check if a raycast is touching a valid collider
-		_isAgainstWall = false;
-		List<RaycastHit> hitInfos = new List<RaycastHit>();
-		for (int i = 0; i < raycastHits.Length; i++)
-		{
-			if (raycastHits[i])
-			{
-				_isAgainstWall = true;
-				hitInfos.Add(raycastInfos[i]);
-			}
-		}
-
-		// Average the position from all valid raycasts
-		Vector3 averagedPosition = new Vector3();
-		for (int i = 0; i < hitInfos.Count; i++)
-		{
-			averagedPosition += hitInfos[i].point;
-		}
-		averagedPosition /= hitInfos.Count;
-
-		if (_isAgainstWall)
-		{
-			// Simple re-direction
-			Vector3 hitPoint = new Vector3(averagedPosition.x, _rsoCharacterPosition.value.y, averagedPosition.z);
-			Vector3 touchedDirection = hitPoint - _rsoCharacterPosition.value;
-			_characterDirection.forward = touchedDirection.normalized;
-		}
-
-		return _isAgainstWall;
-	}
-
-	/// <summary>
-	/// 	Apply a force to `_movement` backward the character.
-	/// 	Called from the switch state fonction.
-	/// </summary>
-	private void JumpOffWall()
-	{
-		Vector3 direction = new Vector3();
-		float force = 0;
-
-		// Reset velocities
-		_verticalVelocity = Vector3.zero;
-		_pendulumVelocity = Vector3.zero;
-		_suspensionVelocity = Vector3.zero;
-
-		switch (_ropeState)
-		{
-			case RopeState.PARTIAL_SUSPENSION:
-
-				force = _characterConfig.jumpOffWallForce;
-
-				direction = Vector3Extention.GetPositionOnCercle(
-					angle: _characterConfig.ropeOffsetAngle,
-					axis: _characterDirection.right,
-					direction: -_characterDirection.forward,
-					origin: _rope.folds[^1],
-					radius: _rope.holdLength,
-					starting: _rsoCharacterPosition.value
-				);
-
-				break;
-
-			case RopeState.COMPLETE_SUSPENSION:
-				break;
-		}
-
-		// Apply jump force
-		_movement += direction * force;
-	}
-
-	private void ApplyFreeRopeForce(float modifier)
-	{
-		Vector3 direction = _ropeVelocity.normalized;
-		float force = _ropeVelocity.magnitude * modifier;
-
-		// Apply jump force
-		_currTime = 0;
-		StartCoroutine(ApplyFreeFallForce(direction, force, 2));
-	}
-
-	private IEnumerator ApplyFreeFallForce(Vector3 direction, float force, float duration)
-	{
-		while (_currTime < duration)
-		{
-			if (_isGrounded) yield break;
-
-			_currTime += Time.deltaTime;
-			float percentage = _currTime / duration;
-			_movement += direction * force * (1 - percentage);
-			yield return new WaitForNextFrameUnit();
-		}
-	}
-	
-	/// <summary>
-	/// 	Desequip the rope from the character is total length is exceeded.
-	/// </summary>
-	private void HandleRopeLength()
-	{
-		// Assert: total rope length is smaller than the max length
-		if (_rope.GetTotalLength() <= _ropeConfig.maxLength) return;
-
-		DesequipRope();
-	}
-
-	/// <summary>
-	/// 	Detach the rope from the character.
-	/// </summary>
-	private void DesequipRope()
-	{
-		_rope.Detach();
-		_rope = null;
-		_isHolding = false;
+		ToggleRopeConstraint(false);
+		m_isHolding = false;
+		m_isClimbing = false;
 	}
 
 	private void HandleRopeMovement()
 	{
-		// ---- CHARACTER IS FALLING WITH THE ROPE ----
+		Vector3 direction =
+			(Vector3Extention.GetPositionOnCercle(
+				angle: m_ssoCharacter.ropeOffsetAngle,
+				axis: m_cameraTarget.forward,
+				direction: m_cameraTarget.right,
+				origin: m_rope.CurrentFold,
+				radius: m_rope.HoldLength,
+				starting: m_rigidbody.position
+			) - m_rigidbody.position).normalized * m_moveInput.x +
+			(Vector3Extention.GetPositionOnCercle(
+				angle: m_ssoCharacter.ropeOffsetAngle,
+				axis: m_cameraTarget.right,
+				direction: m_cameraTarget.forward,
+				origin: m_rope.CurrentFold,
+				radius: m_rope.HoldLength,
+				starting: m_rigidbody.position
+			) - m_rigidbody.position).normalized * m_moveInput.y;
 
-		if (IsFallingWithRope())
-		{
-			// Apply regular falling functions
-			// ApplyAirControl();
-			ApplyDrag();
-			CreateMovementFall();
-			ApplyGravity();
-			return;
-		}
-
-		// ---- CHARACTER IS HOLDING THE ROPE ----
-
-		// Populate useful varaibles
-		Vector3 verticalPoint = _rope.folds[^1] + Vector3.down * _rope.holdLength;
-		Vector3 towardsVertical = (_rsoCharacterPosition.value - verticalPoint).normalized;
-		_towardsCharacter = (_rsoCharacterPosition.value - _rope.folds[^1]).normalized;
-
-		// Get input related data
-		_ropeInputDirection = _cameraTransform.forward * _moveInput.y + _cameraTransform.right * _moveInput.x;
-		_inputsTowardsVertical = Vector3.Dot(_ropeInputDirection, towardsVertical) <= _TOWARDS_VERTICAL_THRESHOLD;
-		_inputsPressed = _ropeInputDirection.magnitude > 0;
-
-		// Calculate different velocities to apply to the `_controller`
-		HandlePendulum();
-		HandleSuspension();
-		HandleVertical();
-
-		// Apply velocities
-		_ropeVelocity = _suspensionVelocity + _verticalVelocity + _pendulumVelocity;
-		_movement += _ropeVelocity;
+		m_rigidbody.AddForce(direction * m_ssoCharacter.ropeMovementForce, ForceMode.Acceleration);
 	}
 
-	/// <summary>
-	/// 	Is the character falling based on the rope holding method.
-	/// </summary>
-	private bool IsFallingWithRope()
+	private void HandleRopeClimbing()
 	{
-		// Assert: the character is falling if there is no more rope
-		if (_rope == null) return true;
-
-		bool isFalling = false;
-		switch (_characterConfig.ropeHoldingMethod)
+		// Assert: holding input method
+		switch (m_ssoCharacter.ropeHoldingMethod)
 		{
 			case RopeHolding.HOLD_TO_STOP:
-				isFalling = !_isHolding;
+				// While hold to stop, we don't constraint the character if the player IS NOT holding the button
+				if (!m_isHolding) return;
 				break;
 
 			case RopeHolding.HOLD_TO_LET_GO:
-				if (_isHolding)
+				// While hold to let go, we don't constraint the character if the player IS holding the button
+				if (m_isHolding) return;
+				break;
+		}
+
+		if (!m_isClimbing)
+		{
+			m_currentClimbSpeed = m_ssoCharacter.climbAcceleration;
+			return;
+		}
+
+		m_currentClimbSpeed += m_currentClimbSpeed * Time.fixedDeltaTime;
+		float clampedClimbSpeed = Mathf.Clamp(m_currentClimbSpeed, 0, m_ssoCharacter.maxClimbSpeed);
+		m_rope.ChangeHoldLength(-clampedClimbSpeed * Time.fixedDeltaTime);
+	}
+
+	private bool IsFallingWithRope()
+	{
+		// Assert: the character is falling if there is no more rope
+		if (!m_rope) return true;
+
+		bool isFalling = false;
+		switch (m_ssoCharacter.ropeHoldingMethod)
+		{
+			case RopeHolding.HOLD_TO_STOP:
+				isFalling = !m_isHolding;
+				break;
+
+			case RopeHolding.HOLD_TO_LET_GO:
+				if (m_isHolding)
 				{
 					isFalling = true;
 				}
 				else
 				{
 					// If the character IS NOT holding the rope, let it fall till it reaches the rope limit constraint
-					isFalling = (_rope.folds[^1] - _rsoCharacterPosition.value).magnitude < _rope.holdLength - _FALLING_FORCES_THRESHOLD;
+					isFalling = (m_rope.CurrentFold - m_rigidbody.position).magnitude < m_rope.HoldLength - k_fallingForcesThreshold;
 				}
 				break;
 		}
 		return isFalling;
 	}
 
-	/// <summary>
-	/// 	Get velocity from a simple pendulum effect.
-	/// </summary>
-	private void HandlePendulum()
+	private void DesequipRope()
 	{
-		if (!_inputsPressed || _inputsTowardsVertical)
-		{
-			if (_canStartSwinging)
-			{
-				ResetPendulumVelocity();
-				_canStartSwinging = false;
-			}
-
-			UpdatePendulumVelocity();
-		}
-		else
-		{
-			_canStartSwinging = true;
-			ResetPendulumVelocity();
-		}
+		m_rope.Detach();
+		m_rope = null;
+		m_isHolding = false;
 	}
 
-	/// <summary>
-	/// 	Reset `_pendulumVelocity` which makes the acceleration process start over.
-	/// </summary>
-	private void ResetPendulumVelocity()
+	private void ToggleRopeHolding(bool isEnabled)
 	{
-		_gizmoStartPendulumPosition = _rsoCharacterPosition.value;
-		_pendulumVelocity = Vector3.zero;
-	}
+		ToggleRopeConstraint(isEnabled);
 
-	private void UpdatePendulumVelocity()
-	{
-		// Add gravity free fall
-		// Character gravity force is negative so we reverse it
-		float gravityForce = _characterConfig.mass * -_characterConfig.gravity;
-
-		// Apply the gravity to `m_CurrentVelocity`
-		_pendulumVelocity += Vector3.down * gravityForce * Time.fixedDeltaTime;
-
-		// Cache pivot and bob positions
-		Vector3 pivotPositionCache = _rope.folds[^1];
-		Vector3 bobPositionCache = _rsoCharacterPosition.value;
-
-		// Get bob's position after applying gravity force
-		Vector3 auxiliaryMovementDelta = _pendulumVelocity * Time.fixedDeltaTime;
-		float distanceAfterGravity = Vector3.Distance(pivotPositionCache, bobPositionCache + auxiliaryMovementDelta);
-
-		// The bob acceleration is mesured in this statement. Returning an updated `m_CurrentVelocity`
-		if (distanceAfterGravity > _rope.holdLength
-		|| Mathf.Approximately(distanceAfterGravity, _rope.holdLength))
+		if (!isEnabled)
 		{
-			Vector3 tensionDirection = (pivotPositionCache - bobPositionCache).normalized;
+			m_positionStartFall = m_rigidbody.position;
 
-			// The nearest the bob is from the vertical point, the greatest the tension force will be.
-			float inclinationAngle = Vector3.Angle(bobPositionCache - pivotPositionCache, Vector3.down);
-			float tensionForce = gravityForce * Mathf.Cos(Mathf.Deg2Rad * inclinationAngle);
-
-			// Generate the counter force to make the bob stay within the circle : centripetal force
-			tensionForce += _characterConfig.mass * Mathf.Pow(_pendulumVelocity.magnitude, 2) / _rope.holdLength;
-
-			// Apply the tension to `m_CurrentVelocity`
-			_pendulumVelocity += tensionDirection * tensionForce * Time.fixedDeltaTime;
-		}
-
-		// Apply a counter velocity force: a drag
-		_pendulumVelocity -= _pendulumVelocity * (_characterConfig.drag / gravityForce);
-	}
-
-	/// <summary>
-	/// 	Calculate the suspension velocity based on the player's inputs.
-	/// </summary>
-	private void HandleSuspension()
-	{
-		// Get desired position on the cercle offset by given angle
-		Vector3 completeDirection =
-			(Vector3Extention.GetPositionOnCercle(
-				angle: _characterConfig.ropeOffsetAngle,
-				axis: _cameraTransform.forward,
-				direction: _cameraTransform.right,
-				origin: _rope.folds[^1],
-				radius: _rope.holdLength,
-				starting: _rsoCharacterPosition.value
-			) - _rsoCharacterPosition.value).normalized * _moveInput.x +
-			(Vector3Extention.GetPositionOnCercle(
-				angle: _characterConfig.ropeOffsetAngle,
-				axis: _cameraTransform.right,
-				direction: _cameraTransform.forward,
-				origin: _rope.folds[^1],
-				radius: _rope.holdLength,
-				starting: _rsoCharacterPosition.value
-			) - _rsoCharacterPosition.value).normalized * _moveInput.y;
-
-		Vector3 partialDirection =
-			(Vector3Extention.GetPositionOnCercle(
-				angle: _characterConfig.ropeOffsetAngle,
-				axis: _cameraTransform.forward,
-				direction: _cameraTransform.right,
-				origin: _rope.folds[^1],
-				radius: _rope.holdLength,
-				starting: _rsoCharacterPosition.value
-			) - _rsoCharacterPosition.value).normalized * _moveInput.x;
-
-		float suspensionForce = _isAgainstWall ? _characterConfig.partialSuspensionSpeed : _characterConfig.completeSuspensionSpeed;
-		Vector3 suspensionDirection = _isAgainstWall ? partialDirection : completeDirection;
-		_suspensionVelocity = suspensionDirection * suspensionForce;
-	}
-
-	/// <summary>
-	/// 	Calculate the attraction velocity towards vertical.
-	/// </summary>
-	public void HandleVertical()
-	{
-		float angleCharacterVertical = Mathf.Clamp(Vector3.Angle(Vector3.down, _towardsCharacter), 0, _characterConfig.maxSideAngle);
-		Vector3 totalForces = -(_pendulumVelocity + _suspensionVelocity);
-		_verticalVelocity = angleCharacterVertical * totalForces / _characterConfig.maxSideAngle;
-
-		if (!_inputsPressed)
-		{
-			_verticalVelocity = Vector3.zero;
-		}
-	}
-
-	/// <summary>
-	/// 	Add spherical locomotion constraint to the character movement. 
-	/// </summary>
-	private void HandleRopeConstraint()
-	{
-		// Assert: holding input method
-		switch (_characterConfig.ropeHoldingMethod)
-		{
-			case RopeHolding.HOLD_TO_STOP:
-				// While hold to stop, we don't constraint the character if the player IS NOT holding the button
-				if (!_isHolding) return;
-				break;
-
-			case RopeHolding.HOLD_TO_LET_GO:
-				// While hold to let go, we don't constraint the character if the player IS holding the button
-				if (_isHolding) return;
-				break;
-		}
-
-		// Get the distance between the current character's position and the position of the last fold
-		Vector3 towardCharacter = _rsoCharacterPosition.value - _rope.folds[^1];
-
-		// Re-snap the character's position within the spherical constraint
-		if (towardCharacter.magnitude > _rope.holdLength)
-		{
-			if (_ropeConstraintTimer != null) StopCoroutine(_ropeConstraintTimer);
-			_ropeConstraintTimer = StartCoroutine(AddRopeConstraintTimer());
-
-			transform.position = _rope.folds[^1] + towardCharacter.normalized * _rope.holdLength;
-
-			// Transform position of the character controller has been modified outside the movement function
-			// Call this unity function to synchronize transform to avoid glitchy movement effects
-			Physics.SyncTransforms();
-		}
-	}
-
-	private IEnumerator AddRopeConstraintTimer()
-	{
-		_ropeConstraintAppliedLastly = true;
-		yield return new WaitForSeconds(1f);
-		_ropeConstraintAppliedLastly = false;
-	}
-
-	private void HandleClimbing()
-	{
-		// Assert: holding input method
-		switch (_characterConfig.ropeHoldingMethod)
-		{
-			case RopeHolding.HOLD_TO_STOP:
-				// While hold to stop, we don't constraint the character if the player IS NOT holding the button
-				if (!_isHolding) return;
-				break;
-
-			case RopeHolding.HOLD_TO_LET_GO:
-				// While hold to let go, we don't constraint the character if the player IS holding the button
-				if (_isHolding) return;
-				break;
-		}
-
-		if (!_isClimbing) 
-		{
-			_currentClimbSpeed = 0f;
-			return;
-		}
-
-		_currentClimbSpeed += _characterConfig.climbAcceleration * Time.fixedDeltaTime;
-		float clampedClimbSpeed = Mathf.Clamp(_currentClimbSpeed, 0, _characterConfig.maxClimbSpeed);
-		_rope.ChangeHoldLength(-clampedClimbSpeed * Time.fixedDeltaTime);
-	}
-
-	private void ToggleRopeHolding(bool enable)
-	{
-		if (enable)
-		{
-			_rope.UpdateHoldLength();
-			if (_rope.holdLength == -1) DesequipRope(); // handle error code 
-		}
-		else
-		{
-			// Reset the gravity velocity
-			_positionStartFall = _rsoCharacterPosition.value;
-			_gravitySpeed = 0f;
-
-			if (_ropeConstraintAppliedLastly && _isJumpingPressed) DesequipRope();
-
-			ApplyFreeRopeForce(_isJumpingPressed 
-				? _characterConfig.jumpOffRopeModifier 
-				: _characterConfig.freeFallFromRopeModifier
+			ApplyFreeRopeForce(IsJumpingPressed
+				? m_ssoCharacter.jumpOffRopeModifier
+				: m_ssoCharacter.freeFallFromRopeModifier
 			);
 		}
 	}
 
+	private void ToggleRopeConstraint(bool isEnabled)
+	{
+		// Assertion
+		if (!IsRopeValid) return;
+
+		if (isEnabled) m_rope.UpdateHoldLength();
+		else m_rope.SetHoldLength(9999);
+
+		if (m_rope.HoldLength == -1) DesequipRope(); // Handle error code 
+	}
+
+	private void ApplyFreeRopeForce(float modifier)
+	{
+		m_rigidbody.AddForce(m_rigidbody.velocity.magnitude * modifier * m_rigidbody.velocity.normalized, ForceMode.Impulse);
+	}
+
 	#endregion
 
-	#endregion
+	#region CRAFT STATE
 
-	#region ladder state
-
-	private void EnterLadderState()
+	private void EnterCraftState()
 	{
-
-	}
-
-	private void UpdateLadderState()
-	{
-
-    }
-
-	private void LateUpdateLadderState()
-	{
-
-	}
-
-
-    private void ExitLadderState()
-	{
-
-	}
-
-    #endregion
-
-    #region aiming/throwing
-
-	private void ToggleAim(bool _isPressed)
-	{
-        if (_isPressed && _craftInHand != null)
+		if (m_craftType == CraftType.TORCH)
 		{
-            _aiming = true;
-            _thirdPersonCamera.SwitchCameraStyle(CameraStyle.AIMING);
-            _craftInHand.InitializePreview();
-        }
-		else if (_craftInHand != null)
-		{
-            _aiming = false;
-
-			if (_craftInHand != null)
+			if (HandObject != null
+			&& HandObject.Type != CraftType.TORCH
+			&& RobotObject?.Type != CraftType.TORCH)
 			{
-                if (_craftInHand.Throw(_thirdPersonCamera.transform))
-                {
-                    // rope attachment exception
-                    _rope = _craftInHand as Rope;
-                    if (_rope != null) _rope?.Attach(_harness);
-
-                    _craftInHand = null;
-                    if (_craftInRobot != null)
-                    {
-                        _craftInRobot.transform.SetParent(_handSocket, false);
-                        _craftInHand = _craftInRobot;
-                        _craftInHand.transform.rotation = _handSocket.transform.rotation;
-                        _craftInRobot = null;
-                    }
-                }
-            }
-
-            _thirdPersonCamera.SwitchCameraStyle(CameraStyle.BASIC);
-        }
-	}
-
-    #endregion
-	
-    #region interaction
-	
-    private void Interact()
-    {
-		// Assertion
-		if (_interactables.Count == 0 || _currentState != AnimationState.LOCOMOTION) return;
-
-		Interactible nearest = GetNearestInteractible();
-		if (nearest != null) nearest.InteractionTrigger();
-    }
-
-    private void Recycle()
-    {
-		// Assertion
-        if (_interactables.Count == 0 || _currentState != AnimationState.LOCOMOTION) return;
-
-        Interactible interactible = GetNearestInteractible();
-
-		// Assertion
-        if (interactible == null) return;
-
-        if (interactible.isRecyclable
-        && interactible.objectToRecycle != null)
-        {
-            _interactables.Remove(interactible);
-            _validInteractibles.Remove(interactible);
-            Destroy(interactible.objectToRecycle);
-            CheckShowInteract();
-            CheckShowRecycle(false);
-        }
-    }
-
-    private Interactible GetNearestInteractible()
-	{
-		_validInteractibles = FilterInteractiblesByAngle();
-		if (_validInteractibles.Count == 0) return null;
-
-		return FilterInteractiblesByDistance();
-    }
-
-	private List<Interactible> FilterInteractiblesByAngle()
-	{
-		List<Interactible> validInteractibles = new List<Interactible>();
-
-        for (int i = 0; i < _interactables.Count; i++)
-        {
-			// Assertion
-			if (_interactables[i] == null) continue;
-
-			Vector3 towardsInteract = _interactables[i].transform.position - transform.position;
-
-			if (Vector3.Dot(
-				new Vector3(_characterDirection.transform.forward.x, 0, _characterDirection.transform.forward.z).normalized, 
-				new Vector3(towardsInteract.x, 0, towardsInteract.z).normalized
-				) > 0.5)
-			{
-				validInteractibles.Add(_interactables[i]);
+				Destroy(HandObject.gameObject);
 			}
-        }
+			m_craftCoroutine = StartCoroutine(Craft(CraftType.TORCH, m_ssoTorch.craftingDuration));
+		}
+		else if (m_craftType == CraftType.ROPE)
+		{
+			if (HandObject != null)
+			{
+				if (HandObject.Type == CraftType.TORCH)
+				{
+					SwitchObjects(ref HandObject, ref RobotObject, m_robotSocket);
+				}
+				else if (HandObject.Type != CraftType.ROPE)
+				{
+					Destroy(HandObject.gameObject);
+				}
+			}
+			m_craftCoroutine = StartCoroutine(Craft(CraftType.ROPE, m_ssoRope.CraftingDuration));
+		}
+	}
 
-		return validInteractibles;
-    }
-
-	private Interactible FilterInteractiblesByDistance()
-	{
-		Interactible nearestInteractible = _validInteractibles[0];
-
-        for (int i = 1; i < _validInteractibles.Count; i++)
-        {
-			if ((_validInteractibles[i].transform.position - transform.position).sqrMagnitude <
-            	(nearestInteractible.transform.position - transform.position).sqrMagnitude)
-            {
-                nearestInteractible = _validInteractibles[i];
-            }
-        }
-
-		return nearestInteractible;
-    }
-
-    public void AddToInteractList(Interactible _interactibleObject)
+	private void FixedUpdateCraftState()
     {
-        _interactables.Add(_interactibleObject);
+		
     }
 
-    public void RemoveFromInteractList(Interactible _interactibleObject)
+    private void ExitCraftState()
     {
-        _interactables.Remove(_interactibleObject);
-		_validInteractibles.Remove(_interactibleObject);
+		if (m_craftCoroutine != null)
+		{
+			StopCoroutine(m_craftCoroutine);
+			m_craftCoroutine = null;
 
-		CheckShowInteract();
-		CheckShowRecycle(false);
-    }
+			m_rseBackpackCrafting.Call(false, -1);
+		}
 
-	private void CheckShowInteract()
+		m_isCrafting = false;
+	}
+
+	private void ToggleCraft(CraftType craftType, bool isInputPressed)
 	{
-		_rseCanInteract.Call(
-			_validInteractibles.Count > 0 
-			&& _currentState == AnimationState.LOCOMOTION
-		);
-    }
+		// Prevent switching to craft state if not in locomotion or crafting state or already crafting another item
+		if (m_rsoCharacterState.value != BehaviorState.LOCOMOTION 
+		|| m_rsoCharacterState.value != BehaviorState.CRAFT)
+		{
+			// If craft button is pressed
+			if (isInputPressed)
+			{
+				m_craftType = craftType;
+				m_isCrafting = true;
+			}
+			// If craft button is released
+			else
+			{
+				m_isCrafting = false;
+			}
+		}
+	}
 
-	private void CheckShowRecycle(bool isRecyclable)
-	{ 
-		_rseCanRecycle.Call(
-			isRecyclable 
-			&& _currentState == AnimationState.LOCOMOTION
+	/// <summary>
+	/// 	Instantiate the torch prefab after the fixed duration.
+	/// </summary>
+	private IEnumerator Craft(CraftType craftType, float duration)
+	{
+		m_rseBackpackCrafting.Call(true, duration);
+
+		yield return new WaitForSeconds(duration);
+
+		HandObject = Instantiate(
+			craftType == CraftType.TORCH ? (Permanent)m_ssoTorch.pfTorch : (Permanent)m_ssoRope.PfRope, 
+			m_handSocket.transform.position,
+			Quaternion.identity,
+			m_handSocket.transform
 		);
+
+		m_rseBackpackCrafting.Call(false, -1);
+		m_craftCoroutine = null;
+	}
+
+	private void ToggleAim(bool isInputPressed)
+	{
+		// Assert: can't throw null
+		if (HandObject == null) return;
+
+		IsAiming = isInputPressed;
+		m_rsoCameraStyle.value = IsAiming ? CameraStyle.AIMING : CameraStyle.BASIC;
+
+		// Handle preview on input pressed
+		if (IsAiming)
+		{
+			HandObject.InitializePreview();
+		}
+
+		// Handle pernament throw on input released
+		else
+		{
+			// Assert: object can't be thrown
+			if (!HandObject.Throw(m_rsoCameraTransform.value)) return;
+
+			// Exception: rope attachment
+			m_rope = HandObject as Rope;
+			if (m_rope != null) m_rope?.Attach(m_harness, m_rigidbody);
+
+			HandObject = null;
+			SwitchObjects(ref RobotObject, ref HandObject, m_handSocket);
+		}
+	}
+
+	/// <summary>
+	/// 	Set the position of the "from" permanent at the position of the "to" permanent.
+	/// 	"to" being the one on the "socket" transform position.
+	/// </summary>
+	private void SwitchObjects(ref Permanent from, ref Permanent to, Transform socket)
+	{
+		// Assertion
+		if (from == null) return;
+
+		Permanent toCache = to;
+		from.transform.SetParent(socket, false);
+		to = from;
+		to.transform.rotation = socket.transform.rotation;
+		from = toCache;
 	}
 
 	#endregion

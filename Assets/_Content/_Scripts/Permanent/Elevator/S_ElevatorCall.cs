@@ -1,8 +1,6 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class ElevatorCall : Interactible
+public class ElevatorCall : Interactable
 {
     [Header("External Variables")]
     [SerializeField] private Elevator _elevator;

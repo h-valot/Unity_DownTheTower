@@ -1,22 +1,19 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.InputSystem.EnhancedTouch;
 
-public class S_TriggerBoxHandler : MonoBehaviour
+public class TriggerBoxHandler : MonoBehaviour
 {
-    [SerializeField] private ToxicGas _toxicGas;
+    [SerializeField] private ToxicGas m_toxicGas;
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.TryGetComponent<CharacterMotor>(out var _character))
+        if (other.TryGetComponent<CharacterMotor>(out var character))
         {
-            _toxicGas.CharacterHasEnter(_character);
+            m_toxicGas.CharacterHasEnter(character);
         }
 
-        if (other.TryGetComponent<Torch>(out var _torch))
+        if (other.TryGetComponent<Torch>(out var torch))
         {
-            _toxicGas.TorchHasEnter(_torch);        
+            m_toxicGas.TorchHasEnter(torch);        
         }
     }
 }

@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class SmallCollider : MonoBehaviour
@@ -8,10 +6,10 @@ public class SmallCollider : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.TryGetComponent<CharacterMotor>(out var _playerCheckRef))
+        if (other.TryGetComponent<CharacterMotor>(out var character))
         {
-            if (_playerCheckRef._craftInHand && _playerCheckRef._craftInRobot) { }
-            _guardianRef.AddToPotentialTargets(_playerCheckRef.gameObject);
+            if (character.HandObject && character.RobotObject) { }
+            _guardianRef.AddToPotentialTargets(character.gameObject);
         }
         if (other.TryGetComponent<Torch>(out var _torchCheckRef))
         {
@@ -22,14 +20,14 @@ public class SmallCollider : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
-        if (other.TryGetComponent<Torch>(out var _torchCheckRef))
+        if (other.TryGetComponent<Torch>(out var torch))
         {
-            _guardianRef.RemovePotentialTargets(_torchCheckRef.gameObject);
+            _guardianRef.RemovePotentialTargets(torch.gameObject);
         }
 
-        if (other.TryGetComponent<CharacterMotor>(out var _playerCheckRef) )
+        if (other.TryGetComponent<CharacterMotor>(out var character) )
         {
-            _guardianRef.RemovePotentialTargets(_playerCheckRef.gameObject);
+            _guardianRef.RemovePotentialTargets(character.gameObject);
         }
     }
 }

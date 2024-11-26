@@ -1,9 +1,7 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.TextCore.Text;
 
-public class Log : Interactible
+public class Log : Interactable
 {
     [Header("External Variables")]
     [SerializeField] private RSE_LogContent _rseLogContent;

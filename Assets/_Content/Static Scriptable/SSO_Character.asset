@@ -1,0 +1,132 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 211f3b163f2b6e241bcab8b78755ce69, type: 3}
+  m_Name: SSO_Character
+  m_EditorClassIdentifier: 
+  pfCamera: {fileID: 2752106863343902558, guid: 0fc0a76567b0a374c881d130fb6a985a,
+    type: 3}
+  pfBackpack: {fileID: 4989554971695821008, guid: 63116bdf185988d46a364d3ad2635d88,
+    type: 3}
+  walkSpeed: 50
+  runSpeed: 100
+  dragGround: 10
+  dragFall: 0
+  frictionMovingFalling: 0
+  frictionNotMovingGround: 1
+  jumpForce: 370
+  fallingControlFactor: 0.05
+  CoyoteTime: 0.25
+  skinWidth: 0.05
+  stepOnHeight: 0.36
+  ropeHoldingMethod: 1
+  cancelRopeDuration: 0.15
+  againstWallRayCastLength: 1
+  againstWallLayerToInclude:
+    serializedVersion: 2
+    m_Bits: 1
+  jumpOffWallForce: 3
+  ropeOffsetAngle: 5
+  partialSuspensionSpeed: 50
+  completeSuspensionSpeed: 75
+  maxSideAngle: 60
+  climbAcceleration: 1
+  maxClimbSpeed: 5
+  freeFallFromRopeModifier: 0.9
+  jumpOffRopeModifier: 1.2
+  jumpRopeDuration: 0.35
+  ropeMovementForce: 1.8
+  glowHeight: 2
+  glowRadius: 1
+  glowStrength: 0.1
+  glowColor: {r: 1, g: 0.81960785, b: 0.6666667, a: 1}
+  startWithBag: 1
+  lethalHeight: 8
+  stunHeight: 6
+  stunDuration:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 2
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 3
+      inSlope: 2.386555
+      outSlope: 2.386555
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.25193375
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  slowHeight: 8
+  slowDuration:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 3
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 4
+      inSlope: 2
+      outSlope: 2
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  slowTimePostStun: 1
+  slowPercentage:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0.35
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 0.75
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  maxSlowTime: 3
+  rotationSpeed: 7
+  startingStyle: 0
+  topClamp: 70
+  bottomClamp: -60

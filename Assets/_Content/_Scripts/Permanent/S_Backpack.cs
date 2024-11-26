@@ -1,84 +1,92 @@
 using DG.Tweening;
 using UnityEngine;
 
-public class Backpack : Interactible
+public class Backpack : Interactable
 {
     [Header("Internal Variables")]
-    [SerializeField] private MeshRenderer _mesh;
-    [SerializeField] private SphereCollider _sphereCollider;
-
-    [Header("External Variables")]
-    [SerializeField] private RSO_PlayerDeath _rsoPlayerDeath;
+    [SerializeField] private MeshRenderer m_mesh;
+    [SerializeField] private SphereCollider m_sphereCollider;
 
     [Header("Scriptable references")]
-    [SerializeField] private CharacterConfig _characterConfig;
+	[SerializeField] private RSO_CharacterDeath m_rsoCharacterDeath;
+	[SerializeField] private RSE_BackpackCrafting m_rsoPackbackCrafting;
 
-    // PRIVATE VARIABLES
-    private CharacterMotor _character;
-    private bool _isPickedUp = false;
-    private Vector3 _startPosition;
-    private Vector3 _startRotation;
-    private Vector3 _startScale;
+	private CharacterInteract m_characterInteract;
+    private Vector3 m_startPosition;
+    private Vector3 m_startRotation;
+    private Vector3 m_startScale;
+    private bool m_isPickedUp;
 
     private void Awake()
     {
-        _startPosition = transform.position;
-        _startRotation = transform.eulerAngles;
-        _startScale = transform.localScale;
-        _mesh.material.SetFloat("_craftingPercent", 1f);
+        m_startPosition = transform.position;
+        m_startRotation = transform.eulerAngles;
+        m_startScale = transform.localScale;
+        m_mesh.material.SetFloat("_craftingPercent", 1f);
     }
 
     private void OnEnable()
     {
-        _rsoPlayerDeath.OnChanged += ResetBackpack;
-    }
+        m_rsoCharacterDeath.OnChanged += ResetBackpack;
+		m_rsoPackbackCrafting.action += HandleCrafting;
+	}
 
     private void OnDisable()
     {
-        _rsoPlayerDeath.OnChanged -= ResetBackpack;
-    }
+        m_rsoCharacterDeath.OnChanged -= ResetBackpack;
+		m_rsoPackbackCrafting.action -= HandleCrafting;
+	}
 
-    public override void OnTriggerEnter(Collider other)
+    public override void OnTriggerEnter(Collider collider)
     {
-        if (other.TryGetComponent<CharacterMotor>(out _character) && !_isPickedUp)
-        {
-            _character.AddToInteractList(this);
-        }
+		// Assertions
+		if (m_isPickedUp) return;
+        if (!collider.TryGetComponent(out m_characterInteract)) return;
+		
+		m_characterInteract.Add(this);
     }
 
     public override void InteractionTrigger()
     {
-        _isPickedUp = true;
-        _character.PickupBackpack(true, this);
-        _sphereCollider.enabled = false;
-    }
+        m_isPickedUp = true;
+		m_characterInteract.Pickup(this);
+	}
 
     private void ResetBackpack()
     {
-        if (!_rsoPlayerDeath.value)
-        {
-            transform.position = _startPosition;
-            transform.rotation = Quaternion.Euler(_startRotation);
-            transform.localScale = _startScale;
-            _isPickedUp = false;
-            _sphereCollider.enabled = true;
-        }
+		// Assertion
+        if (m_rsoCharacterDeath.value) return;
+
+		transform.SetPositionAndRotation(m_startPosition, Quaternion.Euler(m_startRotation));
+		transform.localScale = m_startScale;
+
+		m_isPickedUp = false;
+		m_sphereCollider.enabled = true;
     }
 
-    public void ForceSetupBackpack(CharacterMotor _tmpCharacter)
-    {
-        _character = _tmpCharacter;
-        InteractionTrigger();
-    }
+	public void ForceSetupBackpack(CharacterInteract characterInteract)
+	{
+		m_characterInteract = characterInteract;
+		InteractionTrigger();
+	}
 
-    public void StartCrafting(float _craftTime)
-    {
-        _mesh.material.DOFloat(0f, "_craftingPercent", _craftTime).SetEase(Ease.Linear).SetId(gameObject.GetInstanceID() +"craftingPercent");
-    }
+	public void ToggleCollider(bool isEnabled)
+	{
+		m_sphereCollider.enabled = isEnabled;
+	}
 
-    public void EndCrafting()
-    {
-        DOTween.Kill(gameObject.GetInstanceID() + "craftingPercent");
-        _mesh.material.SetFloat("_craftingPercent", 1f);
-    }
+	public void HandleCrafting(bool isStarting, float duration)
+	{
+		if (isStarting)
+		{
+			m_mesh.material.DOFloat(0f, "_craftingPercent", duration)
+						   .SetEase(Ease.Linear)
+						   .SetId(gameObject.GetInstanceID() + "craftingPercent");
+		}
+		else
+		{
+			DOTween.Kill(gameObject.GetInstanceID() + "craftingPercent");
+			m_mesh.material.SetFloat("_craftingPercent", 1f);
+		}
+	}
 }

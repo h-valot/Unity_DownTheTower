@@ -18,7 +18,7 @@ public class Guardian : MonoBehaviour
     // --- PRIVATE ---
 
     [Header("Internal References")]
-    [SerializeField] private GuardianConfig _guardianConfig;
+    [SerializeField] private SSO_Guardian _guardianConfig;
     [SerializeField] private PathPatrol _pathPatrol;
     [SerializeField] private GameObject _scanCube;
     [SerializeField] private GameObject _raycastEyes;
@@ -42,7 +42,7 @@ public class Guardian : MonoBehaviour
     // Graphics
     private float _aggroColor = 1;
     private float _scanColor = 2;
-    private float _dormantColor = 3; // pas encore appelée
+    private float _dormantColor = 3; // pas encore appelï¿½e
 
     // Struct
 

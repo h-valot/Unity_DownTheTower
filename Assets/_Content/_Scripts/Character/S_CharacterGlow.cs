@@ -1,23 +1,24 @@
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 public class CharacterGlow : MonoBehaviour
 {
-    [Header("Scriptables references")]
-    [SerializeField] private RSO_CharacterPosition _rsoCharacterPosition;
-    [SerializeField] private CharacterConfig _characterConfig;
+	[FoldoutGroup("SSO")][SerializeField] private SSO_Character m_ssoCharacter;
+
+	[FoldoutGroup("RSO")][SerializeField] private RSO_CharacterPosition m_rsoCharacterPosition;
 
     private void OnEnable()
     {
 		UpdateGlowGlobalParameters();
 
-        _rsoCharacterPosition.OnChanged += UpdateCharPositionShaderGlobalParameter;
-        _characterConfig.OnHierarchyChanged += UpdateGlowGlobalParameters;
+        m_rsoCharacterPosition.OnChanged += UpdateCharPositionShaderGlobalParameter;
+        m_ssoCharacter.OnConfigChanged += UpdateGlowGlobalParameters;
 	}
 
     private void OnDisable()
     {
-        _rsoCharacterPosition.OnChanged -= UpdateCharPositionShaderGlobalParameter;
-        _characterConfig.OnHierarchyChanged -= UpdateGlowGlobalParameters;
+        m_rsoCharacterPosition.OnChanged -= UpdateCharPositionShaderGlobalParameter;
+        m_ssoCharacter.OnConfigChanged -= UpdateGlowGlobalParameters;
     }
 
     private void UpdateCharPositionShaderGlobalParameter()
@@ -27,9 +28,9 @@ public class CharacterGlow : MonoBehaviour
 
     private void UpdateGlowGlobalParameters()
     {
-        Shader.SetGlobalFloat("_GlowHeight", _characterConfig.glowHeight);
-        Shader.SetGlobalFloat("_GlowRadius", _characterConfig.glowRadius);
-        Shader.SetGlobalFloat("_GlowStrength", _characterConfig.glowStrength);
-        Shader.SetGlobalColor("_GlowColor", _characterConfig.glowColor);
+        Shader.SetGlobalFloat("_GlowHeight", m_ssoCharacter.glowHeight);
+        Shader.SetGlobalFloat("_GlowRadius", m_ssoCharacter.glowRadius);
+        Shader.SetGlobalFloat("_GlowStrength", m_ssoCharacter.glowStrength);
+        Shader.SetGlobalColor("_GlowColor", m_ssoCharacter.glowColor);
     }
 }

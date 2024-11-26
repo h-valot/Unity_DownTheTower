@@ -16,11 +16,11 @@ public class MainInterface : MonoBehaviour
 
     [Header("External References")]
     [SerializeField] private RSE_Pause _rsePause;
-    [SerializeField] private RSE_CancelAction _rseCancelAction;
+    [SerializeField] private RSE_Cancel m_rseCancel;
     [SerializeField] private RSE_ToggleInputs _rseToggleInputs;
     [SerializeField] private RSE_LogContent _rseLogContent;
     [SerializeField] private RSO_GamePaused _rsoGamePaused;
-    [SerializeField] private RSO_PlayerDeath _rsoPlayerDeath;
+    [SerializeField] private RSO_CharacterDeath m_rsoCharacterDeath;
 
     // --- PRIVATE VARIABLES ---
     private bool isLogShowing = false;
@@ -29,16 +29,16 @@ public class MainInterface : MonoBehaviour
     {
         _rsePause.action += TogglePausePanel;
         _rseLogContent.action += ShowLog;
-        _rseCancelAction.action += HideLog;
-        _rsoPlayerDeath.OnChanged += DeathFade;
+        m_rseCancel.action += HideLog;
+        m_rsoCharacterDeath.OnChanged += DeathFade;
     }
 
     private void OnDisable()
     {
         _rsePause.action -= TogglePausePanel;
         _rseLogContent.action -= ShowLog;
-        _rseCancelAction.action -= HideLog;
-        _rsoPlayerDeath.OnChanged -= DeathFade;
+        m_rseCancel.action -= HideLog;
+        m_rsoCharacterDeath.OnChanged -= DeathFade;
     }
 
     private void TogglePausePanel()
@@ -68,7 +68,7 @@ public class MainInterface : MonoBehaviour
 
     private void DeathFade()
     {
-        if (!_rsoPlayerDeath.value) return;
+        if (!m_rsoCharacterDeath.value) return;
 
         _deathPanelIMG.gameObject.SetActive(true);
 
@@ -95,7 +95,7 @@ public class MainInterface : MonoBehaviour
         _logPanel.gameObject.SetActive(isLogShowing);
     }
 
-    private void HideLog()
+    private void HideLog(bool isHide = true)
     {
         if (!isLogShowing) return;
 

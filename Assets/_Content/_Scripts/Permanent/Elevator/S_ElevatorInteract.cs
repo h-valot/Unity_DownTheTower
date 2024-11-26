@@ -1,37 +1,35 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class ElevatorInteract : Interactible
+public class ElevatorInteract : Interactable
 {
     [Header("Internal Variables")]
     [SerializeField] private Elevator _elevator;
 
     // --- PRIVATE VARIABLES ---
-    private CharacterMotor _character;
+    private CharacterInteract m_characterInteract;
 
     public override void InteractionTrigger()
     {
         _elevator.StartElevator();
-        _character.RemoveFromInteractList(this);
+        m_characterInteract.Remove(this);
     }
 
 
     public override void OnTriggerEnter(Collider other)
     {
-        if (other.TryGetComponent<CharacterMotor>(out var character))
+        if (other.TryGetComponent<CharacterInteract>(out var character))
         {
-            _character = character;
-            character.AddToInteractList(this);
+            m_characterInteract = character;
+            character.Add(this);
         }
     }
 
     public override void OnTriggerExit(Collider other)
     {
-        if (other.TryGetComponent<CharacterMotor>(out var character))
+        if (other.TryGetComponent<CharacterInteract>(out var character))
         {
-            character.RemoveFromInteractList(this);
-            _character = null;
+            character.Remove(this);
+            m_characterInteract = null;
         }
     }
 

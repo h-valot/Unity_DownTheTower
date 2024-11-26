@@ -1,26 +1,23 @@
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 public class GameStart : MonoBehaviour
 {
 	[Header("Tweakable values")]
-	[SerializeField] private GameObject _pfPlayer;
+	[SerializeField] private GameObject m_pfCharacter;
 
-	[Header("Scriptable references")]
-	[SerializeField] private RSO_PlayerDeath _rsoPlayerDeath;
+	[FoldoutGroup("RSO")][SerializeField] private RSO_CharacterDeath m_rsoCharacterDeath;
 
-	[Header("External references")]
-	[SerializeField] private Transform _levelDesigneSpan;
-
-	private GameObject _currentCharacter;
+	private GameObject m_currentCharacter;
 
 	/// <summary>
-	/// 	Destroy the former character if exists.
+	/// Destroy the former character if exists.
 	/// </summary>
 	public void RemoveFormerCharacter()
 	{
-		if (_currentCharacter is null) return;
+		if (!m_currentCharacter) return;
 
-		Destroy(_currentCharacter);
+		Destroy(m_currentCharacter);
 	}
 
 	public void SpawnCharacter()
@@ -28,21 +25,24 @@ public class GameStart : MonoBehaviour
 		RemoveFormerCharacter();
 
 		// Reset player related rso values
-		_rsoPlayerDeath.value = false;
+		m_rsoCharacterDeath.value = false;
 
 		// Instantiate the prefab of the player
-		_currentCharacter = Instantiate(_pfPlayer, transform.position, transform.rotation, _levelDesigneSpan);
+		m_currentCharacter = Instantiate(m_pfCharacter, transform.position, Quaternion.identity, null);
+		m_currentCharacter.GetComponent<CharacterMotor>().Initialize(transform.rotation);
 
-		Debug.Log($"GAME_START: Player instantiated.");
+        Debug.Log($"GAME_START: Player instantiated.");
 	}
 
 #if UNITY_EDITOR
+
 	public void OnDrawGizmos()
 	{
-		// display the game start gizmos in editor
+		// Display the game start gizmos in editor
 		Gizmos.color = Color.cyan;
 		Gizmos.DrawWireSphere(transform.position, 1f);
 		Gizmos.DrawLine(transform.position, 1.5f * transform.forward.normalized + transform.position);
 	}
+	
 #endif
 }

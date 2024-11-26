@@ -1,7 +1,6 @@
 using DG.Tweening;
 using NaughtyAttributes;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Torch : Permanent
@@ -16,10 +15,10 @@ public class Torch : Permanent
     [SerializeField] private SphereCollider _lightCollider;
 
     [Header("External References")]
-	[SerializeField] private TorchConfig _torchConfig;
+	[SerializeField] private SSO_Torch _torchConfig;
     [SerializeField] private RSO_TorchManager _rsoTorchManager;
-    [SerializeField] private CharacterConfig _characterConfig;
-    [SerializeField] private RopeConfig _ropeConfig;
+    [SerializeField] private OldCharacterConfig _characterConfig;
+    [SerializeField] private SSO_Rope _ropeConfig;
     [SerializeField] private RSO_CharacterPosition _rsoCharacterPosition;
 
     // ----- PUBLIC VARIABLES -----
@@ -76,7 +75,7 @@ public class Torch : Permanent
             _torchTop.transform.localPosition = new Vector3(_torchTop.transform.localPosition.x, _torchConfig.topTorchOffsetDistance, _torchTop.transform.localPosition.z);
         }
 
-        _rsoTorchManager.value.AddNewTorchToList(this);
+        _rsoTorchManager.value.Add(this);
 
         _rsoCharacterPosition.OnChanged += UpdateTorchFeedback;
     }
@@ -315,8 +314,8 @@ public class Torch : Permanent
     private IEnumerator WaitAndDeactivateTorch(float duration)
     {
         yield return new WaitForSeconds(duration);
-        _rsoTorchManager.value.RemoveTorchFromList(this);
-        DeactivateTorch();
+        _rsoTorchManager.value.Remove(this);
+        Deactivate();
     }
 
     public override bool StateInHand()
@@ -363,10 +362,10 @@ public class Torch : Permanent
                     _hasChangedColor = false;
                 }
             }
-            if (_rsoCharacterPosition.value.y - transform.position.y > _characterConfig.lethalHeight + _ropeConfig.maxLength)
+            if (_rsoCharacterPosition.value.y - transform.position.y > _characterConfig.lethalHeight + _ropeConfig.MaxLength)
             {
-                _rsoTorchManager.value.RemoveTorchFromList(this);
-                DeactivateTorch();
+                _rsoTorchManager.value.Remove(this);
+                Deactivate();
             }
         }
     }
@@ -374,7 +373,7 @@ public class Torch : Permanent
     /// <summary>
     /// Make torch flicker and 
     /// </summary>
-    public void DeactivateTorch()
+    public void Deactivate()
     {
         if (_torchConfig.activateBreakAnim)
         {

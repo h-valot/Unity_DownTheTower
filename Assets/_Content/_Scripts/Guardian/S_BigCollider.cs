@@ -1,5 +1,4 @@
 using UnityEngine;
-using static CharacterMotor;
 
 public class BigCollider : MonoBehaviour
 {
@@ -12,14 +11,14 @@ public class BigCollider : MonoBehaviour
             _guardianRef.AddToPotentialTargets(_torchCheckRef.gameObject);
         }
 
-        else if (other.TryGetComponent<CharacterMotor>(out var _playerCheckRef))
+        else if (other.TryGetComponent<CharacterMotor>(out var character))
         {
-            if (_playerCheckRef._craftInHand != null)
+            if (character.HandObject != null)
             {
-                if ((_playerCheckRef._craftInHand._craftType == CraftType.TORCH && _playerCheckRef._craftInHand.StateInHand())
-                || (_playerCheckRef._craftInRobot._craftType == CraftType.TORCH && _playerCheckRef._craftInRobot.StateInHand()))
+                if ((character.HandObject.Type == CraftType.TORCH && character.HandObject.StateInHand())
+                || (character.RobotObject.Type == CraftType.TORCH && character.RobotObject.StateInHand()))
                 {
-                    _guardianRef.AddToPotentialTargets(_playerCheckRef.gameObject);
+                    _guardianRef.AddToPotentialTargets(character.gameObject);
                 }
             }
         }
@@ -27,14 +26,14 @@ public class BigCollider : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
-        if (other.TryGetComponent<Torch>(out var _torchCheckRef))
+        if (other.TryGetComponent<Torch>(out var torch))
         {
-            _guardianRef.RemovePotentialTargets(_torchCheckRef.gameObject);
+            _guardianRef.RemovePotentialTargets(torch.gameObject);
         }
 
-        if (other.TryGetComponent<CharacterMotor>(out var _playerCheckRef))
+        if (other.TryGetComponent<CharacterMotor>(out var character))
         {
-            _guardianRef.RemovePotentialTargets(_playerCheckRef.gameObject);
+            _guardianRef.RemovePotentialTargets(character.gameObject);
 
         }
     }

@@ -1,15 +1,13 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class S_PlaySound : MonoBehaviour
+public class PlaySound : MonoBehaviour
 {
-    private AudioSource audioData;
+    private AudioSource _audioData;
 
-    void Start()
+    private void Start()
     {
-        audioData = GetComponent<AudioSource>();
-        audioData.Play(0);
+        _audioData = GetComponent<AudioSource>();
+        _audioData.Play(0);
         Destroy(gameObject, 5f);
     }
 }

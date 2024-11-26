@@ -4,32 +4,29 @@ using UnityEngine;
 public class TorchManager : MonoBehaviour
 {
     [Header("External References")]
-    [SerializeField] private RSO_TorchManager _rsoTorchManager;
-    [SerializeField] private TorchConfig _torchConfig;
+    [SerializeField] private SSO_Torch m_ssoTorch;
+    [SerializeField] private RSO_TorchManager m_rsoTorchManager;
 
-    // -- Private Variables --
-    List<Torch> ActiveTorchs = new List<Torch>();
+    private List<Torch> m_torches = new List<Torch>();
 
     private void Awake()
     {
-        _rsoTorchManager.value = this;
+        m_rsoTorchManager.value = this;
     }
 
-    public void AddNewTorchToList(Torch _newTorch)
+    public void Add(Torch torch)
     {
-        ActiveTorchs.Insert(0,_newTorch);
+        m_torches.Insert(0, torch);
 
-        while (ActiveTorchs.Count > _torchConfig.maxNumberTorch)
+        while (m_torches.Count > m_ssoTorch.maxNumberTorch)
         {
-            ActiveTorchs[4].DeactivateTorch();
-            RemoveTorchFromList(ActiveTorchs[4]);
+            m_torches[4].Deactivate();
+            Remove(m_torches[4]);
         }
     }
 
-    public void RemoveTorchFromList(Torch _removeTorch)
+    public void Remove(Torch torch)
     {
-        ActiveTorchs.Remove(_removeTorch);
+        m_torches.Remove(torch);
     }
-
-
 }

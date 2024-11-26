@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class DeathTrigger : MonoBehaviour
@@ -8,24 +6,24 @@ public class DeathTrigger : MonoBehaviour
 
     public void OnTriggerEnter(Collider other)
     {
-        if (other.TryGetComponent<CharacterMotor>(out var _playerCheckRef))
+        if (other.TryGetComponent<CharacterMotor>(out var character))
         {
-            _GuardianRef.RemovePotentialTargets(_playerCheckRef.gameObject);
-            //StartCoroutine(_GuardianRef.KillPlayer());
-            //_playerCheckRef.HandleDeath();
-        }
+            _GuardianRef.RemovePotentialTargets(character.gameObject);
+			//StartCoroutine(_GuardianRef.KillPlayer());
+			//character.HandleDeath();
+		}
 
-        if (other.TryGetComponent<Torch>(out var _torchCheckRef))
+		if (other.TryGetComponent<Torch>(out var torch))
         {
-            if (_torchCheckRef!=null)
+            if (torch!=null)
 
-                if (!_torchCheckRef.StateInHand())
+                if (!torch.StateInHand())
                 {
                     {
-                        _GuardianRef.RemovePotentialTargets(_torchCheckRef.gameObject);
+                        _GuardianRef.RemovePotentialTargets(torch.gameObject);
                         Debug.Log("Je vire la ref");
                     }
-                    _GuardianRef.destroyTorchCoroutine = StartCoroutine(_GuardianRef.DestroyTorchTime(_torchCheckRef.gameObject));
+                    _GuardianRef.destroyTorchCoroutine = StartCoroutine(_GuardianRef.DestroyTorchTime(torch.gameObject));
                 }
         } 
     }

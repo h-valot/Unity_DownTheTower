@@ -1,16 +1,12 @@
-using System.Collections;
-using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class DestroyingPlatform : MonoBehaviour
 {
     public void OnTriggerEnter(Collider other)
     {
-        if (other.TryGetComponent<CharacterMotor>(out var _playerCheckRef))
+        if (other.TryGetComponent<CharacterMotor>(out var character))
         {
-            Destroy(this.gameObject);
+            Destroy(gameObject);
         }
     }
-
 }
