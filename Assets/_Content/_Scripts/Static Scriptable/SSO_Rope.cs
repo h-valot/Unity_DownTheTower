@@ -7,10 +7,9 @@ public class SSO_Rope : ScriptableObject
 	#region PREFAB
 
 	[FoldoutGroup("Prefabs")]
-	[ShowInInspector]
 	[InfoBox("The prefab of the rope.", InfoMessageType.None)]
 	/// <summary> The prefab of the rope. </summary>
-	public Rope PfRope { get; private set; }
+	public Rope PfRope;
 
 	[FoldoutGroup("Prefabs")]
 	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]

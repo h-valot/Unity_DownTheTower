@@ -949,8 +949,6 @@ public class CharacterMotor : MonoBehaviour
 
 		if (!isEnabled)
 		{
-			m_positionStartFall = m_rigidbody.position;
-
 			ApplyFreeRopeForce(IsJumpingPressed
 				? m_ssoCharacter.jumpOffRopeModifier
 				: m_ssoCharacter.freeFallFromRopeModifier
@@ -963,10 +961,16 @@ public class CharacterMotor : MonoBehaviour
 		// Assertion
 		if (!IsRopeValid) return;
 
-		if (isEnabled) m_rope.UpdateHoldLength();
-		else m_rope.SetHoldLength(9999);
-
-		if (m_rope.HoldLength == -1) DesequipRope(); // Handle error code 
+		if (isEnabled)
+		{
+			m_positionStartFall = m_rigidbody.position;
+			m_rope.UpdateHoldLength();
+			if (m_rope.HoldLength == -1) DesequipRope(); // Handle error code 
+		}
+		else 
+		{
+			m_rope.SetHoldLength(9999);
+		}
 	}
 
 	private void ApplyFreeRopeForce(float modifier)

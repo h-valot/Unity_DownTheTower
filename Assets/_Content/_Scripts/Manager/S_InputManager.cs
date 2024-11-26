@@ -1,5 +1,6 @@
 using Sirenix.OdinInspector;
 using UnityEngine;
+using UnityEngine.AI;
 using UnityEngine.InputSystem;
 
 public class InputManager : MonoBehaviour
@@ -106,15 +107,15 @@ public class InputManager : MonoBehaviour
 		if (m_playerInput.currentControlScheme == "Gamepad")
 		{
 			m_look = new Vector2(
-				input.x * m_ssoInputs.gamepadSensibilityX,
-				input.y * m_ssoInputs.gamepadSensibilityY
+				input.x * m_ssoInputs.GamepadSensibilityX,
+				input.y * m_ssoInputs.GamepadSensibilityY
 			);
 		}
 		else
 		{
 			m_look = new Vector2(
-				input.x * m_ssoInputs.mouseSensibilityX,
-				input.y * m_ssoInputs.mouseSensibilityY * (m_ssoInputs.InvertMouseY ? -1 : 1)
+				input.x * m_ssoInputs.MouseSensibilityX,
+				input.y * m_ssoInputs.MouseSensibilityY * (m_ssoInputs.InvertMouseY ? -1 : 1)
 			);
 		}
 
@@ -138,14 +139,20 @@ public class InputManager : MonoBehaviour
     {
 		if (value.Get<float>() >= 0.05f)
 		{
-			m_throw = !m_throw;
-			m_rseThrow.Call(m_throw);
+			if (!m_throw)
+			{
+				m_throw = true;
+				m_rseThrow.Call(m_throw);
+			}
 		}
 		else
 		{
-			m_throw = !m_throw;
-			m_rseThrow.Call(m_throw);
-        }
+			if (m_throw)
+			{
+				m_throw = false;
+				m_rseThrow.Call(m_throw);
+			}
+		}
 	}
 
 	public void OnToggleInHand()
