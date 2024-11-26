@@ -22,8 +22,8 @@ public class OldCharacterMotor : MonoBehaviour
 
 	[Foldout("Scriptable references")] [SerializeField] private OldCharacterConfig m_characterConfig;
 	[Foldout("Scriptable references")] [SerializeField] private LadderConfig m_ladderConfig;
-	[Foldout("Scriptable references")] [SerializeField] private RopeConfig m_ropeConfig;
-	[Foldout("Scriptable references")] [SerializeField] private TorchConfig m_torchConfig;
+	[Foldout("Scriptable references")] [SerializeField] private SSO_Rope m_ropeConfig;
+	[Foldout("Scriptable references")] [SerializeField] private SSO_Torch m_torchConfig;
 	[Foldout("Scriptable references")] [SerializeField] private RSO_CharacterForward m_rsoCharacterForward;
 	[Foldout("Scriptable references")] [SerializeField] private RSO_CharacterPosition m_rsoCharacterPosition;
 	[Foldout("Scriptable references")] [SerializeField] private RSO_CharacterDeath m_rsoPlayerDeath;

@@ -1,3 +1,4 @@
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 public class GameStart : MonoBehaviour
@@ -5,13 +6,12 @@ public class GameStart : MonoBehaviour
 	[Header("Tweakable values")]
 	[SerializeField] private GameObject m_pfCharacter;
 
-	[Header("Scriptable references")]
-	[SerializeField] private RSO_CharacterDeath m_rsoCharacterDeath;
+	[FoldoutGroup("RSO")][SerializeField] private RSO_CharacterDeath m_rsoCharacterDeath;
 
 	private GameObject m_currentCharacter;
 
 	/// <summary>
-	/// 	Destroy the former character if exists.
+	/// Destroy the former character if exists.
 	/// </summary>
 	public void RemoveFormerCharacter()
 	{

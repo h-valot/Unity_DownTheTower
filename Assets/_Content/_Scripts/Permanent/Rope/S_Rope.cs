@@ -13,7 +13,7 @@ public class Rope : Permanent
 	[SerializeField] private ConfigurableJoint m_joint;
 
 	[Header("Scriptable references")]
-	[SerializeField] private RopeConfig m_ropeConfig;
+	[SerializeField] private SSO_Rope m_ropeConfig;
 	[SerializeField] private RSE_SetCharacterPosition m_rseSetCharacterPosition;
 	[SerializeField] private RSO_CharacterPosition m_rsoCharacterPosition;
 

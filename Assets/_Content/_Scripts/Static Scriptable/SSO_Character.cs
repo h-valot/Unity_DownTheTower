@@ -1,8 +1,8 @@
 using System;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "NewCharacterConfig", menuName = "Configs/New character")]
-public class NewCharacterConfig : ScriptableObject
+[CreateAssetMenu(fileName = "SSO_Character", menuName = "Static Scriptable/Character")]
+public class SSO_Character : ScriptableObject
 {
     /// <summary>
 	/// 	Unity in-built editor function called whenever the scriptable object is updated.
@@ -84,7 +84,8 @@ public class NewCharacterConfig : ScriptableObject
 	[Tooltip("If true, the character starts the play mode with a backpack.")]
 	public bool startWithBag;
 
-	// Status
+
+	[Header("Status")]
 	public float lethalHeight;
 	
 	public float stunHeight;
@@ -95,4 +96,11 @@ public class NewCharacterConfig : ScriptableObject
 	public float slowTimePostStun;
 	public AnimationCurve slowPercentage;
 	public float maxSlowTime;
+
+
+	[Header("Camera")]
+	public float rotationSpeed;
+	public CameraStyle startingStyle;
+	public float topClamp;
+	public float bottomClamp;
 }

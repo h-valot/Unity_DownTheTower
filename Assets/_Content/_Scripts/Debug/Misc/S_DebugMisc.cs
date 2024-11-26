@@ -4,7 +4,7 @@ using UnityEngine;
 public class DebugMisc : MonoBehaviour
 {
     [Header("External Variables")]
-    [SerializeField] private TorchConfig _torchConfig;
+    [SerializeField] private SSO_Torch _torchConfig;
 	[SerializeField] private RSE_ToggleCursor _rseToggleCursor;
 
     [Header("Internal Variables")]

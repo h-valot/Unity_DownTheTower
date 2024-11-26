@@ -1,19 +1,23 @@
 using Cinemachine;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 public class CameraMotor : MonoBehaviour
 {
-	[Header("External references")]
+	[Header("References")]
 	[SerializeField] private CinemachineVirtualCamera m_aimingCamera;
 	[SerializeField] private CinemachineVirtualCamera m_thirdPersonCamera;
 
-	[Header("Scriptable references")]
-	[SerializeField] private OldCharacterConfig m_characterConfig;
-	[Space(5)]
-	[SerializeField] private RSE_Look m_rseLook;
-	[Space(5)]
-	[SerializeField] private RSO_CharacterDeath m_rsoCharacterDeath;
-	[SerializeField] private RSO_CameraStyle m_rsoCameraStyle;
+	[FoldoutGroup("SSO")][SerializeField] private SSO_Character m_ssoCharacter;
+
+	[FoldoutGroup("RSE")][SerializeField] private RSE_Look m_rseLook;
+	[FoldoutGroup("RSE")][SerializeField] private RSE_InitializeCamera m_rseInitializeCamera;
+
+	[FoldoutGroup("RSO")][SerializeField] private RSO_CharacterDeath m_rsoCharacterDeath;
+	[FoldoutGroup("RSO")][SerializeField] private RSO_CameraStyle m_rsoCameraStyle;
+	[FoldoutGroup("RSO")][SerializeField] private RSO_CameraForward m_rsoCameraForward;
+	[FoldoutGroup("RSO")][SerializeField] private RSO_CameraRight m_rsoCameraRight;
+	[FoldoutGroup("RSO")][SerializeField] private RSO_CameraTransform m_rsoCameraTransform;
 
 	// - Private variables -
 	private Vector2 m_lookInput;
@@ -21,21 +25,12 @@ public class CameraMotor : MonoBehaviour
 	private float m_cinemachineTargetPitch;
 	private Transform m_cameraTarget;
 
-	// - Proprieties -
-	public Vector3 PlanarForward { get; private set; }
-	public Vector3 PlanarRight { get; private set; }
-
-	private void LateUpdate()
-	{
-		HandleRotation();
-		CalculatePlanarVectors();
-	}
-
 	private void OnEnable()
 	{
 		m_rseLook.action += UpdateLookInput;
 		m_rsoCameraStyle.OnChanged += SwitchStyle;
 		m_rsoCharacterDeath.OnChanged += HandleDeath;
+		m_rseInitializeCamera.action += Initialize;
 	}
 
 	private void OnDisable()
@@ -43,6 +38,15 @@ public class CameraMotor : MonoBehaviour
 		m_rseLook.action -= UpdateLookInput;
 		m_rsoCameraStyle.OnChanged -= SwitchStyle;
 		m_rsoCharacterDeath.OnChanged -= HandleDeath;
+		m_rseInitializeCamera.action -= Initialize;
+	}
+
+	private void LateUpdate()
+	{
+		HandleRotation();
+		CalculatePlanarVectors();
+
+		m_rsoCameraTransform.value = transform;
 	}
 
 	public void Initialize(Transform aimingLookAt, Transform cameraTarget, Quaternion startRotation)
@@ -53,10 +57,10 @@ public class CameraMotor : MonoBehaviour
 		m_thirdPersonCamera.Follow = cameraTarget;
 		m_thirdPersonCamera.LookAt = cameraTarget;
 
-		PlanarForward = new Vector3(transform.forward.x, 0, transform.forward.z);
-		PlanarRight = new Vector3(transform.right.x, 0, transform.right.z);
+		m_rsoCameraForward.value = new Vector3(transform.forward.x, 0, transform.forward.z);
+		m_rsoCameraRight.value = new Vector3(transform.right.x, 0, transform.right.z);
 
-		m_rsoCameraStyle.value = m_characterConfig.startingStyle;
+		m_rsoCameraStyle.value = m_ssoCharacter.startingStyle;
 		m_cinemachineTargetYaw = startRotation.eulerAngles.y;
 		HandleRotation();
 	}
@@ -65,7 +69,7 @@ public class CameraMotor : MonoBehaviour
 	{
 		// Clamp our rotations so our values are limited 360 degrees
 		m_cinemachineTargetYaw = Matha.ClampAngle(m_cinemachineTargetYaw, float.MinValue, float.MaxValue);
-		m_cinemachineTargetPitch = Matha.ClampAngle(m_cinemachineTargetPitch, m_characterConfig.bottomClamp, m_characterConfig.topClamp);
+		m_cinemachineTargetPitch = Matha.ClampAngle(m_cinemachineTargetPitch, m_ssoCharacter.bottomClamp, m_ssoCharacter.topClamp);
 
 		// Stops the camera if the character is dead
 		if (m_rsoCharacterDeath.value) return;
@@ -87,8 +91,8 @@ public class CameraMotor : MonoBehaviour
 	{
 		if (m_lookInput == Vector2.zero) return;
 
-		PlanarForward = new Vector3(transform.forward.x, 0, transform.forward.z);
-		PlanarRight = new Vector3(transform.right.x, 0, transform.right.z);
+		m_rsoCameraForward.value = new Vector3(transform.forward.x, 0, transform.forward.z);
+		m_rsoCameraRight.value = new Vector3(transform.right.x, 0, transform.right.z);
 	}
 
 	private void UpdateLookInput(Vector2 input)
@@ -105,8 +109,5 @@ public class CameraMotor : MonoBehaviour
 
 		// Set parent as scene root 
 		m_cameraTarget.transform.parent = null;
-
-		// Debug
-		Destroy(transform.parent.gameObject);
 	}
 }

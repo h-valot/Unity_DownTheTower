@@ -2,20 +2,20 @@ using UnityEngine;
 
 public class SoundManager : MonoBehaviour
 {
-    [SerializeField] private RSE_PlaySound _rsePlaySound;
+    [SerializeField] private RSE_PlaySound m_rsePlaySound;
 
     private void OnEnable()
     {
-        _rsePlaySound.action += PlaySound;
+        m_rsePlaySound.action += PlaySound;
     }
 
     private void OnDisable()
     {
-        _rsePlaySound.action -= PlaySound;
+        m_rsePlaySound.action -= PlaySound;
     }
 
-    private void PlaySound(SoundConfig sound)
+    private void PlaySound(SSO_Sound sound)
     {
-
+		// TODO
     }
 }

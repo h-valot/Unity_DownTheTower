@@ -1,3 +1,4 @@
+using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -5,30 +6,29 @@ public class InputManager : MonoBehaviour
 {
 	#region REFERENCES
 
-	[Header("Internal references")]
+	[Header("References")]
 	[SerializeField] private PlayerInput m_playerInput;
 
-	[Header("Scriptable references")]
-	[SerializeField] private InputsConfig m_inputsConfig;
-	[Space(5)]
-	[SerializeField] private RSE_Move m_rseMove;
-	[SerializeField] private RSE_Look m_rseLook;
-	[SerializeField] private RSE_Jump m_rseJump;
-	[SerializeField] private RSE_Run m_rseRun;
-	[SerializeField] private RSE_Interact m_rseInteract;
-	[SerializeField] private RSE_Cancel m_rseCancel;
-    [SerializeField] private RSE_Craft m_rseCraft;
-	[SerializeField] private RSE_Throw m_rseThrow;
-    [SerializeField] private RSE_ToggleInHand m_rseToggleInHand;
-    [SerializeField] private RSE_Pause m_rsePause;
-    [SerializeField] private RSE_HideUI m_rseHideUI;
-    [SerializeField] private RSE_Recycle m_rseRecycle;
-	[SerializeField] private RSE_ToggleCursor m_rseToggleCursor;
-	[SerializeField] private RSE_Climb m_rseClimb;
-	[Space(5)]
-	[SerializeField] private RSO_GamePaused m_rsoGamePaused;
-	[SerializeField] private RSO_CraftInputLocked m_rsoCraftInputLocked;
-	[SerializeField] private RSO_RecycleInputLocked m_rsoRecycleInputLocked;
+	[FoldoutGroup("SSO")][SerializeField] private SSO_Inputs m_ssoInputs;
+
+	[FoldoutGroup("RSE")][SerializeField] private RSE_Move m_rseMove;
+	[FoldoutGroup("RSE")][SerializeField] private RSE_Look m_rseLook;
+	[FoldoutGroup("RSE")][SerializeField] private RSE_Jump m_rseJump;
+	[FoldoutGroup("RSE")][SerializeField] private RSE_Run m_rseRun;
+	[FoldoutGroup("RSE")][SerializeField] private RSE_Interact m_rseInteract;
+	[FoldoutGroup("RSE")][SerializeField] private RSE_Cancel m_rseCancel;
+	[FoldoutGroup("RSE")][SerializeField] private RSE_Craft m_rseCraft;
+	[FoldoutGroup("RSE")][SerializeField] private RSE_Throw m_rseThrow;
+	[FoldoutGroup("RSE")][SerializeField] private RSE_ToggleInHand m_rseToggleInHand;
+	[FoldoutGroup("RSE")][SerializeField] private RSE_Pause m_rsePause;
+	[FoldoutGroup("RSE")][SerializeField] private RSE_HideUI m_rseHideUI;
+	[FoldoutGroup("RSE")][SerializeField] private RSE_Recycle m_rseRecycle;
+	[FoldoutGroup("RSE")][SerializeField] private RSE_ToggleCursor m_rseToggleCursor;
+	[FoldoutGroup("RSE")][SerializeField] private RSE_Climb m_rseClimb;
+
+	[FoldoutGroup("RSO")][SerializeField] private RSO_GamePaused m_rsoGamePaused;
+	[FoldoutGroup("RSO")][SerializeField] private RSO_CraftInputLocked m_rsoCraftInputLocked;
+	[FoldoutGroup("RSO")][SerializeField] private RSO_RecycleInputLocked m_rsoRecycleInputLocked;
 
 	#endregion
 
@@ -106,15 +106,15 @@ public class InputManager : MonoBehaviour
 		if (m_playerInput.currentControlScheme == "Gamepad")
 		{
 			m_look = new Vector2(
-				input.x * m_inputsConfig.gamepadSensibilityX,
-				input.y * m_inputsConfig.gamepadSensibilityY
+				input.x * m_ssoInputs.gamepadSensibilityX,
+				input.y * m_ssoInputs.gamepadSensibilityY
 			);
 		}
 		else
 		{
 			m_look = new Vector2(
-				input.x * m_inputsConfig.mouseSensibilityX,
-				input.y * m_inputsConfig.mouseSensibilityY * (m_inputsConfig.InvertMouseY ? -1 : 1)
+				input.x * m_ssoInputs.mouseSensibilityX,
+				input.y * m_ssoInputs.mouseSensibilityY * (m_ssoInputs.InvertMouseY ? -1 : 1)
 			);
 		}
 

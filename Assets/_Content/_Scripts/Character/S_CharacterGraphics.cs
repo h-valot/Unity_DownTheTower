@@ -1,11 +1,11 @@
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 public class CharacterGraphics : MonoBehaviour
 {
-	[Header("Scriptable references")]
-	[SerializeField] private OldCharacterConfig m_characterConfig;
-	[Space(5)]
-	[SerializeField] private RSO_CameraStyle m_rsoCameraStyle;
+	[FoldoutGroup("SSO")][SerializeField] private SSO_Character m_ssoCharacter;
+
+	[FoldoutGroup("RSO")][SerializeField] private RSO_CameraStyle m_rsoCameraStyle;
 
 	private Transform m_aimingLookAt;
 	private Rigidbody m_rigidbody;
@@ -34,7 +34,7 @@ public class CharacterGraphics : MonoBehaviour
 				transform.localRotation = Quaternion.Lerp(
 					transform.localRotation,
 					Quaternion.LookRotation(planarMovement, Vector3.up),
-					Time.deltaTime * m_characterConfig.rotationSpeed
+					Time.deltaTime * m_ssoCharacter.rotationSpeed
 				);
 			}
 		}

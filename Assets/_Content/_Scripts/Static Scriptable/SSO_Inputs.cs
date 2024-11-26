@@ -1,7 +1,7 @@
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "InputsConfig", menuName = "Configs/Inputs")]
-public class InputsConfig : ScriptableObject
+[CreateAssetMenu(fileName = "SSO_Inputs", menuName = "Static Scriptable/Inputs")]
+public class SSO_Inputs : ScriptableObject
 {
     [Header("Look - Gamepad")]
     [Tooltip("Scalar for mouse sensibility on X")]

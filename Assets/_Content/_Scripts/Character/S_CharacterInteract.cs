@@ -1,24 +1,24 @@
 using System.Collections.Generic;
 using System.Linq;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 public class CharacterInteract : MonoBehaviour
 {
-	[Header("Internal references")]
+	[Header("References")]
 	[SerializeField] private Transform m_backpackAnchor;
 	[SerializeField] private Transform m_characterGraphics;
 
-	[Header("Scriptable references")]
-	[SerializeField] private NewCharacterConfig m_characterConfig;
-	[Space(5)]
-	[SerializeField] private RSE_Recycle m_rseRecycle;
-	[SerializeField] private RSE_Interact m_rseInteract;
-	[Space(5)]
-	[SerializeField] private RSO_CraftInputLocked m_rsoCraftInputLocked;
-	[SerializeField] private RSO_RecycleInputLocked m_rsoRecycleInputLocked;
-	[SerializeField] private RSO_CharacterState m_rsoCharacterState;
-	[SerializeField] private RSO_InteractableValid m_rsoInteractableValid;
-	[SerializeField] private RSO_InteractableRecyclable m_rsoInteractableRecyclable;
+	[FoldoutGroup("SSO")][SerializeField] private SSO_Character m_characterConfig;
+
+	[FoldoutGroup("RSE")][SerializeField] private RSE_Recycle m_rseRecycle;
+	[FoldoutGroup("RSE")][SerializeField] private RSE_Interact m_rseInteract;
+
+	[FoldoutGroup("RSO")][SerializeField] private RSO_CraftInputLocked m_rsoCraftInputLocked;
+	[FoldoutGroup("RSO")][SerializeField] private RSO_RecycleInputLocked m_rsoRecycleInputLocked;
+	[FoldoutGroup("RSO")][SerializeField] private RSO_CharacterState m_rsoCharacterState;
+	[FoldoutGroup("RSO")][SerializeField] private RSO_InteractableValid m_rsoInteractableValid;
+	[FoldoutGroup("RSO")][SerializeField] private RSO_InteractableRecyclable m_rsoInteractableRecyclable;
 
 	private List<Interactable> m_interactables = new List<Interactable>();
 	private Backpack m_backpack;

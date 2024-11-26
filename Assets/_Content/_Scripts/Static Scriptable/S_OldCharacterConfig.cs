@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "OldCharacterConfig", menuName = "Configs/Old character")]
+[CreateAssetMenu(fileName = "OldCharacterConfig", menuName = "Static Scriptable/Old character")]
 public class OldCharacterConfig : ScriptableObject
 {
 	/// <summary>

@@ -1,7 +1,7 @@
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "TorchConfig", menuName = "Configs/Torch")]
-public class TorchConfig : ScriptableObject
+[CreateAssetMenu(fileName = "SSO_Torch", menuName = "Static Scriptable/Torch")]
+public class SSO_Torch : ScriptableObject
 {
 	[Header("References")]
 	[Tooltip("Torch prefab that is instantiated when crafted")]

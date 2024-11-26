@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "Sound", menuName = "Configs/Sound")]
-public class SoundConfig : ScriptableObject
+[CreateAssetMenu(fileName = "SSO_Sound", menuName = "Static Scriptable/Sound")]
+public class SSO_Sound : ScriptableObject
 {
     public string soundName;
     public SoundType soundType;

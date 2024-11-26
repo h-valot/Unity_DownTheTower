@@ -1,6 +1,6 @@
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "LadderConfig", menuName = "Configs/Ladder")]
+[CreateAssetMenu(fileName = "LadderConfig", menuName = "Static Scriptable/Ladder")]
 public class LadderConfig : ScriptableObject
 {
 	[Header("Prefabs")]

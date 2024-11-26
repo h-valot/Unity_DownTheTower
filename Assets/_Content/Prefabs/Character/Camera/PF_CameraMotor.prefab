@@ -30,7 +30,7 @@ Transform:
   m_GameObject: {fileID: 8944336655422409498}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 42.000008, y: 165.50003, z: -416}
+  m_LocalPosition: {x: 2.0442019, y: 2.7773845, z: -5.6753364}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -50,11 +50,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_aimingCamera: {fileID: 0}
   m_thirdPersonCamera: {fileID: 0}
-  m_characterConfig: {fileID: 11400000, guid: 1940b106405212f469b44119418b1e43, type: 2}
+  m_ssoCharacter: {fileID: 11400000, guid: 002492e8a2733234b8bdf7d15dea453b, type: 2}
   m_rseLook: {fileID: 11400000, guid: 96e37ccd82d6cfd43bade6f66c27a479, type: 2}
+  m_rseInitializeCamera: {fileID: 11400000, guid: 00ec736148c957745977176cbb622156,
+    type: 2}
   m_rsoCharacterDeath: {fileID: 11400000, guid: 52795416a18d6764ab55f73b88f71b83,
     type: 2}
   m_rsoCameraStyle: {fileID: 11400000, guid: 54ea121d351e9664dbe3f636e336b041, type: 2}
+  m_rsoCameraForward: {fileID: 11400000, guid: fa47dc1beaf6cae468f7e8b33b2d5047, type: 2}
+  m_rsoCameraRight: {fileID: 11400000, guid: 847973f7108500a41a27b6ee056b7fe3, type: 2}
+  m_rsoCameraTransform: {fileID: 11400000, guid: f7caf230fc006374fb72acc6629f6794,
+    type: 2}
 --- !u!114 &9078993845375825671
 MonoBehaviour:
   m_ObjectHideFlags: 0

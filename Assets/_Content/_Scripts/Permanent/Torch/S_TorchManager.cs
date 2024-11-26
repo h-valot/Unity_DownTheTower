@@ -5,7 +5,7 @@ public class TorchManager : MonoBehaviour
 {
     [Header("External References")]
     [SerializeField] private RSO_TorchManager _rsoTorchManager;
-    [SerializeField] private TorchConfig _torchConfig;
+    [SerializeField] private SSO_Torch _torchConfig;
 
     // -- Private Variables --
     List<Torch> ActiveTorchs = new List<Torch>();

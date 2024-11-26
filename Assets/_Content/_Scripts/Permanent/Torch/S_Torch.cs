@@ -15,10 +15,10 @@ public class Torch : Permanent
     [SerializeField] private SphereCollider _lightCollider;
 
     [Header("External References")]
-	[SerializeField] private TorchConfig _torchConfig;
+	[SerializeField] private SSO_Torch _torchConfig;
     [SerializeField] private RSO_TorchManager _rsoTorchManager;
     [SerializeField] private OldCharacterConfig _characterConfig;
-    [SerializeField] private RopeConfig _ropeConfig;
+    [SerializeField] private SSO_Rope _ropeConfig;
     [SerializeField] private RSO_CharacterPosition _rsoCharacterPosition;
 
     // ----- PUBLIC VARIABLES -----
