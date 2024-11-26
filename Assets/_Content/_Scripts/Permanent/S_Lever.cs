@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Lever : Interactible
+public class Lever : Interactable
 {
     [Header("External References")]
     [SerializeField] private List<Switchable> _switchableList;
