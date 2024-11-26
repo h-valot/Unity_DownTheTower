@@ -541,17 +541,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 44d6f758acfbca3488915e3fbc1b463a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _pausePanel: {fileID: 4621617917309008941}
-  _deathPanelIMG: {fileID: 7398973318019425372}
-  _logPanel: {fileID: 2711802061290539357}
-  _logHeader: {fileID: 52706768025241059}
-  _logBody: {fileID: 1053535455289336154}
-  _rsePause: {fileID: 11400000, guid: a2ea92c3ee051664782983f5eda912ec, type: 2}
-  _rseCancelAction: {fileID: 11400000, guid: f98da23f144768649811d562b2a9d4ad, type: 2}
-  _rseToggleInputs: {fileID: 11400000, guid: 42f42056b3a7bf54a9d3df0551639769, type: 2}
-  _rseLogContent: {fileID: 11400000, guid: b8f2fa8cb72d726419e2f414aec8f019, type: 2}
-  _rsoGamePaused: {fileID: 11400000, guid: faef31959fcedf747aaeb875374bdc6b, type: 2}
-  _rsoPlayerDeath: {fileID: 11400000, guid: 52795416a18d6764ab55f73b88f71b83, type: 2}
+  m_pausePanel: {fileID: 4621617917309008941}
+  m_imgDeathPanel: {fileID: 7398973318019425372}
+  m_rsePause: {fileID: 11400000, guid: a2ea92c3ee051664782983f5eda912ec, type: 2}
+  m_rseToggleInputs: {fileID: 11400000, guid: 42f42056b3a7bf54a9d3df0551639769, type: 2}
+  m_rsoGamePaused: {fileID: 11400000, guid: faef31959fcedf747aaeb875374bdc6b, type: 2}
+  m_rsoCharacterDeath: {fileID: 11400000, guid: 52795416a18d6764ab55f73b88f71b83,
+    type: 2}
 --- !u!1 &4621617917309008941
 GameObject:
   m_ObjectHideFlags: 0

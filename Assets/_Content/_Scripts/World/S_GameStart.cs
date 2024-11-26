@@ -28,8 +28,8 @@ public class GameStart : MonoBehaviour
 		m_rsoCharacterDeath.value = false;
 
 		// Instantiate the prefab of the player
-		m_currentCharacter = Instantiate(m_pfCharacter, transform.position, Quaternion.identity, null);
-		m_currentCharacter.GetComponent<CharacterMotor>().Initialize(transform.rotation);
+		m_currentCharacter = Instantiate(m_pfCharacter, null);
+		m_currentCharacter.GetComponent<CharacterMotor>().Initialize(transform.position, transform.rotation);
 
         Debug.Log($"GAME_START: Player instantiated.");
 	}

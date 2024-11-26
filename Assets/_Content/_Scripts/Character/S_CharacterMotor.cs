@@ -106,19 +106,20 @@ public class CharacterMotor : MonoBehaviour
 
 	#region MONOBEHAVIOR
 
-	public void Initialize(Quaternion startRotation)
+	public void Initialize(Vector3 position, Quaternion rotation)
     {
         // Update drag in rigidbody if changed in characterConfig
         m_ssoCharacter.OnConfigChanged += UpdateDrag;
         // Layer mask to remove character for cast, use ~_layerMaskToIgnore
         m_layerMaskToIgnore |= 1 << LayerMask.NameToLayer("Character");
 
-		m_rseInitializeCamera.Call(m_aimingLookTo, m_cameraTarget, startRotation);
-        m_characterGraphics.Initialize(m_aimingLookTo, m_rigidbody, startRotation);
+		m_rseInitializeCamera.Call(m_aimingLookTo, m_cameraTarget, rotation);
+        m_characterGraphics.Initialize(m_aimingLookTo, m_rigidbody, rotation);
 
 		m_rigidbody.position = Vector3.zero;
 		m_rsoCraftInputLocked.value = false;
 		m_rsoRecycleInputLocked.value = false;
+		SetCharacterPosition(position, rotation);
 	}
 
     private void OnEnable()
@@ -244,9 +245,11 @@ public class CharacterMotor : MonoBehaviour
 
 	private void SetCharacterPosition(Vector3 position, Quaternion rotation)
 	{
+		m_positionStartFall = position;
 		m_rigidbody.velocity = Vector3.zero;
 		m_rigidbody.position = position;
-		m_rigidbody.rotation = rotation;
+		m_characterGraphics.transform.rotation = rotation;
+		m_rsoCharacterPosition.value = transform.position;
 	}
 
 	private void UpdateMoveInput(Vector2 input)
