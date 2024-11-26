@@ -140,7 +140,6 @@ public class Guardian : MonoBehaviour
             CheckPlayerHeight(_objectRef);
             Physics.Raycast(_raycastEyes.transform.position, ((_objectRef.transform.position + new Vector3(0, headHeight, 0)) - _raycastEyes.transform.position).normalized, out var hitDataHead);
             UnityEngine.Debug.DrawRay(_raycastEyes.transform.position, ((_objectRef.transform.position + new Vector3(0, headHeight, 0)) - _raycastEyes.transform.position).normalized, Color.red);
-            Debug.Log(hitDataHead.transform.name);
 
             Physics.Raycast(_raycastEyes.transform.position, ((_objectRef.transform.position + new Vector3(0, eyesHeight, 0)) - _raycastEyes.transform.position).normalized, out var hitDataEyes);
             UnityEngine.Debug.DrawRay(_raycastEyes.transform.position, ((_objectRef.transform.position + new Vector3(0, eyesHeight, 0)) - _raycastEyes.transform.position).normalized, Color.red);
