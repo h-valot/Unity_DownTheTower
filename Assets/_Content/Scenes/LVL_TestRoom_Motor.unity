@@ -6953,6 +6953,59 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 297230924}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &968541893
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 968541895}
+  - component: {fileID: 968541894}
+  m_Layer: 0
+  m_Name: MushroomSpawner (1)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &968541894
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 968541893}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bf9314cd71a81d544bfe9ed971e6d60d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _radius: 2.35
+  _density: 2
+  _minDotAngle: 0.2
+  _isRandom: 1
+  _minSizeMultiplier: 0.5
+  _maxSizeMultiplier: 1.5
+  _mushroomPrefab: {fileID: 7762096543299851040, guid: d078e67249fe575408f240e5e29aacb1,
+    type: 3}
+  mushroomList: []
+--- !u!4 &968541895
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 968541893}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 2.19, y: 2.08, z: 11.58}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &974321744
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -7968,13 +8021,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bf9314cd71a81d544bfe9ed971e6d60d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _radius: 5
+  _radius: 25
   _density: 5
   _minDotAngle: 0.2
-  _mushroomPrefab: {fileID: 7762096543299851040, guid: d078e67249fe575408f240e5e29aacb1,
-    type: 3}
+  _isRandom: 0
   _minSizeMultiplier: 0.5
   _maxSizeMultiplier: 1.5
+  _mushroomPrefab: {fileID: 7762096543299851040, guid: d078e67249fe575408f240e5e29aacb1,
+    type: 3}
   mushroomList: []
 --- !u!4 &1158660156
 Transform:
@@ -7985,7 +8039,7 @@ Transform:
   m_GameObject: {fileID: 1158660154}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 5.63, y: 1.38, z: 10.526}
+  m_LocalPosition: {x: 6.02, y: 1.38, z: 10.915}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -14076,4 +14130,5 @@ SceneRoots:
   - {fileID: 170926968}
   - {fileID: 1648674859}
   - {fileID: 1158660156}
+  - {fileID: 968541895}
   - {fileID: 4969033897334646082}

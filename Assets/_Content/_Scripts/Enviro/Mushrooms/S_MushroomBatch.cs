@@ -7,7 +7,7 @@ using Unity.Mathematics;
 using UnityEditor.PackageManager;
 using UnityEngine;
 
-public class MushroomSpawner : MonoBehaviour
+public class MushroomBatch : MonoBehaviour
 {
 
     [Header("Sphere Properties")]
@@ -16,11 +16,14 @@ public class MushroomSpawner : MonoBehaviour
 
     [Header("Mushroom Placement Properties")]
     [SerializeField] private float _minDotAngle = 0.2f;
+    [SerializeField] private bool _isRandom = true;
+    [EnableIf("_isRandom")]
+    [SerializeField] private float _minSizeMultiplier = 0.5f;
+    [EnableIf("_isRandom")]
+    [SerializeField] private float _maxSizeMultiplier = 1.5f;
 
     [Header("Mushroom Properties")]
     [SerializeField] private GameObject _mushroomPrefab;
-    [SerializeField] private float _minSizeMultiplier = 0.5f;
-    [SerializeField] private float _maxSizeMultiplier = 1.5f;
 
     public List<GameObject> mushroomList = new List<GameObject>();
 
