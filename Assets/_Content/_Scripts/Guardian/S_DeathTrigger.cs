@@ -9,8 +9,7 @@ public class DeathTrigger : MonoBehaviour
         if (other.TryGetComponent<CharacterMotor>(out var character))
         {
             _GuardianRef.RemovePotentialTargets(character.gameObject);
-			//StartCoroutine(_GuardianRef.KillPlayer());
-			//character.HandleDeath();
+			StartCoroutine(_GuardianRef.KillPlayer(character));
 		}
 
 		if (other.TryGetComponent<Torch>(out var torch))

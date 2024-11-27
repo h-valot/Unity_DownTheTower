@@ -577,7 +577,7 @@ public class CharacterMotor : MonoBehaviour
 		}
 	}
 
-	private void HandleDeath()
+	public void HandleDeath()
 	{
 		if (IsRopeValid) DesequipRope();
 		m_rsoCharacterDeath.value = true;

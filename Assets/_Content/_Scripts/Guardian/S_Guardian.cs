@@ -100,14 +100,11 @@ public class Guardian : MonoBehaviour
 
     #region Guardian action on objects
 
-    //public IEnumerator KillPlayer()
-    //{
-    //    StopCoroutine(UpdatePlayerPosition());
-    //    yield return new WaitForSeconds(_killTime);
-    //    //_playerRef.HandleDeath();
-    //    ResetTarget();
-    //    DestroyedTarget();
-    //}
+    public IEnumerator KillPlayer(CharacterMotor _character)
+    {
+        yield return new WaitForSeconds(_guardianConfig.killTime);
+        _character.HandleDeath();
+    }
 
     public IEnumerator DestroyTorchTime(GameObject _torchRef)
     {
