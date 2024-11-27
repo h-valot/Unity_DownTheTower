@@ -1,4 +1,5 @@
 using System;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "SSO_Character", menuName = "Static Scriptable/Character")]
@@ -15,62 +16,165 @@ public class SSO_Character : ScriptableObject
 	public GameObject pfCamera;
 	public Backpack pfBackpack;
 
+	#region MOVEMENT
 
-	[Header("Movement")]
-    [Tooltip("Max speed when walking")]
-    public float walkSpeed;
+	[FoldoutGroup("Movement")]
+	[InfoBox("Magnitude of the character direction input when walking.", InfoMessageType.None)]
+	/// <summary> Magnitude of the character direction input when walking. </summary>
+	public float WalkSpeed;
 
-    [Tooltip("Max speed when running")]
-    public float runSpeed;
+	[FoldoutGroup("Movement")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("Magnitude of the character direction input when running.", InfoMessageType.None)]
+	/// <summary> Magnitude of the character direction input when running. </summary>
+	public float RunSpeed;
 
-    [Tooltip("Drag applied on character while grounded")]
-    public float dragGround;
+	[FoldoutGroup("Movement")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("Drag applied to the character while grounded.", InfoMessageType.None)]
+	/// <summary> Drag applied to the character while grounded. </summary>
+	public float DragGround;
 
-    [Tooltip("Drag applied on character while in falling")]
-    public float dragFall;
+	[FoldoutGroup("Movement")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("Drag applied to the character while falling.", InfoMessageType.None)]
+	/// <summary> Drag applied to the character while falling. </summary>
+	public float DragFall;
 
-    [Tooltip("Friction applied on character while falling or moving")]
-    public float frictionMovingFalling;
+	[FoldoutGroup("Movement")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("Friction applied to the character while falling or moving.", InfoMessageType.None)]
+	/// <summary> Friction applied to the character while falling or moving. </summary>
+	public float FrictionMovingFalling;
 
-    [Tooltip("Friction applied on character while grounded and not moving")]
-    public float frictionNotMovingGround;
+	[FoldoutGroup("Movement")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("Friction applied to the character while grounded or unmoving.", InfoMessageType.None)]
+	/// <summary> Friction applied to the character while grounded or unmoving. </summary>
+	public float FrictionNotMovingGround;
+
+	#endregion
+
+	#region JUMP
+
+	[FoldoutGroup("Jump")]
+	[InfoBox("Magnitude of the up vector when jumping.", InfoMessageType.None)]
+	/// <summary> Magnitude of the up vector when jumping. </summary>
+    public float JumpForce;
+
+	[FoldoutGroup("Jump")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("Scalar applied to the character input direction while falling.", InfoMessageType.None)]
+	/// <summary> Scalar applied to the character input direction while falling. </summary>
+	public float FallingControlFactor;
+
+	[FoldoutGroup("Jump")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("Duration during which the character is still able to jumb after start falling.", InfoMessageType.None)]
+	/// <summary> Duration during which the character is still able to jumb after start falling. </summary>
+	public float CoyoteTime;
+
+	#endregion
+
+	#region GROUND
+
+	[FoldoutGroup("Ground")]
+	[InfoBox("Width added to cast used to determine if it is triggering things.", InfoMessageType.None)]
+	/// <summary> Width added to cast used to determine if it is triggering things. </summary>
+	public float SkinWidth;
+
+	[FoldoutGroup("Ground")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("Maximum height of a step the character will automatically step on.", InfoMessageType.None)]
+	/// <summary> Maximum height of a step the character will automatically step on. </summary>
+	public float StepOnHeight;
+
+	#endregion
+
+	#region ROPE
+
+	[FoldoutGroup("Rope")]
+	[InfoBox("The method the character uses to navigate the rope. HOLD_TO_LET_GO: when the holding input is pressed, the rope constraint will be released. HOLD_TO_STOP: when the holding is pressed, the rope constraint will be applied.", InfoMessageType.None)]
+	/// <summary> The method the character uses to navigate the rope. HOLD_TO_LET_GO: when the holding input is pressed, the rope constraint will be released. HOLD_TO_STOP: when the holding is pressed, the rope constraint will be applied. </summary>
+	public RopeHolding RopeHoldingMethod = RopeHolding.HOLD_TO_LET_GO;
+
+	[FoldoutGroup("Rope")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("Duration the player have to hold the cancel key to desequip the rope.", InfoMessageType.None)]
+	/// <summary> Duration the player have to hold the cancel key to desequip the rope. </summary>
+	public float CancelRopeDuration;
 
 
-    [Header("Jump")]
-    [Tooltip("Force used to make player jump")]
-    public float jumpForce;
+	[Title("Suspension")]
+	[FoldoutGroup("Rope")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("Maximum angle tolerated the character can swing with the rope (upper values are clamped onto this one).", InfoMessageType.None)]
+	/// <summary> Maximum angle tolerated the character can swing with the rope (upper values are clamped onto this one). </summary>
+	public float MaxPendulumAngle;
 
-    [Tooltip("While falling, factor applied to the force used to make player move")]
-    public float fallingControlFactor;
+	[FoldoutGroup("Rope")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("Angle used to determine a direction within the cercle generated by the rope condition.", InfoMessageType.None)]
+	/// <summary> Angle used to determine a direction within the cercle generated by the rope condition. </summary>
+	public float RopeOffsetAngle;
 
-    [Tooltip("Time after start falling while the player can still jump")]
-    public float CoyoteTime;
-
-
-    [Header("Ground")]
-    [Tooltip("Width added to cast to determine if touching things")]
-    public float skinWidth;
-
-    [Tooltip("Height that the character will automaticly step on")]
-    public float stepOnHeight;
-
-
-	[Header("Rope")]
-	public RopeHolding ropeHoldingMethod;
-	public float cancelRopeDuration;
-	public float againstWallRayCastLength;
-	public LayerMask againstWallLayerToInclude;
-	public float jumpOffWallForce;
-	public float ropeOffsetAngle;
-	public float partialSuspensionSpeed;
-	public float completeSuspensionSpeed;
-	public float maxSideAngle;
-	public float climbAcceleration;
-	public float maxClimbSpeed;
-	public float freeFallFromRopeModifier;
-	public float jumpOffRopeModifier;
-	public float jumpRopeDuration;
+	[FoldoutGroup("Rope")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("Force applied to the character direction while roped.", InfoMessageType.None)]
+	/// <summary> . </summary>
 	public float ropeMovementForce;
+
+
+	[Title("Partial")]
+	[FoldoutGroup("Rope")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("Length of raycasts used to check if the character stands against a wall.", InfoMessageType.None)]
+	/// <summary> Length of raycasts used to check is the character stands against a wall. </summary>
+	public float AgainstWallRaycastLength;
+
+	[FoldoutGroup("Rope")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("Layers included in raycasts used to check if the character stands against a wall.", InfoMessageType.None)]
+	/// <summary> Layers included in raycasts used to check if the character stands against a wall. </summary>
+	public LayerMask AgainstWallLayerToInclude;
+
+	[FoldoutGroup("Rope")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("Force of the vector normal to the wall when jumping while suspended with a rope.", InfoMessageType.None)]
+	/// <summary> Force of the vector normal to the wall when jumping while suspended with a rope. </summary>
+	public float JumpOffWallForce;
+
+	[FoldoutGroup("Rope")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox(".", InfoMessageType.None)]
+	/// <summary> . </summary>
+	public float ClimbAcceleration;
+
+	[FoldoutGroup("Rope")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox(".", InfoMessageType.None)]
+	/// <summary> . </summary>
+	public float maxClimbSpeed;
+
+	[FoldoutGroup("Rope")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox(".", InfoMessageType.None)]
+	/// <summary> . </summary>
+	public float freeFallFromRopeModifier;
+
+	[FoldoutGroup("Rope")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox(".", InfoMessageType.None)]
+	/// <summary> . </summary>
+	public float jumpOffRopeModifier;
+
+	[FoldoutGroup("Rope")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox(".", InfoMessageType.None)]
+	/// <summary> . </summary>
+	public float jumpRopeDuration;
+
+	#endregion
 
 
 	[Header("Glow")]

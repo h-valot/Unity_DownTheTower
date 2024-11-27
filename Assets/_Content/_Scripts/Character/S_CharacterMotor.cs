@@ -273,7 +273,7 @@ public class CharacterMotor : MonoBehaviour
 		}
 
 		// Handle both hold methods
-		switch (m_ssoCharacter.ropeHoldingMethod)
+		switch (m_ssoCharacter.RopeHoldingMethod)
 		{
 			case RopeHolding.HOLD_TO_STOP:
 				ToggleRopeHolding(isHolding);
@@ -312,7 +312,7 @@ public class CharacterMotor : MonoBehaviour
 
 	private IEnumerator StartCancellingRope()
 	{
-		while (m_cancelRopeTimer < m_ssoCharacter.cancelRopeDuration)
+		while (m_cancelRopeTimer < m_ssoCharacter.CancelRopeDuration)
 		{
 			m_cancelRopeTimer += Time.deltaTime;
 			yield return null;
@@ -333,7 +333,7 @@ public class CharacterMotor : MonoBehaviour
 		else
 		{
 			if (m_jumpRopeCoroutine != null) StopCoroutine(m_jumpRopeCoroutine);
-			ToggleRopeConstraint(m_ssoCharacter.ropeHoldingMethod == RopeHolding.HOLD_TO_LET_GO ? !m_isHolding : m_isHolding);
+			ToggleRopeConstraint(m_ssoCharacter.RopeHoldingMethod == RopeHolding.HOLD_TO_LET_GO ? !m_isHolding : m_isHolding);
 		}
 	}
 
@@ -344,9 +344,9 @@ public class CharacterMotor : MonoBehaviour
 		{
 			ToggleRopeConstraint(false);
 
-			float force = m_ssoCharacter.jumpOffWallForce;
+			float force = m_ssoCharacter.JumpOffWallForce;
 			Vector3 direction = (Vector3Extention.GetPositionOnCercle(
-				angle: m_ssoCharacter.ropeOffsetAngle,
+				angle: m_ssoCharacter.RopeOffsetAngle,
 				axis: m_characterGraphics.transform.right,
 				direction: -m_characterGraphics.transform.forward,
 				origin: m_rope.CurrentFold,
@@ -493,7 +493,7 @@ public class CharacterMotor : MonoBehaviour
         m_groundNormal = Vector3.down;
 
         Vector3 _start = transform.position + Vector3.up * (m_collider.height - m_collider.radius);
-        float _radius = m_collider.radius + m_ssoCharacter.skinWidth;
+        float _radius = m_collider.radius + m_ssoCharacter.SkinWidth;
         Vector3 _direction = Vector3.down;
         float _distance = m_collider.height - 2 * m_collider.radius;
         m_raycastHits = Physics.SphereCastAll(_start, _radius, _direction, _distance, ~m_layerMaskToIgnore);
@@ -618,12 +618,12 @@ public class CharacterMotor : MonoBehaviour
     {
         if (m_moveInput == Vector2.zero && m_isGrounded)
         {
-            m_collider.sharedMaterial.dynamicFriction = m_ssoCharacter.frictionNotMovingGround;
+            m_collider.sharedMaterial.dynamicFriction = m_ssoCharacter.FrictionNotMovingGround;
             m_collider.sharedMaterial.frictionCombine = PhysicMaterialCombine.Maximum;
         }
         else
         {
-            m_collider.sharedMaterial.dynamicFriction = m_ssoCharacter.frictionMovingFalling;
+            m_collider.sharedMaterial.dynamicFriction = m_ssoCharacter.FrictionMovingFalling;
             m_collider.sharedMaterial.frictionCombine = PhysicMaterialCombine.Minimum;
         }
     }
@@ -635,11 +635,11 @@ public class CharacterMotor : MonoBehaviour
     {
         if (m_rsoCharacterState.value == BehaviorState.LOCOMOTION)
         {
-            m_rigidbody.drag = m_ssoCharacter.dragGround;
+            m_rigidbody.drag = m_ssoCharacter.DragGround;
         }
         else if (m_rsoCharacterState.value == BehaviorState.FALL || m_rsoCharacterState.value == BehaviorState.ROPE)
         {
-            m_rigidbody.drag = m_ssoCharacter.dragFall;
+            m_rigidbody.drag = m_ssoCharacter.DragFall;
         }
     }
 
@@ -663,7 +663,7 @@ public class CharacterMotor : MonoBehaviour
             desiredSpeed = Quaternion.AngleAxis(Vector3.SignedAngle(Vector3.up, m_groundNormal, slopeRight), slopeRight) * desiredSpeed;
 
             // Set desired speed magnitude based on walk/run state
-            desiredSpeed *= m_isRunning ? m_ssoCharacter.runSpeed : m_ssoCharacter.walkSpeed;
+            desiredSpeed *= m_isRunning ? m_ssoCharacter.RunSpeed : m_ssoCharacter.WalkSpeed;
 
 			// Apply speed modifiers
 			if (m_isStunned)
@@ -708,10 +708,10 @@ public class CharacterMotor : MonoBehaviour
                 // Check if hit is in front of character
                 if (Vector3.Dot(moveInput3D, hitDirection) > 0.15)
                 {
-                    if (_hit.point.y - transform.position.y < m_ssoCharacter.stepOnHeight)
+                    if (_hit.point.y - transform.position.y < m_ssoCharacter.StepOnHeight)
                     {
                         // We take the highest that is higher than skin width to not trigger step on very small objects
-                        if (_hit.point.y > stepOnTarget.y && _hit.point.y > transform.position.y + m_ssoCharacter.skinWidth)
+                        if (_hit.point.y > stepOnTarget.y && _hit.point.y > transform.position.y + m_ssoCharacter.SkinWidth)
                         {
                             stepOnTarget = _hit.point;
                         }
@@ -722,15 +722,15 @@ public class CharacterMotor : MonoBehaviour
             if (stepOnTarget != transform.position)
             {
                 // Check if there is really an object to step on in the speed direction, to prevent steping on end of slope
-                Vector3 start = new Vector3(m_rigidbody.position.x, m_rigidbody.position.y + m_ssoCharacter.skinWidth, m_rigidbody.position.z);
+                Vector3 start = new Vector3(m_rigidbody.position.x, m_rigidbody.position.y + m_ssoCharacter.SkinWidth, m_rigidbody.position.z);
                 Vector3 direction = m_rigidbody.velocity.normalized;
                 float distance = m_collider.radius * 2;
                 if (Physics.Raycast(start, direction, distance, ~m_layerMaskToIgnore))
                 {
                     // Check if there is a flat surface to step on (<45 degrees)
-                    start = stepOnTarget + (new Vector3(stepOnTarget.x, 0, stepOnTarget.z) - new Vector3(m_rigidbody.position.x, 0, m_rigidbody.position.z)).normalized * m_ssoCharacter.skinWidth + new Vector3(0, m_ssoCharacter.skinWidth, 0);
+                    start = stepOnTarget + (new Vector3(stepOnTarget.x, 0, stepOnTarget.z) - new Vector3(m_rigidbody.position.x, 0, m_rigidbody.position.z)).normalized * m_ssoCharacter.SkinWidth + new Vector3(0, m_ssoCharacter.SkinWidth, 0);
                     direction = Vector3.down;
-                    distance = m_ssoCharacter.skinWidth * 2;
+                    distance = m_ssoCharacter.SkinWidth * 2;
                     if (Physics.Raycast(start, direction, distance, ~m_layerMaskToIgnore))
                     {
                         m_rigidbody.position = new Vector3(m_rigidbody.position.x, stepOnTarget.y, m_rigidbody.position.z);
@@ -750,7 +750,7 @@ public class CharacterMotor : MonoBehaviour
         if (!isPressed) return;
 		if(m_hasJumped) return;
 
-		m_rigidbody.AddForce(Vector3.up * m_ssoCharacter.jumpForce, ForceMode.Impulse);
+		m_rigidbody.AddForce(Vector3.up * m_ssoCharacter.JumpForce, ForceMode.Impulse);
 		m_hasJumped = true;
     }
 
@@ -767,15 +767,15 @@ public class CharacterMotor : MonoBehaviour
         // Set desired speed magnitude based on walk/run state
         if (m_isRunning)
         {
-            desiredSpeedForce *= m_ssoCharacter.runSpeed;
+            desiredSpeedForce *= m_ssoCharacter.RunSpeed;
         }
         else
         {
-            desiredSpeedForce *= m_ssoCharacter.walkSpeed;
+            desiredSpeedForce *= m_ssoCharacter.WalkSpeed;
         }
 
         // Apply final force to move character, auto clamp the speed by substractiong actual speed to desired speed
-        m_rigidbody.AddForce((desiredSpeedForce - m_rigidbody.velocity) * m_ssoCharacter.fallingControlFactor, ForceMode.Acceleration);
+        m_rigidbody.AddForce((desiredSpeedForce - m_rigidbody.velocity) * m_ssoCharacter.FallingControlFactor, ForceMode.Acceleration);
     }
 
     #endregion
@@ -866,7 +866,7 @@ public class CharacterMotor : MonoBehaviour
 	{
 		Vector3 direction =
 			(Vector3Extention.GetPositionOnCercle(
-				angle: m_ssoCharacter.ropeOffsetAngle,
+				angle: m_ssoCharacter.RopeOffsetAngle,
 				axis: m_cameraTarget.forward,
 				direction: m_cameraTarget.right,
 				origin: m_rope.CurrentFold,
@@ -874,7 +874,7 @@ public class CharacterMotor : MonoBehaviour
 				starting: m_rigidbody.position
 			) - m_rigidbody.position).normalized * m_moveInput.x +
 			(Vector3Extention.GetPositionOnCercle(
-				angle: m_ssoCharacter.ropeOffsetAngle,
+				angle: m_ssoCharacter.RopeOffsetAngle,
 				axis: m_cameraTarget.right,
 				direction: m_cameraTarget.forward,
 				origin: m_rope.CurrentFold,
@@ -888,7 +888,7 @@ public class CharacterMotor : MonoBehaviour
 	private void HandleRopeClimbing()
 	{
 		// Assert: holding input method
-		switch (m_ssoCharacter.ropeHoldingMethod)
+		switch (m_ssoCharacter.RopeHoldingMethod)
 		{
 			case RopeHolding.HOLD_TO_STOP:
 				// While hold to stop, we don't constraint the character if the player IS NOT holding the button
@@ -903,7 +903,7 @@ public class CharacterMotor : MonoBehaviour
 
 		if (!m_isClimbing)
 		{
-			m_currentClimbSpeed = m_ssoCharacter.climbAcceleration;
+			m_currentClimbSpeed = m_ssoCharacter.ClimbAcceleration;
 			return;
 		}
 
@@ -918,7 +918,7 @@ public class CharacterMotor : MonoBehaviour
 		if (!m_rope) return true;
 
 		bool isFalling = false;
-		switch (m_ssoCharacter.ropeHoldingMethod)
+		switch (m_ssoCharacter.RopeHoldingMethod)
 		{
 			case RopeHolding.HOLD_TO_STOP:
 				isFalling = !m_isHolding;
