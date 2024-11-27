@@ -193,20 +193,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Type: 1
-  _light: {fileID: 1720485948228762332}
-  _rigidbody: {fileID: 5666824575402529614}
-  _meshRenderer: {fileID: 7272609494548576517}
-  _aimPreview: {fileID: 2398609788582600357}
-  _torchTop: {fileID: 8405497087091573354}
-  _pointLightBase: {fileID: 2294269590647890243}
-  _lightCollider: {fileID: 5976173811647340609}
-  _torchConfig: {fileID: 11400000, guid: 0c5c3bc89382c9e439e0ef105c99e62b, type: 2}
-  _rsoTorchManager: {fileID: 11400000, guid: 013e0e8312f52a7408c42a7d0621de0c, type: 2}
-  _characterConfig: {fileID: 11400000, guid: 1940b106405212f469b44119418b1e43, type: 2}
-  _ropeConfig: {fileID: 11400000, guid: ebd551676fad39148a6ccab29ef4ebce, type: 2}
-  _rsoCharacterPosition: {fileID: 11400000, guid: 7cfc39952cca0d6478396ad49ab9e0db,
+  m_light: {fileID: 1720485948228762332}
+  m_rigidbody: {fileID: 5666824575402529614}
+  m_meshRenderer: {fileID: 7272609494548576517}
+  m_aimPreview: {fileID: 2398609788582600357}
+  m_torchTop: {fileID: 8405497087091573354}
+  m_pointLightBase: {fileID: 2294269590647890243}
+  m_lightCollider: {fileID: 5976173811647340609}
+  m_ssoTorch: {fileID: 11400000, guid: 0c5c3bc89382c9e439e0ef105c99e62b, type: 2}
+  m_ssoCharacter: {fileID: 11400000, guid: 002492e8a2733234b8bdf7d15dea453b, type: 2}
+  m_ssoRope: {fileID: 11400000, guid: ebd551676fad39148a6ccab29ef4ebce, type: 2}
+  m_rsoTorchManager: {fileID: 11400000, guid: 013e0e8312f52a7408c42a7d0621de0c, type: 2}
+  m_rsoCharacterPosition: {fileID: 11400000, guid: 7cfc39952cca0d6478396ad49ab9e0db,
     type: 2}
-  _isInHand: 0
+  IsInHand: 0
 --- !u!54 &5666824575402529614
 Rigidbody:
   m_ObjectHideFlags: 0

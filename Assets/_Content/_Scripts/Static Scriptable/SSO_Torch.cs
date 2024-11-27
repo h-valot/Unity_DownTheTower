@@ -1,106 +1,183 @@
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "SSO_Torch", menuName = "Static Scriptable/Torch")]
 public class SSO_Torch : ScriptableObject
 {
-	[Header("References")]
-	[Tooltip("Torch prefab that is instantiated when crafted")]
-	public Torch pfTorch;
+	[Title("Debug")]
+	[InfoBox("If true, the torch break animation will be played.", InfoMessageType.None)]
+	/// <summary> If true, the torch break animation will be played. </summary>
+	public bool ActivateBreakAnim = true;
 
+	[InfoBox("Prefabs of the break torch sfx.", InfoMessageType.None)]
+	/// <summary> Prefabs of the break torch sfx. </summary>
+	public GameObject TorchBreakSFX;
 
-	[Space(5)]
-	[Header("Manager")]
-    [Tooltip("Number of torchs that can be light at the same time, if more are spawn the oldest one start fading")]
-    public int maxTorchs = 4;
+	[PropertySpace(SpaceBefore = 0, SpaceAfter = 15)]
+	[InfoBox("Prefabs of the hit torch sfx.", InfoMessageType.None)]
+	/// <summary> Prefabs of the hit torch sfx. </summary>
+	public GameObject TorchHitSFX;
 
-    [Tooltip("Very max number of torchs, instant despawn if more than this number")]
-    public int HardMaxTorchs = 8;
+	#region PREFABS
 
+	[FoldoutGroup("Prefabs")]
+	[InfoBox("The prefab of the torch.", InfoMessageType.None)]
+	/// <summary> The prefab of the torch. </summary>
+	public Torch PfTorch;
 
-	[Space(5f)]
-	[Header("Light")]
-	[Tooltip("Default torch color")]
-    public Color baseColor = new Color(255, 170, 85, 255);
+	#endregion
 
-	[Tooltip("Intensity of the light")]
-	public float lightIntensity;
+	#region MANAGER
 
-	[Tooltip("Lit duration when on ground")]
-	public float groundedLightDuration;
+	[FoldoutGroup("Manager")]
+	[InfoBox("Maximum amount of torches that can be light at the same time, if more are spawn the oldest one starts fading out.", InfoMessageType.None)]
+	/// <summary> Maximum amount of torches that can be light at the same time, if more are spawn the oldest one starts fading out. </summary>
+	public int MaxTorchesSoft;
 
-	[Tooltip("Time to light the torch")]
-	public float lightOnDuration;
+	[FoldoutGroup("Manager")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("Very maximum amount of torches that can exists at the same time, if more are spawn the oldest one instant despawns.", InfoMessageType.None)]
+	/// <summary> Very maximum amount of torches that can exists at the same time, if more are spawn the oldest one instant despawns. </summary>
+	public int MaxTorchesHard;
 
-    [Tooltip("Time to extinguish the torch")]
-    public float lightOffDuration;
+	#endregion
 
-    [Tooltip("Offset distance of the top part when lit")]
-    public float topTorchOffsetDistance = 0.14f;
+	#region LIGHT
 
-	[Tooltip("Offset distance of the point light from surfaces")]
-	public float lightOffsetDistance = 0.5f;
+	[FoldoutGroup("Light")]
+	[InfoBox("Default color of the torch point light.", InfoMessageType.None)]
+	/// <summary> Default color of the torch point light. </summary>
+	public Color LightColor = new Color(255, 170, 85, 255);
 
+	[FoldoutGroup("Light")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("Default intensity of the torch point light.", InfoMessageType.None)]
+	/// <summary> Default intensity of the torch point light. </summary>
+	public float LightIntensity;
 
-    [Space(5f)]
-    [Header("Throw")]
-	[Tooltip("Can throw the torch when handled")]
-    public bool canThrow;
+	[FoldoutGroup("Light")]
+	[Unit(Units.Second)]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("Duration the torch point stays lit while on the ground.", InfoMessageType.None)]
+	/// <summary> Duration the torch point stays lit while on the ground. </summary>
+	public float GroundedLightDuration;
 
-    [Tooltip("Launch force of the throw")]
-	public float minLaunchForce = 0.1f;
+	[FoldoutGroup("Light")]
+	[Unit(Units.Second)]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("Duration the torch takes to lit.", InfoMessageType.None)]
+	/// <summary> Duration the torch takes to lit. </summary>
+	public float LitDuration;
 
-	public float maxLaunchForce = 20f;
+	[FoldoutGroup("Light")]
+	[Unit(Units.Second)]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("Duration the torch takes to unlit.", InfoMessageType.None)]
+	/// <summary> Duration the torch takes to unlit. </summary>
+	public float UnlitDuration;
 
-	public float minLaunchCameraAngle = 0f;
+	[FoldoutGroup("Light")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("Distance the top part of the torch will be offset when lit.", InfoMessageType.None)]
+	/// <summary> Distance the top part of the torch will be offset when lit. </summary>
+	public float TopTorchOffsetDistance;
 
-	public float maxLaunchCameraAngle = 130f;
+	[FoldoutGroup("Light")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("Distance the point light of the torch will be offset when collider with surfaces.", InfoMessageType.None)]
+	/// <summary> Distance the point light of the torch will be offset when collider with surfaces. </summary>
+	public float LightOffsetDistance;
 
+	#endregion
 
-    [Space(5f)]
-    [Header("Crafting")]
-	[Tooltip("Wait this value after pressing the craft button to get the torch prefab instantiate")]
-	public float craftingDuration;
+	#region THROW
 
-	[Tooltip("If the torch should spawn lit or not")]
-	public bool startLit = true;
+	[FoldoutGroup("Throw")]
+	[InfoBox("If true, the torch can be thrown by the character.", InfoMessageType.None)]
+	/// <summary> If true, the torch can be thrown by the character. </summary>
+	public bool CanThrow = true;
 
-	[Tooltip("Number max of torch spawned")]
-	public int maxNumberTorch = 4;
+	[FoldoutGroup("Throw")]
+	[MinMaxSlider(0, 30, true)]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("Minimum and maximum force torches can be thrown.", InfoMessageType.None)]
+	/// <summary> Minimum and maximum force torches can be thrown. </summary>
+	[SerializeField] private Vector2 m_launchForce = new Vector2();
+	public MinMaxFloat LaunchForce { get =>  new MinMaxFloat(m_launchForce); private set => LaunchForce = value; }
 
+	[FoldoutGroup("Throw")]
+	[MinMaxSlider(0, 200, true)]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("Minimum and maximum angle the camera pitch affect the torch throw force.", InfoMessageType.None)]
+	/// <summary> Minimum and maximum angle the camera pitch affect the torch throw force. </summary>
+	[SerializeField] private Vector2 m_launchCameraAngle = new Vector2();
+	public MinMaxFloat LaunchCameraAngle { get => new MinMaxFloat(m_launchCameraAngle); private set => LaunchCameraAngle = value; }
 
-    [Space(5f)]
-    [Header("Aim Preview Variables")]
-    public float minThrowAngleOffset = 0f;
+	#endregion
 
-    public float maxThrowAngleOffset = 20f;
+	#region CRAFTING
 
-	[Range(0.1f, 10f)] public float previewLength = 10f;
+	[FoldoutGroup("Crafting")]
+	[InfoBox("Duration the permanent will take to be crafted.", InfoMessageType.None)]
+	/// <summary> Duration the permanent will take to be crafted. </summary>
+	public float CraftingDuration;
 
-	[Range(0.1f, 0.25f)] public float previewSmoothing = 0.1f;
+	[FoldoutGroup("Crafting")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("If true, the torch spawns lit.", InfoMessageType.None)]
+	/// <summary> If true, the torch spawns lit. </summary>
+	public bool IsStartingLit = true;
 
-	public LayerMask layersToIgnorePreview;
+	#endregion
 
+	#region AIM PREVIEW
 
-    [Space(5f)]
-    [Header("Height Feedback")]
-    [Tooltip("Torch color when height higher than lethal death")]
-    public Color deathColor = new Color(255, 52, 52, 255);
+	[FoldoutGroup("Aim preview")]
+	[Range(0.1f, 10f)]
+	[InfoBox("Length of the preview.", InfoMessageType.None)]
+	/// <summary> Length of the preview. </summary>
+	public float PreviewLength;
 
-	[Tooltip("Time the torch stay lit before despawning when beneath rope lentgh + lethal height")]
-	public float deactivatingTime = 3f;
+	[FoldoutGroup("Aim preview")]
+	[Range(0.1f, 0.25f)]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("The less, the smoother the preview will be.", InfoMessageType.None)]
+	/// <summary> The less, the smoother the preview will be. </summary>
+	public float PreviewSmoothing;
 
-	[Tooltip("Minimal speed of the torch to trigger a hit sound")]
-	public float minimalSpeedForHitSound = 4f;
+	[FoldoutGroup("Aim preview")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("Layer masks the preview system will ignore.", InfoMessageType.None)]
+	/// <summary> Layer masks the preview system will ignore. </summary>
+	public LayerMask PreviewLayersToIgnore;
 
-	[Tooltip("Time in second between hit sound")]
-	public float timeBetweenHitSound = 1f;
+	#endregion
 
+	#region HEIGHT FEEDBACK
 
-    [Space(5f)]
-    [Header("Debug")]
-	public bool activateBreakAnim = true;
+	[FoldoutGroup("Height feedback")]
+	[InfoBox("Color of the torch point light if its distance travelled on y-axis is greater than the character lethal height.", InfoMessageType.None)]
+	/// <summary> Color of the torch point light if its distance travelled on y-axis is greater than the character lethal height. </summary>
+	public Color DeathColor = new Color(255, 52, 52, 255);
 
-    public GameObject torchBreakSFX;
+	[FoldoutGroup("Height feedback")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("Duration the torch stays lit before despawning when below the max rope length and the character lethal height.", InfoMessageType.None)]
+	/// <summary> Duration the torch stays lit before despawning when below the max rope length and the character lethal height. </summary>
+	public float DeactivatingTime;
 
-	public GameObject torchHitSFX;
+	[FoldoutGroup("Height feedback")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("Minimal speed of the torch to play a hit sound.", InfoMessageType.None)]
+	/// <summary> Minimal speed of the torch to play a hit sound. </summary>
+	public float MinSpeedForHitSound;
+
+	[FoldoutGroup("Height feedback")]
+	[Unit(Units.Second)]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("Duration in seconds between two hit sound.", InfoMessageType.None)]
+	/// <summary> Duration in seconds between two hit sound. </summary>
+	public float TimeBetweenHitSound;
+
+	#endregion
 }

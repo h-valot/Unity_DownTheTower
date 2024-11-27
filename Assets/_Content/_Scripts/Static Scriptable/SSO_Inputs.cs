@@ -23,7 +23,6 @@ public class SSO_Inputs : ScriptableObject
 
 
 	[Title("Gamepad")]
-	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
 	[InfoBox("Scalar for gamepad sensibility on X.", InfoMessageType.None)]
 	/// <summary> Scalar for gamepad sensibility on X. </summary>
 	public float GamepadSensibilityX;

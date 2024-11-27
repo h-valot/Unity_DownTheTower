@@ -18,7 +18,7 @@ public class TorchManager : MonoBehaviour
     {
         m_torches.Insert(0, torch);
 
-        while (m_torches.Count > m_ssoTorch.maxNumberTorch)
+        while (m_torches.Count > m_ssoTorch.MaxTorchesSoft)
         {
             m_torches[4].Deactivate();
             Remove(m_torches[4]);
