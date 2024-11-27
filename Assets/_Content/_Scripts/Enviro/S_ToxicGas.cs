@@ -26,7 +26,7 @@ public class ToxicGas: MonoBehaviour
             {
                 mushroom.Explode();
             }
-            StartCoroutine(TimetoRefill(m_ssoToxic.cooldownToRefill));
+            StartCoroutine(TimetoRefill(m_ssoToxic.Cooldown));
         }
     }
 

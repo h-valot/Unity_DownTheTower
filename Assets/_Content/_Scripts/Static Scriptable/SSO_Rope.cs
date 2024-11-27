@@ -4,6 +4,21 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "SSO_Rope", menuName = "Static Scriptable/Rope")]
 public class SSO_Rope : ScriptableObject
 {
+	[Title("Debug")]
+	[InfoBox("Material applied to the rope line if the total length is less or equal than half of the max length.", InfoMessageType.None)]
+	/// <summary> Material applied to the rope line if the total length is less or equal than half of the max length. </summary>
+	public Material SafeMaterial;
+
+	[InfoBox("Material applied to the rope line if the total length is less or equal than three quarters of the max length.", InfoMessageType.None)]
+	/// <summary> Material applied to the rope line if the total length is less or equal than three quarters of the max length. </summary>
+	public Material MidMaterial;
+
+	[PropertySpace(SpaceBefore = 0, SpaceAfter = 15)]
+	[InfoBox("Material applied to the rope line if the total length is greater than three quarters of the max length.", InfoMessageType.None)]
+	/// <summary> Material applied to the rope line if the total length is greater than three quarters of the max length. </summary>
+	public Material DangerMaterial;
+
+	
 	#region PREFAB
 
 	[FoldoutGroup("Prefabs")]
@@ -101,27 +116,6 @@ public class SSO_Rope : ScriptableObject
 	[InfoBox("Maximum angle the offset vector indicating the position of the permanent preview could be on the right axis.", InfoMessageType.None)]
 	/// <summary> Maximum angle the offset vector indicating the position of the permanent preview could be on the right axis. </summary>
 	public float MaxCameraDownwardClamp = 45f;
-
-	#endregion
-
-	#region DEBUG
-
-	[FoldoutGroup("Debug")]
-	[InfoBox("Material applied to the rope line if the total length is less or equal than half of the max length.", InfoMessageType.None)]
-	/// <summary> Material applied to the rope line if the total length is less or equal than half of the max length. </summary>
-	public Material SafeMaterial;
-
-	[FoldoutGroup("Debug")]
-	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
-	[InfoBox("Material applied to the rope line if the total length is less or equal than three quarters of the max length.", InfoMessageType.None)]
-	/// <summary> Material applied to the rope line if the total length is less or equal than three quarters of the max length. </summary>
-	public Material MidMaterial;
-
-	[FoldoutGroup("Debug")]
-	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
-	[InfoBox("Material applied to the rope line if the total length is greater than three quarters of the max length.", InfoMessageType.None)]
-	/// <summary> Material applied to the rope line if the total length is greater than three quarters of the max length. </summary>
-	public Material DangerMaterial;
 
 	#endregion
 }
