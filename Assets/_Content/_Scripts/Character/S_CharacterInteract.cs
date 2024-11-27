@@ -162,10 +162,10 @@ public class CharacterInteract : MonoBehaviour
 	private void GetBackpackDebug()
 	{
 		// Assertion
-		if (!m_characterConfig.startWithBag) return;
+		if (!m_characterConfig.StartWithBag) return;
 
 		m_backpack = FindAnyObjectByType<Backpack>();
-		if (m_backpack == null) m_backpack = Instantiate(m_characterConfig.pfBackpack);
+		if (m_backpack == null) m_backpack = Instantiate(m_characterConfig.PfBackpack);
 		m_backpack.ForceSetupBackpack(this);
 	}
 

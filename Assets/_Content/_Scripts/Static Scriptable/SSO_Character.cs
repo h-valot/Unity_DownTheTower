@@ -13,11 +13,20 @@ public class SSO_Character : ScriptableObject
 	public Action OnConfigChanged;
 
 
-	public GameObject pfCamera;
-	public Backpack pfBackpack;
+	[Title("Debug")]
+	[InfoBox("If true, the character starts the play mode with a backpack.", InfoMessageType.None)]
+	/// <summary> If true, the character starts the play mode with a backpack. </summary>
+	public bool StartWithBag;
+
+	[ShowIf("StartWithBag")]
+	[PropertySpace(SpaceBefore = 0, SpaceAfter = 15)]
+	[InfoBox("Prefab of the backpack. Spawned only if the `StartWithBag` debug is true.", InfoMessageType.None)]
+	/// <summary> Prefab of the backpack. Spawned only if the `StartWithBag` debug is true. </summary>
+	public Backpack PfBackpack;
 
 	#region MOVEMENT
 
+	[Title("Speed")]
 	[FoldoutGroup("Movement")]
 	[InfoBox("Magnitude of the character direction input when walking.", InfoMessageType.None)]
 	/// <summary> Magnitude of the character direction input when walking. </summary>
@@ -29,8 +38,9 @@ public class SSO_Character : ScriptableObject
 	/// <summary> Magnitude of the character direction input when running. </summary>
 	public float RunSpeed;
 
+
+	[Title("Drag")]
 	[FoldoutGroup("Movement")]
-	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
 	[InfoBox("Drag applied to the character while grounded.", InfoMessageType.None)]
 	/// <summary> Drag applied to the character while grounded. </summary>
 	public float DragGround;
@@ -41,17 +51,18 @@ public class SSO_Character : ScriptableObject
 	/// <summary> Drag applied to the character while falling. </summary>
 	public float DragFall;
 
+
+	[Title("Friction")]
+	[FoldoutGroup("Movement")]
+	[InfoBox("Friction applied to the character while grounded and unmoving.", InfoMessageType.None)]
+	/// <summary> Friction applied to the character while grounded and unmoving. </summary>
+	public float FrictionNotMovingGround;
+
 	[FoldoutGroup("Movement")]
 	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
 	[InfoBox("Friction applied to the character while falling or moving.", InfoMessageType.None)]
 	/// <summary> Friction applied to the character while falling or moving. </summary>
 	public float FrictionMovingFalling;
-
-	[FoldoutGroup("Movement")]
-	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
-	[InfoBox("Friction applied to the character while grounded or unmoving.", InfoMessageType.None)]
-	/// <summary> Friction applied to the character while grounded or unmoving. </summary>
-	public float FrictionNotMovingGround;
 
 	#endregion
 
@@ -107,7 +118,6 @@ public class SSO_Character : ScriptableObject
 
 	[Title("Suspension")]
 	[FoldoutGroup("Rope")]
-	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
 	[InfoBox("Maximum angle tolerated the character can swing with the rope (upper values are clamped onto this one).", InfoMessageType.None)]
 	/// <summary> Maximum angle tolerated the character can swing with the rope (upper values are clamped onto this one). </summary>
 	public float MaxPendulumAngle;
@@ -127,7 +137,6 @@ public class SSO_Character : ScriptableObject
 
 	[Title("Partial")]
 	[FoldoutGroup("Rope")]
-	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
 	[InfoBox("Length of raycasts used to check if the character stands against a wall.", InfoMessageType.None)]
 	/// <summary> Length of raycasts used to check is the character stands against a wall. </summary>
 	public float AgainstWallRaycastLength;
@@ -144,67 +153,138 @@ public class SSO_Character : ScriptableObject
 	/// <summary> Force of the vector normal to the wall when jumping while suspended with a rope. </summary>
 	public float JumpOffWallForce;
 
+
+	[Title("Climbing")]
 	[FoldoutGroup("Rope")]
-	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
-	[InfoBox(".", InfoMessageType.None)]
-	/// <summary> . </summary>
+	[InfoBox("Acceleration value used to determine the force to pull the character up the rope.", InfoMessageType.None)]
+	/// <summary> Acceleration value used to determine the force to pull the character up the rope. </summary>
 	public float ClimbAcceleration;
 
 	[FoldoutGroup("Rope")]
 	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
-	[InfoBox(".", InfoMessageType.None)]
-	/// <summary> . </summary>
-	public float maxClimbSpeed;
+	[InfoBox("Maximum force the character can use to pull itself up the rope.", InfoMessageType.None)]
+	/// <summary> Maximum force the character can use to pull itself up the rope. </summary>
+	public float MaxClimbSpeed;
+
+
+	[Title("Jumping")]
+	[FoldoutGroup("Rope")]
+	[InfoBox("Modifier applied to the last direction on the rope when the character switches from the rope to free fall.", InfoMessageType.None)]
+	/// <summary> Modifier applied to the last direction on the rope when the character switches from the rope to free fall. </summary>
+	public float FreeFallFromRopeModifier;
 
 	[FoldoutGroup("Rope")]
 	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
-	[InfoBox(".", InfoMessageType.None)]
-	/// <summary> . </summary>
-	public float freeFallFromRopeModifier;
-
-	[FoldoutGroup("Rope")]
-	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
-	[InfoBox(".", InfoMessageType.None)]
-	/// <summary> . </summary>
-	public float jumpOffRopeModifier;
-
-	[FoldoutGroup("Rope")]
-	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
-	[InfoBox(".", InfoMessageType.None)]
-	/// <summary> . </summary>
-	public float jumpRopeDuration;
+	[InfoBox("Modifier applied to the last direction on the rope when the character switches from the rope to jump of the rope.", InfoMessageType.None)]
+	/// <summary> Modifier applied to the last direction on the rope when the character switches from the rope to jump of the rope. </summary>
+	public float JumpOffRopeModifier;
 
 	#endregion
 
+	#region GLOW
 
-	[Header("Glow")]
-	public float glowHeight;
-	public float glowRadius;
-	public float glowStrength;
-	public Color glowColor;
+	[FoldoutGroup("Glow")]
+	[InfoBox("Up offset from the character position where the glow starts to be emitted.", InfoMessageType.None)]
+	/// <summary> Up offset from the character position where the glow starts to be emitted. </summary>
+	public float GlowHeight;
+
+	[FoldoutGroup("Glow")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("Radius of the shader glow effect.", InfoMessageType.None)]
+	/// <summary> Radius of the shader glow effect. </summary>
+	public float GlowRadius;
+
+	[FoldoutGroup("Glow")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("Intensity of the shader glow effect.", InfoMessageType.None)]
+	/// <summary> Intensity of the shader glow effect. </summary>
+	public float GlowStrength;
+
+	[FoldoutGroup("Glow")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("Color of the shader glow effect.", InfoMessageType.None)]
+	/// <summary> Color of the shader glow effect. </summary>
+	public Color GlowColor;
+
+	#endregion
+
+	#region STATUS
+
+	[FoldoutGroup("Status")]
+	[InfoBox("Maximum distance the character can travel on the y-axis between two grounded position without dying.", InfoMessageType.None)]
+	/// <summary> Maximum distance the character can travel on the y-axis between two grounded position without dying. </summary>
+	public float LethalHeight;
 
 
-	[Header("Debug")]
-	[Tooltip("If true, the character starts the play mode with a backpack.")]
-	public bool startWithBag;
+	[Title("Stun")]
+	[FoldoutGroup("Status")]
+	[InfoBox("Maximum distance the character can travel on the y-axis between two grounded position without being stunned.", InfoMessageType.None)]
+	/// <summary> Maximum distance the character can travel on the y-axis between two grounded position without being stunned. </summary>
+	public float StunHeight;
+
+	[FoldoutGroup("Status")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("Duration of the stun status based on the distance travelled on the y-axis.", InfoMessageType.None)]
+	/// <summary> Duration of the stun status based on the distance travelled on the y-axis. </summary>
+	public AnimationCurve StunDuration;
+
+	[FoldoutGroup("Status")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("Duration of the slow status applied after the stun status vanquishes.", InfoMessageType.None)]
+	/// <summary> Duration of the slow status applied after a stun status vanquishes. </summary>
+	public float PostStunSlowDuration;
 
 
-	[Header("Status")]
-	public float lethalHeight;
-	
-	public float stunHeight;
-	public AnimationCurve stunDuration;
+	[Title("Slow")]
+	[FoldoutGroup("Status")]
+	[InfoBox("Maximum distance the character can travel on the y-axis between two grounded position without being slowed.", InfoMessageType.None)]
+	/// <summary> Maximum distance the character can travel on the y-axis between two grounded position without being slowed. </summary>
+	public float SlowHeight;
 
-	public float slowHeight;
-	public AnimationCurve slowDuration;
-	public float slowTimePostStun;
-	public AnimationCurve slowPercentage;
-	public float maxSlowTime;
+	[FoldoutGroup("Status")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("Duration of the slow status based on the distance travelled on the y-axis.", InfoMessageType.None)]
+	/// <summary> Duration of the slow status based on the distance travelled on the y-axis. </summary>
+	public AnimationCurve SlowDuration;
 
+	[FoldoutGroup("Status")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("Percentage of the character speed reduction while under the slow status based on the distance travelled on the y-axis.", InfoMessageType.None)]
+	/// <summary> Percentage of the character speed reduction while under the slow status based on the distance travelled on the y-axis. </summary>
+	public AnimationCurve SlowPercentage;
 
-	[Header("Camera")]
-	public float rotationSpeed;
-	public CameraStyle startingStyle;
-	public float topClamp;
-	public float bottomClamp;
+	[FoldoutGroup("Status")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("Maximum duration of the slow status.", InfoMessageType.None)]
+	/// <summary> Maximum duration of the slow status. </summary>
+	public float MaxSlowDuration;
+
+	#endregion
+
+	#region CAMERA
+
+	[FoldoutGroup("Camera")]
+	[InfoBox("Starting style of the camera. BASIC: default third person camera. AIMING: third person camera where the character always face the camera forward direction.", InfoMessageType.None)]
+	/// <summary> Starting style of the camera. BASIC: default third person camera. AIMING: third person camera where the character always face the camera forward direction. </summary>
+	public CameraStyle StartingStyle;
+
+	[FoldoutGroup("Camera")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("Maximum angle of the camera pitch can move up to.", InfoMessageType.None)]
+	/// <summary> Maximum angle of the camera pitch can move up to. </summary>
+	public float TopClamp;
+
+	[FoldoutGroup("Camera")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("Minimum angle of the camera pitch can move down to.", InfoMessageType.None)]
+	/// <summary> Minimum angle of the camera pitch can move down to. </summary>
+	public float BottomClamp;
+
+	[FoldoutGroup("Camera")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("Speed value of the lerp function that orient the character graphics in the direction of the movement.", InfoMessageType.None)]
+	/// <summary> Speed value of the lerp function that orient the character graphics in the direction of the movement. </summary>
+	public float RotationSpeed;
+
+	#endregion
 }

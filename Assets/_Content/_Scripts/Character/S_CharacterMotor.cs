@@ -526,27 +526,27 @@ public class CharacterMotor : MonoBehaviour
 	private void ApplyFallHeight()
 	{
 		m_fallHeight = Math.Abs(m_rigidbody.position.y - m_positionStartFall.y);
-		if (m_fallHeight >= m_ssoCharacter.lethalHeight)
+		if (m_fallHeight >= m_ssoCharacter.LethalHeight)
 		{
 			HandleDeath();
 		}
-		else if (m_fallHeight >= m_ssoCharacter.stunHeight)
+		else if (m_fallHeight >= m_ssoCharacter.StunHeight)
 		{
 			// Stun the character for x secondes
 			m_isStunned = true;
 
 			// Cross product to get the stun mitiged value on a 0-1 scale
-			float stunMitigedValue = (m_fallHeight - m_ssoCharacter.stunHeight) / (m_ssoCharacter.lethalHeight - m_ssoCharacter.stunHeight);
-			m_stunTimer = m_ssoCharacter.stunDuration.Evaluate(stunMitigedValue);
+			float stunMitigedValue = (m_fallHeight - m_ssoCharacter.StunHeight) / (m_ssoCharacter.LethalHeight - m_ssoCharacter.StunHeight);
+			m_stunTimer = m_ssoCharacter.StunDuration.Evaluate(stunMitigedValue);
 		}
-		else if (m_fallHeight >= m_ssoCharacter.slowHeight)
+		else if (m_fallHeight >= m_ssoCharacter.SlowHeight)
 		{
 			// Slow the character for x secondes by y percent
 			m_isSlowed = true;
 
 			// Cross product to get the slow mitiged value on a 0-1 scale
-			float slowMitigedValue = (m_fallHeight - m_ssoCharacter.slowHeight) / (m_ssoCharacter.stunHeight - m_ssoCharacter.slowHeight);
-			m_slowTimer = m_ssoCharacter.slowDuration.Evaluate(slowMitigedValue);
+			float slowMitigedValue = (m_fallHeight - m_ssoCharacter.SlowHeight) / (m_ssoCharacter.StunHeight - m_ssoCharacter.SlowHeight);
+			m_slowTimer = m_ssoCharacter.SlowDuration.Evaluate(slowMitigedValue);
 		}
 	}
 
@@ -561,7 +561,7 @@ public class CharacterMotor : MonoBehaviour
 				m_isStunned = false;
 				m_isSlowed = true;
 				m_isSlowedPostStun = true;
-				m_slowTimer = m_ssoCharacter.slowTimePostStun;
+				m_slowTimer = m_ssoCharacter.PostStunSlowDuration;
 			}
 		}
 
@@ -674,11 +674,11 @@ public class CharacterMotor : MonoBehaviour
 			{
 				if (!m_isSlowedPostStun)
 				{
-					desiredSpeed *= m_ssoCharacter.slowPercentage.Evaluate((m_ssoCharacter.maxSlowTime - m_slowTimer) / m_ssoCharacter.maxSlowTime);
+					desiredSpeed *= m_ssoCharacter.SlowPercentage.Evaluate((m_ssoCharacter.MaxSlowDuration - m_slowTimer) / m_ssoCharacter.MaxSlowDuration);
 				}
 				else
 				{
-					desiredSpeed *= m_ssoCharacter.slowPercentage.Evaluate((m_ssoCharacter.slowTimePostStun - m_slowTimer) / m_ssoCharacter.slowTimePostStun);
+					desiredSpeed *= m_ssoCharacter.SlowPercentage.Evaluate((m_ssoCharacter.PostStunSlowDuration - m_slowTimer) / m_ssoCharacter.PostStunSlowDuration);
 				}
 			}
 
@@ -908,7 +908,7 @@ public class CharacterMotor : MonoBehaviour
 		}
 
 		m_currentClimbSpeed += m_currentClimbSpeed * Time.fixedDeltaTime;
-		float clampedClimbSpeed = Mathf.Clamp(m_currentClimbSpeed, 0, m_ssoCharacter.maxClimbSpeed);
+		float clampedClimbSpeed = Mathf.Clamp(m_currentClimbSpeed, 0, m_ssoCharacter.MaxClimbSpeed);
 		m_rope.ChangeHoldLength(-clampedClimbSpeed * Time.fixedDeltaTime);
 	}
 
@@ -953,8 +953,8 @@ public class CharacterMotor : MonoBehaviour
 		if (!isEnabled)
 		{
 			ApplyFreeRopeForce(IsJumpingPressed
-				? m_ssoCharacter.jumpOffRopeModifier
-				: m_ssoCharacter.freeFallFromRopeModifier
+				? m_ssoCharacter.JumpOffRopeModifier
+				: m_ssoCharacter.FreeFallFromRopeModifier
 			);
 		}
 	}

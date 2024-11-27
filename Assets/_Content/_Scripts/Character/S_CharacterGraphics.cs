@@ -34,7 +34,7 @@ public class CharacterGraphics : MonoBehaviour
 				transform.localRotation = Quaternion.Lerp(
 					transform.localRotation,
 					Quaternion.LookRotation(planarMovement, Vector3.up),
-					Time.deltaTime * m_ssoCharacter.rotationSpeed
+					Time.deltaTime * m_ssoCharacter.RotationSpeed
 				);
 			}
 		}

@@ -60,7 +60,7 @@ public class CameraMotor : MonoBehaviour
 		m_rsoCameraForward.value = new Vector3(transform.forward.x, 0, transform.forward.z);
 		m_rsoCameraRight.value = new Vector3(transform.right.x, 0, transform.right.z);
 
-		m_rsoCameraStyle.value = m_ssoCharacter.startingStyle;
+		m_rsoCameraStyle.value = m_ssoCharacter.StartingStyle;
 		m_cinemachineTargetYaw = startRotation.eulerAngles.y;
 		HandleRotation();
 	}
@@ -69,7 +69,7 @@ public class CameraMotor : MonoBehaviour
 	{
 		// Clamp our rotations so our values are limited 360 degrees
 		m_cinemachineTargetYaw = Matha.ClampAngle(m_cinemachineTargetYaw, float.MinValue, float.MaxValue);
-		m_cinemachineTargetPitch = Matha.ClampAngle(m_cinemachineTargetPitch, m_ssoCharacter.bottomClamp, m_ssoCharacter.topClamp);
+		m_cinemachineTargetPitch = Matha.ClampAngle(m_cinemachineTargetPitch, m_ssoCharacter.BottomClamp, m_ssoCharacter.TopClamp);
 
 		// Stops the camera if the character is dead
 		if (m_rsoCharacterDeath.value) return;
