@@ -97,7 +97,7 @@ public class MushroomBatch : MonoBehaviour
     private bool IsNormalFacingOrigin(RaycastHit hitInfo)
     {
         Vector3 rayDirection = (transform.position - hitInfo.point).normalized;
-        return _minDotAngle <= Vector3.Dot(rayDirection, hitInfo.normal);
+        return _minDotAngle <= Vector3.Dot(rayDirection.normalized, hitInfo.normal.normalized);
     }
 
     private void OnDrawGizmosSelected()
