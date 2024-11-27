@@ -73,12 +73,12 @@ public class DebugMisc : MonoBehaviour
 
     public void ToggleTorchAnim()
     {
-        _torchConfig.activateBreakAnim = !_torchConfig.activateBreakAnim;
+        _torchConfig.ActivateBreakAnim = !_torchConfig.ActivateBreakAnim;
         UpdateTorchText();
     }
 
     private void UpdateTorchText()
     {
-		_torchButtonText.text = _torchConfig.activateBreakAnim ? "Torch Break Anim: ON" : "Torch Break Anim: OFF";
+		_torchButtonText.text = _torchConfig.ActivateBreakAnim ? "Torch Break Anim: ON" : "Torch Break Anim: OFF";
 	}
 }

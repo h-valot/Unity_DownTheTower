@@ -61,7 +61,7 @@ public class SSO_Rope : ScriptableObject
 
 	[FoldoutGroup("Deployment")]
 	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
-	[InfoBox("Layer masks the deployment system will ignore for its physics calculations (raycasts)., InfoMessageType.None")]
+	[InfoBox("Layer masks the deployment system will ignore for its physics calculations (raycasts).", InfoMessageType.None)]
 	/// <summary> Layer masks the deployment system will ignore for its physics calculations (raycasts). </summary>
 	public LayerMask DeployLayersToIgnore;
 

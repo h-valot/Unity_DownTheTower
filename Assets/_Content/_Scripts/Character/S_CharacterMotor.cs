@@ -995,7 +995,7 @@ public class CharacterMotor : MonoBehaviour
 			{
 				Destroy(HandObject.gameObject);
 			}
-			m_craftCoroutine = StartCoroutine(Craft(CraftType.TORCH, m_ssoTorch.craftingDuration));
+			m_craftCoroutine = StartCoroutine(Craft(CraftType.TORCH, m_ssoTorch.CraftingDuration));
 		}
 		else if (m_craftType == CraftType.ROPE)
 		{
@@ -1062,7 +1062,7 @@ public class CharacterMotor : MonoBehaviour
 		yield return new WaitForSeconds(duration);
 
 		HandObject = Instantiate(
-			craftType == CraftType.TORCH ? (Permanent)m_ssoTorch.pfTorch : (Permanent)m_ssoRope.PfRope, 
+			craftType == CraftType.TORCH ? (Permanent)m_ssoTorch.PfTorch : (Permanent)m_ssoRope.PfRope, 
 			m_handSocket.transform.position,
 			Quaternion.identity,
 			m_handSocket.transform
