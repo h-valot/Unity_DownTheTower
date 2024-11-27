@@ -21,16 +21,16 @@ public class Torch : Permanent
 	[FoldoutGroup("RSO")][SerializeField] private RSO_TorchManager m_rsoTorchManager;
 	[FoldoutGroup("RSO")][SerializeField] private RSO_CharacterPosition m_rsoCharacterPosition;
 
-    // ----- PUBLIC VARIABLES -----
-    [HideInInspector] public bool IsInHand = false;
+	// ----- PUBLIC VARIABLES -----
+	[HideInInspector] public bool IsLit;
+    [HideInInspector] public bool IsInHand;
 
-    // ----- PRIVATE VARIABLES -----
-    private Vector3 m_lastPosition;
+	// ----- PRIVATE VARIABLES -----
+	private Vector3 m_lastPosition;
     private LayerMask m_layerMask;
 
     private MaterialPropertyBlock m_propertyBlock;
 
-    private bool m_isLit;
     private bool m_hasChangedColor;
     private bool m_hasPlayedHitSound;
     private bool m_isDeactivate;
@@ -68,7 +68,7 @@ public class Torch : Permanent
     {
         if (m_ssoTorch.IsStartingLit)
         {
-            m_isLit = true;
+            IsLit = true;
             m_lightPercent = 1f;
             m_propertyBlock.SetFloat("_lightPercent", m_lightPercent);
             m_meshRenderer.SetPropertyBlock(m_propertyBlock);
@@ -82,7 +82,7 @@ public class Torch : Permanent
     private void Update()
     {
 		// Assertion
-        if (IsInHand || !m_isLit) return;
+        if (IsInHand || !IsLit) return;
 
 		if (HasMoved()) UpdateTorchFeedback();
 	}
@@ -93,7 +93,7 @@ public class Torch : Permanent
 		// TODO - Use trigger enter and exit to prevent penetration test when there is no collider in range.
 
 		// Assertion
-		if (IsInHand || !m_isLit) return;
+		if (IsInHand || !IsLit) return;
 
 		Vector3 _lightOffset = Vector3.zero;
 		Collider[] _hitColliders = Physics.OverlapSphere(m_pointLightBase.position, m_ssoTorch.LightOffsetDistance, m_layerMask);
@@ -171,9 +171,9 @@ public class Torch : Permanent
 		// Assertion
         if (!IsInHand) return;
 
-		if (m_isLit) 
+		if (IsLit) 
 		{
-            m_isLit = false;
+            IsLit = false;
             DOTween.Kill(gameObject.GetInstanceID() + "light");
             DOTween.To(() => m_lightPercent, x => m_lightPercent = x, 0f, m_ssoTorch.UnlitDuration).SetEase(Ease.Linear).SetId(gameObject.GetInstanceID() + "light")
                 .OnUpdate(() =>
@@ -186,7 +186,7 @@ public class Torch : Permanent
         }
 		else
 		{
-            m_isLit = true;
+            IsLit = true;
             m_light.enabled = true;
             DOTween.Kill(gameObject.GetInstanceID() + "light");
             DOTween.To(() => m_lightPercent, x => m_lightPercent = x, 1f, m_ssoTorch.UnlitDuration).SetEase(Ease.Linear).SetId(gameObject.GetInstanceID() + "light")

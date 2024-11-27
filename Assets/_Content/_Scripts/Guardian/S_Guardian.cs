@@ -1,10 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
-using TMPro;
 
 public class Guardian : MonoBehaviour
 {
@@ -18,11 +16,11 @@ public class Guardian : MonoBehaviour
     // --- PRIVATE ---
 
     [Header("Internal References")]
+	[SerializeField] private NavMeshAgent _agent;
     [SerializeField] private SSO_Guardian _guardianConfig;
     [SerializeField] private PathPatrol _pathPatrol;
     [SerializeField] private GameObject _scanCube;
     [SerializeField] private GameObject _raycastEyes;
-    private NavMeshAgent _agent;
 
     // Targeting
     private GameObject _actualTarget;
@@ -59,13 +57,7 @@ public class Guardian : MonoBehaviour
 
     #endregion
 
-    #region Monobehavior Functions
-
-    private void Start()
-    {
-        _agent = GetComponent<NavMeshAgent>();
-        _aggro = false;
-    }
+    #region MONOBEHAVIOR
 
     private void Update()
     {
@@ -173,6 +165,7 @@ public class Guardian : MonoBehaviour
     #endregion
 
     #region Dictionary Manager
+	
     public void AddToPotentialTargets(GameObject _targetRef)
     {
         if (_potentialTarget.ContainsKey(_targetRef) == false) 
