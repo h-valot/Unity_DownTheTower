@@ -812,6 +812,7 @@ public class CharacterMotor : MonoBehaviour
 	private void EnterRopeState()
 	{
 		EnterFallState();
+		ToggleRopeConstraint(m_ssoCharacter.RopeHoldingMethod == RopeHolding.HOLD_TO_LET_GO ? !m_isHolding : m_isHolding);
 		m_rope.IncreaseHoldLength(2);
 	}
 
