@@ -322,6 +322,21 @@ public class CharacterMotor : MonoBehaviour
 		DesequipRope();
 	}
 
+	/// <summary>
+	/// If the input is pressed and If the player hasn't jumped:
+	/// Add a vertical impulse to the player
+	/// </summary>
+	private void Jump(bool isPressed)
+	{
+		// Assertions
+		if (!isPressed) return;
+		if (m_isStunned) return;
+		if (m_hasJumped) return;
+
+		m_rigidbody.AddForce(Vector3.up * m_ssoCharacter.JumpForce, ForceMode.Impulse);
+		m_hasJumped = true;
+	}
+
 	private void JumpRope(bool isPressed)
 	{
 		if (!IsRopeValid) return;
@@ -697,63 +712,49 @@ public class CharacterMotor : MonoBehaviour
     /// </summary>
     private void HandleStepOn()
     {
-        if (m_raycastHits.Length > 1 && m_moveInput != Vector2.zero)
-        {
-            Vector3 stepOnTarget = transform.position;
-			Vector3 moveInput3D = (m_rsoCameraRight.value * m_moveInput.x + m_rsoCameraForward.value * m_moveInput.y).normalized;
+		// Assertion
+        if (m_raycastHits.Length <= 1 || m_moveInput == Vector2.zero) return;
+		
+		Vector3 stepOnTarget = transform.position;
+		Vector3 moveInput3D = (m_rsoCameraRight.value * m_moveInput.x + m_rsoCameraForward.value * m_moveInput.y).normalized;
 
-            foreach (RaycastHit _hit in m_raycastHits)
-            {
-                Vector3 hitDirection = _hit.point - transform.position;
-                hitDirection = new Vector3(hitDirection.x, 0, hitDirection.z);
+		foreach (var hit in m_raycastHits)
+		{
+			Vector3 hitDirection = hit.point - transform.position;
+			hitDirection = new Vector3(hitDirection.x, 0, hitDirection.z);
 
-                // Check if hit is in front of character
-                if (Vector3.Dot(moveInput3D, hitDirection) > 0.15)
-                {
-                    if (_hit.point.y - transform.position.y < m_ssoCharacter.StepOnHeight)
-                    {
-                        // We take the highest that is higher than skin width to not trigger step on very small objects
-                        if (_hit.point.y > stepOnTarget.y && _hit.point.y > transform.position.y + m_ssoCharacter.SkinWidth)
-                        {
-                            stepOnTarget = _hit.point;
-                        }
-                    }
-                }
-            }
+			// Check if hit is in front of character
+			if (Vector3.Dot(moveInput3D, hitDirection) > 0.15)
+			{
+				if (hit.point.y - transform.position.y < m_ssoCharacter.StepOnHeight)
+				{
+					// We take the highest that is higher than skin width to not trigger step on very small objects
+					if (hit.point.y > stepOnTarget.y && hit.point.y > transform.position.y + m_ssoCharacter.SkinWidth)
+					{
+						stepOnTarget = hit.point;
+					}
+				}
+			}
+		}
 
-            if (stepOnTarget != transform.position)
-            {
-                // Check if there is really an object to step on in the speed direction, to prevent steping on end of slope
-                Vector3 start = new Vector3(m_rigidbody.position.x, m_rigidbody.position.y + m_ssoCharacter.SkinWidth, m_rigidbody.position.z);
-                Vector3 direction = m_rigidbody.velocity.normalized;
-                float distance = m_collider.radius * 2;
-                if (Physics.Raycast(start, direction, distance, ~m_layerMaskToIgnore))
-                {
-                    // Check if there is a flat surface to step on (<45 degrees)
-                    start = stepOnTarget + (new Vector3(stepOnTarget.x, 0, stepOnTarget.z) - new Vector3(m_rigidbody.position.x, 0, m_rigidbody.position.z)).normalized * m_ssoCharacter.SkinWidth + new Vector3(0, m_ssoCharacter.SkinWidth, 0);
-                    direction = Vector3.down;
-                    distance = m_ssoCharacter.SkinWidth * 2;
-                    if (Physics.Raycast(start, direction, distance, ~m_layerMaskToIgnore))
-                    {
-                        m_rigidbody.position = new Vector3(m_rigidbody.position.x, stepOnTarget.y, m_rigidbody.position.z);
-                    }
-                }
-            }
-        }
-    }
-
-    /// <summary>
-    /// If the input is pressed and If the player hasn't jumped:
-    /// Add a vertical impulse to the player
-    /// </summary>
-    private void Jump(bool isPressed)
-    {
-		// Assertions
-        if (!isPressed) return;
-		if(m_hasJumped) return;
-
-		m_rigidbody.AddForce(Vector3.up * m_ssoCharacter.JumpForce, ForceMode.Impulse);
-		m_hasJumped = true;
+		if (stepOnTarget != transform.position)
+		{
+			// Check if there is really an object to step on in the speed direction, to prevent steping on end of slope
+			Vector3 start = new Vector3(m_rigidbody.position.x, m_rigidbody.position.y + m_ssoCharacter.SkinWidth, m_rigidbody.position.z);
+			Vector3 direction = m_rigidbody.velocity.normalized;
+			float distance = m_collider.radius * 2;
+			if (Physics.Raycast(start, direction, distance, ~m_layerMaskToIgnore))
+			{
+				// Check if there is a flat surface to step on (<45 degrees)
+				start = stepOnTarget + (new Vector3(stepOnTarget.x, 0, stepOnTarget.z) - new Vector3(m_rigidbody.position.x, 0, m_rigidbody.position.z)).normalized * m_ssoCharacter.SkinWidth + new Vector3(0, m_ssoCharacter.SkinWidth, 0);
+				direction = Vector3.down;
+				distance = m_ssoCharacter.SkinWidth * 2;
+				if (Physics.Raycast(start, direction, distance, ~m_layerMaskToIgnore))
+				{
+					m_rigidbody.position = new Vector3(m_rigidbody.position.x, stepOnTarget.y, m_rigidbody.position.z);
+				}
+			}
+		}
     }
 
     /// <summary>
