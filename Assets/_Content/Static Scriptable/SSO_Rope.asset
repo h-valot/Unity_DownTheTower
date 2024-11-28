@@ -12,8 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7c157d0ef5740a74d8ec4a4c4d788a6e, type: 3}
   m_Name: SSO_Rope
   m_EditorClassIdentifier: 
+  SafeMaterial: {fileID: 2100000, guid: ba23822fb6a3b364099a36e0afdebbeb, type: 2}
+  MidMaterial: {fileID: 2100000, guid: 366714ebc99d310499c50f72b93c87e1, type: 2}
+  DangerMaterial: {fileID: 2100000, guid: 550f01c26defd7e48adfe4458382316d, type: 2}
   PfRope: {fileID: 2423774863846630498, guid: fd48698d019dac54c9052c72fb4353f6, type: 3}
   PfRopeLine: {fileID: 440317143077410654, guid: 08059428aa4d4934bb46b2f7e68db13b,
+    type: 3}
+  PfRopeJoint: {fileID: 2944967571969741767, guid: 1d3e55933e7789d4fb4b53fae33915db,
     type: 3}
   PfRopeInteractible: {fileID: 6891042402262571688, guid: f6a63fbf1b31ae9468d8188ffcf741b3,
     type: 3}
@@ -33,6 +38,3 @@ MonoBehaviour:
   MaxDistFromCamera: 8
   CameraOffsetAngle: 20
   MaxCameraDownwardClamp: 45
-  SafeMaterial: {fileID: 2100000, guid: ba23822fb6a3b364099a36e0afdebbeb, type: 2}
-  MidMaterial: {fileID: 2100000, guid: 366714ebc99d310499c50f72b93c87e1, type: 2}
-  DangerMaterial: {fileID: 2100000, guid: 550f01c26defd7e48adfe4458382316d, type: 2}

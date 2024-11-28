@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using DG.Tweening;
 using Sirenix.OdinInspector;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class Rope : Permanent
@@ -9,6 +8,7 @@ public class Rope : Permanent
 	#region REFERENCES
 
 	[Title("Internal references")]
+	[SerializeField] private BoxCollider m_boxCollider;
 	[SerializeField] private Transform m_ropeAttach;
 	[SerializeField] private MeshRenderer m_previewMeshRendered;
 	[SerializeField] private GameObject m_previewGameObject;
@@ -26,13 +26,13 @@ public class Rope : Permanent
 
 	private bool m_isConnected;
 	private bool m_isPlaced;
-	public float m_holdLength;
+	private float m_holdLength;
 	private List<Vector3> m_folds = new List<Vector3>();
 	private List<RopeLine> m_ropeLines = new List<RopeLine>();
 	private Transform m_characterHarness;
 	private SoftJointLimit m_linearLimit;
 
-	public bool IsConstrained;
+	[HideInInspector] public bool IsConstrained;
 	public bool IsConnected => m_isConnected;
 	public bool IsPlaced => m_isPlaced;
 	public float HoldLength => m_holdLength;
@@ -138,7 +138,8 @@ public class Rope : Permanent
 		transform.eulerAngles = new Vector3(0, cameraTransform.rotation.eulerAngles.y, 0);
 		transform.DOJump(deployPoint, 1f, 0, 0.3f).OnComplete(() =>
 		{
-			// Rope custom initialization commands 
+			// Rope custom initialization commands
+			m_boxCollider.enabled = true;
 			m_folds = new List<Vector3>() { m_ropeAttach.position.CutDigits(2) };
 			m_isPlaced = true;
 		});
