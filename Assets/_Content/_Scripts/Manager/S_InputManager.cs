@@ -1,35 +1,34 @@
 using Sirenix.OdinInspector;
 using UnityEngine;
-using UnityEngine.AI;
 using UnityEngine.InputSystem;
 
 public class InputManager : MonoBehaviour
 {
 	#region REFERENCES
 
-	[Header("References")]
+	[Header("Internal references")]
 	[SerializeField] private PlayerInput m_playerInput;
 
-	[FoldoutGroup("SSO")][SerializeField] private SSO_Inputs m_ssoInputs;
+	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Inputs m_ssoInputs;
 
-	[FoldoutGroup("RSE")][SerializeField] private RSE_Move m_rseMove;
-	[FoldoutGroup("RSE")][SerializeField] private RSE_Look m_rseLook;
-	[FoldoutGroup("RSE")][SerializeField] private RSE_Jump m_rseJump;
-	[FoldoutGroup("RSE")][SerializeField] private RSE_Run m_rseRun;
-	[FoldoutGroup("RSE")][SerializeField] private RSE_Interact m_rseInteract;
-	[FoldoutGroup("RSE")][SerializeField] private RSE_Cancel m_rseCancel;
-	[FoldoutGroup("RSE")][SerializeField] private RSE_Craft m_rseCraft;
-	[FoldoutGroup("RSE")][SerializeField] private RSE_Throw m_rseThrow;
-	[FoldoutGroup("RSE")][SerializeField] private RSE_ToggleInHand m_rseToggleInHand;
-	[FoldoutGroup("RSE")][SerializeField] private RSE_Pause m_rsePause;
-	[FoldoutGroup("RSE")][SerializeField] private RSE_HideUI m_rseHideUI;
-	[FoldoutGroup("RSE")][SerializeField] private RSE_Recycle m_rseRecycle;
-	[FoldoutGroup("RSE")][SerializeField] private RSE_ToggleCursor m_rseToggleCursor;
-	[FoldoutGroup("RSE")][SerializeField] private RSE_Climb m_rseClimb;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Move m_rseMove;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Look m_rseLook;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Jump m_rseJump;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Run m_rseRun;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Interact m_rseInteract;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Cancel m_rseCancel;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Craft m_rseCraft;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Throw m_rseThrow;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSE_ToggleInHand m_rseToggleInHand;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Pause m_rsePause;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSE_HideUI m_rseHideUI;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Recycle m_rseRecycle;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSE_ToggleCursor m_rseToggleCursor;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Climb m_rseClimb;
 
-	[FoldoutGroup("RSO")][SerializeField] private RSO_GamePaused m_rsoGamePaused;
-	[FoldoutGroup("RSO")][SerializeField] private RSO_CraftInputLocked m_rsoCraftInputLocked;
-	[FoldoutGroup("RSO")][SerializeField] private RSO_RecycleInputLocked m_rsoRecycleInputLocked;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_GamePaused m_rsoGamePaused;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CraftInputLocked m_rsoCraftInputLocked;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_RecycleInputLocked m_rsoRecycleInputLocked;
 
 	#endregion
 
@@ -214,9 +213,14 @@ public class InputManager : MonoBehaviour
 		m_rseClimb.Call(m_climb);
 	}
 
-	public void OnHideUI()
+	public void OnHideUI(InputValue value)
 	{
 		m_rseHideUI.Call();
+	}
+
+	public void OnPause()
+	{
+		m_rsePause.Call();
 	}
 
 	#endregion

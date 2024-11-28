@@ -9,16 +9,16 @@ public class CharacterInteract : MonoBehaviour
 	[SerializeField] private Transform m_backpackAnchor;
 	[SerializeField] private Transform m_characterGraphics;
 
-	[FoldoutGroup("SSO")][SerializeField] private SSO_Character m_characterConfig;
+	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Character m_characterConfig;
 
-	[FoldoutGroup("RSE")][SerializeField] private RSE_Recycle m_rseRecycle;
-	[FoldoutGroup("RSE")][SerializeField] private RSE_Interact m_rseInteract;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Recycle m_rseRecycle;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Interact m_rseInteract;
 
-	[FoldoutGroup("RSO")][SerializeField] private RSO_CraftInputLocked m_rsoCraftInputLocked;
-	[FoldoutGroup("RSO")][SerializeField] private RSO_RecycleInputLocked m_rsoRecycleInputLocked;
-	[FoldoutGroup("RSO")][SerializeField] private RSO_CharacterState m_rsoCharacterState;
-	[FoldoutGroup("RSO")][SerializeField] private RSO_InteractableValid m_rsoInteractableValid;
-	[FoldoutGroup("RSO")][SerializeField] private RSO_InteractableRecyclable m_rsoInteractableRecyclable;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CraftInputLocked m_rsoCraftInputLocked;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_RecycleInputLocked m_rsoRecycleInputLocked;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterState m_rsoCharacterState;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_InteractableValid m_rsoInteractableValid;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_InteractableRecyclable m_rsoInteractableRecyclable;
 
 	public List<Interactable> m_interactables = new List<Interactable>();
 	private Backpack m_backpack;

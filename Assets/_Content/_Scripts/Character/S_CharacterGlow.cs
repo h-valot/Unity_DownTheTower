@@ -3,9 +3,9 @@ using UnityEngine;
 
 public class CharacterGlow : MonoBehaviour
 {
-	[FoldoutGroup("SSO")][SerializeField] private SSO_Character m_ssoCharacter;
+	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Character m_ssoCharacter;
 
-	[FoldoutGroup("RSO")][SerializeField] private RSO_CharacterPosition m_rsoCharacterPosition;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterPosition m_rsoCharacterPosition;
 
     private void OnEnable()
     {

@@ -1,11 +1,11 @@
 using System.Collections.Generic;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 public class TorchManager : MonoBehaviour
 {
-    [Header("External References")]
-    [SerializeField] private SSO_Torch m_ssoTorch;
-    [SerializeField] private RSO_TorchManager m_rsoTorchManager;
+    [FoldoutGroup("Scriptable")][SerializeField] private SSO_Torch m_ssoTorch;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_TorchManager m_rsoTorchManager;
 
     private List<Torch> m_torches = new List<Torch>();
 

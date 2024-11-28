@@ -7,7 +7,7 @@ public class CharacterMotor : MonoBehaviour
 {
 	#region REFERENCES
 
-	[Header("References")]
+	[Header("Internal references")]
 	[SerializeField] private Rigidbody m_rigidbody;
 	[SerializeField] private CapsuleCollider m_collider;
 	[SerializeField] private Transform m_handSocket;
@@ -17,32 +17,32 @@ public class CharacterMotor : MonoBehaviour
 	[SerializeField] private Transform m_cameraTarget;
 	[SerializeField] private CharacterGraphics m_characterGraphics;
 
-	[FoldoutGroup("SSO")][SerializeField] private SSO_Character m_ssoCharacter;
-	[FoldoutGroup("SSO")][SerializeField] private SSO_Torch m_ssoTorch;
-	[FoldoutGroup("SSO")][SerializeField] private SSO_Rope m_ssoRope;
+	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Character m_ssoCharacter;
+	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Torch m_ssoTorch;
+	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Rope m_ssoRope;
 
-	[FoldoutGroup("RSE")][SerializeField] private RSE_Move m_rseMove;
-	[FoldoutGroup("RSE")][SerializeField] private RSE_Jump m_rseJump;
-	[FoldoutGroup("RSE")][SerializeField] private RSE_Craft m_rseCraft;
-	[FoldoutGroup("RSE")][SerializeField] private RSE_Throw m_rseThrow;
-	[FoldoutGroup("RSE")][SerializeField] private RSE_Run m_rseRun;
-	[FoldoutGroup("RSE")][SerializeField] private RSE_Climb m_rseClimb;
-	[FoldoutGroup("RSE")][SerializeField] private RSE_Cancel m_rseCancel;
-	[FoldoutGroup("RSE")][SerializeField] private RSE_BackpackCrafting m_rseBackpackCrafting;
-	[FoldoutGroup("RSE")][SerializeField] private RSE_SetCharacterPosition m_rseSetCharacterPosition;
-	[FoldoutGroup("RSE")][SerializeField] private RSE_KillCharacter m_rseKillCharacter;
-	[FoldoutGroup("RSE")][SerializeField] private RSE_InitializeCamera m_rseInitializeCamera;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Move m_rseMove;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Jump m_rseJump;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Craft m_rseCraft;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Throw m_rseThrow;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Run m_rseRun;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Climb m_rseClimb;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Cancel m_rseCancel;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSE_BackpackCrafting m_rseBackpackCrafting;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSE_SetCharacterPosition m_rseSetCharacterPosition;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSE_KillCharacter m_rseKillCharacter;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSE_InitializeCamera m_rseInitializeCamera;
 
-	[FoldoutGroup("RSO")][SerializeField] private RSO_MovementDatas m_rsoMovementDatas;
-	[FoldoutGroup("RSO")][SerializeField] private RSO_CameraStyle m_rsoCameraStyle;
-	[FoldoutGroup("RSO")][SerializeField] private RSO_CraftInputLocked m_rsoCraftInputLocked;
-	[FoldoutGroup("RSO")][SerializeField] private RSO_RecycleInputLocked m_rsoRecycleInputLocked;
-	[FoldoutGroup("RSO")][SerializeField] private RSO_CharacterState m_rsoCharacterState;
-	[FoldoutGroup("RSO")][SerializeField] private RSO_CharacterPosition m_rsoCharacterPosition;
-	[FoldoutGroup("RSO")][SerializeField] private RSO_CharacterDeath m_rsoCharacterDeath;
-	[FoldoutGroup("RSO")][SerializeField] private RSO_CameraForward m_rsoCameraForward;
-	[FoldoutGroup("RSO")][SerializeField] private RSO_CameraRight m_rsoCameraRight;
-	[FoldoutGroup("RSO")][SerializeField] private RSO_CameraTransform m_rsoCameraTransform;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_MovementDatas m_rsoMovementDatas;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CameraStyle m_rsoCameraStyle;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CraftInputLocked m_rsoCraftInputLocked;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_RecycleInputLocked m_rsoRecycleInputLocked;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterState m_rsoCharacterState;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterPosition m_rsoCharacterPosition;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterDeath m_rsoCharacterDeath;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CameraForward m_rsoCameraForward;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CameraRight m_rsoCameraRight;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CameraTransform m_rsoCameraTransform;
 
 	#endregion
 
@@ -79,6 +79,7 @@ public class CharacterMotor : MonoBehaviour
 	[HideInInspector] public Permanent HandObject;
 	[HideInInspector] public Permanent RobotObject;
 	[HideInInspector] public bool IsAiming;
+	private bool m_startAiming;
 
 	// - Rope state -
 	private Rope m_rope;
@@ -858,8 +859,10 @@ public class CharacterMotor : MonoBehaviour
 	private void ExitRopeState()
 	{
 		ToggleRopeConstraint(false);
+
 		m_isHolding = false;
 		m_isClimbing = false;
+		m_isRunning = false;
 	}
 
 	private void HandleRopeMovement()
@@ -1084,20 +1087,25 @@ public class CharacterMotor : MonoBehaviour
 		if (IsAiming)
 		{
 			HandObject.InitializePreview();
+			m_startAiming = true;
 		}
 
 		// Handle pernament throw on input released
 		else
 		{
-			// Assert: object can't be thrown
+			// Assertion
+			if (!m_startAiming) return;
 			if (!HandObject.Throw(m_rsoCameraTransform.value)) return;
 
 			// Exception: rope attachment
+			if (m_rope != null) DesequipRope();
 			m_rope = HandObject as Rope;
 			if (m_rope != null) m_rope?.Attach(m_harness, m_rigidbody);
 
 			HandObject = null;
 			SwitchObjects(ref RobotObject, ref HandObject, m_handSocket);
+
+			m_startAiming = false;
 		}
 	}
 

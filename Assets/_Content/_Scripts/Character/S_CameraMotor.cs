@@ -4,20 +4,20 @@ using UnityEngine;
 
 public class CameraMotor : MonoBehaviour
 {
-	[Header("References")]
+	[Header("External references")]
 	[SerializeField] private CinemachineVirtualCamera m_aimingCamera;
 	[SerializeField] private CinemachineVirtualCamera m_thirdPersonCamera;
 
-	[FoldoutGroup("SSO")][SerializeField] private SSO_Character m_ssoCharacter;
+	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Character m_ssoCharacter;
 
-	[FoldoutGroup("RSE")][SerializeField] private RSE_Look m_rseLook;
-	[FoldoutGroup("RSE")][SerializeField] private RSE_InitializeCamera m_rseInitializeCamera;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Look m_rseLook;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSE_InitializeCamera m_rseInitializeCamera;
 
-	[FoldoutGroup("RSO")][SerializeField] private RSO_CharacterDeath m_rsoCharacterDeath;
-	[FoldoutGroup("RSO")][SerializeField] private RSO_CameraStyle m_rsoCameraStyle;
-	[FoldoutGroup("RSO")][SerializeField] private RSO_CameraForward m_rsoCameraForward;
-	[FoldoutGroup("RSO")][SerializeField] private RSO_CameraRight m_rsoCameraRight;
-	[FoldoutGroup("RSO")][SerializeField] private RSO_CameraTransform m_rsoCameraTransform;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterDeath m_rsoCharacterDeath;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CameraStyle m_rsoCameraStyle;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CameraForward m_rsoCameraForward;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CameraRight m_rsoCameraRight;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CameraTransform m_rsoCameraTransform;
 
 	// - Private variables -
 	private Vector2 m_lookInput;
