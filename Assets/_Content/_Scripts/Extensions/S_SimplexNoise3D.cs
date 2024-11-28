@@ -4,10 +4,8 @@ public class SimplexNoise3D
 {
     public static float SimplexNoise(Vector3 coordinates, float noiseScale)
     {
-        Debug.Log(new Vector3(coordinates.x * noiseScale, coordinates.y * noiseScale, coordinates.z * noiseScale).ToString());
         float output = SNoise(new Vector3(coordinates.x * noiseScale, coordinates.y * noiseScale, coordinates.z * noiseScale));
-        // return Matha.Remap(-1f, 1f, 0f, 1f, output);
-        return output;
+        return Matha.Remap(-1f, 1f, 0f, 1f, output);
     }
 
     public static float SNoise(Vector3 vector)
@@ -16,7 +14,6 @@ public class SimplexNoise3D
 
         // First corner
         Vector3 i = Floor(vector + Vector3.Dot(vector, new Vector3(C.y, C.y, C.y)) * Vector3.one);
-        Matha.PrecisionPrint(i);
         Vector3 x0 = vector - i + Vector3.Dot(i, new Vector3(C.x, C.x, C.x)) * Vector3.one;
 
         // Other corners
@@ -53,6 +50,7 @@ public class SimplexNoise3D
         Vector4 s0 = Floor(b0) * 2f + Vector4.one;
         Vector4 s1 = Floor(b1) * 2f + Vector4.one;
         Vector4 sh = -Step(h, Vector4.zero);
+        Matha.PrecisionPrint(Step(h, Vector4.zero));
 
         Vector4 a0 = new Vector4(b0.x, b0.z, b0.y, b0.w) + new Vector4(s0.x * sh.x, s0.z * sh.x, s0.y * sh.y, s0.w * sh.y);
         Vector4 a1 = new Vector4(b1.x, b1.z, b1.y, b1.w) + new Vector4(s1.x * sh.z, s1.z * sh.z, s1.y * sh.w, s1.w * sh.w);
@@ -64,7 +62,7 @@ public class SimplexNoise3D
 
         // Normalize gradients
         Vector4 norm = InvSqrt(new Vector4(Vector3.Dot(g0, g0), Vector3.Dot(g1, g1), Vector3.Dot(g2, g2), Vector3.Dot(g3, g3)));
-        g0 *= norm.x;
+        g0 *= norm.y;
         g1 *= norm.y;
         g2 *= norm.z;
         g3 *= norm.w;
@@ -73,7 +71,6 @@ public class SimplexNoise3D
         Vector4 m = Vector4.Max(Vector4.one * 0.6f - new Vector4(Vector3.Dot(x0, x0), Vector3.Dot(x1, x1), Vector3.Dot(x2, x2), Vector3.Dot(x3, x3)), Vector4.zero);
         m = new Vector4(m.x * m.x, m.y * m.y, m.z * m.z, m.w * m.w);
         m = new Vector4(m.x * m.x, m.y * m.y, m.z * m.z, m.w * m.w);
-
         Vector4 px = new Vector4(Vector3.Dot(x0, g0), Vector3.Dot(x1, g1), Vector3.Dot(x2, g2), Vector3.Dot(x3, g3));
         return 42f * Vector4.Dot(m, px);
     }
@@ -129,6 +126,6 @@ public class SimplexNoise3D
 
     private static Vector4 InvSqrt(Vector4 vector)
     {
-        return Vector4.one * 1.79284291400159f - (vector * 0.85373472095314f);
+        return new Vector4(1.792843f, 1.792843f, 1.792843f, 1.792843f) -(vector * 0.8537347f);
     }
 }

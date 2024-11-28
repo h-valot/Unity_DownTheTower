@@ -15,7 +15,7 @@ float4 permute(float4 x)
 
 float4 taylorInvSqrt(float4 r)
 {
-    return (float4) 1.79284291400159 - (r * 0.85373472095314);
+    return (float4) 1.792843 - (r * 0.8537347);
 }
 
 #ifndef TESTVALUES_INCLUDED
@@ -74,7 +74,7 @@ void TestValues_float(float3 In, out float Out)
     //float4 s1 = float4(lessThan(b1, 0.0)) * 2.0 - 1.0;
     float4 s0 = floor(b0) * 2.0 + 1.0;
     float4 s1 = floor(b1) * 2.0 + 1.0;
-    float4 sh = -step(h, 0.0);
+    float4 sh = -step(h, 0.00001);
 
     float4 a0 = b0.xzyw + s0.xzyw * sh.xxyy;
     float4 a1 = b1.xzyw + s1.xzyw * sh.zzww;

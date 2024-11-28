@@ -13,7 +13,7 @@ public class TestValues : MonoBehaviour
     [Button]
     public void Print()
     {
-        float x0 = SimplexNoise3D.SNoise(i);
+        float x0 = SimplexNoise3D.SimplexNoise(i, scale);
         Debug.Log("Final Result :" + x0.ToString());
         // 12, -6, 21
     }

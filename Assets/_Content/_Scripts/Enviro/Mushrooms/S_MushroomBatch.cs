@@ -78,6 +78,7 @@ public class MushroomBatch : MonoBehaviour
 
     private void SpawnMushroom(RaycastHit hitInfo)
     {
+        if (SimplexNoise3D.SimplexNoise(hitInfo.point, 0.37f) < 0.5f) return;
         float scale = UnityEngine.Random.Range(_minSizeMultiplier, _maxSizeMultiplier);
 
         if (!IsNormalFacingOrigin(hitInfo) || !HasEnoughRoom(hitInfo, _mushroomPrefab.transform.localScale.x / 2)) return;
