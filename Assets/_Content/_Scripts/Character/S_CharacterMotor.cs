@@ -86,6 +86,7 @@ public class CharacterMotor : MonoBehaviour
 	private RopeState m_ropeState;
 	private bool m_isHolding;
 	private bool IsRopeValid => m_rope && m_rope.IsPlaced;
+	private bool m_isSuspended;
 
 	// Cancel
 	private bool m_isCancellingRope;
@@ -836,6 +837,7 @@ public class CharacterMotor : MonoBehaviour
 	{
 		EnterFallState();
 		ToggleRopeConstraint(true);
+		m_isSuspended = true;
 	}
 
 	private void FixedUpdateRopeState()
@@ -863,6 +865,7 @@ public class CharacterMotor : MonoBehaviour
 		m_isHolding = false;
 		m_isClimbing = false;
 		m_isRunning = false;
+		m_isSuspended = false;
 	}
 
 	private void HandleRopeMovement()
@@ -1056,7 +1059,7 @@ public class CharacterMotor : MonoBehaviour
 	}
 
 	/// <summary>
-	/// 	Instantiate the torch prefab after the fixed duration.
+	/// Instantiate the torch prefab after the fixed duration.
 	/// </summary>
 	private IEnumerator Craft(CraftType craftType, float duration)
 	{
@@ -1077,7 +1080,8 @@ public class CharacterMotor : MonoBehaviour
 
 	private void ToggleAim(bool isInputPressed)
 	{
-		// Assert: can't throw null
+		// Assertions
+		if (m_isSuspended) return;
 		if (HandObject == null) return;
 
 		IsAiming = isInputPressed;
