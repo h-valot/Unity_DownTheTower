@@ -68,11 +68,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 37557274e2b75344ba08499a8aaa2a3e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _interactible: {fileID: 9148584914362091126}
-  _maxHeight: 0
-  _minHeight: 0
-  _rideTime: 0
-  isUp: 0
+  m_maxHeight: 5
+  m_minHeight: 0
+  m_rideTime: 3
+  m_interactable: {fileID: 9148584914362091126}
+  IsUp: 0
 --- !u!1 &9073261231649071094
 GameObject:
   m_ObjectHideFlags: 0
@@ -244,7 +244,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a35e4c2b0957df24da7655291c99a720, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isRecyclable: 0
-  objectToRecycle: {fileID: 0}
-  displayGizmos: 0
-  _elevator: {fileID: 1150021416558879970}
+  m_isRecyclable: 0
+  m_objectToRecycle: {fileID: 0}
+  m_displayGizmos: 0
+  m_elevator: {fileID: 0}

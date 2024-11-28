@@ -1,19 +1,20 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 public class OptimizedPropManager : MonoBehaviour
 {
-	[Header("External references")]
-	[SerializeField] private RSO_CharacterPosition _rsoPlayerTransform;
-	[SerializeField] private WorldConfig _worldConfig;
+	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Optimization m_ssoOptimization;
 
-	private List<OptimizedProp> props;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterPosition m_rsoPlayerTransform;
+
+	private List<OptimizedProp> m_props;
 
 	// /!\ THAT IS TEMPORARY /!\ //
-	// there is very certainly other ways to optimize this aspect of the game
-	// this is not important at the moment
+	// There is very certainly other ways to optimize this aspect of the game.
+	// This is not important at the moment.
 
 	public void Start()
 	{
@@ -23,19 +24,19 @@ public class OptimizedPropManager : MonoBehaviour
 
 	public void GatherOptimizedProps()
 	{
-		// get every optimized object from the scene
-		props = new List<OptimizedProp>(Resources.FindObjectsOfTypeAll<OptimizedProp>().ToList());
+		// Get every optimized object from the scene
+		m_props = new List<OptimizedProp>(Resources.FindObjectsOfTypeAll<OptimizedProp>().ToList());
 	}
 
 	public IEnumerator UpdateLoadability()
 	{
 		while (true)
 		{
-			yield return new WaitForSecondsRealtime(_worldConfig.optimizedPropUpdateTimer);
+			yield return new WaitForSecondsRealtime(m_ssoOptimization.OptimizedPropUpdateTimer);
 
-			foreach (var prop in props)
+			foreach (var prop in m_props)
 			{
-				prop.gameObject.SetActive(Vector3.Distance(_rsoPlayerTransform.value, prop.transform.position) < _worldConfig.optimizedPropRenderDistance);
+				prop.gameObject.SetActive(Vector3.Distance(m_rsoPlayerTransform.value, prop.transform.position) < m_ssoOptimization.OptimizedPropRenderDistance);
 			}
 		}
 	}

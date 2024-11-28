@@ -1,19 +1,18 @@
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 public class ElevatorInteract : Interactable
 {
-    [Header("Internal Variables")]
-    [SerializeField] private Elevator _elevator;
+    [Title("Internal references")]
+    [SerializeField] private Elevator m_elevator;
 
-    // --- PRIVATE VARIABLES ---
     private CharacterInteract m_characterInteract;
 
     public override void InteractionTrigger()
     {
-        _elevator.StartElevator();
+        m_elevator.StartElevator();
         m_characterInteract.Remove(this);
     }
-
 
     public override void OnTriggerEnter(Collider other)
     {
@@ -32,5 +31,4 @@ public class ElevatorInteract : Interactable
             m_characterInteract = null;
         }
     }
-
 }

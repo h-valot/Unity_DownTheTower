@@ -1,13 +1,14 @@
 using DG.Tweening;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 public class MemoryCristal : Interactable
 {
-	[Header("Tweakable values")]
+	[Title("Tweakable values")]
     [SerializeField] private Vector3 m_direction;
 	[SerializeField] private float m_duration;
 
-	[Header("External references")]
+	[Title("External references")]
     [SerializeField] private Transform m_firstDoor;
     [SerializeField] private Transform m_secondDoor;
 

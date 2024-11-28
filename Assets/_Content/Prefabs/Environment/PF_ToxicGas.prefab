@@ -66,7 +66,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: da4e92fd08e84754b8de853c78d5028d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _toxicGas: {fileID: -3022151229872531805}
+  m_toxicGas: {fileID: 0}
 --- !u!1 &5518636541828325953
 GameObject:
   m_ObjectHideFlags: 0
@@ -196,9 +196,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6d754fcd6bdb4cd48b62571d1134f3ec, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _mushroomsList: []
-  _gaz: {fileID: 5518636541828325953}
-  _toxicConfig: {fileID: 11400000, guid: de53c9f952bee15468a735a71927549f, type: 2}
-  _characterMotor: {fileID: 3475349417308713120, guid: 45c3e8494e2284f4db75133fba67cbc1,
-    type: 3}
-  _rseKillCharacter: {fileID: 11400000, guid: 38188b704256e78469e87ce8957c4651, type: 2}
+  m_gaz: {fileID: 5518636541828325953}
+  m_mushrooms: []
+  m_ssoToxic: {fileID: 11400000, guid: de53c9f952bee15468a735a71927549f, type: 2}
+  m_rseKillCharacter: {fileID: 11400000, guid: 38188b704256e78469e87ce8957c4651, type: 2}

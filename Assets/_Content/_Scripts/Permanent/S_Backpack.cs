@@ -1,15 +1,16 @@
 using DG.Tweening;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 public class Backpack : Interactable
 {
-    [Header("Internal Variables")]
+    [Title("Internal Variables")]
     [SerializeField] private MeshRenderer m_mesh;
     [SerializeField] private SphereCollider m_sphereCollider;
 
-    [Header("Scriptable references")]
-	[SerializeField] private RSO_CharacterDeath m_rsoCharacterDeath;
-	[SerializeField] private RSE_BackpackCrafting m_rsoPackbackCrafting;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSE_BackpackCrafting m_rsoPackbackCrafting;
+
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterDeath m_rsoCharacterDeath;
 
 	private CharacterInteract m_characterInteract;
     private Vector3 m_startPosition;

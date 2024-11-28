@@ -1,9 +1,10 @@
+using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class DebuggerManager : MonoBehaviour
 {
-	[Header("Internal references")]
+	[Title("Internal references")]
 	[SerializeField] private SceneLoader m_SceneLoader;
 	[SerializeField] private DebugMisc m_DebugMisc;
 	[SerializeField] private Console m_Console;

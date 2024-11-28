@@ -1,8 +1,9 @@
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 public class SoundManager : MonoBehaviour
 {
-    [SerializeField] private RSE_PlaySound m_rsePlaySound;
+    [FoldoutGroup("Scriptable")][SerializeField] private RSE_PlaySound m_rsePlaySound;
 
     private void OnEnable()
     {

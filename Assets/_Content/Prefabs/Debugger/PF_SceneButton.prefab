@@ -85,7 +85,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ae0f3721099e9a14eb54fa0a8f8d6d6b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _tmpScene: {fileID: 7601447187127847563}
+  m_tmpScene: {fileID: 7601447187127847563}
 --- !u!1001 &3494712830381088353
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -99,6 +99,16 @@ PrefabInstance:
       propertyPath: m_Name
       value: PF_OSB
       objectReference: {fileID: 0}
+    - target: {fileID: 3778183347747320635, guid: 856d34bdd18712947b3fbd5b45da8843,
+        type: 3}
+      propertyPath: m_imgBlack
+      value: 
+      objectReference: {fileID: 2426978150376118017}
+    - target: {fileID: 3778183347747320635, guid: 856d34bdd18712947b3fbd5b45da8843,
+        type: 3}
+      propertyPath: m_graphicsParent
+      value: 
+      objectReference: {fileID: 5107492468985904299}
     - target: {fileID: 3778183347747320635, guid: 856d34bdd18712947b3fbd5b45da8843,
         type: 3}
       propertyPath: OnClick.m_PersistentCalls.m_Calls.Array.size
@@ -264,6 +274,24 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 856d34bdd18712947b3fbd5b45da8843, type: 3}
+--- !u!114 &2426978150376118017 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1284067992963959136, guid: 856d34bdd18712947b3fbd5b45da8843,
+    type: 3}
+  m_PrefabInstance: {fileID: 3494712830381088353}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!1 &5107492468985904299 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8547484211877929674, guid: 856d34bdd18712947b3fbd5b45da8843,
+    type: 3}
+  m_PrefabInstance: {fileID: 3494712830381088353}
+  m_PrefabAsset: {fileID: 0}
 --- !u!114 &7601447187127847563 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 6413817723804488938, guid: 856d34bdd18712947b3fbd5b45da8843,

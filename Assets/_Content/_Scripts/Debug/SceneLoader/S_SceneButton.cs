@@ -1,23 +1,24 @@
+using Sirenix.OdinInspector;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class SceneButton : MonoBehaviour
 {
-	[Header("Internal references")]
-	[SerializeField] private TextMeshProUGUI _tmpScene;
+	[Title("Internal references")]
+	[SerializeField] private TextMeshProUGUI m_tmpScene;
 
-	private string _sceneName;
+	private string m_sceneName;
 
 	public void Initialize(string newScene)
 	{
-		_sceneName = newScene;
-		_tmpScene.text = _sceneName;
+		m_sceneName = newScene;
+		m_tmpScene.text = m_sceneName;
 	}
 
 	public void Press()
 	{
 		Time.timeScale = 1f;
-		SceneManager.LoadScene(_sceneName);
+		SceneManager.LoadScene(m_sceneName);
 	}
 }

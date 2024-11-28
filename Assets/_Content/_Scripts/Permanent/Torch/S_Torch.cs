@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class Torch : Permanent
 {
-    [Header("References")]
+    [Title("Internal references")]
     [SerializeField] private Light m_light;
     [SerializeField] private Rigidbody m_rigidbody;
     [SerializeField] private MeshRenderer m_meshRenderer;
@@ -14,12 +14,12 @@ public class Torch : Permanent
     [SerializeField] private Transform m_pointLightBase;
     [SerializeField] private SphereCollider m_lightCollider;
 
-	[FoldoutGroup("SSO")][SerializeField] private SSO_Torch m_ssoTorch;
-	[FoldoutGroup("SSO")][SerializeField] private SSO_Character m_ssoCharacter;
-	[FoldoutGroup("SSO")][SerializeField] private SSO_Rope m_ssoRope;
+	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Torch m_ssoTorch;
+	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Character m_ssoCharacter;
+	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Rope m_ssoRope;
 
-	[FoldoutGroup("RSO")][SerializeField] private RSO_TorchManager m_rsoTorchManager;
-	[FoldoutGroup("RSO")][SerializeField] private RSO_CharacterPosition m_rsoCharacterPosition;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_TorchManager m_rsoTorchManager;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterPosition m_rsoCharacterPosition;
 
 	// ----- PUBLIC VARIABLES -----
 	[HideInInspector] public bool IsLit;
@@ -328,8 +328,9 @@ public class Torch : Permanent
     /// </summary>
     private void UpdateTorchFeedback()
     {
-		// Assertion
+		// Assertions
         if (IsInHand) return;
+		if (!gameObject) return;
 
 		if (m_rsoCharacterPosition.value.y - transform.position.y > m_ssoCharacter.LethalHeight)
 		{

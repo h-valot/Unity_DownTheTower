@@ -1,39 +1,41 @@
 using DG.Tweening;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 public class Elevator : MonoBehaviour
 {
-    [Header("Internal Variables")]
-    [SerializeField] private GameObject _interactible;
+    [Title("Tweakable values")]
+    [SerializeField] private float m_maxHeight;
+    [SerializeField] private float m_minHeight;
+    [SerializeField] private float m_rideTime;
+	
+	[Title("Internal references")]
+	[SerializeField] private GameObject m_interactable;
 
-    [Header("Tweakable Variables")]
-    [SerializeField] private float _maxHeight;
-    [SerializeField] private float _minHeight;
-    [SerializeField] private float _rideTime;
-
-    [Header("Public Variables")]
-    public bool isUp = false;
+	[HideInInspector] public bool IsUp = false;
 
     public void StartElevator()
     {
-        if (isUp) Descend();
+        if (IsUp) Descend();
         else Ascend();
     }
 
     public void Ascend()
     {
-        _interactible.SetActive(false);
-        transform.DOMoveY(_maxHeight, _rideTime).SetEase(Ease.InOutCubic).OnComplete(() =>
-            _interactible.SetActive(true));
-        isUp = true;
+        m_interactable.SetActive(false);
+        transform.DOMoveY(m_maxHeight, m_rideTime).SetEase(Ease.InOutCubic).OnComplete(() =>
+            m_interactable.SetActive(true));
+
+        IsUp = true;
     }
 
     public void Descend()
     {
-        _interactible.SetActive(false);
-        transform.DOMoveY(_minHeight, _rideTime).SetEase(Ease.InOutCubic).OnComplete(() =>
-            _interactible.SetActive(true));
-        isUp = false;
+        m_interactable.SetActive(false);
+        transform.DOMoveY(m_minHeight, m_rideTime).SetEase(Ease.InOutCubic).OnComplete(() =>
+            m_interactable.SetActive(true));
+
+        IsUp = false;
     }
 
     private void OnTriggerEnter(Collider other)

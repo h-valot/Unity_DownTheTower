@@ -1,22 +1,23 @@
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 public class ElevatorCall : Interactable
 {
-    [Header("External Variables")]
-    [SerializeField] private Elevator _elevator;
+    [Title("Tweakable references")]
+    [SerializeField] private bool m_callToTop = false;
 
-    [Header("Tweakable Variables")]
-    [SerializeField] private bool callToTop = false;
+    [Title("External references")]
+    [SerializeField] private Elevator m_elevator;
 
     public override void InteractionTrigger()
     {
-        if(callToTop && !_elevator.isUp) _elevator.Ascend();
-        if(!callToTop && _elevator.isUp) _elevator.Descend();
+        if (m_callToTop && !m_elevator.IsUp) m_elevator.Ascend();
+        if (!m_callToTop && m_elevator.IsUp) m_elevator.Descend();
         UpdateGraphics();
     }
 
     private void UpdateGraphics()
     {
-
+		// TODO
     }
 }

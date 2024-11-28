@@ -7,7 +7,7 @@ public class CharacterMotor : MonoBehaviour
 {
 	#region REFERENCES
 
-	[Header("References")]
+	[Title("Internal references")]
 	[SerializeField] private Rigidbody m_rigidbody;
 	[SerializeField] private CapsuleCollider m_collider;
 	[SerializeField] private Transform m_handSocket;
@@ -17,39 +17,39 @@ public class CharacterMotor : MonoBehaviour
 	[SerializeField] private Transform m_cameraTarget;
 	[SerializeField] private CharacterGraphics m_characterGraphics;
 
-	[FoldoutGroup("SSO")][SerializeField] private SSO_Character m_ssoCharacter;
-	[FoldoutGroup("SSO")][SerializeField] private SSO_Torch m_ssoTorch;
-	[FoldoutGroup("SSO")][SerializeField] private SSO_Rope m_ssoRope;
+	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Character m_ssoCharacter;
+	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Torch m_ssoTorch;
+	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Rope m_ssoRope;
 
-	[FoldoutGroup("RSE")][SerializeField] private RSE_Move m_rseMove;
-	[FoldoutGroup("RSE")][SerializeField] private RSE_Jump m_rseJump;
-	[FoldoutGroup("RSE")][SerializeField] private RSE_Craft m_rseCraft;
-	[FoldoutGroup("RSE")][SerializeField] private RSE_Throw m_rseThrow;
-	[FoldoutGroup("RSE")][SerializeField] private RSE_Run m_rseRun;
-	[FoldoutGroup("RSE")][SerializeField] private RSE_Climb m_rseClimb;
-	[FoldoutGroup("RSE")][SerializeField] private RSE_Cancel m_rseCancel;
-	[FoldoutGroup("RSE")][SerializeField] private RSE_BackpackCrafting m_rseBackpackCrafting;
-	[FoldoutGroup("RSE")][SerializeField] private RSE_SetCharacterPosition m_rseSetCharacterPosition;
-	[FoldoutGroup("RSE")][SerializeField] private RSE_KillCharacter m_rseKillCharacter;
-	[FoldoutGroup("RSE")][SerializeField] private RSE_InitializeCamera m_rseInitializeCamera;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Move m_rseMove;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Jump m_rseJump;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Craft m_rseCraft;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Throw m_rseThrow;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Run m_rseRun;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Climb m_rseClimb;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Cancel m_rseCancel;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSE_BackpackCrafting m_rseBackpackCrafting;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSE_SetCharacterPosition m_rseSetCharacterPosition;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSE_KillCharacter m_rseKillCharacter;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSE_InitializeCamera m_rseInitializeCamera;
 
-	[FoldoutGroup("RSO")][SerializeField] private RSO_MovementDatas m_rsoMovementDatas;
-	[FoldoutGroup("RSO")][SerializeField] private RSO_CameraStyle m_rsoCameraStyle;
-	[FoldoutGroup("RSO")][SerializeField] private RSO_CraftInputLocked m_rsoCraftInputLocked;
-	[FoldoutGroup("RSO")][SerializeField] private RSO_RecycleInputLocked m_rsoRecycleInputLocked;
-	[FoldoutGroup("RSO")][SerializeField] private RSO_CharacterState m_rsoCharacterState;
-	[FoldoutGroup("RSO")][SerializeField] private RSO_CharacterPosition m_rsoCharacterPosition;
-	[FoldoutGroup("RSO")][SerializeField] private RSO_CharacterDeath m_rsoCharacterDeath;
-	[FoldoutGroup("RSO")][SerializeField] private RSO_CameraForward m_rsoCameraForward;
-	[FoldoutGroup("RSO")][SerializeField] private RSO_CameraRight m_rsoCameraRight;
-	[FoldoutGroup("RSO")][SerializeField] private RSO_CameraTransform m_rsoCameraTransform;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_MovementDatas m_rsoMovementDatas;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CameraStyle m_rsoCameraStyle;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CraftInputLocked m_rsoCraftInputLocked;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_RecycleInputLocked m_rsoRecycleInputLocked;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterState m_rsoCharacterState;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterPosition m_rsoCharacterPosition;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterDeath m_rsoCharacterDeath;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CameraForward m_rsoCameraForward;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CameraRight m_rsoCameraRight;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CameraTransform m_rsoCameraTransform;
 
 	#endregion
 
 	#region VARIABLES
 
 	// - Inputs -
-	private Vector2 m_moveInput = new Vector2();
+	[ShowInInspector] private Vector2 m_moveInput = new Vector2();
 
     // - Collisions -
     private LayerMask m_layerMaskToIgnore;
@@ -68,10 +68,10 @@ public class CharacterMotor : MonoBehaviour
 	private bool m_isSlowedPostStun;
 
 	// - Movement -
-	private bool m_isRunning;
-    private bool m_hasJumped;
+	[ShowInInspector] private bool m_isRunning;
+	[ShowInInspector] private bool m_hasJumped;
 	public bool IsJumpingPressed { get; private set; }
-	private bool m_isCrafting;
+	[ShowInInspector] private bool m_isCrafting;
 
 	// - Craft state -
 	private CraftType m_craftType;
@@ -79,12 +79,14 @@ public class CharacterMotor : MonoBehaviour
 	[HideInInspector] public Permanent HandObject;
 	[HideInInspector] public Permanent RobotObject;
 	[HideInInspector] public bool IsAiming;
+	[ShowInInspector] private bool m_startAiming;
 
 	// - Rope state -
 	private Rope m_rope;
 	private RopeState m_ropeState;
 	private bool m_isHolding;
 	private bool IsRopeValid => m_rope && m_rope.IsPlaced;
+	private bool m_isSuspended;
 
 	// Cancel
 	private bool m_isCancellingRope;
@@ -154,7 +156,6 @@ public class CharacterMotor : MonoBehaviour
     private void LateUpdate()
     {
 		MovementDatas _movementDatas = new MovementDatas();
-
         _movementDatas.dataToString.Add((Mathf.Round(m_rigidbody.velocity.magnitude * 100f) / 100f).ToString());
         _movementDatas.dataToString.Add(m_isGrounded.ToString());
         _movementDatas.dataToString.Add(m_rsoCharacterState.value.ToString());
@@ -243,7 +244,7 @@ public class CharacterMotor : MonoBehaviour
         }
 	}
 
-	private void SetCharacterPosition(Vector3 position, Quaternion rotation)
+	public void SetCharacterPosition(Vector3 position, Quaternion rotation)
 	{
 		m_positionStartFall = position;
 		m_rigidbody.velocity = Vector3.zero;
@@ -318,6 +319,21 @@ public class CharacterMotor : MonoBehaviour
 			yield return null;
 		}
 		DesequipRope();
+	}
+
+	/// <summary>
+	/// If the input is pressed and If the player hasn't jumped:
+	/// Add a vertical impulse to the player
+	/// </summary>
+	private void Jump(bool isPressed)
+	{
+		// Assertions
+		if (!isPressed) return;
+		if (m_isStunned) return;
+		if (m_hasJumped) return;
+
+		m_rigidbody.AddForce(Vector3.up * m_ssoCharacter.JumpForce, ForceMode.Impulse);
+		m_hasJumped = true;
 	}
 
 	private void JumpRope(bool isPressed)
@@ -695,63 +711,49 @@ public class CharacterMotor : MonoBehaviour
     /// </summary>
     private void HandleStepOn()
     {
-        if (m_raycastHits.Length > 1 && m_moveInput != Vector2.zero)
-        {
-            Vector3 stepOnTarget = transform.position;
-			Vector3 moveInput3D = (m_rsoCameraRight.value * m_moveInput.x + m_rsoCameraForward.value * m_moveInput.y).normalized;
+		// Assertion
+        if (m_raycastHits.Length <= 1 || m_moveInput == Vector2.zero) return;
+		
+		Vector3 stepOnTarget = transform.position;
+		Vector3 moveInput3D = (m_rsoCameraRight.value * m_moveInput.x + m_rsoCameraForward.value * m_moveInput.y).normalized;
 
-            foreach (RaycastHit _hit in m_raycastHits)
-            {
-                Vector3 hitDirection = _hit.point - transform.position;
-                hitDirection = new Vector3(hitDirection.x, 0, hitDirection.z);
+		foreach (var hit in m_raycastHits)
+		{
+			Vector3 hitDirection = hit.point - transform.position;
+			hitDirection = new Vector3(hitDirection.x, 0, hitDirection.z);
 
-                // Check if hit is in front of character
-                if (Vector3.Dot(moveInput3D, hitDirection) > 0.15)
-                {
-                    if (_hit.point.y - transform.position.y < m_ssoCharacter.StepOnHeight)
-                    {
-                        // We take the highest that is higher than skin width to not trigger step on very small objects
-                        if (_hit.point.y > stepOnTarget.y && _hit.point.y > transform.position.y + m_ssoCharacter.SkinWidth)
-                        {
-                            stepOnTarget = _hit.point;
-                        }
-                    }
-                }
-            }
+			// Check if hit is in front of character
+			if (Vector3.Dot(moveInput3D, hitDirection) > 0.15)
+			{
+				if (hit.point.y - transform.position.y < m_ssoCharacter.StepOnHeight)
+				{
+					// We take the highest that is higher than skin width to not trigger step on very small objects
+					if (hit.point.y > stepOnTarget.y && hit.point.y > transform.position.y + m_ssoCharacter.SkinWidth)
+					{
+						stepOnTarget = hit.point;
+					}
+				}
+			}
+		}
 
-            if (stepOnTarget != transform.position)
-            {
-                // Check if there is really an object to step on in the speed direction, to prevent steping on end of slope
-                Vector3 start = new Vector3(m_rigidbody.position.x, m_rigidbody.position.y + m_ssoCharacter.SkinWidth, m_rigidbody.position.z);
-                Vector3 direction = m_rigidbody.velocity.normalized;
-                float distance = m_collider.radius * 2;
-                if (Physics.Raycast(start, direction, distance, ~m_layerMaskToIgnore))
-                {
-                    // Check if there is a flat surface to step on (<45 degrees)
-                    start = stepOnTarget + (new Vector3(stepOnTarget.x, 0, stepOnTarget.z) - new Vector3(m_rigidbody.position.x, 0, m_rigidbody.position.z)).normalized * m_ssoCharacter.SkinWidth + new Vector3(0, m_ssoCharacter.SkinWidth, 0);
-                    direction = Vector3.down;
-                    distance = m_ssoCharacter.SkinWidth * 2;
-                    if (Physics.Raycast(start, direction, distance, ~m_layerMaskToIgnore))
-                    {
-                        m_rigidbody.position = new Vector3(m_rigidbody.position.x, stepOnTarget.y, m_rigidbody.position.z);
-                    }
-                }
-            }
-        }
-    }
-
-    /// <summary>
-    /// If the input is pressed and If the player hasn't jumped:
-    /// Add a vertical impulse to the player
-    /// </summary>
-    private void Jump(bool isPressed)
-    {
-		// Assertions
-        if (!isPressed) return;
-		if(m_hasJumped) return;
-
-		m_rigidbody.AddForce(Vector3.up * m_ssoCharacter.JumpForce, ForceMode.Impulse);
-		m_hasJumped = true;
+		if (stepOnTarget != transform.position)
+		{
+			// Check if there is really an object to step on in the speed direction, to prevent steping on end of slope
+			Vector3 start = new Vector3(m_rigidbody.position.x, m_rigidbody.position.y + m_ssoCharacter.SkinWidth, m_rigidbody.position.z);
+			Vector3 direction = m_rigidbody.velocity.normalized;
+			float distance = m_collider.radius * 2;
+			if (Physics.Raycast(start, direction, distance, ~m_layerMaskToIgnore))
+			{
+				// Check if there is a flat surface to step on (<45 degrees)
+				start = stepOnTarget + (new Vector3(stepOnTarget.x, 0, stepOnTarget.z) - new Vector3(m_rigidbody.position.x, 0, m_rigidbody.position.z)).normalized * m_ssoCharacter.SkinWidth + new Vector3(0, m_ssoCharacter.SkinWidth, 0);
+				direction = Vector3.down;
+				distance = m_ssoCharacter.SkinWidth * 2;
+				if (Physics.Raycast(start, direction, distance, ~m_layerMaskToIgnore))
+				{
+					m_rigidbody.position = new Vector3(m_rigidbody.position.x, stepOnTarget.y, m_rigidbody.position.z);
+				}
+			}
+		}
     }
 
     /// <summary>
@@ -835,6 +837,7 @@ public class CharacterMotor : MonoBehaviour
 	{
 		EnterFallState();
 		ToggleRopeConstraint(true);
+		m_isSuspended = true;
 	}
 
 	private void FixedUpdateRopeState()
@@ -858,8 +861,12 @@ public class CharacterMotor : MonoBehaviour
 	private void ExitRopeState()
 	{
 		ToggleRopeConstraint(false);
+
 		m_isHolding = false;
 		m_isClimbing = false;
+		m_isRunning = false;
+		m_isSuspended = false;
+		m_hasJumped = false;
 	}
 
 	private void HandleRopeMovement()
@@ -987,30 +994,35 @@ public class CharacterMotor : MonoBehaviour
 
 	private void EnterCraftState()
 	{
+		// Assertion
+		if (m_craftType == HandObject?.Type) return;
+
 		if (m_craftType == CraftType.TORCH)
 		{
-			if (HandObject != null
-			&& HandObject.Type != CraftType.TORCH
-			&& RobotObject?.Type != CraftType.TORCH)
+			if (HandObject?.Type == CraftType.ROPE)
 			{
 				Destroy(HandObject.gameObject);
+				HandObject = null;
 			}
-			m_craftCoroutine = StartCoroutine(Craft(CraftType.TORCH, m_ssoTorch.CraftingDuration));
+
+			if (!HandObject)
+			{
+				m_craftCoroutine = StartCoroutine(Craft(CraftType.TORCH, m_ssoTorch.CraftingDuration));
+			}
 		}
 		else if (m_craftType == CraftType.ROPE)
 		{
-			if (HandObject != null)
+			// If a torch is already in hand and the robot arm is free.
+			if (HandObject?.Type == CraftType.TORCH
+			&& !RobotObject)
 			{
-				if (HandObject.Type == CraftType.TORCH)
-				{
-					SwitchObjects(ref HandObject, ref RobotObject, m_robotSocket);
-				}
-				else if (HandObject.Type != CraftType.ROPE)
-				{
-					Destroy(HandObject.gameObject);
-				}
+				SwitchObjects(ref HandObject, ref RobotObject, m_robotSocket);
 			}
-			m_craftCoroutine = StartCoroutine(Craft(CraftType.ROPE, m_ssoRope.CraftingDuration));
+
+			if (!HandObject)
+			{
+				m_craftCoroutine = StartCoroutine(Craft(CraftType.ROPE, m_ssoRope.CraftingDuration));
+			}
 		}
 	}
 
@@ -1053,7 +1065,7 @@ public class CharacterMotor : MonoBehaviour
 	}
 
 	/// <summary>
-	/// 	Instantiate the torch prefab after the fixed duration.
+	/// Instantiate the torch prefab after the fixed duration.
 	/// </summary>
 	private IEnumerator Craft(CraftType craftType, float duration)
 	{
@@ -1074,7 +1086,8 @@ public class CharacterMotor : MonoBehaviour
 
 	private void ToggleAim(bool isInputPressed)
 	{
-		// Assert: can't throw null
+		// Assertions
+		if (m_isSuspended) return;
 		if (HandObject == null) return;
 
 		IsAiming = isInputPressed;
@@ -1084,20 +1097,25 @@ public class CharacterMotor : MonoBehaviour
 		if (IsAiming)
 		{
 			HandObject.InitializePreview();
+			m_startAiming = true;
 		}
 
 		// Handle pernament throw on input released
 		else
 		{
-			// Assert: object can't be thrown
+			// Assertion
+			if (!m_startAiming) return;
 			if (!HandObject.Throw(m_rsoCameraTransform.value)) return;
 
 			// Exception: rope attachment
+			if (m_rope != null) DesequipRope();
 			m_rope = HandObject as Rope;
 			if (m_rope != null) m_rope?.Attach(m_harness, m_rigidbody);
 
 			HandObject = null;
 			SwitchObjects(ref RobotObject, ref HandObject, m_handSocket);
+
+			m_startAiming = false;
 		}
 	}
 

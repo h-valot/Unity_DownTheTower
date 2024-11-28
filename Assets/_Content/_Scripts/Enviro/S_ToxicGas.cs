@@ -1,43 +1,44 @@
 using System.Collections;
 using System.Collections.Generic;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 public class ToxicGas: MonoBehaviour
 {
-    [SerializeField] private List<ExplosiveMushroom> m_mushrooms;
+	[Title("Internal references")]
     [SerializeField] private GameObject m_gaz;
+    [SerializeField] private List<ExplosiveMushroom> m_mushrooms;
 
-    [SerializeField] private SSO_Toxic m_ssoToxic;
-    [SerializeField] private SSO_Character m_ssoCharacter;
+	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Toxic m_ssoToxic;
 
-    [SerializeField] private RSE_KillCharacter m_rseKillCharacter;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSE_KillCharacter m_rseKillCharacter;
 
-    public void TorchHasEnter(Torch _torch)
+    public void Enter(Torch torch)
     {
-        if (_torch.IsInHand)
+        if (torch.IsInHand)
         {
             m_rseKillCharacter.Call();
         }
         else
         {
-            Destroy(_torch.gameObject);
+            Destroy(torch.gameObject);
             m_gaz.SetActive(false);
             foreach (var mushroom in m_mushrooms)
             {
                 mushroom.Explode();
             }
-            StartCoroutine(TimetoRefill(m_ssoToxic.Cooldown));
+            StartCoroutine(Refill());
         }
     }
 
-    public void CharacterHasEnter(CharacterMotor character)
+    public void Enter(CharacterMotor character)
     {
         m_rseKillCharacter.Call();
     }
 
-    private IEnumerator TimetoRefill(float cooldown)
+    private IEnumerator Refill()
     {
-        yield return new WaitForSeconds(cooldown);
+        yield return new WaitForSeconds(m_ssoToxic.Cooldown);
         m_gaz.SetActive(true);
 
         foreach (var mushroom in m_mushrooms)

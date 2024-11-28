@@ -3,9 +3,9 @@ using UnityEngine;
 
 public class CharacterGraphics : MonoBehaviour
 {
-	[FoldoutGroup("SSO")][SerializeField] private SSO_Character m_ssoCharacter;
+	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Character m_ssoCharacter;
 
-	[FoldoutGroup("RSO")][SerializeField] private RSO_CameraStyle m_rsoCameraStyle;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CameraStyle m_rsoCameraStyle;
 
 	private Transform m_aimingLookAt;
 	private Rigidbody m_rigidbody;

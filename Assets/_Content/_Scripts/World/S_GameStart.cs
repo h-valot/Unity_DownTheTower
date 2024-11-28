@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class GameStart : MonoBehaviour
 {
-	[Header("Tweakable values")]
+	[Title("Tweakable values")]
 	[SerializeField] private GameObject m_pfCharacter;
 
 	[FoldoutGroup("RSO")][SerializeField] private RSO_CharacterDeath m_rsoCharacterDeath;

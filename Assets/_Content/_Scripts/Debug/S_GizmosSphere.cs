@@ -1,8 +1,9 @@
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 public class GizmosSphere : MonoBehaviour
 {
-	[Header("Tweakable values")]
+	[Title("Tweakable values")]
 	[SerializeField] private Color m_color = Color.red;
 	[SerializeField] private float m_radius = 0.25f;
 

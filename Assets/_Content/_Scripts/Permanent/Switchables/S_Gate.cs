@@ -1,13 +1,12 @@
 using DG.Tweening;
-using System.Collections;
-using System.Collections.Generic;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 public class Gate : Switchable
 {
-    [Header("Tweakable Variables")]
-    [SerializeField] private float _maxHeight = 1;
-    [SerializeField] private float _animLength = 1;
+    [Title("Tweakable values")]
+    [SerializeField] private float m_maxHeight = 1;
+    [SerializeField] private float m_animLength = 1;
 
     protected override void ActivateMechanism()
     {
@@ -16,6 +15,6 @@ public class Gate : Switchable
 
     protected override void DeactivateMechanism()
     {
-        transform.DOScaleY(_maxHeight, _animLength);
+        transform.DOScaleY(m_maxHeight, m_animLength);
     }
 }

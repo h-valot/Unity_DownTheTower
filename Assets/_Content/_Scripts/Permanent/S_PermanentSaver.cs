@@ -3,16 +3,16 @@ using UnityEngine;
 
 public class PermanentSaver : MonoBehaviour
 {
-	public List<Permanent> placeables;
-	public List<PermanentData> placeableDatas;
+	public List<Permanent> Placeables;
+	public List<PermanentData> PlaceableDatas;
 
 	public void Save()
 	{
-		// save the position of all placeable placed 
+		// TODO - Save the position of all placeable placed 
 	}
 
 	public void Load()
 	{
-		// instantiate a placeable at the position of each former placeable stored
+		// TODO - Instantiate a placeable at the position of each former placeable stored
 	}
 }

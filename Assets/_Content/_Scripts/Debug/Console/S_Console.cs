@@ -1,21 +1,22 @@
 using System.Text;
+using Sirenix.OdinInspector;
 using TMPro;
 using UnityEngine;
 
 public class Console : MonoBehaviour	
 {
-	[Header("Tweakable values")]
+	[Title("Tweakable values")]
 	[SerializeField] private string m_colorCodeBase = "F0F0F0";
 	[SerializeField] private string m_colorCodeWarning = "FFC107";
 	[SerializeField] private string m_colorCodeError = "FF534A";
 
-	[Header("Internal references")]
+	[Title("Internal references")]
 	[SerializeField] private GameObject m_graphicsParent;
 	[SerializeField] private TextMeshProUGUI m_output;
 
-	[Header("External references")]
-	[SerializeField] private SSO_Game m_ssoGame;
-	[SerializeField] private RSE_ToggleCursor m_rseToggleCursor;
+	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Game m_ssoGame;
+	
+	[FoldoutGroup("Scriptable")][SerializeField] private RSE_ToggleCursor m_rseToggleCursor;
 
 	private StringBuilder m_logBuilder;
 	private bool m_isPressed;
