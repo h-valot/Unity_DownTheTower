@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using DG.Tweening;
 using Sirenix.OdinInspector;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class Rope : Permanent
@@ -31,6 +32,7 @@ public class Rope : Permanent
 	private Transform m_characterHarness;
 	private SoftJointLimit m_linearLimit;
 
+	public bool IsConstrained;
 	public bool IsConnected => m_isConnected;
 	public bool IsPlaced => m_isPlaced;
 	public float HoldLength => m_holdLength;
@@ -197,7 +199,7 @@ public class Rope : Permanent
 		if (m_folds.Count >= 2
 		&& !Physics.Linecast(m_characterHarness.position, LastFold, out var removeHit, m_ropeConfig.FoldLayerToInclude))
 		{
-			ChangeHoldLength((LastFold - CurrentFold).magnitude);
+			IncreaseHoldLength((LastFold - CurrentFold).magnitude);
 			m_folds.Remove(CurrentFold);
 		}
 	}
@@ -225,14 +227,15 @@ public class Rope : Permanent
 	/// <param name="isAllowed">Is it allowed to update hold rope radius</param>
 	public void UpdateHoldLength(bool isAllowed = true)
 	{
-		// Assert: is it not allowed
+		// Assertions
 		if (!isAllowed) return;
+		if (!IsConstrained) return;
 
 		m_holdLength = GetLastFoldHarnessDistance();
 		HandleJoint();
 	}
 
-	public void ChangeHoldLength(float amount)
+	public void IncreaseHoldLength(float amount)
 	{
 		m_holdLength += amount;
 		HandleJoint();

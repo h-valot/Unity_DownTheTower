@@ -49,7 +49,7 @@ public class CharacterMotor : MonoBehaviour
 	#region VARIABLES
 
 	// - Inputs -
-	[ShowInInspector] private Vector2 m_moveInput = new Vector2();
+	private Vector2 m_moveInput = new Vector2();
 
     // - Collisions -
     private LayerMask m_layerMaskToIgnore;
@@ -68,10 +68,10 @@ public class CharacterMotor : MonoBehaviour
 	private bool m_isSlowedPostStun;
 
 	// - Movement -
-	[ShowInInspector] private bool m_isRunning;
-	[ShowInInspector] private bool m_hasJumped;
+	private bool m_isRunning;
+	private bool m_hasJumped;
 	public bool IsJumpingPressed { get; private set; }
-	[ShowInInspector] private bool m_isCrafting;
+	private bool m_isCrafting;
 
 	// - Craft state -
 	private CraftType m_craftType;
@@ -79,14 +79,13 @@ public class CharacterMotor : MonoBehaviour
 	[HideInInspector] public Permanent HandObject;
 	[HideInInspector] public Permanent RobotObject;
 	[HideInInspector] public bool IsAiming;
-	[ShowInInspector] private bool m_startAiming;
+	private bool m_startAiming;
 
 	// - Rope state -
 	private Rope m_rope;
 	private RopeState m_ropeState;
 	private bool m_isHolding;
 	private bool IsRopeValid => m_rope && m_rope.IsPlaced;
-	private bool m_isSuspended;
 
 	// Cancel
 	private bool m_isCancellingRope;
@@ -198,7 +197,7 @@ public class CharacterMotor : MonoBehaviour
 		m_rseMove.action -= UpdateMoveInput;
 		m_rseRun.action -= UpdateRunInput;
 		m_rseRun.action -= UpdateHoldInput;
-		m_rseJump.action -= Jump;
+		m_rseJump.action -= JumpGround;
 		m_rseJump.action -= JumpRope;
 		m_rseCraft.action -= ToggleCraft;
 		m_rseThrow.action -= ToggleAim;
@@ -215,9 +214,9 @@ public class CharacterMotor : MonoBehaviour
         {
             case BehaviorState.LOCOMOTION:
 				m_rseMove.action += UpdateMoveInput;
+				m_rseRun.action += UpdateHoldInput;
 				m_rseRun.action += UpdateRunInput;
-				m_rseJump.action += Jump;
-				m_rseJump.action += JumpRope; // the rope jump can start while grounded
+				m_rseJump.action += JumpGround;
 				m_rseCraft.action += ToggleCraft;
 				m_rseThrow.action += ToggleAim;
 				m_rseCancel.action += CancelRope;
@@ -265,26 +264,14 @@ public class CharacterMotor : MonoBehaviour
 
 	private void UpdateHoldInput(bool isHolding)
 	{
-		if (IsJumpingPressed && !isHolding) return;
-
-		if (m_rope == null)
+		// Assertion
+		if (!IsRopeValid)
 		{
 			m_isHolding = false;
 			return;
 		}
 
-		// Handle both hold methods
-		switch (m_ssoCharacter.RopeHoldingMethod)
-		{
-			case RopeHolding.HOLD_TO_STOP:
-				ToggleRopeHolding(isHolding);
-				break;
-
-			case RopeHolding.HOLD_TO_LET_GO:
-				ToggleRopeHolding(!isHolding);
-				break;
-		}
-
+		ToggleRopeConstraint(m_ssoCharacter.RopeHoldingMethod == RopeHolding.HOLD_TO_LET_GO ? !isHolding : isHolding);
 		m_isHolding = isHolding;
 	}
 
@@ -295,20 +282,24 @@ public class CharacterMotor : MonoBehaviour
 
 	private void CancelRope(bool isPressed)
 	{
-		if (!IsRopeValid) return;
+		if (!IsRopeValid) 
+		{
+			m_isCancellingRope = false;
+			return;
+		}
 
-		m_isCancellingRope = isPressed;
-
-		if (m_isCancellingRope)
+		if (isPressed)
 		{
 			m_cancelRopeTimer = 0f;
 			m_cancelRopeCoroutine = StartCoroutine(StartCancellingRope());
 		}
-		else if (!m_isCancellingRope
+		else if (!isPressed
 		&& m_cancelRopeCoroutine != null)
 		{
 			StopCoroutine(m_cancelRopeCoroutine);
 		}
+
+		m_isCancellingRope = isPressed;
 	}
 
 	private IEnumerator StartCancellingRope()
@@ -318,6 +309,7 @@ public class CharacterMotor : MonoBehaviour
 			m_cancelRopeTimer += Time.deltaTime;
 			yield return null;
 		}
+		
 		DesequipRope();
 	}
 
@@ -325,7 +317,7 @@ public class CharacterMotor : MonoBehaviour
 	/// If the input is pressed and If the player hasn't jumped:
 	/// Add a vertical impulse to the player
 	/// </summary>
-	private void Jump(bool isPressed)
+	private void JumpGround(bool isPressed)
 	{
 		// Assertions
 		if (!isPressed) return;
@@ -338,46 +330,30 @@ public class CharacterMotor : MonoBehaviour
 
 	private void JumpRope(bool isPressed)
 	{
-		if (!IsRopeValid) return;
+		// Assertion
+		if (!IsRopeValid) 
+		{
+			m_isJumpingRope = false;
+			return;
+		}
 
 		m_isJumpingRope = isPressed;
 
-		if (m_isJumpingRope)
+		// Assertion
+		if (!m_isJumpingRope) return;
+		
+		if (m_ssoCharacter.JumpRopeMethod == JumpMethod.SLACKEN)
 		{
-			m_jumpRopeCoroutine = StartCoroutine(ApplyJumpForce());
+			m_rope.IncreaseHoldLength(m_ssoCharacter.JumpRopeSlackenAmount);
 		}
-		else
+		else if (m_ssoCharacter.JumpRopeMethod == JumpMethod.RELEASE)
 		{
-			if (m_jumpRopeCoroutine != null) StopCoroutine(m_jumpRopeCoroutine);
-			ToggleRopeConstraint(m_ssoCharacter.RopeHoldingMethod == RopeHolding.HOLD_TO_LET_GO ? !m_isHolding : m_isHolding);
-		}
-	}
-
-	private IEnumerator ApplyJumpForce()
-	{
-		if (!m_isGrounded
-		&& m_ropeState == RopeState.PARTIAL_SUSPENSION)
-		{
-			ToggleRopeConstraint(false);
-
-			float force = m_ssoCharacter.JumpOffWallForce;
-			Vector3 direction = (Vector3Extention.GetPositionOnCercle(
-				angle: m_ssoCharacter.RopeOffsetAngle,
-				axis: m_characterGraphics.transform.right,
-				direction: -m_characterGraphics.transform.forward,
-				origin: m_rope.CurrentFold,
-				radius: m_rope.HoldLength,
-				starting: m_rigidbody.position
-			) - m_rigidbody.position).normalized;
-
-			m_rigidbody.AddForce(direction * force, ForceMode.Impulse);
+			DesequipRope();
 		}
 
-		while (m_isJumpingRope)
-		{
-			ToggleRopeConstraint(false);
-			yield return null;
-		}
+		float force = m_ssoCharacter.JumpOffRopeModifier * m_rigidbody.velocity.magnitude;
+		Vector3 direction = (m_rsoCameraRight.value * m_moveInput.x + m_rsoCameraForward.value * m_moveInput.y).normalized;
+		m_rigidbody.AddForce(direction * force, ForceMode.Impulse);
 	}
 
 	#endregion
@@ -605,7 +581,7 @@ public class CharacterMotor : MonoBehaviour
         if (!m_hasJumped)
         {
             m_coyoteTime = m_ssoCharacter.CoyoteTime;
-            m_rseJump.action += Jump;
+            m_rseJump.action += JumpGround;
         }
     }
 
@@ -613,7 +589,7 @@ public class CharacterMotor : MonoBehaviour
     {
         if (m_hasJumped || m_coyoteTime <= 0)
         {
-            m_rseJump.action -= Jump;
+            m_rseJump.action -= JumpGround;
             return;
         }
 
@@ -836,21 +812,20 @@ public class CharacterMotor : MonoBehaviour
 	private void EnterRopeState()
 	{
 		EnterFallState();
-		ToggleRopeConstraint(true);
-		m_isSuspended = true;
+		m_rope.IncreaseHoldLength(2);
 	}
 
 	private void FixedUpdateRopeState()
 	{
-		if (IsFallingWithRope())
-		{
-			FixedUpdateFallState();
-			return;
-		}
-
 		if (m_rope.GetTotalLength() > m_ssoRope.MaxLength)
 		{
 			DesequipRope();
+			return;
+		}
+
+		if (IsFallingWithRope())
+		{
+			FixedUpdateFallState();
 			return;
 		}
 
@@ -865,7 +840,6 @@ public class CharacterMotor : MonoBehaviour
 		m_isHolding = false;
 		m_isClimbing = false;
 		m_isRunning = false;
-		m_isSuspended = false;
 		m_hasJumped = false;
 	}
 
@@ -914,9 +888,10 @@ public class CharacterMotor : MonoBehaviour
 			return;
 		}
 
+		m_positionStartFall = m_rigidbody.position;
 		m_currentClimbSpeed += m_currentClimbSpeed * Time.fixedDeltaTime;
 		float clampedClimbSpeed = Mathf.Clamp(m_currentClimbSpeed, 0, m_ssoCharacter.MaxClimbSpeed);
-		m_rope.ChangeHoldLength(-clampedClimbSpeed * Time.fixedDeltaTime);
+		m_rope.IncreaseHoldLength(-clampedClimbSpeed * Time.fixedDeltaTime);
 	}
 
 	private bool IsFallingWithRope()
@@ -953,19 +928,6 @@ public class CharacterMotor : MonoBehaviour
 		m_isHolding = false;
 	}
 
-	private void ToggleRopeHolding(bool isEnabled)
-	{
-		ToggleRopeConstraint(isEnabled);
-
-		if (!isEnabled)
-		{
-			ApplyFreeRopeForce(IsJumpingPressed
-				? m_ssoCharacter.JumpOffRopeModifier
-				: m_ssoCharacter.FreeFallFromRopeModifier
-			);
-		}
-	}
-
 	private void ToggleRopeConstraint(bool isEnabled)
 	{
 		// Assertion
@@ -973,19 +935,16 @@ public class CharacterMotor : MonoBehaviour
 
 		if (isEnabled)
 		{
+			m_rope.IsConstrained = true;
 			m_positionStartFall = m_rigidbody.position;
 			m_rope.UpdateHoldLength();
 			if (m_rope.HoldLength == -1) DesequipRope(); // Handle error code 
 		}
-		else 
+		else
 		{
+			m_rope.IsConstrained = false;
 			m_rope.SetHoldLength(9999);
 		}
-	}
-
-	private void ApplyFreeRopeForce(float modifier)
-	{
-		m_rigidbody.AddForce(m_rigidbody.velocity.magnitude * modifier * m_rigidbody.velocity.normalized, ForceMode.Impulse);
 	}
 
 	#endregion
@@ -1087,7 +1046,7 @@ public class CharacterMotor : MonoBehaviour
 	private void ToggleAim(bool isInputPressed)
 	{
 		// Assertions
-		if (m_isSuspended) return;
+		if (m_rsoCharacterState.value == BehaviorState.ROPE) return;
 		if (HandObject == null) return;
 
 		IsAiming = isInputPressed;
