@@ -7,7 +7,7 @@ public class CharacterMotor : MonoBehaviour
 {
 	#region REFERENCES
 
-	[Header("Internal references")]
+	[Title("Internal references")]
 	[SerializeField] private Rigidbody m_rigidbody;
 	[SerializeField] private CapsuleCollider m_collider;
 	[SerializeField] private Transform m_handSocket;
@@ -49,7 +49,7 @@ public class CharacterMotor : MonoBehaviour
 	#region VARIABLES
 
 	// - Inputs -
-	private Vector2 m_moveInput = new Vector2();
+	[ShowInInspector] private Vector2 m_moveInput = new Vector2();
 
     // - Collisions -
     private LayerMask m_layerMaskToIgnore;
@@ -68,10 +68,10 @@ public class CharacterMotor : MonoBehaviour
 	private bool m_isSlowedPostStun;
 
 	// - Movement -
-	private bool m_isRunning;
-    private bool m_hasJumped;
+	[ShowInInspector] private bool m_isRunning;
+	[ShowInInspector] private bool m_hasJumped;
 	public bool IsJumpingPressed { get; private set; }
-	private bool m_isCrafting;
+	[ShowInInspector] private bool m_isCrafting;
 
 	// - Craft state -
 	private CraftType m_craftType;
@@ -79,7 +79,7 @@ public class CharacterMotor : MonoBehaviour
 	[HideInInspector] public Permanent HandObject;
 	[HideInInspector] public Permanent RobotObject;
 	[HideInInspector] public bool IsAiming;
-	private bool m_startAiming;
+	[ShowInInspector] private bool m_startAiming;
 
 	// - Rope state -
 	private Rope m_rope;
@@ -156,7 +156,6 @@ public class CharacterMotor : MonoBehaviour
     private void LateUpdate()
     {
 		MovementDatas _movementDatas = new MovementDatas();
-
         _movementDatas.dataToString.Add((Mathf.Round(m_rigidbody.velocity.magnitude * 100f) / 100f).ToString());
         _movementDatas.dataToString.Add(m_isGrounded.ToString());
         _movementDatas.dataToString.Add(m_rsoCharacterState.value.ToString());
@@ -245,7 +244,7 @@ public class CharacterMotor : MonoBehaviour
         }
 	}
 
-	private void SetCharacterPosition(Vector3 position, Quaternion rotation)
+	public void SetCharacterPosition(Vector3 position, Quaternion rotation)
 	{
 		m_positionStartFall = position;
 		m_rigidbody.velocity = Vector3.zero;
@@ -995,30 +994,35 @@ public class CharacterMotor : MonoBehaviour
 
 	private void EnterCraftState()
 	{
+		// Assertion
+		if (m_craftType == HandObject?.Type) return;
+
 		if (m_craftType == CraftType.TORCH)
 		{
-			if (HandObject != null
-			&& HandObject.Type != CraftType.TORCH
-			&& RobotObject?.Type != CraftType.TORCH)
+			if (HandObject?.Type == CraftType.ROPE)
 			{
 				Destroy(HandObject.gameObject);
+				HandObject = null;
 			}
-			m_craftCoroutine = StartCoroutine(Craft(CraftType.TORCH, m_ssoTorch.CraftingDuration));
+
+			if (!HandObject)
+			{
+				m_craftCoroutine = StartCoroutine(Craft(CraftType.TORCH, m_ssoTorch.CraftingDuration));
+			}
 		}
 		else if (m_craftType == CraftType.ROPE)
 		{
-			if (HandObject != null)
+			// If a torch is already in hand and the robot arm is free.
+			if (HandObject?.Type == CraftType.TORCH
+			&& !RobotObject)
 			{
-				if (HandObject.Type == CraftType.TORCH)
-				{
-					SwitchObjects(ref HandObject, ref RobotObject, m_robotSocket);
-				}
-				else if (HandObject.Type != CraftType.ROPE)
-				{
-					Destroy(HandObject.gameObject);
-				}
+				SwitchObjects(ref HandObject, ref RobotObject, m_robotSocket);
 			}
-			m_craftCoroutine = StartCoroutine(Craft(CraftType.ROPE, m_ssoRope.CraftingDuration));
+
+			if (!HandObject)
+			{
+				m_craftCoroutine = StartCoroutine(Craft(CraftType.ROPE, m_ssoRope.CraftingDuration));
+			}
 		}
 	}
 

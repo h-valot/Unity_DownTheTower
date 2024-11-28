@@ -1,16 +1,16 @@
 public class Sentence
 {
-	private string _sentence;
-	private string _colorCode;
+	private string m_sentence;
+	private string m_colorCode;
 
 	public Sentence(string sentence, string colorCode)
 	{
-		_sentence = sentence;
-		_colorCode = colorCode;
+		m_sentence = sentence;
+		m_colorCode = colorCode;
 	}
 
 	public string GetStylizedSentence()
 	{
-		return $"<#{_colorCode}>{_sentence}</color>";
+		return $"<#{m_colorCode}>{m_sentence}</color>";
 	}
 }

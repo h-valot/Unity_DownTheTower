@@ -161,10 +161,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d52929f66b5619943b116f7c58356995, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _torchConfig: {fileID: 11400000, guid: 0c5c3bc89382c9e439e0ef105c99e62b, type: 2}
-  _rseToggleCursor: {fileID: 11400000, guid: e3c127dc7da608c4f85fb9f1feb0c684, type: 2}
-  _graphicsParent: {fileID: 6946503593587950199}
-  _torchButtonText: {fileID: 2298909340174041641}
+  m_graphicsParent: {fileID: 6946503593587950199}
+  m_tmpTorch: {fileID: 1530432178119896176}
+  m_ssotorch: {fileID: 11400000, guid: 0c5c3bc89382c9e439e0ef105c99e62b, type: 2}
+  m_rseToggleCursor: {fileID: 11400000, guid: e3c127dc7da608c4f85fb9f1feb0c684, type: 2}
 --- !u!1 &2989089600924696093
 GameObject:
   m_ObjectHideFlags: 0
@@ -819,15 +819,3 @@ RectTransform:
     type: 3}
   m_PrefabInstance: {fileID: 5108534302218278595}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &2298909340174041641 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 6413817723804488938, guid: 856d34bdd18712947b3fbd5b45da8843,
-    type: 3}
-  m_PrefabInstance: {fileID: 5108534302218278595}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 

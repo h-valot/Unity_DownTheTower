@@ -3,7 +3,7 @@ using UnityEngine;
 public static class Vector3Extention
 {
 	/// <summary>
-	/// 	Return the given vector3's x, y and z with the given amout of digit.
+	/// Return the given vector3's x, y and z with the given amout of digit.
 	/// </summary>
 	/// <param name="digitAmount">Number of digit left after the comma. 0 by default = similar to floor to int.</param>
 	public static Vector3 CutDigits(this Vector3 vector, int digitAmount = 0)
@@ -16,8 +16,8 @@ public static class Vector3Extention
 	}
 
 	/// <summary>
-	/// 	Return the position of a point on a cercle with the given origin and radius perpendicular to the given axis.
-	/// 	From the given starting point, creates a rotation which rotates given angle degree around the given axis of the cercle.
+	/// Return the position of a point on a cercle with the given origin and radius perpendicular to the given axis.
+	/// From the given starting point, creates a rotation which rotates given angle degree around the given axis of the cercle.
 	/// </summary>
 	/// <param name="angle">Creates a rotation in degrees around the given axis in the given direction.</param>
 	/// <param name="axis">Axis perpendicular to the cercle.</param>

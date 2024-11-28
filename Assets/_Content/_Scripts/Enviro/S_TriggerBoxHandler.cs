@@ -8,12 +8,12 @@ public class TriggerBoxHandler : MonoBehaviour
     {
         if (other.TryGetComponent<CharacterMotor>(out var character))
         {
-            m_toxicGas.CharacterHasEnter(character);
+            m_toxicGas.Enter(character);
         }
 
         if (other.TryGetComponent<Torch>(out var torch))
         {
-            m_toxicGas.TorchHasEnter(torch);        
+            m_toxicGas.Enter(torch);        
         }
     }
 }

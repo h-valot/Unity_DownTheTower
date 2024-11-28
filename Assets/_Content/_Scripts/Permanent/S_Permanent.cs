@@ -1,8 +1,9 @@
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 public class Permanent : MonoBehaviour
 {
-	[Header("Permanent settings")]
+	[Title("Permanent settings")]
 	public CraftType Type;
 
 	private Vector3 GROUND_RAY_OFFSET = new Vector3(0.0f, 0.25f, 0.0f);

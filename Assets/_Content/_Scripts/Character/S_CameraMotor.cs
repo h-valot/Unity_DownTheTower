@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class CameraMotor : MonoBehaviour
 {
-	[Header("External references")]
+	[Title("External references")]
 	[SerializeField] private CinemachineVirtualCamera m_aimingCamera;
 	[SerializeField] private CinemachineVirtualCamera m_thirdPersonCamera;
 

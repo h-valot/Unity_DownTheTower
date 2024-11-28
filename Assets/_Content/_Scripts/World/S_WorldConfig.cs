@@ -1,7 +1,9 @@
+using Sirenix.OdinInspector;
 using UnityEngine;
 
-public class WorldConfig : ScriptableObject
+public class SSO_Optimization : ScriptableObject
 {
-	public float optimizedPropUpdateTimer;
-	public float optimizedPropRenderDistance;
+	[Title("World")]
+	public float OptimizedPropUpdateTimer;
+	public float OptimizedPropRenderDistance;
 }

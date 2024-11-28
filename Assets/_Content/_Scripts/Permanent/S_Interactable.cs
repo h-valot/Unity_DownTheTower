@@ -1,10 +1,10 @@
 using System;
-using NaughtyAttributes;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 public class Interactable : MonoBehaviour
 {
-	[Header("Interactible")]
+	[Title("Interactible")]
 	[Tooltip("If set as true destroys the `Object To Recycle` on interaction triggered. Otherwise, don't.")]
 	[SerializeField] private bool m_isRecyclable;
 

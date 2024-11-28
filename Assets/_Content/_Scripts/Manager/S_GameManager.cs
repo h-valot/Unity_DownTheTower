@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-	[Header("Tweakable values")]
+	[Title("Tweakable values")]
 	[Required("A Game Start must be assigned to start the game. If there is no in the scene, you can find the prefab here: Content/Prefabs/LevelDesign")]
 	[SerializeField] private GameStart m_gameStart;
 

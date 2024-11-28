@@ -1,21 +1,21 @@
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 public class InputAdvisor : MonoBehaviour
 {
-    [Header("Internal References")]
+    [Title("Internal References")]
 	[SerializeField] private GameObject m_graphicInteract;
     [SerializeField] private GameObject m_graphicRecycle;
     [SerializeField] private GameObject m_inputPanel;
     [SerializeField] private GameObject m_ropeInputs;
     [SerializeField] private GameObject m_locomotionInputs;
 
-    [Header("External References")]
-    [SerializeField] private RSE_HideUI m_rseHideUI;
-	[Space(5)]
-	[SerializeField] private RSO_GamePaused m_rsoGamePaused;
-	[SerializeField] private RSO_CharacterState m_rsoCharacterState;
-	[SerializeField] private RSO_InteractableValid m_rsoInteractableValid;
-	[SerializeField] private RSO_InteractableRecyclable m_rsoInteractableRecyclable;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSE_HideUI m_rseHideUI;
+
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_GamePaused m_rsoGamePaused;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterState m_rsoCharacterState;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_InteractableValid m_rsoInteractableValid;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_InteractableRecyclable m_rsoInteractableRecyclable;
 
 	private bool m_isActive = true;
 

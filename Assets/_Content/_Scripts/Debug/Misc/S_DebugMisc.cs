@@ -1,19 +1,19 @@
+using Sirenix.OdinInspector;
 using TMPro;
 using UnityEngine;
 
 public class DebugMisc : MonoBehaviour
 {
-    [Header("External Variables")]
-    [SerializeField] private SSO_Torch _torchConfig;
-	[SerializeField] private RSE_ToggleCursor _rseToggleCursor;
+	[Title("Internal references")]
+    [SerializeField] private GameObject m_graphicsParent;
+    [SerializeField] private TextMeshProUGUI m_tmpTorch;
 
-    [Header("Internal Variables")]
-    [SerializeField] private GameObject _graphicsParent;
-    [SerializeField] private TextMeshProUGUI _torchButtonText;
+	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Torch m_ssotorch;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSE_ToggleCursor m_rseToggleCursor;
 
     // ----- PRIVATE VARIABLES -----
-    private bool _isPressed;
-    private bool _isEnabled;
+    private bool m_isPressed;
+    private bool m_isEnabled;
 
     private void Start()
     {
@@ -30,22 +30,22 @@ public class DebugMisc : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.F3))
         {
-            if (!_isPressed)
+            if (!m_isPressed)
             {
                 Toggle();
             }
-            _isPressed = true;
+            m_isPressed = true;
         }
 
         if (Input.GetKeyUp(KeyCode.F3))
         {
-            _isPressed = false;
+            m_isPressed = false;
         }
     }
 
     private void Toggle()
     {
-        if (_isEnabled)
+        if (m_isEnabled)
         {
             Hide();
             Time.timeScale = 1f;
@@ -59,26 +59,26 @@ public class DebugMisc : MonoBehaviour
 
 	public void Hide()
 	{
-		_rseToggleCursor.Call(false);
-		_graphicsParent.SetActive(false);
-        _isEnabled = false;
+		m_rseToggleCursor.Call(false);
+		m_graphicsParent.SetActive(false);
+        m_isEnabled = false;
     }
 
     private void Show()
 	{
-		_rseToggleCursor.Call(true);
-		_graphicsParent.SetActive(true);
-        _isEnabled = true;
+		m_rseToggleCursor.Call(true);
+		m_graphicsParent.SetActive(true);
+        m_isEnabled = true;
     }
 
     public void ToggleTorchAnim()
     {
-        _torchConfig.ActivateBreakAnim = !_torchConfig.ActivateBreakAnim;
+        m_ssotorch.ActivateBreakAnim = !m_ssotorch.ActivateBreakAnim;
         UpdateTorchText();
     }
 
     private void UpdateTorchText()
     {
-		_torchButtonText.text = _torchConfig.ActivateBreakAnim ? "Torch Break Anim: ON" : "Torch Break Anim: OFF";
+		m_tmpTorch.text = m_ssotorch.ActivateBreakAnim ? "Torch Break Anim: ON" : "Torch Break Anim: OFF";
 	}
 }

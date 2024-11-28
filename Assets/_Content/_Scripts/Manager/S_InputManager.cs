@@ -6,7 +6,7 @@ public class InputManager : MonoBehaviour
 {
 	#region REFERENCES
 
-	[Header("Internal references")]
+	[Title("Internal references")]
 	[SerializeField] private PlayerInput m_playerInput;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Inputs m_ssoInputs;
@@ -175,14 +175,6 @@ public class InputManager : MonoBehaviour
 		if (!m_rsoCraftInputLocked.value) return;
 
         m_rseCraft.Call(CraftType.TORCH, value.isPressed);
-    }
-
-    public void OnCraftLadder(InputValue value)
-	{
-		// Assertion
-		if (!m_rsoCraftInputLocked.value) return;
-
-		m_rseCraft.Call(CraftType.DEPRECATED_LADDER, value.isPressed);
     }
 
     public void OnCraftRope(InputValue value)

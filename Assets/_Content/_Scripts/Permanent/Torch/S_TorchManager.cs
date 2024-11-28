@@ -5,6 +5,7 @@ using UnityEngine;
 public class TorchManager : MonoBehaviour
 {
     [FoldoutGroup("Scriptable")][SerializeField] private SSO_Torch m_ssoTorch;
+	
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_TorchManager m_rsoTorchManager;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterDeath m_rsoCharacterDeath;
 

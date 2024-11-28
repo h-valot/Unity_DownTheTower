@@ -1,21 +1,23 @@
 using System.Collections.Generic;
 using DG.Tweening;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 public class Rope : Permanent
 {
 	#region REFERENCES
 
-	[Header("Internal references")]
+	[Title("Internal references")]
 	[SerializeField] private Transform m_ropeAttach;
 	[SerializeField] private MeshRenderer m_previewMeshRendered;
 	[SerializeField] private GameObject m_previewGameObject;
 	[SerializeField] private ConfigurableJoint m_joint;
 
-	[Header("Scriptable references")]
-	[SerializeField] private SSO_Rope m_ropeConfig;
-	[SerializeField] private RSE_SetCharacterPosition m_rseSetCharacterPosition;
-	[SerializeField] private RSO_CharacterPosition m_rsoCharacterPosition;
+	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Rope m_ropeConfig;
+
+	[FoldoutGroup("Scriptable")][SerializeField] private RSE_SetCharacterPosition m_rseSetCharacterPosition;
+
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterPosition m_rsoCharacterPosition;
 
 	#endregion
 

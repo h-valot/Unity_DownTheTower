@@ -2,6 +2,6 @@ using UnityEngine;
 
 public class OptimizedProp : MonoBehaviour
 {
-	// empty class for the moment
-	// see OptimizedPropManager.cs for more informations
+	// Empty class for the moment
+	// See OptimizedPropManager.cs for more informations
 }

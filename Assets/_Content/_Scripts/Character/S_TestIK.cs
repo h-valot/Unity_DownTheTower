@@ -1,10 +1,10 @@
-using NaughtyAttributes;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 [RequireComponent(typeof(Animator))]
 public class TestIk : MonoBehaviour
 {
-	[Header("Internal references")]
+	[Title("Internal references")]
 	[Required("TestIk required an animator to work.")]
 	[SerializeField] private Animator m_animator;
 	[SerializeField] private Transform m_rightHandLiftTorchTarget = null;
@@ -12,7 +12,7 @@ public class TestIk : MonoBehaviour
 	[SerializeField] private Transform m_leftFootObj;
 	[SerializeField] private Transform m_rightFootObj;
 
-	[Header("External references")]
+	[Title("External references")]
 	[SerializeField] private CharacterMotor m_characterMotor;
 
 	// ---- PRIVATE VARIABLES ----

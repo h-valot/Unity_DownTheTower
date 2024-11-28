@@ -1,8 +1,9 @@
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 public class AnimatorManager : MonoBehaviour
 {
-	[Header("External references")]
+	[Title("External references")]
     [SerializeField] private Animator m_animator;
     [SerializeField] private CharacterMotor m_characterMotor;
 

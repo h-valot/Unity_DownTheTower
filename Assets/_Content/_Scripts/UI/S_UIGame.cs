@@ -7,7 +7,7 @@ using UnityEngine.UI;
 
 public class UIGame : MonoBehaviour
 {
-    [Header("Internal references")]
+    [Title("Internal references")]
     [SerializeField] private Image m_imgDeath;
     [SerializeField] private GameObject m_pnlPause;
     [SerializeField] private GameObject m_pnlLog;

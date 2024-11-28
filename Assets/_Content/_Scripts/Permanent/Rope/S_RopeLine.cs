@@ -1,23 +1,23 @@
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 public class RopeLine : MonoBehaviour
 {
-	[Header("Internal references")]
-	[SerializeField] private LineRenderer _lineRenderer;
+	[Title("Internal references")]
+	[SerializeField] private LineRenderer m_lineRenderer;
 
-	[Header("Debugging")]
-	public Vector3[] positions;
+	private Vector3[] m_positions;
 
 	public void SetPositions(Vector3 from, Vector3 to)
 	{
-		positions = new Vector3[] { from, to };
+		m_positions = new Vector3[] { from, to };
 
-		_lineRenderer.positionCount = 2;
-		_lineRenderer.SetPositions(positions);
+		m_lineRenderer.positionCount = 2;
+		m_lineRenderer.SetPositions(m_positions);
 	}
 
 	public void SetColor(Material material)
 	{
-		_lineRenderer.sharedMaterial = material;
+		m_lineRenderer.sharedMaterial = material;
 	}
 }

@@ -1,40 +1,43 @@
 using DG.Tweening;
-using System.Collections;
+using Sirenix.OdinInspector;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class Lever : Interactable
 {
-    [Header("External References")]
-    [SerializeField] private List<Switchable> _switchableList;
+    [Title("External references")]
+    [SerializeField] private List<Switchable> m_switchables = new List<Switchable>();
 
-    [Header("Tweakable Variables")]
-    [SerializeField] private bool _isActivated = false;
+    [Title("Tweakable values")]
+    [SerializeField] private bool m_isActivated = false;
 
-    [Header("Graphic Elements (TEMP)")]
-    [SerializeField] private GameObject _handleOrigin;
-    [SerializeField] private GameObject _gauge;
+    [Title("TEMP: graphic elements")]
+    [SerializeField] private GameObject m_handleOrigin;
+    [SerializeField] private GameObject m_gauge;
 
     public override void InteractionTrigger()
     {
-        _isActivated = !_isActivated;
+        m_isActivated = !m_isActivated;
 
-        foreach (Switchable switchable in _switchableList) switchable.SwitchBehavior(_isActivated);
+        foreach (var switchable in m_switchables) 
+		{
+			switchable.SwitchBehavior(m_isActivated);
+		}
 
         UpdateGraphics();
     }
 
     private void UpdateGraphics()
     {
-        if (_isActivated)
+        if (m_isActivated)
         {
-            _handleOrigin.transform.DORotate(new Vector3(0, 0, 30), 0.5f);
-            _gauge.transform.DOScaleY(0.8f, 0.5f);
+            m_handleOrigin.transform.DORotate(new Vector3(0, 0, 30), 0.5f);
+            m_gauge.transform.DOScaleY(0.8f, 0.5f);
         }
         else
         {
-            _handleOrigin.transform.DORotate(new Vector3(0, 0, 150), 0.5f);
-            _gauge.transform.DOScaleY(0.1f, 0.5f);
+            m_handleOrigin.transform.DORotate(new Vector3(0, 0, 150), 0.5f);
+            m_gauge.transform.DOScaleY(0.1f, 0.5f);
         }
     }
 }

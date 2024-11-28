@@ -1,17 +1,17 @@
 using System.Collections.Generic;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 public class Log : Interactable
 {
-    [Header("External Variables")]
-    [SerializeField] private RSE_LogContent _rseLogContent;
+    [Title("Tweakable Values")]
+    [SerializeField] private string m_logHeader;
+    [SerializeField] private List<string> m_logBody = new List<string>();
 
-    [Header("Tweakable Values")]
-    [SerializeField] private string _logHeader;
-    [SerializeField] private List<string> _logBody;
+    [FoldoutGroup("Scriptable")][SerializeField] private RSE_LogContent m_rseLogContent;
 
     public override void InteractionTrigger()
     {
-        _rseLogContent.Call(_logHeader, _logBody);
+        m_rseLogContent.Call(m_logHeader, m_logBody);
     }
 }
