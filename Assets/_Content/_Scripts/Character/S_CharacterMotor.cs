@@ -867,6 +867,7 @@ public class CharacterMotor : MonoBehaviour
 		m_isClimbing = false;
 		m_isRunning = false;
 		m_isSuspended = false;
+		m_hasJumped = false;
 	}
 
 	private void HandleRopeMovement()
