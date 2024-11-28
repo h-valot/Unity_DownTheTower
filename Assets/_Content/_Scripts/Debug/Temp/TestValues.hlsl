@@ -26,18 +26,14 @@ void dotEX_float(float3 v1, float3 v2, out precise float Out)
     precise float pre = v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
     Out = pre;
 }
-// 65.66666793
-// 65.66666793
 
 void TestValues_float(float3 In, out float Out)
 {
     const float2 C = float2(1.0 / 6.0, 1.0 / 3.0);
-    // -3.33333242
     
     // First corner
     float3 i = floor(In + dot(In, C.yyy));
     float3 x0 = In - i + dot(i, C.xxx);
-    // 0.33333255350589754
     
     // Other corners
     float3 g = step(x0.yzx, x0.xyz);
