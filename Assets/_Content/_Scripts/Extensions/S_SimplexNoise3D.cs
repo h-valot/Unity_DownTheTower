@@ -50,7 +50,6 @@ public class SimplexNoise3D
         Vector4 s0 = Floor(b0) * 2f + Vector4.one;
         Vector4 s1 = Floor(b1) * 2f + Vector4.one;
         Vector4 sh = -Step(h, Vector4.zero);
-        Matha.PrecisionPrint(Step(h, Vector4.zero));
 
         Vector4 a0 = new Vector4(b0.x, b0.z, b0.y, b0.w) + new Vector4(s0.x * sh.x, s0.z * sh.x, s0.y * sh.y, s0.w * sh.y);
         Vector4 a1 = new Vector4(b1.x, b1.z, b1.y, b1.w) + new Vector4(s1.x * sh.z, s1.z * sh.z, s1.y * sh.w, s1.w * sh.w);
