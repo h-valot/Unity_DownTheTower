@@ -39,7 +39,7 @@ float3 permute(float3 x)
 
 float4 taylorInvSqrt(float4 r)
 {
-  return (float4)1.79284291400159 - r * 0.85373472095314;
+  return (float4)1.792843 - r * 0.8537347;
 }
 
 float3 taylorInvSqrt(float3 r)

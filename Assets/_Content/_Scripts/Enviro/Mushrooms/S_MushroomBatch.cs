@@ -1,6 +1,10 @@
-
+using System;
+using System.Collections;
 using Sirenix.OdinInspector;
 using System.Collections.Generic;
+using Unity.Mathematics;
+using Unity.VisualScripting;
+using UnityEditor.PackageManager;
 using UnityEngine;
 
 public class MushroomBatch : MonoBehaviour
@@ -12,6 +16,7 @@ public class MushroomBatch : MonoBehaviour
 
     [Header("Mushroom Placement Properties")]
     [SerializeField] private float _minDotAngle = 0.2f;
+    [SerializeField] private float _overlapModifier = 1f;
     [SerializeField] private bool _isRandom = true;
     [EnableIf("_isRandom")]
     [SerializeField] private float _minSizeMultiplier = 0.5f;
@@ -60,12 +65,6 @@ public class MushroomBatch : MonoBehaviour
         }
     }
 
-    private Vector3 GetNextRayDirection()
-    {
-
-        return Vector3.forward;
-    }
-
     private int GetRaycastSamples()
     {
         float area = 4 * Mathf.PI * Mathf.Pow(_radius, 2);
@@ -74,31 +73,38 @@ public class MushroomBatch : MonoBehaviour
 
     private void SpawnMushroom(RaycastHit hitInfo)
     {
-        float scale = UnityEngine.Random.Range(_minSizeMultiplier, _maxSizeMultiplier);
+        if (SimplexNoise3D.SimplexNoise(hitInfo.point, 0.37f) < 0.5f) return;
+        float scale = _mushroomPrefab.transform.localScale.x * UnityEngine.Random.Range(_minSizeMultiplier, _maxSizeMultiplier);
 
-        if (!IsNormalFacingOrigin(hitInfo) || !HasEnoughRoom(hitInfo, _mushroomPrefab.transform.localScale.x / 2)) return;
+        if (!IsNormalFacingOrigin(hitInfo) || !HasEnoughRoom(hitInfo, scale * 0.5f * _overlapModifier)) return;
 
         GameObject newMushroom = Instantiate(_mushroomPrefab, hitInfo.point, Quaternion.FromToRotation(Vector3.up, hitInfo.normal), transform);
-        newMushroom.transform.localScale = new Vector3(newMushroom.transform.localScale.x * scale, newMushroom.transform.localScale.y * scale, newMushroom.transform.localScale.z * scale);
+        newMushroom.transform.localScale = new Vector3(scale, scale, scale);
+        newMushroom.name = "Mushroom" + (mushroomList.Count + 1);
         mushroomList.Add(newMushroom);
-        
+
     }
 
     private bool HasEnoughRoom(RaycastHit hitInfo, float radius)
     {
-        RaycastHit[] hitList = Physics.SphereCastAll(hitInfo.point, radius, Vector3.zero);
-        return hitList.Length < 1;
+        // Doesn't overlap with other mushrooms
+        LayerMask raycastLayerMask = new LayerMask();
+        raycastLayerMask |= (1 << LayerMask.NameToLayer("NoCollision_NoRaycast"));
+        Collider[] hitlist = Physics.OverlapSphere(hitInfo.point, radius, raycastLayerMask, QueryTriggerInteraction.Collide);
+        return hitlist.Length < 1;
     }
 
     private bool IsNormalFacingOrigin(RaycastHit hitInfo)
     {
         Vector3 rayDirection = (transform.position - hitInfo.point).normalized;
-        return _minDotAngle <= Vector3.Dot(rayDirection, hitInfo.normal);
+        return _minDotAngle <= Vector3.Dot(rayDirection.normalized, hitInfo.normal.normalized);
     }
 
-    private void OnDrawGizmosSelected()
+    private void OnDrawGizmos()
     {
-        Gizmos.color = Color.magenta;
-        Gizmos.DrawWireSphere(transform.position, _radius);
+        foreach (GameObject mushroom in mushroomList)
+        {
+
+        }
     }
 }
