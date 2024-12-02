@@ -115,6 +115,12 @@ public class SSO_Character : ScriptableObject
 	/// <summary> Duration the player have to hold the cancel key to desequip the rope. </summary>
 	public float CancelRopeDuration;
 
+	[FoldoutGroup("Rope")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("Distance the rope constraint length increases when the character enters the rope state.", InfoMessageType.None)]
+	/// <summary> Distance the rope constraint length increases when the character enters the rope state. </summary>
+	public float EntranceOffset;
+
 
 	[Title("Suspension")]
 	[FoldoutGroup("Rope")]

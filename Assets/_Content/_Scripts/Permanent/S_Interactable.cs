@@ -15,8 +15,11 @@ public class Interactable : MonoBehaviour
 	[SerializeField] private bool m_displayGizmos;
 
 	public Action OnInteracted;
+	public Action<CharacterInteract> OnInteractedWithRef;
 	public bool IsValid { get; set; }
 	public bool IsRecyclable => m_isRecyclable && m_objectToRecycle != null;
+
+	private CharacterInteract m_character;
 
 	/// <summary>
 	/// 	Called when the interactable is getting interacted.
@@ -24,6 +27,7 @@ public class Interactable : MonoBehaviour
 	public virtual void InteractionTrigger() 
 	{
 		OnInteracted?.Invoke();
+		if (m_character) OnInteractedWithRef?.Invoke(m_character);
 	}
 
 	/// <summary>
@@ -34,6 +38,7 @@ public class Interactable : MonoBehaviour
     {
 		if (collider.TryGetComponent<CharacterInteract>(out var character))
 		{
+			m_character = character;
 			character.Add(this);
 		}
 	}
@@ -46,6 +51,7 @@ public class Interactable : MonoBehaviour
 	{
 		if (collider.TryGetComponent<CharacterInteract>(out var character))
 		{
+			m_character = null;
 			character.Remove(this);
 		}
 	}

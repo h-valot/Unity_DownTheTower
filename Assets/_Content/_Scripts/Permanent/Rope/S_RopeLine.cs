@@ -5,15 +5,15 @@ public class RopeLine : MonoBehaviour
 {
 	[Title("Internal references")]
 	[SerializeField] private LineRenderer m_lineRenderer;
-
-	private Vector3[] m_positions;
+	
+	[HideInInspector] public Vector3[] Positions;
 
 	public void SetPositions(Vector3 from, Vector3 to)
 	{
-		m_positions = new Vector3[] { from, to };
+		Positions = new Vector3[] { from, to };
 
 		m_lineRenderer.positionCount = 2;
-		m_lineRenderer.SetPositions(m_positions);
+		m_lineRenderer.SetPositions(Positions);
 	}
 
 	public void SetColor(Material material)

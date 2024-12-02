@@ -1,3 +1,4 @@
+using DG.Tweening;
 using Sirenix.OdinInspector;
 using UnityEngine;
 
@@ -24,6 +25,7 @@ public class GameManager : MonoBehaviour
 	{
 		Restart();
 		Cursor.lockState = CursorLockMode.Locked;
+		DOTween.SetTweensCapacity(400, 400);
 		m_rsoGamePaused.value = false;
 	}
 
