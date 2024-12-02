@@ -311,7 +311,6 @@ public class Torch : Permanent
     {
         yield return new WaitForSeconds(duration);
         m_rsoTorchManager.value.Remove(this);
-        Deactivate();
     }
 
     public override bool StateInHand()
@@ -330,7 +329,7 @@ public class Torch : Permanent
     {
 		// Assertions
         if (IsInHand) return;
-		if (!gameObject) return;
+		if (gameObject == null) return;
 
 		if (m_rsoCharacterPosition.value.y - transform.position.y > m_ssoCharacter.LethalHeight)
 		{
@@ -364,7 +363,6 @@ public class Torch : Permanent
 		if (m_rsoCharacterPosition.value.y - transform.position.y > m_ssoCharacter.LethalHeight + m_ssoRope.MaxLength)
 		{
 			m_rsoTorchManager.value.Remove(this);
-			Deactivate();
 		}
     }
 
@@ -373,7 +371,9 @@ public class Torch : Permanent
     /// </summary>
     public void Deactivate()
     {
-        if (!m_ssoTorch.ActivateBreakAnim)
+		if (m_isDeactivate) return;
+
+		if (!m_ssoTorch.ActivateBreakAnim)
 		{
 			DestroyTorch();
 			return;

@@ -32,14 +32,14 @@ public class TorchManager : MonoBehaviour
 
         while (m_torches.Count > m_ssoTorch.MaxTorchesSoft)
         {
-            m_torches[4].Deactivate();
             Remove(m_torches[4]);
         }
     }
 
     public void Remove(Torch torch)
-    {
-        m_torches.Remove(torch);
+	{
+		torch.Deactivate();
+		m_torches.Remove(torch);
 	}
 
 	public void Clear()
@@ -49,7 +49,6 @@ public class TorchManager : MonoBehaviour
 
 		for (int i = m_torches.Count - 1; i >= 0; i--)
 		{
-			m_torches[i].Deactivate();
 			Remove(m_torches[i]);
 		}
 	}
