@@ -72,9 +72,11 @@ public class CharacterMotor : MonoBehaviour
 	private bool m_hasJumped;
 	public bool IsJumpingPressed { get; private set; }
 	private bool m_isCrafting;
+	private float m_airControlForceFactor;
+	private float m_airControlTime;
 
-	// - Craft state -
-	private CraftType m_craftType;
+    // - Craft state -
+    private CraftType m_craftType;
 	private Coroutine m_craftCoroutine;
 	[HideInInspector] public Permanent HandObject;
 	[HideInInspector] public Permanent RobotObject;
@@ -757,7 +759,7 @@ public class CharacterMotor : MonoBehaviour
         }
 
         // Apply final force to move character, auto clamp the speed by substractiong actual speed to desired speed
-        m_rigidbody.AddForce((desiredSpeedForce - m_rigidbody.velocity) * m_ssoCharacter.FallingControlFactor, ForceMode.Acceleration);
+        m_rigidbody.AddForce((desiredSpeedForce * m_ssoCharacter.AirControlSpeedFactor - m_rigidbody.velocity) * m_airControlForceFactor, ForceMode.Acceleration);
     }
 
     #endregion
@@ -801,17 +803,31 @@ public class CharacterMotor : MonoBehaviour
         UpdateDrag();
         SetFriction();
         StartCoyoteTime();
+		StartAirControl();
     }
 
     private void FixedUpdateFallState()
     {
         UpdateCoyoteTime();
+		UpdateAirControl();
         MoveFalling();
     }
 
     private void ExitFallState()
     {
         m_hasJumped = false;
+    }
+
+	private void StartAirControl()
+	{
+		m_airControlTime = m_ssoCharacter.AirControlTime;
+		m_airControlForceFactor = m_ssoCharacter.MaxAirControlForceFactor;
+    }
+
+	private void UpdateAirControl()
+	{
+		m_airControlTime -= Time.fixedDeltaTime;
+		m_airControlForceFactor = m_ssoCharacter.MaxAirControlForceFactor * m_airControlTime / m_ssoCharacter.AirControlTime;
     }
 
 	#endregion

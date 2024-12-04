@@ -75,11 +75,23 @@ public class SSO_Character : ScriptableObject
 
 	[FoldoutGroup("Jump")]
 	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
-	[InfoBox("Scalar applied to the character input direction while falling.", InfoMessageType.None)]
+	[InfoBox("Scalar applied to the the max speed while falling.", InfoMessageType.None)]
 	/// <summary> Scalar applied to the character input direction while falling. </summary>
-	public float FallingControlFactor;
+	public float AirControlSpeedFactor;
 
-	[FoldoutGroup("Jump")]
+    [FoldoutGroup("Jump")]
+    [PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+    [InfoBox("Scalar applied to the force applied to character while falling.", InfoMessageType.None)]
+    /// <summary> Scalar applied to the character input direction while falling. </summary>
+    public float MaxAirControlForceFactor;
+
+    [FoldoutGroup("Jump")]
+    [PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+    [InfoBox("Time it takes to decrease air control force factor.", InfoMessageType.None)]
+    /// <summary> Scalar applied to the character input direction while falling. </summary>
+    public float AirControlTime;
+
+    [FoldoutGroup("Jump")]
 	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
 	[InfoBox("Duration during which the character is still able to jumb after start falling.", InfoMessageType.None)]
 	/// <summary> Duration during which the character is still able to jumb after start falling. </summary>
