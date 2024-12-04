@@ -231,6 +231,11 @@ public class Guardian : MonoBehaviour
                         {
                             if (_objectRef != null)
                             {
+                                _objectRef.TryGetComponent<Torch>(out Torch _torchObject);
+                                if (!_torchObject.IsLit)
+                                {
+                                    _potentialTarget.Remove(pair.Key.gameObject);
+                                }
                                 if (CheckRaycast(_objectRef))
                                 {
                                     _distance.Add(_objectRef, Vector3.Distance(this.transform.position, _objectRef.transform.position));
