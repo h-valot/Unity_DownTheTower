@@ -28,9 +28,10 @@ public class CharacterMotor : MonoBehaviour
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Run m_rseRun;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Climb m_rseClimb;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Cancel m_rseCancel;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSE_ToggleHandObject m_rseToggleHandObject;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSE_KillCharacter m_rseKillCharacter;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_BackpackCrafting m_rseBackpackCrafting;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_SetCharacterPosition m_rseSetCharacterPosition;
-	[FoldoutGroup("Scriptable")][SerializeField] private RSE_KillCharacter m_rseKillCharacter;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_InitializeCamera m_rseInitializeCamera;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_MovementDatas m_rsoMovementDatas;
@@ -207,12 +208,14 @@ public class CharacterMotor : MonoBehaviour
 		m_rseThrow.action -= ToggleAim;
 		m_rseClimb.action -= UpdateClimbInput;
 		m_rseCancel.action -= CancelRope;
+		m_rseToggleHandObject.action -= ToggleTorch;
 	}
 
     private void SubscribeStateInputs()
 	{
 		m_rseSetCharacterPosition.action += SetCharacterPosition;
 		m_rseKillCharacter.action += HandleDeath;
+		m_rseToggleHandObject.action += ToggleTorch;
 
 		switch (m_rsoCharacterState.value)
         {
@@ -278,6 +281,14 @@ public class CharacterMotor : MonoBehaviour
 
 		ToggleRopeConstraint(m_ssoCharacter.RopeHoldingMethod == RopeHolding.HOLD_TO_LET_GO ? !isHolding : isHolding);
 		m_isHolding = isHolding;
+	}
+
+	private void ToggleTorch()
+	{
+		// Assertion
+		if (!(HandObject as Torch)) return;
+
+		((Torch)HandObject)?.ToggleHandEffect();
 	}
 
 	private void UpdateClimbInput(bool isClimbing)

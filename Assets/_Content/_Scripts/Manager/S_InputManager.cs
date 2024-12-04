@@ -19,7 +19,7 @@ public class InputManager : MonoBehaviour
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Cancel m_rseCancel;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Craft m_rseCraft;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Throw m_rseThrow;
-	[FoldoutGroup("Scriptable")][SerializeField] private RSE_ToggleInHand m_rseToggleInHand;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSE_ToggleHandObject m_rseToggleHandObject;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Pause m_rsePause;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_HideUI m_rseHideUI;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Recycle m_rseRecycle;
@@ -154,9 +154,9 @@ public class InputManager : MonoBehaviour
 		}
 	}
 
-	public void OnToggleInHand()
+	public void OnToggleHandObject()
 	{
-		m_rseToggleInHand.Call();
+		m_rseToggleHandObject.Call();
 	}
 
 	public void OnInteract(InputValue value)
