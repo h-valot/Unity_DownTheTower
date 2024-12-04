@@ -102,6 +102,12 @@ public class SSO_Character : ScriptableObject
 	#region GROUND
 
 	[FoldoutGroup("Ground")]
+	[InfoBox("Check ground & handle step on systems raycasts will only include the following layer masks.", InfoMessageType.None)]
+	/// <summary> Check ground & handle step on systems raycasts will only include the following layer masks. </summary>
+	public LayerMask GroundLayerToInclude;
+
+	[FoldoutGroup("Ground")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
 	[InfoBox("Width added to cast used to determine if it is triggering things.", InfoMessageType.None)]
 	/// <summary> Width added to cast used to determine if it is triggering things. </summary>
 	public float SkinWidth;

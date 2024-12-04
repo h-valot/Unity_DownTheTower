@@ -164,7 +164,7 @@ public class Torch : Permanent
     /// <summary> 
 	/// Activate or deactivate light on the torch.
 	/// </summary>
-    public override void ToggleInHand()
+    public override void ToggleHandEffect()
     {
         m_light.enabled = false;
 
@@ -269,6 +269,11 @@ public class Torch : Permanent
     {
 		// Assertion
         if (!IsInHand || !m_ssoTorch.CanThrow) return false;
+
+		if (!IsLit)
+		{
+			ToggleHandEffect();
+		}
 
         m_aimPreview.enabled = false;
 
