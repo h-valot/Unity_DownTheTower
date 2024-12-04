@@ -53,7 +53,6 @@ public class CharacterMotor : MonoBehaviour
 	private Vector2 m_moveInput = new Vector2();
 
     // - Collisions -
-    private LayerMask m_layerMaskToIgnore;
     private RaycastHit[] m_raycastHits;
 
     // - Ground -
@@ -116,8 +115,6 @@ public class CharacterMotor : MonoBehaviour
     {
         // Update drag in rigidbody if changed in characterConfig
         m_ssoCharacter.OnConfigChanged += UpdateDrag;
-        // Layer mask to remove character for cast, use ~_layerMaskToIgnore
-        m_layerMaskToIgnore |= 1 << LayerMask.NameToLayer("Character");
 
 		m_rseInitializeCamera.Call(m_aimingLookTo, m_cameraTarget, rotation);
         m_characterGraphics.Initialize(m_aimingLookTo, m_rigidbody, rotation);
@@ -505,24 +502,22 @@ public class CharacterMotor : MonoBehaviour
         float _radius = m_collider.radius + m_ssoCharacter.SkinWidth;
         Vector3 _direction = Vector3.down;
         float _distance = m_collider.height - 2 * m_collider.radius;
-        m_raycastHits = Physics.SphereCastAll(_start, _radius, _direction, _distance, ~m_layerMaskToIgnore);
+        m_raycastHits = Physics.SphereCastAll(_start, _radius, _direction, _distance, m_ssoCharacter.GroundLayerToInclude);
 
-        //check each points
+        // Check each points
         foreach (RaycastHit hit in m_raycastHits)
         {
-            //exclude hit point that come from the spherecast spawning inside a collider
-            if (hit.point == Vector3.zero)
-            {
-                continue;
-            }
-            //check if it is on the bottom round part of the capsule
+            // Exclude hit point that come from the spherecast spawning inside a collider
+            if (hit.point == Vector3.zero) continue;
+
+            // Check if it is on the bottom round part of the capsule
             if (hit.point.y < transform.position.y + m_collider.radius)
             {
                 float _angle = Vector3.Angle(hit.normal, Vector3.up);
                 if (_angle < 46f)
                 {
                     m_isGrounded = true;
-                    //take the smallest normal from ground check as the new ground normal
+                    // Take the smallest normal from ground check as the new ground normal
                     if (Vector3.Dot(hit.normal, Vector3.up) > Vector3.Dot(m_groundNormal, Vector3.up))
                     {
                         m_groundNormal = hit.normal;
@@ -735,13 +730,13 @@ public class CharacterMotor : MonoBehaviour
 			Vector3 start = new Vector3(m_rigidbody.position.x, m_rigidbody.position.y + m_ssoCharacter.SkinWidth, m_rigidbody.position.z);
 			Vector3 direction = m_rigidbody.velocity.normalized;
 			float distance = m_collider.radius * 2;
-			if (Physics.Raycast(start, direction, distance, ~m_layerMaskToIgnore))
+			if (Physics.Raycast(start, direction, distance, m_ssoCharacter.GroundLayerToInclude))
 			{
 				// Check if there is a flat surface to step on (<45 degrees)
 				start = stepOnTarget + (new Vector3(stepOnTarget.x, 0, stepOnTarget.z) - new Vector3(m_rigidbody.position.x, 0, m_rigidbody.position.z)).normalized * m_ssoCharacter.SkinWidth + new Vector3(0, m_ssoCharacter.SkinWidth, 0);
 				direction = Vector3.down;
 				distance = m_ssoCharacter.SkinWidth * 2;
-				if (Physics.Raycast(start, direction, distance, ~m_layerMaskToIgnore))
+				if (Physics.Raycast(start, direction, distance, m_ssoCharacter.GroundLayerToInclude))
 				{
 					m_rigidbody.position = new Vector3(m_rigidbody.position.x, stepOnTarget.y, m_rigidbody.position.z);
 				}
