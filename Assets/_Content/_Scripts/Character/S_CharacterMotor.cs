@@ -12,9 +12,9 @@ public class CharacterMotor : MonoBehaviour
 	[SerializeField] private CapsuleCollider m_collider;
 	[SerializeField] private Transform m_handSocket;
 	[SerializeField] private Transform m_robotSocket;
-	[SerializeField] private Transform m_harness;
 	[SerializeField] private Transform m_aimingLookTo;
 	[SerializeField] private Transform m_cameraTarget;
+	[SerializeField] private Transform m_attach;
 	[SerializeField] private CharacterGraphics m_characterGraphics;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Character m_ssoCharacter;
@@ -85,18 +85,15 @@ public class CharacterMotor : MonoBehaviour
 
 	// - Rope state -
 	private Rope m_rope;
-	private RopeState m_ropeState;
 	private bool m_isHolding;
 	private bool IsRopeValid => m_rope && m_rope.IsPlaced;
 
 	// Cancel
-	private bool m_isCancellingRope;
 	private Coroutine m_cancelRopeCoroutine;
 	private float m_cancelRopeTimer;
 
 	// Jump
 	private bool m_isJumpingRope;
-	private Coroutine m_jumpRopeCoroutine;
 
 	// Climbing
 	private bool m_isClimbing;
@@ -105,7 +102,7 @@ public class CharacterMotor : MonoBehaviour
 	// Misc
 	private const float k_fallingForcesThreshold = 0.2f;
 	public Rigidbody Rigidbody => m_rigidbody;
-	public Transform Harness => m_harness;
+	public Transform Attach => m_attach;
 
 	#endregion
 
@@ -291,14 +288,13 @@ public class CharacterMotor : MonoBehaviour
 	private void UpdateClimbInput(bool isClimbing)
 	{
 		m_isClimbing = isClimbing;
-		m_rope.UpdateHoldLength(isClimbing);
+		if (m_isGrounded) m_rope.UpdateHoldLength(isClimbing);
 	}
 
 	private void CancelRope(bool isPressed)
 	{
 		if (!IsRopeValid) 
 		{
-			m_isCancellingRope = false;
 			return;
 		}
 
@@ -312,8 +308,6 @@ public class CharacterMotor : MonoBehaviour
 		{
 			StopCoroutine(m_cancelRopeCoroutine);
 		}
-
-		m_isCancellingRope = isPressed;
 	}
 
 	private IEnumerator StartCancellingRope()
@@ -924,7 +918,7 @@ public class CharacterMotor : MonoBehaviour
 		m_positionStartFall = m_rigidbody.position;
 		m_currentClimbSpeed += m_currentClimbSpeed * Time.fixedDeltaTime;
 		float clampedClimbSpeed = Mathf.Clamp(m_currentClimbSpeed, 0, m_ssoCharacter.MaxClimbSpeed);
-		m_rope.IncreaseHoldLength(-clampedClimbSpeed * Time.fixedDeltaTime);
+		m_rope.IncreaseHoldLength(-clampedClimbSpeed * Time.fixedDeltaTime); // Decreasing hold length
 	}
 
 	private bool IsFallingWithRope()
@@ -1107,7 +1101,7 @@ public class CharacterMotor : MonoBehaviour
 			// Exception: rope attachment
 			if (m_rope != null) DesequipRope();
 			m_rope = HandObject as Rope;
-			if (m_rope != null) m_rope?.Attach(m_harness, m_rigidbody);
+			if (m_rope != null) m_rope?.Attach(m_attach, m_rigidbody);
 
 			HandObject = null;
 			SwitchObjects(ref RobotObject, ref HandObject, m_handSocket);
