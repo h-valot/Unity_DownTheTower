@@ -231,14 +231,23 @@ public class Guardian : MonoBehaviour
                         {
                             if (_objectRef != null)
                             {
-                                _objectRef.TryGetComponent<Torch>(out Torch _torchObject);
-                                if (!_torchObject.IsLit)
+                                if (_objectRef.TryGetComponent<Torch>(out Torch _torchObject))
                                 {
-                                    _potentialTarget.Remove(pair.Key.gameObject);
+                                    Debug.Log("J'ai détecté une torche");
+                                    if (!_torchObject.IsLit)
+                                    {
+                                        _potentialTarget.Remove(pair.Key.gameObject);
+                                    }
+                                    else if (CheckRaycast(_objectRef))
+                                    {
+                                        _distance.Add(_objectRef, Vector3.Distance(this.transform.position, _objectRef.transform.position));
+                                        Debug.Log("Je suis vu par ma torche");
+                                    }
                                 }
-                                if (CheckRaycast(_objectRef))
+                                else if (CheckRaycast(_objectRef))
                                 {
                                     _distance.Add(_objectRef, Vector3.Distance(this.transform.position, _objectRef.transform.position));
+                                    Debug.Log("Je suis vu en tant que joueur");
                                 }                              
                             }
                             else
