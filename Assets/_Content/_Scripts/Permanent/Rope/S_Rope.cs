@@ -16,8 +16,6 @@ public class Rope : Permanent
 
 	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Rope m_ssoRope;
 
-	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterPosition m_rsoCharacterPosition;
-
 	#endregion
 
 	#region VARIABLES
@@ -28,7 +26,8 @@ public class Rope : Permanent
 	private List<Vector3> m_folds = new List<Vector3>();
 	private List<RopeLine> m_ropeLines = new List<RopeLine>();
 	private List<Interactable> m_interactables = new List<Interactable>();
-	private Transform m_characterHarness;
+	private Rigidbody m_characterRigidbody;
+	private Transform m_characterAttach;
 	private SoftJointLimit m_linearLimit;
 
 	[HideInInspector] public bool IsConstrained;
@@ -148,7 +147,7 @@ public class Rope : Permanent
 			// Rope custom initialization commands
 			m_boxCollider.enabled = true;
 			m_folds = new List<Vector3>() { m_ropeAttach.position.CutDigits(2) };
-			if (m_characterHarness) SetHoldLength((m_ropeAttach.position - m_characterHarness.position).magnitude);
+			if (m_isConnected) UpdateHoldLength();
 			m_isPlaced = true;
 		});
 	}
@@ -157,25 +156,29 @@ public class Rope : Permanent
 
 	#region ROPE
 
-	public void Attach(Transform harness, Rigidbody rigidbody)
+	public void Attach(Transform attach, Rigidbody rigidbody)
 	{
-		m_characterHarness = harness;
+		m_characterAttach = attach;
+		m_characterRigidbody = rigidbody;
 		m_joint.connectedBody = rigidbody;
 		m_isConnected = true;
+
+		if (m_isPlaced) UpdateHoldLength();
 	}
 
 	public void Detach()
 	{
-		// Assertions
-		if (m_characterHarness == null || !m_isConnected) return;
+		// Assertion
+		if (!m_isConnected) return;
 
 		// Add a final fold to spawn an interactible on it.
-		m_folds.Add(m_characterHarness.position.CutDigits(2));
+		m_folds.Add(m_characterAttach.position.CutDigits(2));
 		SpawnInteractables();
 
 		m_isConnected = false;
 		m_joint.connectedBody = null;
-		m_characterHarness = null;
+		m_characterRigidbody = null;
+		m_characterAttach = null;
 	}
 
 	/// <summary>
@@ -184,7 +187,7 @@ public class Rope : Permanent
 	public void HandleFolds()
 	{
 		// Add fold if a collider stands between the character and the last fold
-		if (Physics.Linecast(m_characterHarness.position, CurrentFold, out var addHit, m_ssoRope.FoldLayerToInclude))
+		if (Physics.Linecast(m_characterAttach.position, CurrentFold, out var addHit, m_ssoRope.FoldLayerToInclude))
 		{
 			Vector3 offsetPoint = addHit.point + addHit.normal * m_ssoRope.FoldOffset;
 			Vector3 approximatePoint = offsetPoint.CutDigits(2);
@@ -194,19 +197,24 @@ public class Rope : Permanent
 				// Minimal distance between two fold point to be register
 				if ((CurrentFold - LastFold).magnitude >= m_ssoRope.MinFoldDistance)
 				{
-					m_folds.AddUnique(approximatePoint, UpdateHoldLength);
+					m_folds.AddUnique(approximatePoint, callback: added => {
+						if (added) IncreaseHoldLength(-(LastFold - CurrentFold).magnitude);
+					});
 				}
 			}
 			else
 			{
-				m_folds.AddUnique(approximatePoint, UpdateHoldLength);
+				
+				m_folds.AddUnique(approximatePoint, callback: added => {
+					if (added) IncreaseHoldLength(-(LastFold - CurrentFold).magnitude);
+				});
 			}
 		}
 
 		// Remove the last fold from the list if there is no collider 
 		// that stands between the character and the previous last fold.
 		if (m_folds.Count >= 2
-		&& !Physics.Linecast(m_characterHarness.position, LastFold, out var removeHit, m_ssoRope.FoldLayerToInclude))
+		&& !Physics.Linecast(m_characterAttach.position, LastFold, out var removeHit, m_ssoRope.FoldLayerToInclude))
 		{
 			IncreaseHoldLength((LastFold - CurrentFold).magnitude);
 			m_folds.Remove(CurrentFold);
@@ -238,14 +246,14 @@ public class Rope : Permanent
 	{
 		// Attach the character to the rope
 		var characterMotor = characterInteract.GetComponent<CharacterMotor>();
-		Attach(characterMotor.Harness, characterMotor.Rigidbody);
+		Attach(characterMotor.Attach, characterMotor.Rigidbody);
 		characterMotor.Equip(this);
 
 		// Update folds
 		for (int i = m_folds.Count - 1; i >= 0; i--)
 		{
 			// Assert: an object is obstructing the way from the fold towards the character.
-			if (!Physics.Linecast(m_characterHarness.position, m_folds[i], out var hit, m_ssoRope.FoldLayerToInclude)) break;
+			if (!Physics.Linecast(m_characterAttach.position, m_folds[i], out var hit, m_ssoRope.FoldLayerToInclude)) break;
 			
 			m_folds.Remove(m_folds[i]);
 		}
@@ -270,7 +278,7 @@ public class Rope : Permanent
 		if (!isAllowed) return;
 		if (!IsConstrained) return;
 
-		m_holdLength = GetLastFoldHarnessDistance();
+		m_holdLength = GetCurrentFoldCharacterDistance();
 		HandleJoint();
 	}
 
@@ -305,7 +313,7 @@ public class Rope : Permanent
 		for (int i = 0; i < m_folds.Count; i++)
 		{
 			Vector3 nextPosition = i + 1 >= m_folds.Count
-				? m_characterHarness.position
+				? m_characterRigidbody.position
 				: m_folds[i + 1];
 
 			output += (m_folds[i] - nextPosition).magnitude;
@@ -313,21 +321,22 @@ public class Rope : Permanent
 		return output;
 	}
 
-	public float GetLastFoldHarnessDistance()
+	public float GetCurrentFoldCharacterDistance()
 	{
 		// Assertion
 		if (!m_isConnected) return -1;
 
-		// Note that we do not connect the last fold to the harness
+		// Note that we do not connect the current fold to the harness
 		// but the character's current position. This avoids re-centering
 		// issue if spamming holding rope key
-		return (CurrentFold - m_rsoCharacterPosition.value).magnitude;
+		// Only the graphics are connected to harness.
+		return (CurrentFold - m_characterRigidbody.position).magnitude;
 	}
 
 	private void DrawLines()
 	{
 		// Assertion
-		if (!m_characterHarness) return;
+		if (!m_isConnected) return;
 
 		// Clear lists
 		if (m_ropeLines.Count >= 1)
@@ -354,7 +363,7 @@ public class Rope : Permanent
 		for (int i = 0; i < m_folds.Count; i++)
 		{
 			RopeLine newRopeLine = Instantiate(m_ssoRope.PfRopeLine, transform);
-			newRopeLine.SetPositions(m_folds[i], i + 1 >= m_folds.Count ? m_characterHarness.position : m_folds[i + 1]);
+			newRopeLine.SetPositions(m_folds[i], i + 1 >= m_folds.Count ? m_characterAttach.position : m_folds[i + 1]);
 			newRopeLine.SetColor(material);
 			m_ropeLines.Add(newRopeLine);
 		}
