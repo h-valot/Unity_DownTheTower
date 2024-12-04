@@ -1,22 +1,16 @@
-using System;
-using System.Collections;
 using Sirenix.OdinInspector;
 using System.Collections.Generic;
-using Unity.Mathematics;
-using Unity.VisualScripting;
-using UnityEditor.PackageManager;
 using UnityEngine;
 
 public class MushroomBatch : MonoBehaviour
 {
 
     [Header("Sphere Properties")]
-    [SerializeField] private float _radius = 1;
+    [SerializeField] private float _radius = 3;
     [SerializeField] private float _density = 5;
 
     [Header("Mushroom Placement Properties")]
-    [SerializeField] private float _minDotAngle = 0.2f;
-    [SerializeField] private float _overlapModifier = 1f;
+    [SerializeField] private float _overlapModifier = 0.5f;
     [SerializeField] private bool _isRandom = true;
     [EnableIf("_isRandom")]
     [SerializeField] private float _minSizeMultiplier = 0.5f;
@@ -54,10 +48,10 @@ public class MushroomBatch : MonoBehaviour
         }
     }
 
-    [Button] 
+    [Button]
     public void Clear()
     {
-        while(mushroomList.Count > 0)
+        while (mushroomList.Count > 0)
         {
             GameObject tempMushroom = mushroomList[0];
             mushroomList.RemoveAt(0);
@@ -97,14 +91,12 @@ public class MushroomBatch : MonoBehaviour
     private bool IsNormalFacingOrigin(RaycastHit hitInfo)
     {
         Vector3 rayDirection = (transform.position - hitInfo.point).normalized;
-        return _minDotAngle <= Vector3.Dot(rayDirection.normalized, hitInfo.normal.normalized);
+        return 0.2f <= Vector3.Dot(rayDirection.normalized, hitInfo.normal.normalized);
     }
 
-    private void OnDrawGizmos()
+    private void OnDrawGizmosSelected()
     {
-        foreach (GameObject mushroom in mushroomList)
-        {
-
-        }
+        Gizmos.color = Color.magenta;
+        Gizmos.DrawWireSphere(transform.position, _radius);
     }
 }
