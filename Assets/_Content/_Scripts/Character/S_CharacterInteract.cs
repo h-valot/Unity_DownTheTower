@@ -50,7 +50,7 @@ public class CharacterInteract : MonoBehaviour
 	private void Interact(bool isPressed)
 	{
 		// Assertion
-		if (m_interactables.Count <= 0 || m_rsoCharacterState.value != BehaviorState.LOCOMOTION) return;
+		if (m_interactables.Count <= 0 || (m_rsoCharacterState.value != BehaviorState.LOCOMOTION && m_rsoCharacterState.value != BehaviorState.FALL)) return;
 
 		if(isPressed)
 		{
@@ -153,7 +153,7 @@ public class CharacterInteract : MonoBehaviour
 
 		m_rsoInteractableValid.value =
 			m_interactables.Count(i => i.IsValid) > 0
-			&& m_rsoCharacterState.value == BehaviorState.LOCOMOTION;
+			&& (m_rsoCharacterState.value == BehaviorState.LOCOMOTION || m_rsoCharacterState.value == BehaviorState.FALL);
 	}
 
 	private void CheckInteractibleRecyclability()
