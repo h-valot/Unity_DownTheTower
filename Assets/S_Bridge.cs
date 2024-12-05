@@ -17,6 +17,7 @@ public class Bridge : Switchable
 
     protected override void DeactivateMechanism()
     {
+        // Deactivation is not working, it need to be link with the starting rotation of the prefab
         transform.DOLocalRotate(m_maxRotation, m_animLength);
     }
 }
