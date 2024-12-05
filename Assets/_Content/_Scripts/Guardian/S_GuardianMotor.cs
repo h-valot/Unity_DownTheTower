@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.AI;
+using UnityEngine.Rendering;
 using UnityEngine.TextCore.Text;
 
 public class GuardianMotor : MonoBehaviour
@@ -13,6 +15,7 @@ public class GuardianMotor : MonoBehaviour
     [FoldoutGroup("Scriptable")][SerializeField] private RSO_GuardianState m_rsoGuardianState;
     [FoldoutGroup("Scriptable")][SerializeField] private SSO_Guardian _guardianRef;
 
+    [FoldoutGroup("Internal References")][SerializeField] private NavMeshAgent _agent;
 
     [FoldoutGroup("Scriptable")][SerializeField] private TextMeshProUGUI _guardianTarget;
     [FoldoutGroup("Scriptable")][SerializeField] private TextMeshProUGUI _stateText;
@@ -21,7 +24,7 @@ public class GuardianMotor : MonoBehaviour
 
     #region Variables
 
-    private List<GameObject> _potentialTargets = new List<GameObject>();
+    public List<GameObject> _potentialTargets = new List<GameObject>();
     private float _targetDistance = 99999;
     private GameObject _target;
 
@@ -36,9 +39,12 @@ public class GuardianMotor : MonoBehaviour
 
     private void Update()
     {
-        DetermineState();
         SelectTarget();
+
+        DetermineState();
+        UpdateState();
         UpdateDebugUI();
+
     }
 
     #endregion
@@ -47,7 +53,9 @@ public class GuardianMotor : MonoBehaviour
 
     private void SelectTarget()
     {
+        _target = null;
         _targetDistance = 99999;
+
         if (_potentialTargets.Count > 0 )
         {
             foreach (GameObject target in _potentialTargets)
@@ -60,11 +68,6 @@ public class GuardianMotor : MonoBehaviour
                     }
                 }
             }
-        }
-
-        else
-        {
-            _target = null;
         }
     }
 
@@ -87,12 +90,12 @@ public class GuardianMotor : MonoBehaviour
     /// </summary>
     private void DetermineState()
     {
-        if (m_rsoGuardianState.value != GuardianBehaviorState.PATROL)
+        if (m_rsoGuardianState.value != GuardianBehaviorState.PATROL && _target == null)
         {
             SwitchState(GuardianBehaviorState.PATROL);
         }
 
-        if (m_rsoGuardianState.value != GuardianBehaviorState.AGGRO)
+        if (m_rsoGuardianState.value != GuardianBehaviorState.AGGRO && _target != null)
         {
             SwitchState(GuardianBehaviorState.AGGRO);
         }
@@ -132,7 +135,21 @@ public class GuardianMotor : MonoBehaviour
                 ExitAggroState();
                 break;
         }
-    } 
+    }
+    
+    private void UpdateState()
+    {
+        switch (m_rsoGuardianState.value)
+        {
+            case GuardianBehaviorState.PATROL:
+                UpdatePatrolState();
+                break;
+
+            case GuardianBehaviorState.AGGRO:
+                UpdateAggroState();
+                break;
+        }
+    }
 
     #endregion
 
@@ -141,6 +158,11 @@ public class GuardianMotor : MonoBehaviour
     private void EnterPatrolState()
     {
         
+    }
+
+    private void UpdatePatrolState()
+    {
+
     }
 
     private void ExitPatrolState()
@@ -155,6 +177,11 @@ public class GuardianMotor : MonoBehaviour
     private void EnterAggroState()
     {
 
+    }
+
+    private void UpdateAggroState()
+    {
+        _agent.destination = _target.transform.position;
     }
 
     public void DestroyTorch(Torch torch)
@@ -175,9 +202,9 @@ public class GuardianMotor : MonoBehaviour
     {
         if (_guardianRef.debugMode)
         {
-            if (_target != null)
+            if (!_target)
             {
-                _guardianTarget.text = _target.ToString();
+                _guardianTarget.text = _target?.ToString();
                 _stateText.text = m_rsoGuardianState.value.ToString();
             }
 
