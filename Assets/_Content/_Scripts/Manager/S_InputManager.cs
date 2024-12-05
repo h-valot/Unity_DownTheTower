@@ -123,7 +123,6 @@ public class InputManager : MonoBehaviour
 		}
 
 		if (m_rsoGamePaused.value) m_look = Vector2.zero;
-		m_rseLook.Call(m_look);
     }
 
 	public void OnJump(InputValue value)
