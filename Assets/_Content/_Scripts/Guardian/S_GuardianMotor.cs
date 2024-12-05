@@ -1,6 +1,7 @@
 using Sirenix.OdinInspector;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.TextCore.Text;
@@ -10,6 +11,11 @@ public class GuardianMotor : MonoBehaviour
     #region References
 
     [FoldoutGroup("Scriptable")][SerializeField] private RSO_GuardianState m_rsoGuardianState;
+    [FoldoutGroup("Scriptable")][SerializeField] private SSO_Guardian _guardianRef;
+
+
+    [FoldoutGroup("Scriptable")][SerializeField] private TextMeshProUGUI _guardianTarget;
+    [FoldoutGroup("Scriptable")][SerializeField] private TextMeshProUGUI _stateText;
 
     #endregion
 
@@ -32,6 +38,7 @@ public class GuardianMotor : MonoBehaviour
     {
         DetermineState();
         SelectTarget();
+        UpdateDebugUI();
     }
 
     #endregion
@@ -40,12 +47,21 @@ public class GuardianMotor : MonoBehaviour
 
     private void SelectTarget()
     {
-        foreach (GameObject target in _potentialTargets)
+        _targetDistance = 99999;
+        if (_potentialTargets.Count > 0 )
         {
-            if(Vector3.Distance(this.transform.position, target.transform.position) <= _targetDistance)
+            foreach (GameObject target in _potentialTargets)
             {
-                _target = target;
+                if (Vector3.Distance(this.transform.position, target.transform.position) <= _targetDistance)
+                {
+                    _target = target;
+                }
             }
+        }
+
+        else
+        {
+            _target = null;
         }
     }
 
@@ -138,9 +154,36 @@ public class GuardianMotor : MonoBehaviour
 
     }
 
+    public void DestroyTorch(Torch torch)
+    {
+        torch.DestroyTorch();
+    }
+
     private void ExitAggroState()
     {
 
+    }
+
+    #endregion
+
+    #region Debug
+
+    private void UpdateDebugUI()
+    {
+        if (_guardianRef.debugMode)
+        {
+            if (_target != null)
+            {
+                _guardianTarget.text = _target.ToString();
+                _stateText.text = m_rsoGuardianState.value.ToString();
+            }
+
+            else
+            {
+                _guardianTarget.text = "null";
+                _stateText.text = m_rsoGuardianState.value.ToString();
+            }
+        }
     }
 
     #endregion

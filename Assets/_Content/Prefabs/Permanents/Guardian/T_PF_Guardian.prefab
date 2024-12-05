@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8436130935548531696}
   - component: {fileID: 1517017858032438292}
+  - component: {fileID: 6412754733033068052}
   - component: {fileID: 8307310262378912332}
   - component: {fileID: 2290026609873240630}
   - component: {fileID: 1982599703297393053}
@@ -45,7 +46,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 484332240391301456}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1703bde79b5fb944796cb82be3a3b990, type: 3}
   m_Name: 
@@ -56,6 +57,22 @@ MonoBehaviour:
   _pathPatrol: {fileID: 8307310262378912332}
   _scanCube: {fileID: 7629230841967528970}
   _raycastEyes: {fileID: 8900911316742972979}
+--- !u!114 &6412754733033068052
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 484332240391301456}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5c90f7ec1a31320468ca680ea61beab4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_rsoGuardianState: {fileID: 11400000, guid: 0b2ae53bd79552f478ee46c906c3fe7c, type: 2}
+  _guardianRef: {fileID: 11400000, guid: 2e6f0790dfe016342a28d77717de30d9, type: 2}
+  _guardianTarget: {fileID: 0}
+  _stateText: {fileID: 0}
 --- !u!114 &8307310262378912332
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -213,7 +230,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b2f8c73142167384e87ce52f0be6bd62, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _GuardianRef: {fileID: 1517017858032438292}
+  _GuardianRef: {fileID: 6412754733033068052}
 --- !u!136 &4464038581707040825
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -683,7 +700,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ac9abd75fbf539a4a808e55da4cfc18e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _guardianRef: {fileID: 1517017858032438292}
+  _guardianRef: {fileID: 6412754733033068052}
 --- !u!4 &1094901096302456366 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 5e38a5b57a808094389a67003158e67a,
@@ -1064,4 +1081,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ac9abd75fbf539a4a808e55da4cfc18e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _guardianRef: {fileID: 1517017858032438292}
+  _guardianRef: {fileID: 6412754733033068052}
