@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7a085f387d30e944bb3975099a1815d4, type: 3}
   m_Name: SSO_Torch
   m_EditorClassIdentifier: 
-  m_activateBreakAnim: 1
+  ActivateBreakAnim: 1
   TorchBreakSFX: {fileID: 708887329953543571, guid: 9be71127c133719429b79674e1c08627,
     type: 3}
   TorchHitSFX: {fileID: 708887329953543571, guid: c2116f7f810d2774899be7d01b907cfd,
@@ -21,7 +21,7 @@ MonoBehaviour:
   MaxTorchesSoft: 4
   MaxTorchesHard: 8
   LightColor: {r: 0.99215686, g: 0.6901961, b: 0.34509805, a: 255}
-  m_lightIntensity: 5
+  LightIntensity: 5
   GroundedLightDuration: 120
   LitDuration: 0.1
   UnlitDuration: 0.1
@@ -38,7 +38,6 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 384
   DeathColor: {r: 0.99215686, g: 0.22352941, b: 0.22352941, a: 255}
-  m_desactivatingTime: 3
+  DesactivatingTime: 3
   MinSpeedForHitSound: 1
   TimeBetweenHitSound: 0.5
-  m_ssoDebug: {fileID: 0}

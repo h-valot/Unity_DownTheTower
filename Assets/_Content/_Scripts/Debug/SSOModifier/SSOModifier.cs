@@ -29,23 +29,6 @@ public class SSOModifier : MonoBehaviour
         Hide();
 
 		// Update toggleables
-		m_toggleableActivateBreakAnim.Initialize(
-			m_ssoDebug.OverrideActivateBreakAnim, 
-			nameof(m_ssoDebug.OverrideActivateBreakAnim).Substring(8), 
-			m_ssoDebug.FlavorActivateBreakAnim
-		);
-
-		m_toggleableLightIntensity.Initialize(
-			m_ssoDebug.OverrideLightIntensity,
-			nameof(m_ssoDebug.OverrideLightIntensity).Substring(8),
-			m_ssoDebug.FlavorLightIntensity
-		);
-
-		m_toggleableDesactivatingTime.Initialize(
-			m_ssoDebug.OverrideDesactivatingTime,
-			nameof(m_ssoDebug.OverrideDesactivatingTime).Substring(8),
-			m_ssoDebug.FlavorDesactivatingTime
-		);
 	}
 
     private void Update()
@@ -109,8 +92,4 @@ public class SSOModifier : MonoBehaviour
 		tabPressed.color = m_colorTabSelected;
 		m_tabContainers.Where(tc => tc.tab.name == tabPressed.name).ToList()[0].container.SetActive(true);
 	}
-
-    public void ToggleActivateBreakAnim() => m_ssoDebug.OverrideActivateBreakAnim = m_toggleableActivateBreakAnim.Value;
-	public void UpdateLightIntensity() => m_ssoDebug.OverrideLightIntensity = m_toggleableLightIntensity.Value;
-	public void UpdateDesactivatingTime() => m_ssoDebug.OverrideDesactivatingTime = m_toggleableDesactivatingTime.Value;
 }
