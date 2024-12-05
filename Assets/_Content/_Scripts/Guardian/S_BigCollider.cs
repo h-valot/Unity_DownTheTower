@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class BigCollider : MonoBehaviour
 {
-    [SerializeField] private Guardian _guardianRef;
+    [SerializeField] private GuardianMotor _guardianRef;
 
     private void OnTriggerEnter(Collider other)
     {
@@ -13,14 +13,16 @@ public class BigCollider : MonoBehaviour
 
         else if (other.TryGetComponent<CharacterMotor>(out var character))
         {
-            if (character.HandObject != null)
-            {
-                if ((character.HandObject.Type == CraftType.TORCH && character.HandObject.StateInHand())
-                || (character.RobotObject.Type == CraftType.TORCH && character.RobotObject.StateInHand()))
-                {
-                    _guardianRef.AddToPotentialTargets(character.gameObject);
-                }
-            }
+            _guardianRef.AddToPotentialTargets(character.gameObject);
+
+            //if (character.HandObject != null)
+            //{
+            //    if ((character.HandObject.Type == CraftType.TORCH && character.HandObject.StateInHand())
+            //    || (character.RobotObject.Type == CraftType.TORCH && character.RobotObject.StateInHand()))
+            //    {
+                    
+            //    }
+            //}
         }
     }
 

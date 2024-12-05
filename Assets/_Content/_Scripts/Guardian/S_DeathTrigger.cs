@@ -2,28 +2,30 @@ using UnityEngine;
 
 public class DeathTrigger : MonoBehaviour
 {
-    [SerializeField] private Guardian _GuardianRef;
+    [SerializeField] private GuardianMotor _GuardianRef;
 
     public void OnTriggerEnter(Collider other)
     {
         if (other.TryGetComponent<CharacterMotor>(out var character))
         {
             _GuardianRef.RemovePotentialTargets(character.gameObject);
-			StartCoroutine(_GuardianRef.KillPlayer(character));
+			//StartCoroutine(_GuardianRef.KillPlayer(character));
 		}
 
 		if (other.TryGetComponent<Torch>(out var torch))
         {
-            if (torch!=null)
-
+            if (torch != null)
+            {
                 if (!torch.StateInHand())
                 {
                     {
                         _GuardianRef.RemovePotentialTargets(torch.gameObject);
-                        Debug.Log("Je vire la ref");
+                        _GuardianRef.DestroyTorch(torch);
                     }
-                    _GuardianRef.destroyTorchCoroutine = StartCoroutine(_GuardianRef.DestroyTorchTime(torch.gameObject));
                 }
+            }
+
+
         } 
     }
 }

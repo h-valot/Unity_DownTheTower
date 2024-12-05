@@ -17,4 +17,7 @@ public class SSO_Guardian : ScriptableObject
 
     [Header("Layers")]
     public LayerMask targetLayerToIgnore;
+
+    [Header("Debug Mode")]
+    public bool debugMode;
 }
