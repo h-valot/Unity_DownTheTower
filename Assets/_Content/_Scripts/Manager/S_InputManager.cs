@@ -40,6 +40,7 @@ public class InputManager : MonoBehaviour
 	private bool m_throw;
 	private bool m_jump;
 	private bool m_climb;
+	private bool m_interact;
 
 	#endregion
 
@@ -63,7 +64,10 @@ public class InputManager : MonoBehaviour
 
 		m_jump = false;
 		m_rseJump.Call(false);
-	}
+
+		m_interact = false;
+		m_rseInteract.Call(false);
+    }
 
 	private void Update()
 	{
@@ -161,7 +165,8 @@ public class InputManager : MonoBehaviour
 
 	public void OnInteract(InputValue value)
 	{
-		m_rseInteract.Call();
+		m_interact = value.isPressed;
+		m_rseInteract.Call(m_interact);
 	}
 
     public void OnCancel(InputValue value)

@@ -47,13 +47,17 @@ public class CharacterInteract : MonoBehaviour
 		CheckInteractibleRecyclability();
 	}
 
-	private void Interact()
+	private void Interact(bool isPressed)
 	{
 		// Assertion
 		if (m_interactables.Count <= 0 || m_rsoCharacterState.value != BehaviorState.LOCOMOTION) return;
 
-		GetNearestInteractable()?.InteractionTrigger();
-	}
+		if(isPressed)
+		{
+            GetNearestInteractable()?.InteractionTrigger();
+        }
+    }
+		
 
 	private void Recycle()
 	{
