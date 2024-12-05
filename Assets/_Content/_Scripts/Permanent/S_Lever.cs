@@ -31,12 +31,12 @@ public class Lever : Interactable
     {
         if (m_isActivated)
         {
-            m_handleOrigin.transform.DORotate(new Vector3(0, 0, 30), 0.5f);
+            m_handleOrigin.transform.DOLocalRotate(new Vector3(0, 0, 30), 0.5f);
             m_gauge.transform.DOScaleY(0.8f, 0.5f);
         }
         else
         {
-            m_handleOrigin.transform.DORotate(new Vector3(0, 0, 150), 0.5f);
+            m_handleOrigin.transform.DOLocalRotate(new Vector3(0, 0, 150), 0.5f);
             m_gauge.transform.DOScaleY(0.1f, 0.5f);
         }
     }
