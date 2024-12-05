@@ -52,9 +52,12 @@ public class GuardianMotor : MonoBehaviour
         {
             foreach (GameObject target in _potentialTargets)
             {
-                if (Vector3.Distance(this.transform.position, target.transform.position) <= _targetDistance)
+                if ( target != null)
                 {
-                    _target = target;
+                    if (Vector3.Distance(this.transform.position, target.transform.position) <= _targetDistance)
+                    {
+                        _target = target;
+                    }
                 }
             }
         }
