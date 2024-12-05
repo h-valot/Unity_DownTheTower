@@ -10,6 +10,7 @@ public class SceneLoader : MonoBehaviour
 	[Title("External references")]
 	[SerializeField] private SceneButton m_pfSceneButton;
 
+	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Game m_ssoGame;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_ToggleCursor m_rseToggleCursor;
 
 	private bool m_isPressed;
@@ -107,6 +108,9 @@ public class SceneLoader : MonoBehaviour
 
 	private void Show()
 	{
+		// Assertion
+		if (m_ssoGame.BuildType == BuildType.RELEASE) return;
+
 		m_rseToggleCursor.Call(true);
 		m_graphicsParent.SetActive(true);
 		m_isEnabled = true;

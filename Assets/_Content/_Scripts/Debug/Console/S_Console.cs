@@ -103,6 +103,9 @@ public class Console : MonoBehaviour
 
 	private void Show()
 	{
+		// Assertion
+		if (m_ssoGame.BuildType == BuildType.RELEASE) return;
+		
 		m_rseToggleCursor.Call(true);
 		m_graphicsParent.SetActive(true);
 		m_isEnabled = true;
