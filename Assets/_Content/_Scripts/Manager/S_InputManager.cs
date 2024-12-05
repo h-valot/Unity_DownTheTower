@@ -40,6 +40,7 @@ public class InputManager : MonoBehaviour
 	private bool m_throw;
 	private bool m_jump;
 	private bool m_climb;
+	private bool m_isCursorEnabled;
 
 	#endregion
 
@@ -75,8 +76,9 @@ public class InputManager : MonoBehaviour
 
 	private void OnApplicationFocus(bool hasFocus)
 	{
-		// Set cursor state
-		Cursor.lockState = hasFocus ? CursorLockMode.Locked : CursorLockMode.None;
+		Cursor.lockState = hasFocus && !m_isCursorEnabled 
+			? CursorLockMode.Locked 
+			: CursorLockMode.None;
 	}
 
 	private void OnEnable()
@@ -195,6 +197,7 @@ public class InputManager : MonoBehaviour
 
 	public void OnEnableCursor(bool value)
 	{
+		m_isCursorEnabled = value;
 		Cursor.visible = value;
 		Cursor.lockState = value ? CursorLockMode.None : CursorLockMode.Locked;
 	}

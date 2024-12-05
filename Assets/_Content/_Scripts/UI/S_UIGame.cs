@@ -13,16 +13,25 @@ public class UIGame : MonoBehaviour
     [SerializeField] private GameObject m_pnlLog;
     [SerializeField] private TextMeshProUGUI m_tmpLogHeader;
     [SerializeField] private TextMeshProUGUI m_tmpLogBody;
+	[SerializeField] private TextMeshProUGUI m_tmpVersion;
 
-    [FoldoutGroup("Scriptable")][SerializeField] private RSE_Pause m_rsePause;
+	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Game m_ssoGame;
+
+	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Pause m_rsePause;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Cancel m_rseCancel;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_ToggleInputs m_rseToggleInputs;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_LogContent m_rseLogContent;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSE_ToggleCursor m_rseToggleCursor;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_GamePaused m_rsoGamePaused;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterDeath m_rsoCharacterDeath;
 
     private bool m_isLogShowing = false;
+
+	private void Start()
+	{
+		Hide();
+	}
 
     private void OnEnable()
     {
@@ -41,17 +50,44 @@ public class UIGame : MonoBehaviour
     }
 
     private void TogglePausePanel()
-    {
-        if (m_isLogShowing) 
-        {
-            HideLog();
-        }
+	{
+		m_tmpVersion.text = $"version: {m_ssoGame.Version} {m_ssoGame.BuildType.ToString().ToLower()}";
 
-        TogglePauseGame(!m_rsoGamePaused.value);
-        m_pnlPause.SetActive(m_rsoGamePaused.value);
-    }
+		if (m_pnlPause.activeInHierarchy)
+		{
+			Hide();
+		}
+		else 
+		{
+			Show();
+		}
+	}
 
-    private void TogglePauseGame(bool isPaused)
+	private void Show()
+	{
+		if (m_isLogShowing)
+		{
+			HideLog();
+		}
+
+		m_pnlPause.SetActive(true);
+		TogglePauseGame(true);
+		m_rseToggleCursor.Call(true);
+	}
+
+	public void Hide()
+	{
+		m_pnlPause.SetActive(false);
+		TogglePauseGame(false);
+		m_rseToggleCursor.Call(false);
+	}
+
+	public void Exit()
+	{
+		Application.Quit();
+	}
+
+	private void TogglePauseGame(bool isPaused)
     {
         m_rsoGamePaused.value = isPaused;
         Time.timeScale = isPaused ? 0f : 1f;
@@ -81,7 +117,6 @@ public class UIGame : MonoBehaviour
     {
         m_tmpLogHeader.text = title;
         m_tmpLogBody.text = BuildLogBody(body);
-
 
         TogglePauseGame(true);
 

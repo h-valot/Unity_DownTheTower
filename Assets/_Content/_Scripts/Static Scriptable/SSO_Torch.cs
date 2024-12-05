@@ -7,7 +7,15 @@ public class SSO_Torch : ScriptableObject
 	[Title("Debug")]
 	[InfoBox("If true, the torch break animation will be played.", InfoMessageType.None)]
 	/// <summary> If true, the torch break animation will be played. </summary>
-	public bool ActivateBreakAnim = true;
+	[SerializeField] private bool m_activateBreakAnim = true;
+	public bool ActivateBreakAnim
+	{
+		get
+		{
+			if (m_ssoDebug.OverrideActivateBreakAnim) return m_ssoDebug.ValueActivateBreakAnim;
+			else return m_activateBreakAnim;
+		}
+	}
 
 	[InfoBox("Prefabs of the break torch sfx.", InfoMessageType.None)]
 	/// <summary> Prefabs of the break torch sfx. </summary>
@@ -53,7 +61,15 @@ public class SSO_Torch : ScriptableObject
 	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
 	[InfoBox("Default intensity of the torch point light.", InfoMessageType.None)]
 	/// <summary> Default intensity of the torch point light. </summary>
-	public float LightIntensity;
+	[SerializeField] private float m_lightIntensity;
+	public float LightIntensity
+	{
+		get
+		{
+			if (m_ssoDebug.OverrideLightIntensity) return m_ssoDebug.ValueLightIntensity;
+			else return m_lightIntensity;
+		}
+	}
 
 	[FoldoutGroup("Light")]
 	[Unit(Units.Second)]
@@ -164,7 +180,15 @@ public class SSO_Torch : ScriptableObject
 	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
 	[InfoBox("Duration the torch stays lit before despawning when below the max rope length and the character lethal height.", InfoMessageType.None)]
 	/// <summary> Duration the torch stays lit before despawning when below the max rope length and the character lethal height. </summary>
-	public float DeactivatingTime;
+	[SerializeField] private float m_desactivatingTime;
+	public float DesactivatingTime
+	{
+		get 
+		{
+			if (m_ssoDebug.OverrideDesactivatingTime) return m_ssoDebug.ValueDesactivatingTime;
+			else return m_desactivatingTime;
+		}
+	}
 
 	[FoldoutGroup("Height feedback")]
 	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
@@ -178,6 +202,13 @@ public class SSO_Torch : ScriptableObject
 	[InfoBox("Duration in seconds between two hit sound.", InfoMessageType.None)]
 	/// <summary> Duration in seconds between two hit sound. </summary>
 	public float TimeBetweenHitSound;
+
+	#endregion
+
+	#region STATIC SCRIPTABLES
+
+	[FoldoutGroup("Static scriptables")]
+	public SSO_Debug m_ssoDebug;
 
 	#endregion
 }

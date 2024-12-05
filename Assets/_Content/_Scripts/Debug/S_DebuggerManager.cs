@@ -6,7 +6,7 @@ public class DebuggerManager : MonoBehaviour
 {
 	[Title("Internal references")]
 	[SerializeField] private SceneLoader m_SceneLoader;
-	[SerializeField] private DebugMisc m_DebugMisc;
+	[SerializeField] private SSOModifier m_DebugMisc;
 	[SerializeField] private Console m_Console;
 
 	private void OnEnable()

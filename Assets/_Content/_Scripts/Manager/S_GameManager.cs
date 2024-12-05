@@ -11,6 +11,8 @@ public class GameManager : MonoBehaviour
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterDeath m_rsoCharacterDeath;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_GamePaused m_rsoGamePaused;
 
+	[FoldoutGroup("Scriptable")][SerializeField] private RSE_ToggleCursor m_rseToggleCursor;
+
 	private void OnEnable()
 	{
 		m_rsoCharacterDeath.OnChanged += HandleDeath;
@@ -24,7 +26,7 @@ public class GameManager : MonoBehaviour
 	private void Start()
 	{
 		Restart();
-		Cursor.lockState = CursorLockMode.Locked;
+		m_rseToggleCursor.Call(false);
 		DOTween.SetTweensCapacity(400, 400);
 		m_rsoGamePaused.value = false;
 	}

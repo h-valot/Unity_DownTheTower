@@ -147,7 +147,7 @@ public class Torch : Permanent
 			if (m_isDeactivate)
 			{
 				Instantiate(m_ssoTorch.TorchBreakSFX, transform.position, Quaternion.identity);
-				DOTween.Sequence().AppendInterval(m_ssoTorch.DeactivatingTime).SetId(gameObject.GetInstanceID()).OnComplete(() => { m_hasPlayedHitSound = false; });
+				DOTween.Sequence().AppendInterval(m_ssoTorch.DesactivatingTime).SetId(gameObject.GetInstanceID()).OnComplete(() => { m_hasPlayedHitSound = false; });
 			}
 			else
 			{
@@ -400,9 +400,9 @@ public class Torch : Permanent
 		_deactivatingSequence.AppendCallback(() => { m_light.enabled = false; });
 		_deactivatingSequence.AppendInterval(0.03f);
 		_deactivatingSequence.AppendCallback(() => { m_light.enabled = true; });
-		_deactivatingSequence.Insert(0f, m_light.DOIntensity(0f, m_ssoTorch.DeactivatingTime).SetEase(Ease.Linear));
-		_deactivatingSequence.Insert(0f, DOTween.To(() => m_light.range, x => m_light.range = x, 0f, m_ssoTorch.DeactivatingTime).SetEase(Ease.Linear));
-		_deactivatingSequence.Insert(0f, DOTween.To(() => m_lightPercent, x => m_lightPercent = x, 0f, m_ssoTorch.DeactivatingTime).SetEase(Ease.Linear)
+		_deactivatingSequence.Insert(0f, m_light.DOIntensity(0f, m_ssoTorch.DesactivatingTime).SetEase(Ease.Linear));
+		_deactivatingSequence.Insert(0f, DOTween.To(() => m_light.range, x => m_light.range = x, 0f, m_ssoTorch.DesactivatingTime).SetEase(Ease.Linear));
+		_deactivatingSequence.Insert(0f, DOTween.To(() => m_lightPercent, x => m_lightPercent = x, 0f, m_ssoTorch.DesactivatingTime).SetEase(Ease.Linear)
 														.OnUpdate(() => {
 															m_propertyBlock.SetFloat("_lightPercent", m_lightPercent);
 															m_meshRenderer.SetPropertyBlock(m_propertyBlock);
