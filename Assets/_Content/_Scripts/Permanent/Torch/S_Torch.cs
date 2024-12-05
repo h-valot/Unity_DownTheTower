@@ -76,7 +76,16 @@ public class Torch : Permanent
         }
 
         m_rsoTorchManager.value.Add(this);
+    }
+
+    private void OnEnable()
+    {
         m_rsoCharacterPosition.OnChanged += UpdateTorchFeedback;
+    }
+
+    private void OnDisable()
+    {
+        m_rsoCharacterPosition.OnChanged -= UpdateTorchFeedback;
     }
 
     private void Update()
