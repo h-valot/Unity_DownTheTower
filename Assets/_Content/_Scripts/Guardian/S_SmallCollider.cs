@@ -8,8 +8,8 @@ public class SmallCollider : MonoBehaviour
     {
         if (other.TryGetComponent<CharacterMotor>(out var character))
         {
-            if (character.HandObject && character.RobotObject) { }
             _guardianRef.AddToPotentialTargets(character.gameObject);
+            //if (character.HandObject && character.RobotObject) { }
         }
         if (other.TryGetComponent<Torch>(out var _torchCheckRef))
         {
