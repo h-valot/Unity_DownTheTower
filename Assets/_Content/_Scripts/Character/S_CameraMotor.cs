@@ -99,8 +99,8 @@ public class CameraMotor : MonoBehaviour
 	{
 		m_lookInput = input;
 
-		m_cinemachineTargetYaw += input.x;
-		m_cinemachineTargetPitch += input.y;
+		m_cinemachineTargetYaw += input.x * Time.deltaTime;
+		m_cinemachineTargetPitch += input.y * Time.deltaTime;
     }
 
 	private void HandleDeath()
