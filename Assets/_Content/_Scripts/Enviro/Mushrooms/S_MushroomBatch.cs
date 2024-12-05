@@ -1,42 +1,53 @@
 using Sirenix.OdinInspector;
+using System.Collections;
 using System.Collections.Generic;
-using UnityEditor;
 using UnityEngine;
 
 public class MushroomBatch : MonoBehaviour
 {
+    #region editor variables
 
     [Header("Area Properties")]
-    [SerializeField] private float _radius = 3;
-    [SerializeField] private float _density = 5;
+    [FoldoutGroup("Spawning")][SerializeField] private float _radius = 3;
+    [FoldoutGroup("Spawning")][SerializeField] private float _density = 5;
 
     [Header("Mushroom Placement Properties")]
-    [SerializeField] private float _overlapModifier = 0.5f;
-    [SerializeField] private bool _isRandom = true;
-    [EnableIf("_isRandom")]
-    [SerializeField] private float _minSizeMultiplier = 0.5f;
-    [EnableIf("_isRandom")]
-    [SerializeField] private float _maxSizeMultiplier = 1.5f;
-
-    [Header("External References")]
-    [SerializeField] private GameObject _mushroomTriggerPrefab;
-    [SerializeField] private GameObject _mushroomPrefab;
-    [SerializeField] private Material _masterMaterial;
-
+    [FoldoutGroup("Spawning")][SerializeField] private float _overlapModifier = 0.5f;
+    [FoldoutGroup("Spawning")][SerializeField] private float _minSizeMultiplier = 0.5f;
+    [FoldoutGroup("Spawning")][SerializeField] private float _maxSizeMultiplier = 1.5f;
 
     public List<GameObject> mushroomList = new List<GameObject>();
 
-    // --- PRIVATE VARIABLES ---
-    private float _furthestShroom = -1f;
+    [FoldoutGroup("External References")][SerializeField] private GameObject _mushroomTriggerPrefab;
+    [FoldoutGroup("External References")][SerializeField] private GameObject _mushroomPrefab;
+    [FoldoutGroup("External References")][SerializeField] private Material _masterMaterial;
+
+
+    [FoldoutGroup("Effect")][SerializeField] private float _releaseTime;
+    [FoldoutGroup("Effect")][SerializeField] private float _chargeTime;
 
     // --- INSTANCIATED VARIABLES ---
-    private GameObject _mushroomTrigger;
-    private Material _mushroomMaterial;
+    [HideInInspector] public GameObject _mushroomTrigger;
+    [HideInInspector] public Material _mushroomMaterial;
 
+    // --- PRIVATE VARIABLES ---
+    // not used during runtime
+    private float _furthestShroom = -1f;
+
+    // used during runtime
+    private MushroomState _currentState = MushroomState.REST;
+
+    #endregion
+
+    #region spawning logic
+
+    [Title("ziruguilrgh")]
+    [InfoBox("Draw spawns mushrooms in the radius defined in the spawning properties. Clear removes all which have spawned.", InfoMessageType = InfoMessageType.None)]
     [Button]
     public void Draw()
     {
         Clear();
+        
 
         if (_mushroomMaterial == null) _mushroomMaterial = Instantiate(_masterMaterial);
 
@@ -85,7 +96,6 @@ public class MushroomBatch : MonoBehaviour
         }
     }
 
-
     private int GetRaycastSamples()
     {
         float area = 4 * Mathf.PI * Mathf.Pow(_radius, 2);
@@ -128,6 +138,38 @@ public class MushroomBatch : MonoBehaviour
         else if (Vector3.Distance(transform.position, mushroom.transform.position) > _furthestShroom) 
             _furthestShroom = Vector3.Distance(transform.position, mushroom.transform.position);
     }
+
+    #endregion spawning
+
+    #region monobehavior functions
+
+    private void Start()
+    {
+        
+    }
+
+    #endregion
+
+    public void InitiateExplosion(Vector3 source)
+    {
+        if(_currentState != MushroomState.REST) return;
+
+        _mushroomMaterial.SetVector("_explosionSource", source);
+        StartCoroutine("TimeSinceExplosion");
+    }
+
+    IEnumerator TimeSinceExplosion()
+    {
+        
+        float normalizedTime = 0;
+        while (normalizedTime <= 10f)
+        {
+            _mushroomMaterial.SetFloat("_timeSinceExplosion", normalizedTime);
+            normalizedTime += Time.deltaTime;
+            yield return null;
+        }
+    }
+
 
     private void OnDrawGizmosSelected()
     {

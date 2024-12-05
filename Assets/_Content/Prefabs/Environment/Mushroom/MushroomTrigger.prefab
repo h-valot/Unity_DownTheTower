@@ -10,7 +10,8 @@ GameObject:
   m_Component:
   - component: {fileID: 8374472695516080482}
   - component: {fileID: 8564629697729236476}
-  m_Layer: 0
+  - component: {fileID: 8775089298884660634}
+  m_Layer: 8
   m_Name: MushroomTrigger
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -47,9 +48,21 @@ SphereCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
   m_Radius: 0.5
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &8775089298884660634
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 338019743662669733}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 45855cbe5ddce6743b39bedeacff438b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
