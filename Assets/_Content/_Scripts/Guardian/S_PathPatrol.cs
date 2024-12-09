@@ -6,21 +6,19 @@ using UnityEngine.AI;
 public class PathPatrol : MonoBehaviour
 { 
     [Header("Internal reference")]
-    [SerializeField] public Guardian _guardianRef;
+    [SerializeField] public GuardianMotor _guardianRef;
 
     // public
     [Header("Patrol Path")]
     [SerializeField] private Transform[] _patrolPoints;
 
     // private
-    private NavMeshAgent _agent;
+    [SerializeField] private NavMeshAgent _agent;
     private bool _aggro;
-    private bool dontPatrol;
     private int _targetPoint;
 
     void Start()
     {
-        _agent = GetComponent<NavMeshAgent>();
         _targetPoint = 0;
         Patrolling();
     }
@@ -28,26 +26,20 @@ public class PathPatrol : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if ( dontPatrol == false)
+        if ( _guardianRef.isPatrolling == true)
         {
-            if (_guardianRef.IsActif() == true)
-            {
-                IncreaseTargetInt();
-                GetAggro();
-            }
+            IncreaseTargetInt();
+            GetAggro();  
         }
     }
 
     void Patrolling()
     {
-        if (_aggro == false)
-        {
-            _agent.destination = _patrolPoints[_targetPoint].transform.position;
-        }
-
+        _agent.destination = _patrolPoints[_targetPoint].transform.position;
     }
     void IncreaseTargetInt()
     {
+        Patrolling();
         if ((transform.position - _patrolPoints[_targetPoint].position).magnitude <= 0.5f)
         {
             _targetPoint++;
@@ -55,11 +47,10 @@ public class PathPatrol : MonoBehaviour
             {
                 _targetPoint = 0;
             }
-            if (_aggro == false) 
-            {
-                Patrolling();
-            }
+            
+
         }
+
     }
 
     public void GoingBackToPatrol()
@@ -68,13 +59,12 @@ public class PathPatrol : MonoBehaviour
         if (_aggro == false)
             {
                 Patrolling();
-                dontPatrol = false;
             }
     }
 
     void GetAggro()
     {
-        _aggro = _guardianRef.StateAggro();
+        //_aggro = _guardianRef.StateAggro();
     }
 
 

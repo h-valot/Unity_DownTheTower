@@ -1,12 +1,8 @@
 using Sirenix.OdinInspector;
-using System.Collections;
 using System.Collections.Generic;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
-using UnityEngine.Rendering;
-using UnityEngine.TextCore.Text;
 
 public class GuardianMotor : MonoBehaviour
 {
@@ -27,6 +23,8 @@ public class GuardianMotor : MonoBehaviour
     public List<GameObject> _potentialTargets = new List<GameObject>();
     private float _targetDistance = 99999;
     private GameObject _target;
+    private GameObject m_newValidTarget;
+    public bool isPatrolling;
 
     #endregion
 
@@ -43,8 +41,7 @@ public class GuardianMotor : MonoBehaviour
 
         DetermineState();
         UpdateState();
-        UpdateDebugUI();
-
+        // UpdateDebugUI();
     }
 
     #endregion
@@ -53,22 +50,24 @@ public class GuardianMotor : MonoBehaviour
 
     private void SelectTarget()
     {
-        _target = null;
-        _targetDistance = 99999;
-
-        if (_potentialTargets.Count > 0 )
+        if (_potentialTargets.Count > 0)
         {
+            m_newValidTarget = null;
+            _targetDistance = 99999;
+
             foreach (GameObject target in _potentialTargets)
             {
-                if ( target != null)
+                if (target != null)
                 {
                     if (Vector3.Distance(this.transform.position, target.transform.position) <= _targetDistance)
                     {
-                        _target = target;
+                        m_newValidTarget = target;
                     }
                 }
             }
         }
+
+        if (_target != m_newValidTarget) _target = m_newValidTarget;
     }
 
     public void AddToPotentialTargets(GameObject objectRef)
@@ -92,11 +91,13 @@ public class GuardianMotor : MonoBehaviour
     {
         if (m_rsoGuardianState.value != GuardianBehaviorState.PATROL && _target == null)
         {
+            Debug.Log("switching to patrol");
             SwitchState(GuardianBehaviorState.PATROL);
         }
 
         if (m_rsoGuardianState.value != GuardianBehaviorState.AGGRO && _target != null)
         {
+            Debug.Log("switching to aggro");
             SwitchState(GuardianBehaviorState.AGGRO);
         }
     }
@@ -157,7 +158,7 @@ public class GuardianMotor : MonoBehaviour
 
     private void EnterPatrolState()
     {
-        
+        isPatrolling = true;
     }
 
     private void UpdatePatrolState()
@@ -167,7 +168,7 @@ public class GuardianMotor : MonoBehaviour
 
     private void ExitPatrolState()
     {
-
+        isPatrolling = false;
     }
 
     #endregion
@@ -176,7 +177,6 @@ public class GuardianMotor : MonoBehaviour
 
     private void EnterAggroState()
     {
-
     }
 
     private void UpdateAggroState()
@@ -184,14 +184,14 @@ public class GuardianMotor : MonoBehaviour
         _agent.destination = _target.transform.position;
     }
 
-    public void DestroyTorch(Torch torch)
-    {
-        torch.DestroyTorch();
-    }
-
     private void ExitAggroState()
     {
 
+    }
+
+    public void DestroyTorch(Torch torch)
+    {
+        torch.DestroyTorch();
     }
 
     #endregion
@@ -202,7 +202,7 @@ public class GuardianMotor : MonoBehaviour
     {
         if (_guardianRef.debugMode)
         {
-            if (!_target)
+            if (_target)
             {
                 _guardianTarget.text = _target?.ToString();
                 _stateText.text = m_rsoGuardianState.value.ToString();
@@ -210,7 +210,7 @@ public class GuardianMotor : MonoBehaviour
 
             else
             {
-                _guardianTarget.text = "null";
+                // _guardianTarget.text = "null";
                 _stateText.text = m_rsoGuardianState.value.ToString();
             }
         }

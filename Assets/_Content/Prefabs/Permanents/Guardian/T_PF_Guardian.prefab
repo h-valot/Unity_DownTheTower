@@ -74,6 +74,8 @@ MonoBehaviour:
   _agent: {fileID: 2290026609873240630}
   _guardianTarget: {fileID: 0}
   _stateText: {fileID: 0}
+  _potentialTargets: []
+  isPatrolling: 0
 --- !u!114 &8307310262378912332
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -86,8 +88,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 293ef9978589ae849972dd4b291534fb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _guardianRef: {fileID: 1517017858032438292}
+  _guardianRef: {fileID: 6412754733033068052}
   _patrolPoints: []
+  _agent: {fileID: 2290026609873240630}
 --- !u!195 &2290026609873240630
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -318,8 +321,8 @@ Transform:
   m_Children:
   - {fileID: 4005954973549722987}
   - {fileID: 1094901096302456366}
-  - {fileID: 5989017113030769808}
   - {fileID: 2325958042816803478}
+  - {fileID: 5989017113030769808}
   m_Father: {fileID: 8436130935548531696}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &6306757356383654500
@@ -796,6 +799,11 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 8
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 5e38a5b57a808094389a67003158e67a,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -873,6 +881,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Layer
       value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 317121205823624010, guid: dd1c62b3094bfd244898a20ac2f7d6c5,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7126587672550869400, guid: dd1c62b3094bfd244898a20ac2f7d6c5,
         type: 3}
@@ -977,6 +990,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Layer
       value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 317121205823624010, guid: dd1c62b3094bfd244898a20ac2f7d6c5,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7126587672550869400, guid: dd1c62b3094bfd244898a20ac2f7d6c5,
         type: 3}

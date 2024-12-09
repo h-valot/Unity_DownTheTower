@@ -6,6 +6,8 @@ public class DeathTrigger : MonoBehaviour
 
     public void OnTriggerEnter(Collider other)
     {
+        return;
+
         if (other.TryGetComponent<CharacterMotor>(out var character))
         {
             _GuardianRef.RemovePotentialTargets(character.gameObject);
