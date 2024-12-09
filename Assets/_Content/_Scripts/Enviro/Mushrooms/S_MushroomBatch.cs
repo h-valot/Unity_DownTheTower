@@ -18,10 +18,11 @@ public class MushroomBatch : MonoBehaviour
     [FoldoutGroup("Spawning")][SerializeField] private float _maxSizeMultiplier = 1.5f;
 
     // DrawMeshInstanced can only draw up to 1023 meshes at a time, so we need a new list for every 1023 mushrooms
-    public List<List<Matrix4x4>> mushroomLists = new List<List<Matrix4x4>>();
+    public List<MatrixList> mushroomLists = new List<MatrixList>();
 
     [FoldoutGroup("External References")][SerializeField] private GameObject _mushroomTriggerPrefab;
     [FoldoutGroup("External References")][SerializeField] private GameObject _mushroomPrefab;
+    [FoldoutGroup("External References")][SerializeField] private Mesh _mushroomMesh;
     [FoldoutGroup("External References")][SerializeField] private Material _masterMaterial;
 
 
@@ -86,13 +87,13 @@ public class MushroomBatch : MonoBehaviour
     public void ShowGameObjects()
     {
         ClearGameObjects();
-        foreach (List<Matrix4x4> list in mushroomLists)
+        foreach (MatrixList list in mushroomLists)
         {
-            foreach (Matrix4x4 mushroom in list)
+            foreach (Matrix4x4 mushroom in list.matrices)
             {
                 GameObject newMushroom = Instantiate(_mushroomPrefab, mushroom.GetPosition(), mushroom.rotation, transform);
                 newMushroom.transform.localScale = mushroom.lossyScale;
-                newMushroom.name = "List" + mushroomLists.IndexOf(list) + "Mushroom" + list.IndexOf(mushroom);
+                newMushroom.name = "List" + mushroomLists.IndexOf(list) + "Mushroom" + list.matrices.IndexOf(mushroom);
                 newMushroom.GetComponent<MeshRenderer>().material = _mushroomMaterial;
             }
         }
@@ -101,6 +102,7 @@ public class MushroomBatch : MonoBehaviour
     [Button]
     public void ClearGameObjects()
     {
+        Debug.Log("List size: " + mushroomLists[0].matrices.Count);
         LayerMask raycastLayerMask = new LayerMask();
         raycastLayerMask |= (1 << LayerMask.NameToLayer("NoCollision_NoRaycast"));
         foreach (Collider collider in Physics.OverlapSphere(transform.position, _radius, raycastLayerMask)) 
@@ -141,7 +143,7 @@ public class MushroomBatch : MonoBehaviour
         newMushroom.transform.localScale = new Vector3(scale, scale, scale);
         newMushroom.GetComponent<MeshRenderer>().material = _mushroomMaterial;
         AddMatrixToList(newMushroom.transform.localToWorldMatrix);
-        newMushroom.name = "List" + mushroomLists.Count + "Mushroom" + mushroomLists[mushroomLists.Count - 1].Count;
+        newMushroom.name = "List" + mushroomLists.Count + "Mushroom" + mushroomLists[mushroomLists.Count - 1].matrices.Count;
         CheckFurthest(newMushroom);
     }
 
@@ -169,20 +171,20 @@ public class MushroomBatch : MonoBehaviour
 
     public void AddMatrixToList(Matrix4x4 matrix)
     {
-        if (mushroomLists.Count == 0) mushroomLists.Add(new List<Matrix4x4>());
-        if (mushroomLists[mushroomLists.Count - 1].Count == 1023) mushroomLists.Add(new List<Matrix4x4>());
-        mushroomLists[mushroomLists.Count - 1].Add(matrix);
+        if (mushroomLists.Count == 0) mushroomLists.Add(new MatrixList());
+        if (mushroomLists[mushroomLists.Count - 1].matrices.Count == 1023) mushroomLists.Add(new MatrixList());
+        mushroomLists[mushroomLists.Count - 1].matrices.Add(matrix);
     }
 
     public bool RemoveMushroomFromList(Vector3 position)
     {
-        foreach (List<Matrix4x4> list in mushroomLists)
+        foreach (MatrixList list in mushroomLists)
         {
-            foreach (Matrix4x4 mushroom in list)
+            foreach (Matrix4x4 mushroom in list.matrices)
             {
                 if (position.Equals(mushroom.GetPosition()))
                 {
-                    list.Remove(mushroom);
+                    list.matrices.Remove(mushroom);
                     return true;
                 }
             }
@@ -197,10 +199,19 @@ public class MushroomBatch : MonoBehaviour
 
     private void Start()
     {
-        
+        ClearGameObjects();
+    }
+
+    private void Update()
+    {
+        foreach (MatrixList list in mushroomLists)
+            Graphics.DrawMeshInstanced(_mushroomMesh, 0, _mushroomMaterial, list.matrices);
     }
 
     #endregion
+
+
+    #region effect
 
     public void InitiateExplosion(Vector3 source)
     {
@@ -228,4 +239,6 @@ public class MushroomBatch : MonoBehaviour
         Gizmos.color = Color.magenta;
         Gizmos.DrawWireSphere(transform.position, _radius);
     }
+
+    #endregion
 }
