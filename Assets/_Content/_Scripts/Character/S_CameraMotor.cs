@@ -99,8 +99,9 @@ public class CameraMotor : MonoBehaviour
 	{
 		m_lookInput = input;
 
-		m_cinemachineTargetYaw += input.x * Time.deltaTime;
-		m_cinemachineTargetPitch += input.y * Time.deltaTime;
+		// Multiplying by fixedDeltaTime. Otherwise, look sensibility is frame based.
+		m_cinemachineTargetYaw += input.x * Time.fixedDeltaTime;
+		m_cinemachineTargetPitch += input.y * Time.fixedDeltaTime;
     }
 
 	private void HandleDeath()
