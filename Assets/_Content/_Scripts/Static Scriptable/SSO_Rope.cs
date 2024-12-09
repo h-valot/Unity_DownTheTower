@@ -49,6 +49,12 @@ public class SSO_Rope : ScriptableObject
 
 	[FoldoutGroup("Global settings")]
 	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("Radius of the sphere trigger collider of the rope interactable.", InfoMessageType.None)]
+	/// <summary> Radius of the sphere trigger collider of the rope interactable. </summary>
+	public float InteractableSphereRadius;
+
+	[FoldoutGroup("Global settings")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
 	[InfoBox("The rope folding system will only care about collider of the given layer mask.", InfoMessageType.None)]
 	/// <summary> The rope folding system will only care about collider of the given layer mask. </summary>
 	public LayerMask FoldLayerToInclude;

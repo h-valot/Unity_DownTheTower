@@ -12,6 +12,7 @@ public class Rope : Permanent
 	[SerializeField] private Transform m_ropeAttach;
 	[SerializeField] private MeshRenderer m_previewMeshRendered;
 	[SerializeField] private GameObject m_previewGameObject;
+	[SerializeField] private Interactable m_baseInteractable;
 	[SerializeField] private ConfigurableJoint m_joint;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Rope m_ssoRope;
@@ -54,6 +55,11 @@ public class Rope : Permanent
 	#endregion
 
 	#region MONOBEHAVIOR
+
+	private void Start()
+	{
+		m_baseInteractable.gameObject.SetActive(false);
+	}
 
 	private void Update()
 	{
@@ -223,13 +229,19 @@ public class Rope : Permanent
 
 	public void SpawnInteractables()
 	{
+		// Update the interactable component at the base of the rope.
+		m_baseInteractable.GetComponent<SphereCollider>().radius = m_ssoRope.InteractableSphereRadius;
+		m_baseInteractable.gameObject.SetActive(true);
+		m_baseInteractable.OnInteractedWithRef += Reattach;
+
+		m_ssoRope.PfRopeInteractible.GetComponent<SphereCollider>().radius = m_ssoRope.InteractableSphereRadius;
 		float sphereDiameter = m_ssoRope.PfRopeInteractible.GetComponent<SphereCollider>().radius * 2f;
 
 		for (int i = 0; i < m_ropeLines.Count; i++)
 		{
 			Vector3 lineDirection = (m_ropeLines[i].Positions[0] - m_ropeLines[i].Positions[1]).normalized;
 			float lineLength = (m_ropeLines[i].Positions[0] - m_ropeLines[i].Positions[1]).magnitude;
-			int sphereAmount = Mathf.FloorToInt(lineLength / sphereDiameter);
+			int sphereAmount = Mathf.FloorToInt(lineLength / sphereDiameter) + 1;
 
 			for (int j = 0; j < sphereAmount; j++)
 			{
@@ -259,9 +271,12 @@ public class Rope : Permanent
 		}
 		UpdateHoldLength();
 
-		// Delete interactable spheres
+		// Delete interactables
+		m_baseInteractable.gameObject.SetActive(false);
+		m_baseInteractable.OnInteractedWithRef -= Reattach;
 		for (int i = m_interactables.Count - 1; i >= 0; i--)
 		{
+			m_interactables[i].OnInteractedWithRef -= Reattach;
 			Destroy(m_interactables[i].gameObject);
 		}
 		m_interactables.Clear();
