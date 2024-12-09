@@ -2,6 +2,7 @@ using Sirenix.OdinInspector;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class MushroomBatch : MonoBehaviour
 {
@@ -16,7 +17,8 @@ public class MushroomBatch : MonoBehaviour
     [FoldoutGroup("Spawning")][SerializeField] private float _minSizeMultiplier = 0.5f;
     [FoldoutGroup("Spawning")][SerializeField] private float _maxSizeMultiplier = 1.5f;
 
-    public List<GameObject> mushroomList = new List<GameObject>();
+    // DrawMeshInstanced can only draw up to 1023 meshes at a time, so we need a new list for every 1023 mushrooms
+    public List<List<Matrix4x4>> mushroomLists = new List<List<Matrix4x4>>();
 
     [FoldoutGroup("External References")][SerializeField] private GameObject _mushroomTriggerPrefab;
     [FoldoutGroup("External References")][SerializeField] private GameObject _mushroomPrefab;
@@ -41,12 +43,12 @@ public class MushroomBatch : MonoBehaviour
 
     #region spawning logic
 
-    [Title("ziruguilrgh")]
+    [Title("Functions")]
     [InfoBox("Draw spawns mushrooms in the radius defined in the spawning properties. Clear removes all which have spawned.", InfoMessageType = InfoMessageType.None)]
     [Button]
     public void Draw()
     {
-        Clear();
+        ClearAll();
         
 
         if (_mushroomMaterial == null) _mushroomMaterial = Instantiate(_masterMaterial);
@@ -71,7 +73,7 @@ public class MushroomBatch : MonoBehaviour
             if (Physics.Raycast(transform.position, localDirection, out RaycastHit hitInfo, _radius, ~raycastLayerMask)) SpawnMushroom(hitInfo);
         }
 
-        if (mushroomList.Count > 0)
+        if (mushroomLists.Count > 0)
         {
             // 1. Instantiate Death Sphere (collision)
             _mushroomTrigger = Instantiate(_mushroomTriggerPrefab, transform.position, Quaternion.identity, transform);
@@ -81,15 +83,41 @@ public class MushroomBatch : MonoBehaviour
     }
 
     [Button]
-    public void Clear()
+    public void ShowGameObjects()
     {
-        while (mushroomList.Count > 0)
+        ClearGameObjects();
+        foreach (List<Matrix4x4> list in mushroomLists)
         {
-            GameObject tempMushroom = mushroomList[0];
-            mushroomList.RemoveAt(0);
-            DestroyImmediate(tempMushroom);
+            foreach (Matrix4x4 mushroom in list)
+            {
+                GameObject newMushroom = Instantiate(_mushroomPrefab, mushroom.GetPosition(), mushroom.rotation, transform);
+                newMushroom.transform.localScale = mushroom.lossyScale;
+                newMushroom.name = "List" + mushroomLists.IndexOf(list) + "Mushroom" + list.IndexOf(mushroom);
+                newMushroom.GetComponent<MeshRenderer>().material = _mushroomMaterial;
+            }
         }
-        if (_mushroomTrigger != null) 
+    }
+
+    [Button]
+    public void ClearGameObjects()
+    {
+        LayerMask raycastLayerMask = new LayerMask();
+        raycastLayerMask |= (1 << LayerMask.NameToLayer("NoCollision_NoRaycast"));
+        foreach (Collider collider in Physics.OverlapSphere(transform.position, _radius, raycastLayerMask)) 
+            if(collider.gameObject.TryGetComponent<Mushroom>(out Mushroom mushroom)) DestroyImmediate(mushroom.gameObject);
+    }
+
+    [Button]
+    public void ClearAll()
+    {
+        if (mushroomLists.Count == 0) return;
+        ClearGameObjects();
+
+        while (mushroomLists.Count > 0)
+        {
+            mushroomLists.RemoveAt(0);
+        }
+        if (_mushroomTrigger != null)
         {
             DestroyImmediate(_mushroomTrigger);
             _mushroomTrigger = null;
@@ -105,15 +133,15 @@ public class MushroomBatch : MonoBehaviour
     private void SpawnMushroom(RaycastHit hitInfo)
     {
         if (SimplexNoise3D.SimplexNoise(hitInfo.point, 0.37f) < 0.5f) return;
-        float scale = _mushroomPrefab.transform.localScale.x * UnityEngine.Random.Range(_minSizeMultiplier, _maxSizeMultiplier);
+        float scale = _mushroomPrefab.transform.localScale.x * Random.Range(_minSizeMultiplier, _maxSizeMultiplier);
 
         if (!IsNormalFacingOrigin(hitInfo) || !HasEnoughRoom(hitInfo, scale * 0.5f * _overlapModifier)) return;
 
         GameObject newMushroom = Instantiate(_mushroomPrefab, hitInfo.point, Quaternion.FromToRotation(Vector3.up, hitInfo.normal), transform);
         newMushroom.transform.localScale = new Vector3(scale, scale, scale);
         newMushroom.GetComponent<MeshRenderer>().material = _mushroomMaterial;
-        newMushroom.name = "Mushroom" + (mushroomList.Count + 1);
-        mushroomList.Add(newMushroom);
+        AddMatrixToList(newMushroom.transform.localToWorldMatrix);
+        newMushroom.name = "List" + mushroomLists.Count + "Mushroom" + mushroomLists[mushroomLists.Count - 1].Count;
         CheckFurthest(newMushroom);
     }
 
@@ -137,6 +165,30 @@ public class MushroomBatch : MonoBehaviour
         if (_furthestShroom == -1f) _furthestShroom = Vector3.Distance(transform.position, mushroom.transform.position);
         else if (Vector3.Distance(transform.position, mushroom.transform.position) > _furthestShroom) 
             _furthestShroom = Vector3.Distance(transform.position, mushroom.transform.position);
+    }
+
+    public void AddMatrixToList(Matrix4x4 matrix)
+    {
+        if (mushroomLists.Count == 0) mushroomLists.Add(new List<Matrix4x4>());
+        if (mushroomLists[mushroomLists.Count - 1].Count == 1023) mushroomLists.Add(new List<Matrix4x4>());
+        mushroomLists[mushroomLists.Count - 1].Add(matrix);
+    }
+
+    public bool RemoveMushroomFromList(Vector3 position)
+    {
+        foreach (List<Matrix4x4> list in mushroomLists)
+        {
+            foreach (Matrix4x4 mushroom in list)
+            {
+                if (position.Equals(mushroom.GetPosition()))
+                {
+                    list.Remove(mushroom);
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     #endregion spawning
