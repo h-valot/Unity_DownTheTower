@@ -26,8 +26,10 @@ public class MushroomBatch : MonoBehaviour
     [FoldoutGroup("External References")][SerializeField] private Material _masterMaterial;
 
 
-    [FoldoutGroup("Effect")][SerializeField] private float _releaseTime;
-    [FoldoutGroup("Effect")][SerializeField] private float _chargeTime;
+    [FoldoutGroup("Behavior")][SerializeField] private float _deflateTime = 3f;
+    [FoldoutGroup("Behavior")][SerializeField] private float _inflateTime = 10f;
+    [FoldoutGroup("Behavior")][SerializeField] private float _propagationSpeed = 2f;
+
 
     // --- INSTANCIATED VARIABLES ---
     [HideInInspector] public GameObject _mushroomTrigger;
@@ -200,6 +202,11 @@ public class MushroomBatch : MonoBehaviour
     private void Start()
     {
         ClearGameObjects();
+        if (mushroomLists[0].matrices.Count == 0) return;
+
+        _mushroomMaterial.SetFloat("_deflateTime", _deflateTime);
+        _mushroomMaterial.SetFloat("_inflateTime", _inflateTime);
+        _mushroomMaterial.SetFloat("_propagationSpeed", _propagationSpeed);
     }
 
     private void Update()
