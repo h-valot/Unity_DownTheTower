@@ -14,14 +14,4 @@ public static class Matha
         return outMin + (value - inMin) * (outMax - outMin) / (inMax - inMin);
     }
 
-    public static void PrecisionPrint(Vector3 vector)
-	{
-        Debug.Log("(" + vector.x.ToString() + ", " + vector.y.ToString() + ", " + vector.z.ToString() + ")");
-    }
-
-    public static void PrecisionPrint(Vector4 vector)
-    {
-        Debug.Log("(" + vector.x.ToString() + ", " + vector.y.ToString() + ", " + vector.z.ToString() + ", " + vector.w.ToString() + ")");
-    }
-
 }

@@ -1,42 +1,58 @@
 using Sirenix.OdinInspector;
+using System.Collections;
 using System.Collections.Generic;
-using UnityEditor;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class MushroomBatch : MonoBehaviour
 {
+    #region editor variables
 
     [Header("Area Properties")]
-    [SerializeField] private float _radius = 3;
-    [SerializeField] private float _density = 5;
+    [FoldoutGroup("Spawning")][SerializeField] private float _radius = 3;
+    [FoldoutGroup("Spawning")][SerializeField] private float _density = 5;
 
     [Header("Mushroom Placement Properties")]
-    [SerializeField] private float _overlapModifier = 0.5f;
-    [SerializeField] private bool _isRandom = true;
-    [EnableIf("_isRandom")]
-    [SerializeField] private float _minSizeMultiplier = 0.5f;
-    [EnableIf("_isRandom")]
-    [SerializeField] private float _maxSizeMultiplier = 1.5f;
+    [FoldoutGroup("Spawning")][SerializeField] private float _overlapModifier = 0.5f;
+    [FoldoutGroup("Spawning")][SerializeField] private float _minSizeMultiplier = 0.5f;
+    [FoldoutGroup("Spawning")][SerializeField] private float _maxSizeMultiplier = 1.5f;
 
-    [Header("External References")]
-    [SerializeField] private GameObject _mushroomTriggerPrefab;
-    [SerializeField] private GameObject _mushroomPrefab;
-    [SerializeField] private Material _masterMaterial;
+    // DrawMeshInstanced can only draw up to 1023 meshes at a time, so we need a new list for every 1023 mushrooms
+    public List<MatrixList> mushroomLists = new List<MatrixList>();
+
+    [FoldoutGroup("External References")][SerializeField] private GameObject _mushroomTriggerPrefab;
+    [FoldoutGroup("External References")][SerializeField] private GameObject _mushroomPrefab;
+    [FoldoutGroup("External References")][SerializeField] private Mesh _mushroomMesh;
+    [FoldoutGroup("External References")][SerializeField] private Material _masterMaterial;
 
 
-    public List<GameObject> mushroomList = new List<GameObject>();
+    [FoldoutGroup("Behavior")][SerializeField] private float _deflateTime = 3f;
+    [FoldoutGroup("Behavior")][SerializeField] private float _inflateTime = 10f;
+    [FoldoutGroup("Behavior")][SerializeField] private float _propagationSpeed = 2f;
 
-    // --- PRIVATE VARIABLES ---
-    private float _furthestShroom = -1f;
 
     // --- INSTANCIATED VARIABLES ---
-    private GameObject _mushroomTrigger;
-    private Material _mushroomMaterial;
+    [HideInInspector] public GameObject _mushroomTrigger;
+    [HideInInspector] public Material _mushroomMaterial;
 
+    // --- PRIVATE VARIABLES ---
+    // not used during runtime
+    private float _furthestShroom = -1f;
+
+    // used during runtime
+    private MushroomState _currentState = MushroomState.REST;
+
+    #endregion
+
+    #region spawning logic
+
+    [Title("Functions")]
+    [InfoBox("Draw spawns mushrooms in the radius defined in the spawning properties. Clear removes all which have spawned.", InfoMessageType = InfoMessageType.None)]
     [Button]
     public void Draw()
     {
-        Clear();
+        ClearAll();
+        
 
         if (_mushroomMaterial == null) _mushroomMaterial = Instantiate(_masterMaterial);
 
@@ -60,7 +76,7 @@ public class MushroomBatch : MonoBehaviour
             if (Physics.Raycast(transform.position, localDirection, out RaycastHit hitInfo, _radius, ~raycastLayerMask)) SpawnMushroom(hitInfo);
         }
 
-        if (mushroomList.Count > 0)
+        if (mushroomLists.Count > 0)
         {
             // 1. Instantiate Death Sphere (collision)
             _mushroomTrigger = Instantiate(_mushroomTriggerPrefab, transform.position, Quaternion.identity, transform);
@@ -70,21 +86,47 @@ public class MushroomBatch : MonoBehaviour
     }
 
     [Button]
-    public void Clear()
+    public void ShowGameObjects()
     {
-        while (mushroomList.Count > 0)
+        ClearGameObjects();
+        foreach (MatrixList list in mushroomLists)
         {
-            GameObject tempMushroom = mushroomList[0];
-            mushroomList.RemoveAt(0);
-            DestroyImmediate(tempMushroom);
+            foreach (Matrix4x4 mushroom in list.matrices)
+            {
+                GameObject newMushroom = Instantiate(_mushroomPrefab, mushroom.GetPosition(), mushroom.rotation, transform);
+                newMushroom.transform.localScale = mushroom.lossyScale;
+                newMushroom.name = "List" + mushroomLists.IndexOf(list) + "Mushroom" + list.matrices.IndexOf(mushroom);
+                newMushroom.GetComponent<MeshRenderer>().material = _mushroomMaterial;
+            }
         }
-        if (_mushroomTrigger != null) 
+    }
+
+    [Button]
+    public void ClearGameObjects()
+    {
+        Debug.Log("List size: " + mushroomLists[0].matrices.Count);
+        LayerMask raycastLayerMask = new LayerMask();
+        raycastLayerMask |= (1 << LayerMask.NameToLayer("NoCollision_NoRaycast"));
+        foreach (Collider collider in Physics.OverlapSphere(transform.position, _radius, raycastLayerMask)) 
+            if(collider.gameObject.TryGetComponent<Mushroom>(out Mushroom mushroom)) DestroyImmediate(mushroom.gameObject);
+    }
+
+    [Button]
+    public void ClearAll()
+    {
+        if (mushroomLists.Count == 0) return;
+        ClearGameObjects();
+
+        while (mushroomLists.Count > 0)
+        {
+            mushroomLists.RemoveAt(0);
+        }
+        if (_mushroomTrigger != null)
         {
             DestroyImmediate(_mushroomTrigger);
             _mushroomTrigger = null;
         }
     }
-
 
     private int GetRaycastSamples()
     {
@@ -95,15 +137,15 @@ public class MushroomBatch : MonoBehaviour
     private void SpawnMushroom(RaycastHit hitInfo)
     {
         if (SimplexNoise3D.SimplexNoise(hitInfo.point, 0.37f) < 0.5f) return;
-        float scale = _mushroomPrefab.transform.localScale.x * UnityEngine.Random.Range(_minSizeMultiplier, _maxSizeMultiplier);
+        float scale = _mushroomPrefab.transform.localScale.x * Random.Range(_minSizeMultiplier, _maxSizeMultiplier);
 
         if (!IsNormalFacingOrigin(hitInfo) || !HasEnoughRoom(hitInfo, scale * 0.5f * _overlapModifier)) return;
 
         GameObject newMushroom = Instantiate(_mushroomPrefab, hitInfo.point, Quaternion.FromToRotation(Vector3.up, hitInfo.normal), transform);
         newMushroom.transform.localScale = new Vector3(scale, scale, scale);
         newMushroom.GetComponent<MeshRenderer>().material = _mushroomMaterial;
-        newMushroom.name = "Mushroom" + (mushroomList.Count + 1);
-        mushroomList.Add(newMushroom);
+        AddMatrixToList(newMushroom.transform.localToWorldMatrix);
+        newMushroom.name = "List" + mushroomLists.Count + "Mushroom" + mushroomLists[mushroomLists.Count - 1].matrices.Count;
         CheckFurthest(newMushroom);
     }
 
@@ -129,9 +171,81 @@ public class MushroomBatch : MonoBehaviour
             _furthestShroom = Vector3.Distance(transform.position, mushroom.transform.position);
     }
 
+    public void AddMatrixToList(Matrix4x4 matrix)
+    {
+        if (mushroomLists.Count == 0) mushroomLists.Add(new MatrixList());
+        if (mushroomLists[mushroomLists.Count - 1].matrices.Count == 1023) mushroomLists.Add(new MatrixList());
+        mushroomLists[mushroomLists.Count - 1].matrices.Add(matrix);
+    }
+
+    public bool RemoveMushroomFromList(Vector3 position)
+    {
+        foreach (MatrixList list in mushroomLists)
+        {
+            foreach (Matrix4x4 mushroom in list.matrices)
+            {
+                if (position.Equals(mushroom.GetPosition()))
+                {
+                    list.matrices.Remove(mushroom);
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    #endregion spawning
+
+    #region monobehavior functions
+
+    private void Start()
+    {
+        ClearGameObjects();
+        if (mushroomLists[0].matrices.Count == 0) return;
+
+        _mushroomMaterial.SetFloat("_deflateTime", _deflateTime);
+        _mushroomMaterial.SetFloat("_inflateTime", _inflateTime);
+        _mushroomMaterial.SetFloat("_propagationSpeed", _propagationSpeed);
+    }
+
+    private void Update()
+    {
+        foreach (MatrixList list in mushroomLists)
+            Graphics.DrawMeshInstanced(_mushroomMesh, 0, _mushroomMaterial, list.matrices);
+    }
+
+    #endregion
+
+
+    #region effect
+
+    public void InitiateExplosion(Vector3 source)
+    {
+        if(_currentState != MushroomState.REST) return;
+
+        _mushroomMaterial.SetVector("_explosionSource", source);
+        StartCoroutine("TimeSinceExplosion");
+    }
+
+    IEnumerator TimeSinceExplosion()
+    {
+        
+        float normalizedTime = 0;
+        while (normalizedTime <= 10f)
+        {
+            _mushroomMaterial.SetFloat("_timeSinceExplosion", normalizedTime);
+            normalizedTime += Time.deltaTime;
+            yield return null;
+        }
+    }
+
+
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.magenta;
         Gizmos.DrawWireSphere(transform.position, _radius);
     }
+
+    #endregion
 }
