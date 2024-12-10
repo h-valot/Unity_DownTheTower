@@ -21,6 +21,7 @@ MonoBehaviour:
   MaxTorchesSoft: 4
   MaxTorchesHard: 8
   LightColor: {r: 0.99215686, g: 0.6901961, b: 0.34509805, a: 255}
+  LightRange: 50
   LightIntensity: 5
   GroundedLightDuration: 120
   LitDuration: 0.1
@@ -28,6 +29,9 @@ MonoBehaviour:
   TopTorchOffsetDistance: 0.14
   LightOffsetDistance: 0.5
   CanThrow: 1
+  LayerColliderToInclude:
+    serializedVersion: 2
+    m_Bits: 129
   m_launchForce: {x: 0.1, y: 15}
   m_launchCameraAngle: {x: 0, y: 130}
   CraftingDuration: 0.2
