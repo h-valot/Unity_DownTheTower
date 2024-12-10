@@ -8,10 +8,16 @@ public class GameManager : MonoBehaviour
 	[Required("A Game Start must be assigned to start the game. If there is no in the scene, you can find the prefab here: Content/Prefabs/LevelDesign")]
 	[SerializeField] private GameStart m_gameStart;
 
+	[Required("There is only one directional light per level, you can find it under --LEVEL DESIGN--")]
+	[SerializeField] private Light m_directionalLight;
+
+	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Game m_ssoGame;
+
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterDeath m_rsoCharacterDeath;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_GamePaused m_rsoGamePaused;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_ToggleCursor m_rseToggleCursor;
+
 
 	private void OnEnable()
 	{
@@ -25,9 +31,18 @@ public class GameManager : MonoBehaviour
 
 	private void Start()
 	{
+		if (!m_directionalLight)
+		{
+			Debug.LogError("GAME MANAGER: directional light reference is null. The global light intensity could by setup.");
+		}
+		else
+		{
+			m_directionalLight.intensity = m_ssoGame.GlobalLightIntensity;
+		}
+
 		Restart();
-		m_rseToggleCursor.Call(false);
 		DOTween.SetTweensCapacity(400, 400);
+		m_rseToggleCursor.Call(false);
 		m_rsoGamePaused.value = false;
 	}
 

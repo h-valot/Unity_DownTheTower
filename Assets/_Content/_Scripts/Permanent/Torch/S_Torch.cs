@@ -27,7 +27,6 @@ public class Torch : Permanent
 
 	// ----- PRIVATE VARIABLES -----
 	private Vector3 m_lastPosition;
-    private LayerMask m_layerMask;
 
     private MaterialPropertyBlock m_propertyBlock;
 
@@ -50,8 +49,6 @@ public class Torch : Permanent
         // Collisions
         m_rigidbody.constraints = RigidbodyConstraints.FreezeAll;
         m_lightCollider.radius = m_ssoTorch.LightOffsetDistance;
-        m_layerMask |= (1 << LayerMask.NameToLayer("Default"));
-        m_layerMask |= (1 << LayerMask.NameToLayer("Collision_NoRaycast"));
 
         // Preview
         m_aimPreview.useWorldSpace = true;
@@ -60,8 +57,9 @@ public class Torch : Permanent
         m_propertyBlock = new MaterialPropertyBlock();
         m_light.color = m_ssoTorch.LightColor;
         m_light.intensity = m_ssoTorch.LightIntensity;
+		m_light.range = m_ssoTorch.LightRange;
         m_propertyBlock.SetColor("_lightColor", m_ssoTorch.LightColor);
-        m_meshRenderer.SetPropertyBlock(m_propertyBlock);
+		m_meshRenderer.SetPropertyBlock(m_propertyBlock);
     }
 
     private void Start()
@@ -104,38 +102,38 @@ public class Torch : Permanent
 		// Assertion
 		if (IsInHand || !IsLit) return;
 
-		Vector3 _lightOffset = Vector3.zero;
-		Collider[] _hitColliders = Physics.OverlapSphere(m_pointLightBase.position, m_ssoTorch.LightOffsetDistance, m_layerMask);
-		if (_hitColliders.Length > 0)
-		{
-			foreach (Collider _otherCollider in _hitColliders)
-			{
-				Vector3 otherPosition = _otherCollider.gameObject.transform.position;
-				Quaternion otherRotation = _otherCollider.gameObject.transform.rotation;
+		var lightOffset = Vector3.zero;
+		Collider[] hitColliders = Physics.OverlapSphere(m_pointLightBase.position, m_ssoTorch.LightOffsetDistance, m_ssoTorch.LayerColliderToInclude);
 
-				Vector3 direction;
-				float distance;
-
-				bool overlapped = Physics.ComputePenetration(
-					m_lightCollider, transform.position, transform.rotation,
-					_otherCollider, otherPosition, otherRotation,
-					out direction, out distance
-				);
-
-				if (overlapped)
-				{
-					_lightOffset += direction * distance;
-				}
-
-				_lightOffset = Vector3.ClampMagnitude(_lightOffset, m_ssoTorch.LightOffsetDistance);
-				m_light.transform.position = m_pointLightBase.position + _lightOffset;
-			}
-		}
-		else
+		if (hitColliders.Length <= 0)
 		{
 			m_light.transform.position = m_pointLightBase.position;
+			return;
 		}
-    }   
+
+		foreach (Collider otherCollider in hitColliders)
+		{
+			Vector3 otherPosition = otherCollider.gameObject.transform.position;
+			Quaternion otherRotation = otherCollider.gameObject.transform.rotation;
+
+			Vector3 direction;
+			float distance;
+
+			bool overlapped = Physics.ComputePenetration(
+				m_lightCollider, transform.position, transform.rotation,
+				otherCollider, otherPosition, otherRotation,
+				out direction, out distance
+			);
+
+			if (overlapped)
+			{
+				lightOffset += direction * distance;
+			}
+
+			lightOffset = Vector3.ClampMagnitude(lightOffset, m_ssoTorch.LightOffsetDistance);
+			m_light.transform.position = m_pointLightBase.position + lightOffset;
+		}
+	}   
 
     private void OnCollisionEnter(Collision collision)
     {

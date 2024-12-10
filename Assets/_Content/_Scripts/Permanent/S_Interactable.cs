@@ -22,7 +22,7 @@ public class Interactable : MonoBehaviour
 	private CharacterInteract m_character;
 
 	/// <summary>
-	/// 	Called when the interactable is getting interacted.
+	/// Called when the interactable is getting interacted.
 	/// </summary>
 	public virtual void InteractionTrigger() 
 	{
@@ -31,8 +31,8 @@ public class Interactable : MonoBehaviour
 	}
 
 	/// <summary>
-	/// 	Called when a collider enters the interactable's collider. 
-	/// 	If it's the character, add itseft to the character's interactable list.
+	/// Called when a collider enters the interactable's collider. 
+	/// If it's the character, add itseft to the character's interactable list.
 	/// </summary>
     public virtual void OnTriggerEnter(Collider collider)
     {
@@ -44,8 +44,8 @@ public class Interactable : MonoBehaviour
 	}
 
 	/// <summary>
-	/// 	Called when a collider enters the interactable's collider. 
-	/// 	If it's the character, remove itseft from the character's interactable list.
+	/// Called when a collider enters the interactable's collider. 
+	/// If it's the character, remove itseft from the character's interactable list.
 	/// </summary>
 	public virtual void OnTriggerExit(Collider collider)
 	{
@@ -57,11 +57,19 @@ public class Interactable : MonoBehaviour
 	}
 
 	/// <summary>
-	/// 	Destroy the object to recycle.
+	/// Destroy the object to recycle.
 	/// </summary>
 	public void Recycle()
 	{
 		Destroy(m_objectToRecycle.gameObject);
+	}
+
+	/// <summary>
+	/// Remove this permament from the character interact when destroyed.
+	/// </summary>
+	public void OnDestroy()
+	{
+		if (m_character) m_character.Remove(this);
 	}
 
 #if UNITY_EDITOR

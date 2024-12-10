@@ -1,30 +1,25 @@
 using Sirenix.OdinInspector;
 using UnityEngine;
 
-public class SceneLoader : MonoBehaviour 
+public class SceneLoader : UIWindow
 {
 	[Title("Internal references")]
-	[SerializeField] private GameObject m_graphicsParent;
 	[SerializeField] private Transform m_buttonsParent;
 
 	[Title("External references")]
 	[SerializeField] private SceneButton m_pfSceneButton;
 
-	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Game m_ssoGame;
-	[FoldoutGroup("Scriptable")][SerializeField] private RSE_ToggleCursor m_rseToggleCursor;
-
-	private bool m_isPressed;
-	private bool m_isEnabled;
 	private string[] m_scenes;
-
-	private void Start()
+	
+	public override void Start()
 	{
-		Hide();
+		base.Start();
+		CreateButtons();
 	}
 
-	private void Update()
+	private void OnDestroy()
 	{
-		HandleShortcut();
+		RemoveButtons();
 	}
 
 	private void GetAllScenes()
@@ -65,55 +60,5 @@ public class SceneLoader : MonoBehaviour
 		{
 			Destroy(child.gameObject);
 		}
-	}
-
-	private void HandleShortcut()
-	{
-		if (Input.GetKeyDown(KeyCode.F2))
-		{
-			if (!m_isPressed)
-			{
-				Toggle();
-			}
-			m_isPressed = true;
-		}
-
-		if (Input.GetKeyUp(KeyCode.F2))
-		{
-			m_isPressed = false;
-		}
-	}
-
-	private void Toggle()
-	{
-		if (m_isEnabled)
-		{
-			Hide();
-			Time.timeScale = 1f;
-		}
-		else
-		{
-			Show();
-			Time.timeScale = 0.001f;
-		}
-	}
-
-	public void Hide()
-	{
-		m_rseToggleCursor.Call(false);
-		m_graphicsParent.SetActive(false);
-		m_isEnabled = false;
-		RemoveButtons();
-	}
-
-	private void Show()
-	{
-		// Assertion
-		if (m_ssoGame.BuildType == BuildType.RELEASE) return;
-
-		m_rseToggleCursor.Call(true);
-		m_graphicsParent.SetActive(true);
-		m_isEnabled = true;
-		CreateButtons();
 	}
 }

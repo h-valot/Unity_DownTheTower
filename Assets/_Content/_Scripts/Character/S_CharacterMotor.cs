@@ -1032,6 +1032,11 @@ public class CharacterMotor : MonoBehaviour
 			m_rseBackpackCrafting.Call(false, -1);
 		}
 
+		if (!HandObject && RobotObject) 
+		{
+			SwitchObjects(ref RobotObject, ref HandObject, m_handSocket);
+		}
+
 		m_isCrafting = false;
 	}
 

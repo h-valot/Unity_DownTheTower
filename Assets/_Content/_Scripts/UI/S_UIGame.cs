@@ -91,7 +91,6 @@ public class UIGame : MonoBehaviour
     {
         m_rsoGamePaused.value = isPaused;
         Time.timeScale = isPaused ? 0f : 1f;
-		
         m_rseToggleInputs.Call();
     }
 

@@ -51,6 +51,12 @@ public class SSO_Torch : ScriptableObject
 
 	[FoldoutGroup("Light")]
 	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("Default range of the torch point light.", InfoMessageType.None)]
+	/// <summary> Default range of the torch point light. </summary>
+	public float LightRange;
+
+	[FoldoutGroup("Light")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
 	[InfoBox("Default intensity of the torch point light.", InfoMessageType.None)]
 	/// <summary> Default intensity of the torch point light. </summary>
 	public float LightIntensity;
@@ -96,6 +102,12 @@ public class SSO_Torch : ScriptableObject
 	[InfoBox("If true, the torch can be thrown by the character.", InfoMessageType.None)]
 	/// <summary> If true, the torch can be thrown by the character. </summary>
 	public bool CanThrow = true;
+
+	[FoldoutGroup("Throw")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("The point light offset system will include only those layers.", InfoMessageType.None)]
+	/// <summary> The point light offset system will include only those layers. </summary>
+	public LayerMask LayerColliderToInclude;
 
 	[FoldoutGroup("Throw")]
 	[MinMaxSlider(0, 30, true)]

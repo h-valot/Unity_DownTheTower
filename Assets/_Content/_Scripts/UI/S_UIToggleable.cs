@@ -59,6 +59,12 @@ public class UIToggleable : MonoBehaviour
 		m_tmpTitle.text = m_title;
 	}
 
+	public void SetFlavor(string flavor)
+	{
+		m_flavor = flavor;
+		UpdateFlavor();
+	}
+
 	private void UpdateFlavor()
 	{
 		m_tmpFlavor.text = m_flavor;
