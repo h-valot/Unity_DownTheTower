@@ -9,6 +9,8 @@ public class GuardianMotor : MonoBehaviour
     #region References
 
     [FoldoutGroup("Scriptable")][SerializeField] private RSO_GuardianState m_rsoGuardianState;
+    [FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterPosition m_rsoCharacterPosition;
+    [FoldoutGroup("Scriptable")][SerializeField] private RSO_TorchManager m_rsoTorchManager;
     [FoldoutGroup("Scriptable")][SerializeField] private SSO_Guardian _guardianRef;
 
     [FoldoutGroup("Internal References")][SerializeField] private NavMeshAgent _agent;
@@ -50,24 +52,38 @@ public class GuardianMotor : MonoBehaviour
 
     private void SelectTarget()
     {
-        if (_potentialTargets.Count > 0)
+        _targetDistance = 99999;
+        if(Vector3.Distance(this.transform.position, m_rsoCharacterPosition.value) < _targetDistance )
         {
-            m_newValidTarget = null;
-            _targetDistance = 99999;
-
-            foreach (GameObject target in _potentialTargets)
-            {
-                if (target != null)
-                {
-                    if (Vector3.Distance(this.transform.position, target.transform.position) <= _targetDistance)
-                    {
-                        m_newValidTarget = target;
-                    }
-                }
-            }
+            _target = 
         }
 
-        if (_target != m_newValidTarget) _target = m_newValidTarget;
+        foreach ( GameObject target in m_rsoTorchManager.list ) { }
+
+
+
+
+
+
+
+        //if (_potentialTargets.Count > 0)
+        //{
+        //    m_newValidTarget = null;
+        //    _targetDistance = 99999;
+
+        //    foreach (GameObject target in _potentialTargets)
+        //    {
+        //        if (target != null)
+        //        {
+        //            if (Vector3.Distance(this.transform.position, target.transform.position) <= _targetDistance)
+        //            {
+        //                m_newValidTarget = target;
+        //            }
+        //        }
+        //    }
+        //}
+
+        //if (_target != m_newValidTarget) _target = m_newValidTarget;
     }
 
     public void AddToPotentialTargets(GameObject objectRef)
