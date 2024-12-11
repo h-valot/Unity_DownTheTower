@@ -1,6 +1,9 @@
 using DG.Tweening;
+using EasyCurvedLine;
 using Sirenix.OdinInspector;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class Torch : Permanent
@@ -9,7 +12,7 @@ public class Torch : Permanent
     [SerializeField] private Light m_light;
     [SerializeField] private Rigidbody m_rigidbody;
     [SerializeField] private MeshRenderer m_meshRenderer;
-    [SerializeField] private LineRenderer m_aimPreview;
+    [SerializeField] private LineRenderer m_aimLineRenderer;
     [SerializeField] private Transform m_torchTop;
     [SerializeField] private Transform m_pointLightBase;
     [SerializeField] private SphereCollider m_lightCollider;
@@ -51,7 +54,7 @@ public class Torch : Permanent
         m_lightCollider.radius = m_ssoTorch.LightOffsetDistance;
 
         // Preview
-        m_aimPreview.useWorldSpace = true;
+        m_aimLineRenderer.useWorldSpace = true;
 
         // Visual
         m_propertyBlock = new MaterialPropertyBlock();
@@ -229,40 +232,71 @@ public class Torch : Permanent
 	/// </summary>
     public override void PreviewThrow(Transform _cameraTransform)
     {
-        m_aimPreview.enabled = true;
-        m_aimPreview.positionCount = Mathf.CeilToInt(m_ssoTorch.PreviewLength / m_ssoTorch.PreviewSmoothing) + 1;
+        m_aimLineRenderer.enabled = true;
+
+        List<Vector3> trajectoryPoints = new List<Vector3> ();
 
         // set up starting point and velocity
         Vector3 startPosition = transform.position;
         Vector3 startVelocity = Quaternion.AngleAxis(-CalculateThrowAngleOffset(_cameraTransform), _cameraTransform.right) * _cameraTransform.forward * CalculateLaunchForce(_cameraTransform);
+        float trajectoryDistance = 0;
 
-        // placing points along the line renderer
-        int i = 0;
-        m_aimPreview.SetPosition(i, startPosition);
-        for (float time = 0; time < m_ssoTorch.PreviewLength; time += m_ssoTorch.PreviewSmoothing)
+        trajectoryPoints.Add (startPosition);
+
+        // finding trajectory point using physics
+        for (float time = 0; time < m_ssoTorch.PreviewLength; time += m_ssoTorch.PreviewAccuracy)
         {
-            i++;
             Vector3 point = startPosition + time * startVelocity;
             // defines placement over time using gravity as an accelerator
             point.y = startPosition.y + startVelocity.y * time + (Physics.gravity.y / 2f * time * time);
 
-            m_aimPreview.SetPosition(i, point);
+            trajectoryPoints.Add(point);
 
-            if (CheckEndOfPreview(i, point)) return;
+            if (CheckEndOfPreview(ref trajectoryPoints, point)) break;
+
+            trajectoryDistance += (trajectoryPoints[^1] - trajectoryPoints[^2]).magnitude;
         }
+
+        Vector3[] smoothedPoints = LineSmoother.SmoothLine(trajectoryPoints.ToArray(), m_ssoTorch.LineSegmentSize);
+        //Vector3[] smoothedPoints = trajectoryPoints.ToArray();
+
+        // set line settings
+        m_aimLineRenderer.positionCount = smoothedPoints.Length;
+        m_aimLineRenderer.SetPositions(smoothedPoints);
+        m_aimLineRenderer.startWidth = m_ssoTorch.LineWidth;
+        m_aimLineRenderer.endWidth = m_ssoTorch.LineWidth;
+
+        float fadeInDistancePercent = (m_ssoTorch.fadeInDistance < trajectoryDistance*0.25f) ? (m_ssoTorch.fadeInDistance / trajectoryDistance) : 0.25f;
+
+        Gradient gradient = new Gradient();
+
+        // Set color
+        GradientColorKey[] colors = new GradientColorKey[3];
+        colors[0] = new GradientColorKey(new Color(255f, 229f, 0), 0.0f);
+        colors[1] = new GradientColorKey(new Color(255f, 229f, 0), fadeInDistancePercent);
+        colors[2] = new GradientColorKey(new Color(255f, 229f, 0), 1.0f);
+
+        // Blend alpha from alpha at 0% to opaque at fade in distance to transparent at 100%
+        GradientAlphaKey[] alphas = new GradientAlphaKey[3];
+        alphas[0] = new GradientAlphaKey(0.0f, 0.0f);
+        alphas[1] = new GradientAlphaKey(1.0f, fadeInDistancePercent);
+        alphas[2] = new GradientAlphaKey(0.0f, 1.0f);
+
+        gradient.SetKeys(colors, alphas);
+
+        m_aimLineRenderer.colorGradient = gradient;
     }
 
 
     /// <summary> 
-	/// Stop the curve of the previsualisation if it collides with an object.
+	/// Stop the curve of the previsualisation if it collides with an object and correct last point to match collision.
 	/// </summary>
-    private bool CheckEndOfPreview(int pointNb, Vector3 pointPos)
+    private bool CheckEndOfPreview(ref List<Vector3> trajectoryPoints, Vector3 pointPos)
     {
-        Vector3 lastPosition = m_aimPreview.GetPosition(pointNb - 1);
+        Vector3 lastPosition = trajectoryPoints[^2];
         if (Physics.Raycast(lastPosition, (pointPos - lastPosition).normalized, out var hit, (pointPos - lastPosition).magnitude, ~(m_ssoTorch.PreviewLayersToIgnore)))
         {
-            m_aimPreview.SetPosition(pointNb, hit.point);
-            m_aimPreview.positionCount = pointNb + 1;
+            trajectoryPoints[^1] = hit.point;
             return true;
         }
         return false;
@@ -282,7 +316,7 @@ public class Torch : Permanent
 			ToggleHandEffect();
 		}
 
-        m_aimPreview.enabled = false;
+        m_aimLineRenderer.enabled = false;
 
         m_lastPosition = transform.position;
         gameObject.transform.parent = null;

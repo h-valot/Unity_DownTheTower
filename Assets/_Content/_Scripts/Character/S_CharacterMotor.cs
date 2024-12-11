@@ -126,6 +126,8 @@ public class CharacterMotor : MonoBehaviour
     {
         CheckGround();
         DetermineState();
+
+		Application.onBeforeRender += UpdatePreview;
     }
 
     private void OnDisable()
@@ -133,6 +135,8 @@ public class CharacterMotor : MonoBehaviour
         UnsubscibeAllInputs();
         m_ssoCharacter.OnConfigChanged -= UpdateDrag;
         m_rsoCharacterState.value = BehaviorState.NONE;
+
+        Application.onBeforeRender -= UpdatePreview;
     }
 
     private void FixedUpdate()
@@ -158,8 +162,6 @@ public class CharacterMotor : MonoBehaviour
         _movementDatas.dataToString.Add(m_isGrounded.ToString());
         _movementDatas.dataToString.Add(m_rsoCharacterState.value.ToString());
         m_rsoMovementDatas.value = _movementDatas;
-
-		if (IsAiming) HandObject.PreviewThrow(m_rsoCameraTransform.value);
 	}
 
 #if UNITY_EDITOR
@@ -760,6 +762,11 @@ public class CharacterMotor : MonoBehaviour
 
         // Apply final force to move character, auto clamp the speed by substractiong actual speed to desired speed
         m_rigidbody.AddForce((desiredSpeedForce * m_ssoCharacter.AirControlSpeedFactor - m_rigidbody.velocity) * m_airControlForceFactor, ForceMode.Acceleration);
+    }
+
+    private void UpdatePreview()
+    {
+        if (IsAiming) HandObject.PreviewThrow(m_rsoCameraTransform.value);
     }
 
     #endregion
