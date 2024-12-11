@@ -12,13 +12,13 @@ public class CharacterGlow : MonoBehaviour
 		UpdateGlowGlobalParameters();
 
         m_rsoCharacterPosition.OnChanged += UpdateCharPositionShaderGlobalParameter;
-        m_ssoCharacter.OnConfigChanged += UpdateGlowGlobalParameters;
+        m_ssoCharacter.OnSSOChanged += UpdateGlowGlobalParameters;
 	}
 
     private void OnDisable()
     {
         m_rsoCharacterPosition.OnChanged -= UpdateCharPositionShaderGlobalParameter;
-        m_ssoCharacter.OnConfigChanged -= UpdateGlowGlobalParameters;
+        m_ssoCharacter.OnSSOChanged -= UpdateGlowGlobalParameters;
     }
 
     private void UpdateCharPositionShaderGlobalParameter()

@@ -9,7 +9,7 @@ public class TorchManager : MonoBehaviour
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_TorchManager m_rsoTorchManager;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterDeath m_rsoCharacterDeath;
 
-	public List<Torch> m_torches = new List<Torch>();
+	[HideInInspector] public List<Torch> Torches = new List<Torch>();
 
     private void Awake()
     {
@@ -28,18 +28,18 @@ public class TorchManager : MonoBehaviour
 
     public void Add(Torch torch)
     {
-        m_torches.Insert(0, torch);
+        Torches.Insert(0, torch);
 
-        while (m_torches.Count > m_ssoTorch.MaxTorchesSoft)
+        while (Torches.Count > m_ssoTorch.MaxTorchesSoft)
         {
-            Remove(m_torches[4]);
+            Remove(Torches[4]);
         }
     }
 
     public void Remove(Torch torch)
 	{
 		torch.Deactivate();
-		m_torches.Remove(torch);
+		Torches.Remove(torch);
 	}
 
 	public void Clear()
@@ -47,9 +47,9 @@ public class TorchManager : MonoBehaviour
 		// Assertion
 		if (!m_rsoCharacterDeath.value) return;
 
-		for (int i = m_torches.Count - 1; i >= 0; i--)
+		for (int i = Torches.Count - 1; i >= 0; i--)
 		{
-			Remove(m_torches[i]);
+			Remove(Torches[i]);
 		}
 	}
 }

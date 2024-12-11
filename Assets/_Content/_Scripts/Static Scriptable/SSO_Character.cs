@@ -9,8 +9,8 @@ public class SSO_Character : ScriptableObject
 	/// 	Unity in-built editor function called whenever the scriptable object is updated.
     /// 	Used to apply change to drag immediatly to rigidbody.
 	/// </summary>
-	public void OnValidate() => OnConfigChanged?.Invoke();
-	public Action OnConfigChanged;
+	public void OnValidate() => OnSSOChanged?.Invoke();
+	public Action OnSSOChanged;
 
 
 	[Title("Debug")]
