@@ -43,6 +43,8 @@ public class MushroomBatch : MonoBehaviour
     // used during runtime
     private MushroomState _currentState = MushroomState.REST;
 
+    [HideInInspector][SerializeField] private List<GameObject> SpawnedGameObjects = new List<GameObject>();
+
     #endregion
 
     #region spawning logic
@@ -77,7 +79,7 @@ public class MushroomBatch : MonoBehaviour
             if (Physics.Raycast(transform.position, localDirection, out RaycastHit hitInfo, _radius, ~raycastLayerMask)) SpawnMushroom(hitInfo);
         }
 
-        if (mushroomLists.Count > 0)
+        if (mushroomLists.Count > 0 && _mushroomTriggerPrefab != null)
         {
             // 1. Instantiate Death Sphere (collision)
             _mushroomTrigger = Instantiate(_mushroomTriggerPrefab, transform.position, Quaternion.identity, transform);
@@ -95,6 +97,7 @@ public class MushroomBatch : MonoBehaviour
             foreach (Matrix4x4 mushroom in list.matrices)
             {
                 GameObject newMushroom = Instantiate(_mushroomPrefab, mushroom.GetPosition(), mushroom.rotation, transform);
+                SpawnedGameObjects.Add(newMushroom);
                 newMushroom.transform.localScale = mushroom.lossyScale;
                 newMushroom.name = "List" + mushroomLists.IndexOf(list) + "Mushroom" + list.matrices.IndexOf(mushroom);
                 newMushroom.GetComponent<MeshRenderer>().material = _mushroomMaterial;
@@ -105,10 +108,9 @@ public class MushroomBatch : MonoBehaviour
     [Button]
     public void ClearGameObjects()
     {
-        LayerMask raycastLayerMask = new LayerMask();
-        raycastLayerMask |= (1 << LayerMask.NameToLayer("NoCollision_NoRaycast"));
-        foreach (Collider collider in Physics.OverlapSphere(transform.position, _radius, raycastLayerMask)) 
-            if(collider.gameObject.TryGetComponent<Mushroom>(out Mushroom mushroom)) DestroyImmediate(mushroom.gameObject);
+        foreach (GameObject spawnedObject in SpawnedGameObjects) 
+            if (spawnedObject != null) DestroyImmediate(spawnedObject);
+        SpawnedGameObjects.Clear();
     }
 
     [Button]
@@ -142,6 +144,7 @@ public class MushroomBatch : MonoBehaviour
         if (!IsNormalFacingOrigin(hitInfo) || !HasEnoughRoom(hitInfo, scale * 0.5f * _overlapModifier)) return;
 
         GameObject newMushroom = Instantiate(_mushroomPrefab, hitInfo.point, Quaternion.FromToRotation(Vector3.up, hitInfo.normal), transform);
+        SpawnedGameObjects.Add(newMushroom);
         newMushroom.transform.localScale = new Vector3(scale, scale, scale);
         newMushroom.GetComponent<MeshRenderer>().material = _mushroomMaterial;
         AddMatrixToList(newMushroom.transform.localToWorldMatrix);
