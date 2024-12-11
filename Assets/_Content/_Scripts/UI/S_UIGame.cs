@@ -1,6 +1,5 @@
 using DG.Tweening;
 using Sirenix.OdinInspector;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -26,8 +25,6 @@ public class UIGame : MonoBehaviour
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_GamePaused m_rsoGamePaused;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterDeath m_rsoCharacterDeath;
 
-    private bool m_isLogShowing = false;
-
 	private void Start()
 	{
 		Hide();
@@ -36,16 +33,12 @@ public class UIGame : MonoBehaviour
     private void OnEnable()
     {
         m_rsePause.action += TogglePausePanel;
-        m_rseLogContent.action += ShowLog;
-        m_rseCancel.action += HideLog;
         m_rsoCharacterDeath.OnChanged += DeathFade;
     }
 
     private void OnDisable()
     {
         m_rsePause.action -= TogglePausePanel;
-        m_rseLogContent.action -= ShowLog;
-        m_rseCancel.action -= HideLog;
         m_rsoCharacterDeath.OnChanged -= DeathFade;
     }
 
@@ -65,11 +58,6 @@ public class UIGame : MonoBehaviour
 
 	private void Show()
 	{
-		if (m_isLogShowing)
-		{
-			HideLog();
-		}
-
 		m_pnlPause.SetActive(true);
 		TogglePauseGame(true);
 		m_rseToggleCursor.Call(true);
@@ -110,36 +98,5 @@ public class UIGame : MonoBehaviour
     {
         m_imgDeath.gameObject.SetActive(false);
         m_imgDeath.color = Color.black;
-    }
-
-    private void ShowLog(string title, List<string> body)
-    {
-        m_tmpLogHeader.text = title;
-        m_tmpLogBody.text = BuildLogBody(body);
-
-        TogglePauseGame(true);
-
-        m_isLogShowing = true;
-        m_pnlLog.SetActive(m_isLogShowing);
-    }
-
-    private void HideLog(bool isHide = true)
-    {
-        if (!m_isLogShowing) return;
-
-        TogglePauseGame(false);
-
-        m_isLogShowing = false;
-        m_pnlLog.SetActive(m_isLogShowing);
-    }
-
-    private string BuildLogBody(List<string> bodyList)
-    {
-        string body = string.Empty;
-        foreach (var paragraph in bodyList)
-        {
-            body = body + paragraph + "<br>";
-        }
-        return body;
     }
 }
