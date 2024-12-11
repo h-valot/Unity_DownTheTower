@@ -71,6 +71,12 @@ public class SSO_Rope : ScriptableObject
 	/// <summary> The distance between two following folds can't be smaller than the given float. </summary>
 	public float MinFoldDistance = 0.25f;
 
+	[FoldoutGroup("Global settings")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("Below this distance, the character can not climb up the rope.", InfoMessageType.None)]
+	/// <summary> Below this distance, the character can not climb up the rope. </summary>
+	public float MinimumClimbLength = 1f;
+
 	#endregion
 
 	#region DEPLOYMENT

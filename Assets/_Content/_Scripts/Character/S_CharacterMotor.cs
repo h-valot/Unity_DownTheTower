@@ -914,7 +914,8 @@ public class CharacterMotor : MonoBehaviour
 		if (!IsRopeValid
 		|| !m_isClimbing
 		|| m_ssoCharacter.RopeHoldingMethod == RopeHolding.HOLD_TO_STOP && !m_isHolding
-		|| m_ssoCharacter.RopeHoldingMethod == RopeHolding.HOLD_TO_LET_GO && m_isHolding)
+		|| m_ssoCharacter.RopeHoldingMethod == RopeHolding.HOLD_TO_LET_GO && m_isHolding
+		|| m_rope.GetTotalLength() <= m_ssoRope.MinimumClimbLength)
 		{
 			m_currentClimbSpeed = m_ssoCharacter.ClimbAcceleration;
 			return;

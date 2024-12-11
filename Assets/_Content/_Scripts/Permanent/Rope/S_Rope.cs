@@ -147,13 +147,15 @@ public class Rope : Permanent
 
 	private void Deploy(Transform cameraTransform, Vector3 deployPoint)
 	{
+		// Disable hold length constraint to avoid the character to be snapped to the rope when placed
+		SetHoldLength(9999);
+
 		transform.eulerAngles = new Vector3(0, cameraTransform.rotation.eulerAngles.y, 0);
 		transform.DOJump(deployPoint, 1f, 0, 0.3f).OnComplete(() =>
 		{
 			// Rope custom initialization commands
 			m_boxCollider.enabled = true;
 			m_folds = new List<Vector3>() { m_ropeAttach.position.CutDigits(2) };
-			if (m_isConnected) UpdateHoldLength();
 			m_isPlaced = true;
 		});
 	}
