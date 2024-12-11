@@ -525,7 +525,7 @@ public class CharacterMotor : MonoBehaviour
 	
 	private void ApplyFallHeight()
 	{
-		m_fallHeight = Math.Abs(m_rigidbody.position.y - m_positionStartFall.y);
+		m_fallHeight = (m_rigidbody.position.y - m_positionStartFall.y) * -1f;
 		if (m_fallHeight >= m_ssoCharacter.LethalHeight)
 		{
 			HandleDeath();
