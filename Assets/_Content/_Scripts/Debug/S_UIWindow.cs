@@ -3,8 +3,7 @@ using UnityEngine;
 
 public class UIWindow : MonoBehaviour
 {
-	[Title("UI Window")]
-	[SerializeField] protected GameObject m_graphicsParent;
+	[FoldoutGroup("Static variables")][SerializeField] protected GameObject m_graphicsParent;
 	
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_ToggleCursor m_rseToggleCursor;
 

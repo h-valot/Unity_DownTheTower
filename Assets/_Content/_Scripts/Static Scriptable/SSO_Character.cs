@@ -35,40 +35,10 @@ public class SSO_Character : ScriptableObject
 
 	[FoldoutGroup("Movement")]
 	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
-	[InfoBox("Drag applied to the character if grounded. Used to slow character movement acceleration. Note: Drag is set to 0 if the character is not grounded.", InfoMessageType.None)]
-	public float DragGround;
-
-	[FoldoutGroup("Movement")]
-	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
-	[InfoBox("Friction applied to the character if grounded and not receiving movement inputs. Used to stop the character. Note: Friction is set to 0 if the character is not grounded.", InfoMessageType.None)]
-	public float FrictionDeceleration;
-
-	#endregion
-
-	#region JUMP
-
-	[FoldoutGroup("Jump")]
 	[InfoBox("Magnitude of the up vector when jumping. Note: This value is high because the friction and drag are still being applied on this frame.", InfoMessageType.None)]
     public float JumpForce;
 
-	[FoldoutGroup("Jump")]
-	[PropertyRange(0f, 10f)]
-	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
-	[InfoBox("Scalar applied to the max speed while falling.", InfoMessageType.None)]
-	public float AirControlScalar;
-
-	[FoldoutGroup("Jump")]
-	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
-	[InfoBox("Duration during witch air control movement can be applied.", InfoMessageType.None)]
-	public float AirControlDuration;
-
-	[FoldoutGroup("Jump")]
-	[PropertyRange(0f, 2f)]
-	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
-	[InfoBox("Percentage of the current velocity magnitude the character is allowed to preform before exiting the air control.", InfoMessageType.None)]
-	public float AirControlThreshold;
-
-	[FoldoutGroup("Jump")]
+	[FoldoutGroup("Movement")]
 	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
 	[InfoBox("Duration during which the character is still able to jumb after start falling.", InfoMessageType.None)]
 	public float CoyoteTime;
@@ -78,6 +48,16 @@ public class SSO_Character : ScriptableObject
 	#region GROUND
 
 	[FoldoutGroup("Ground")]
+	[InfoBox("Drag applied to the character if grounded. Used to slow character movement acceleration. Note: Drag is set to 0 if the character is not grounded.", InfoMessageType.None)]
+	public float DragGround;
+
+	[FoldoutGroup("Ground")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("Friction applied to the character if grounded and not receiving movement inputs. Used to stop the character. Note: Friction is set to 0 if the character is not grounded.", InfoMessageType.None)]
+	public float FrictionDeceleration;
+
+	[FoldoutGroup("Ground")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
 	[InfoBox("Check ground & handle step on systems raycasts will only include the following layer masks.", InfoMessageType.None)]
 	public LayerMask GroundLayerToInclude;
 
@@ -90,6 +70,32 @@ public class SSO_Character : ScriptableObject
 	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
 	[InfoBox("Maximum height of a step the character will automatically step on.", InfoMessageType.None)]
 	public float StepOnHeight;
+
+	#endregion
+
+	#region FALL
+
+	[FoldoutGroup("Fall")]
+	[InfoBox("Duration after what the character will be destroyed.", InfoMessageType.None)]
+	public float FallDeathDurationBeforeRespawn;
+
+
+	[Title("Air control")]
+	[FoldoutGroup("Fall")]
+	[PropertyRange(0f, 10f)]
+	[InfoBox("Scalar applied to the max speed while falling.", InfoMessageType.None)]
+	public float AirControlScalar;
+
+	[FoldoutGroup("Fall")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("Duration during witch air control movement can be applied.", InfoMessageType.None)]
+	public float AirControlDuration;
+
+	[FoldoutGroup("Fall")]
+	[PropertyRange(0f, 2f)]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("Percentage of the current velocity magnitude the character is allowed to preform before exiting the air control.", InfoMessageType.None)]
+	public float AirControlThreshold;
 
 	#endregion
 

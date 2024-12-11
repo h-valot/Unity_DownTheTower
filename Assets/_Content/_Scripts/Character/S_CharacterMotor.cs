@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using DG.Tweening;
 using Sirenix.OdinInspector;
 using TMPro;
 using UnityEngine;
@@ -34,6 +35,7 @@ public class CharacterMotor : MonoBehaviour
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_BackpackCrafting m_rseBackpackCrafting;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_SetCharacterPosition m_rseSetCharacterPosition;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_InitializeCamera m_rseInitializeCamera;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSE_PlayFallDeath m_rsePlayFallDeath;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_MovementDatas m_rsoMovementDatas;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CameraStyle m_rsoCameraStyle;
@@ -801,7 +803,8 @@ public class CharacterMotor : MonoBehaviour
     {
         UpdateCoyoteTime();
 		UpdateAirControl();
-        MoveFalling();
+		CheckFallHeight();
+		MoveFalling();
     }
 
     private void ExitFallState()
@@ -847,6 +850,32 @@ public class CharacterMotor : MonoBehaviour
 		m_airControlDuration -= Time.fixedDeltaTime;
 		m_airControlTimeScalar = m_airControlDuration / m_ssoCharacter.AirControlDuration;
     }
+
+	private bool m_isCharacterDead;
+
+	/// <summary>
+	/// Handle fall death animation when the distance the character travelled on the y-axis exceed the lethal height. 
+	/// </summary>
+	private void CheckFallHeight()
+	{
+		// Assertions
+		if (m_rsoCharacterState.value != BehaviorState.FALL) return;
+		if (m_isCharacterDead) return;
+
+		m_fallHeight = Math.Abs(m_rigidbody.position.y - m_positionStartFall.y);
+		if (m_fallHeight >= m_ssoRope.MaxLength + m_ssoCharacter.LethalHeight * 2f)
+		{
+			m_isCharacterDead = true;
+			StartCoroutine(AnimateFallDeath());
+		}
+	}
+
+	private IEnumerator AnimateFallDeath()
+	{
+		m_rsePlayFallDeath.Call();
+		yield return new WaitForSeconds(m_ssoCharacter.FallDeathDurationBeforeRespawn);
+		HandleDeath();
+	}
 
 	#endregion
 
