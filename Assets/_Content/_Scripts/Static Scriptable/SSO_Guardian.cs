@@ -3,12 +3,13 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "SSO_Guardian", menuName = "Static Scriptable/Guardian")]
 public class SSO_Guardian : ScriptableObject
 {
-    [Header("Cooldowns")]
+    [Header("Values")]
     public float resetAggroCD;
     public float shiftToPatrolCD;
     public float shiftToPursuitCD;
     public float timeToDestroy;
     public float killTime;
+    public float maxRange;
 
     [Header("Graphics")]
     public Material aggroMaterial;

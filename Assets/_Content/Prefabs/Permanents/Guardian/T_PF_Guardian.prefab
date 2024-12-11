@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 8307310262378912332}
   - component: {fileID: 2290026609873240630}
   - component: {fileID: 1982599703297393053}
-  m_Layer: 7
+  m_Layer: 6
   m_Name: T_PF_Guardian
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -70,8 +70,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_rsoGuardianState: {fileID: 11400000, guid: 0b2ae53bd79552f478ee46c906c3fe7c, type: 2}
+  m_rsoCharacterPosition: {fileID: 11400000, guid: 7cfc39952cca0d6478396ad49ab9e0db,
+    type: 2}
+  m_rsoTorchManager: {fileID: 11400000, guid: 013e0e8312f52a7408c42a7d0621de0c, type: 2}
   _guardianRef: {fileID: 11400000, guid: 2e6f0790dfe016342a28d77717de30d9, type: 2}
   _agent: {fileID: 2290026609873240630}
+  _playerRef: {fileID: 1152081341770739563, guid: 45c3e8494e2284f4db75133fba67cbc1,
+    type: 3}
   _guardianTarget: {fileID: 0}
   _stateText: {fileID: 0}
   _potentialTargets: []
@@ -149,7 +154,7 @@ GameObject:
   - component: {fileID: 3671550207374140674}
   - component: {fileID: 12689244352726884}
   - component: {fileID: 4464038581707040825}
-  m_Layer: 8
+  m_Layer: 6
   m_Name: Capsule
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -267,7 +272,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5039903922429803696}
-  m_Layer: 7
+  m_Layer: 6
   m_Name: PivotParent
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -299,7 +304,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3141846831418197013}
-  m_Layer: 7
+  m_Layer: 6
   m_Name: TriggerParent
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -336,7 +341,7 @@ GameObject:
   - component: {fileID: 8848590871374029103}
   - component: {fileID: 7219584677520287635}
   - component: {fileID: 9202351141502274907}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Spot Light
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -454,7 +459,7 @@ GameObject:
   - component: {fileID: 8319812223972452617}
   - component: {fileID: 5014412619255241873}
   - component: {fileID: 8327442397819004711}
-  m_Layer: 8
+  m_Layer: 6
   m_Name: Cube
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -536,7 +541,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1902372652006279480}
-  m_Layer: 8
+  m_Layer: 6
   m_Name: RaycastEyes
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -644,7 +649,7 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: 5e38a5b57a808094389a67003158e67a,
         type: 3}
       propertyPath: m_Layer
-      value: 8
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 5e38a5b57a808094389a67003158e67a,
         type: 3}
@@ -797,7 +802,7 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: 5e38a5b57a808094389a67003158e67a,
         type: 3}
       propertyPath: m_Layer
-      value: 8
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 5e38a5b57a808094389a67003158e67a,
         type: 3}
@@ -880,7 +885,7 @@ PrefabInstance:
     - target: {fileID: 317121205823624010, guid: dd1c62b3094bfd244898a20ac2f7d6c5,
         type: 3}
       propertyPath: m_Layer
-      value: 8
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 317121205823624010, guid: dd1c62b3094bfd244898a20ac2f7d6c5,
         type: 3}
@@ -989,7 +994,7 @@ PrefabInstance:
     - target: {fileID: 317121205823624010, guid: dd1c62b3094bfd244898a20ac2f7d6c5,
         type: 3}
       propertyPath: m_Layer
-      value: 8
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 317121205823624010, guid: dd1c62b3094bfd244898a20ac2f7d6c5,
         type: 3}

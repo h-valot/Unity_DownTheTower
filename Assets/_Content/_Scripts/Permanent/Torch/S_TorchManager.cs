@@ -9,7 +9,7 @@ public class TorchManager : MonoBehaviour
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_TorchManager m_rsoTorchManager;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterDeath m_rsoCharacterDeath;
 
-	private List<Torch> m_torches = new List<Torch>();
+	public List<Torch> m_torches = new List<Torch>();
 
     private void Awake()
     {

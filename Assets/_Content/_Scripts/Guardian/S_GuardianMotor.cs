@@ -1,6 +1,7 @@
 using Sirenix.OdinInspector;
 using System.Collections.Generic;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -14,6 +15,7 @@ public class GuardianMotor : MonoBehaviour
     [FoldoutGroup("Scriptable")][SerializeField] private SSO_Guardian _guardianRef;
 
     [FoldoutGroup("Internal References")][SerializeField] private NavMeshAgent _agent;
+    [FoldoutGroup("Internal References")][SerializeField] private CharacterMotor _playerRef;
 
     [FoldoutGroup("Scriptable")][SerializeField] private TextMeshProUGUI _guardianTarget;
     [FoldoutGroup("Scriptable")][SerializeField] private TextMeshProUGUI _stateText;
@@ -23,9 +25,10 @@ public class GuardianMotor : MonoBehaviour
     #region Variables
 
     public List<GameObject> _potentialTargets = new List<GameObject>();
-    private float _targetDistance = 99999;
     private GameObject _target;
-    private GameObject m_newValidTarget;
+    private float _targetDistance;
+    private bool _targetAssigned;
+    private int _noGuardianLayer = 6;
     public bool isPatrolling;
 
     #endregion
@@ -43,7 +46,7 @@ public class GuardianMotor : MonoBehaviour
 
         DetermineState();
         UpdateState();
-        // UpdateDebugUI();
+        UpdateDebugUI();
     }
 
     #endregion
@@ -52,13 +55,38 @@ public class GuardianMotor : MonoBehaviour
 
     private void SelectTarget()
     {
-        _targetDistance = 99999;
-        if(Vector3.Distance(this.transform.position, m_rsoCharacterPosition.value) < _targetDistance )
+        _targetAssigned = false;
+        _targetDistance = _guardianRef.maxRange;
+        if(Vector3.Distance(this.transform.position, m_rsoCharacterPosition.value) < _targetDistance)
         {
-            _target = 
+            Physics.Linecast(transform.position, m_rsoCharacterPosition.value, out RaycastHit hitInfo);
+            UnityEngine.Debug.DrawLine(transform.position, m_rsoCharacterPosition.value, Color.red, 1f);
+            
+            if (hitInfo.transform.GetComponent<CharacterMotor>())
+            {
+                print(hitInfo.ToString());
+                _targetDistance = Vector3.Distance(this.transform.position, m_rsoCharacterPosition.value);
+                _target = hitInfo.transform.gameObject;
+                _targetAssigned = true;
+            }
         }
 
-        foreach ( GameObject target in m_rsoTorchManager.list ) { }
+        foreach (Torch target in m_rsoTorchManager.value.m_torches)
+        {
+            if (Vector3.Distance(this.transform.position, target.gameObject.transform.position) < _targetDistance)
+            {
+                _targetDistance = Vector3.Distance(this.transform.position, m_rsoCharacterPosition.value);
+                _target = target.gameObject;
+                _targetAssigned = true;
+            }
+        }
+
+        if (!_targetAssigned)
+        {
+            _target = null;
+        }
+
+
 
 
 
@@ -226,7 +254,7 @@ public class GuardianMotor : MonoBehaviour
 
             else
             {
-                // _guardianTarget.text = "null";
+                _guardianTarget.text = "null";
                 _stateText.text = m_rsoGuardianState.value.ToString();
             }
         }
