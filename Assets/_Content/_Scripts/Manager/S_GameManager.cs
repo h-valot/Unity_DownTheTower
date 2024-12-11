@@ -33,7 +33,7 @@ public class GameManager : MonoBehaviour
 	{
 		if (!m_directionalLight)
 		{
-			Debug.LogError("GAME_MANAGER: Directional light reference is null. The global light intensity could by setup.");
+			Debug.LogError("GAME_MANAGER: Directional light reference is null. The global light intensity couldn't be setup correctly.");
 		}
 		else
 		{

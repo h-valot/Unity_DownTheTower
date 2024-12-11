@@ -18,13 +18,11 @@ MonoBehaviour:
   WalkSpeed: 50
   RunSpeed: 100
   DragGround: 10
-  DragFall: 0
-  FrictionNotMovingGround: 1
-  FrictionMovingFalling: 0
+  FrictionDeceleration: 1
   JumpForce: 370
-  AirControlSpeedFactor: 0.05
-  MaxAirControlForceFactor: 1
-  AirControlTime: 2
+  AirControlScalar: 1.93
+  AirControlDuration: 3
+  AirControlThreshold: 0.87
   CoyoteTime: 0.25
   GroundLayerToInclude:
     serializedVersion: 2

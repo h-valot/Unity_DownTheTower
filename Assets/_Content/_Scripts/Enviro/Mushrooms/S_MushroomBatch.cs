@@ -105,7 +105,6 @@ public class MushroomBatch : MonoBehaviour
     [Button]
     public void ClearGameObjects()
     {
-        Debug.Log("List size: " + mushroomLists[0].matrices.Count);
         LayerMask raycastLayerMask = new LayerMask();
         raycastLayerMask |= (1 << LayerMask.NameToLayer("NoCollision_NoRaycast"));
         foreach (Collider collider in Physics.OverlapSphere(transform.position, _radius, raycastLayerMask)) 
