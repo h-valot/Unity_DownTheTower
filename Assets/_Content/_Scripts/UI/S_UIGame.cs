@@ -33,13 +33,11 @@ public class UIGame : MonoBehaviour
     private void OnEnable()
     {
         m_rsePause.action += TogglePausePanel;
-        m_rsoCharacterDeath.OnChanged += DeathFade;
     }
 
     private void OnDisable()
     {
         m_rsePause.action -= TogglePausePanel;
-        m_rsoCharacterDeath.OnChanged -= DeathFade;
     }
 
     private void TogglePausePanel()
@@ -80,23 +78,5 @@ public class UIGame : MonoBehaviour
         m_rsoGamePaused.value = isPaused;
         Time.timeScale = isPaused ? 0f : 1f;
         m_rseToggleInputs.Call();
-    }
-
-    private void DeathFade()
-    {
-		// Assertion
-        if (!m_rsoCharacterDeath.value) return;
-
-        m_imgDeath.gameObject.SetActive(true);
-
-        DOTweenModuleUI.DOFade(m_imgDeath, 0, 5)
-                       .SetEase(Ease.InExpo)
-                       .OnComplete(ResetDeathFade);
-    }
-
-    private void ResetDeathFade()
-    {
-        m_imgDeath.gameObject.SetActive(false);
-        m_imgDeath.color = Color.black;
     }
 }

@@ -12,6 +12,7 @@ public class CameraMotor : MonoBehaviour
 
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Look m_rseLook;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_InitializeCamera m_rseInitializeCamera;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSE_PlayFallDeath m_rsePlayFallDeath;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterDeath m_rsoCharacterDeath;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CameraStyle m_rsoCameraStyle;
@@ -31,6 +32,7 @@ public class CameraMotor : MonoBehaviour
 		m_rsoCameraStyle.OnChanged += SwitchStyle;
 		m_rsoCharacterDeath.OnChanged += HandleDeath;
 		m_rseInitializeCamera.action += Initialize;
+		m_rsePlayFallDeath.action += FreeCamera;
 	}
 
 	private void OnDisable()
@@ -39,6 +41,7 @@ public class CameraMotor : MonoBehaviour
 		m_rsoCameraStyle.OnChanged -= SwitchStyle;
 		m_rsoCharacterDeath.OnChanged -= HandleDeath;
 		m_rseInitializeCamera.action -= Initialize;
+		m_rsePlayFallDeath.action -= FreeCamera;
 	}
 
 	private void LateUpdate()
@@ -108,7 +111,14 @@ public class CameraMotor : MonoBehaviour
 	{
 		if (!m_rsoCharacterDeath.value) return;
 
-		// Set parent as scene root 
+		FreeCamera();
+	}
+
+	/// <summary>
+	/// Set parent as scene root.
+	/// </summary>
+	private void FreeCamera()
+	{
 		m_cameraTarget.transform.parent = null;
 	}
 }

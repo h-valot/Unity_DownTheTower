@@ -1,6 +1,8 @@
 using System;
 using System.Collections;
+using DG.Tweening;
 using Sirenix.OdinInspector;
+using TMPro;
 using UnityEngine;
 
 public class CharacterMotor : MonoBehaviour
@@ -33,6 +35,7 @@ public class CharacterMotor : MonoBehaviour
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_BackpackCrafting m_rseBackpackCrafting;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_SetCharacterPosition m_rseSetCharacterPosition;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_InitializeCamera m_rseInitializeCamera;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSE_PlayFallDeath m_rsePlayFallDeath;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_MovementDatas m_rsoMovementDatas;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CameraStyle m_rsoCameraStyle;
@@ -51,9 +54,10 @@ public class CharacterMotor : MonoBehaviour
 
 	// - Inputs -
 	private Vector2 m_moveInput = new Vector2();
+	public bool DoMoveInputs => m_moveInput.magnitude > 0.1f;
 
-    // - Collisions -
-    private RaycastHit[] m_raycastHits;
+	// - Collisions -
+	private RaycastHit[] m_raycastHits;
 
     // - Ground -
 	private bool m_isGrounded;
@@ -68,12 +72,14 @@ public class CharacterMotor : MonoBehaviour
 	private bool m_isSlowedPostStun;
 
 	// - Movement -
+	private Vector2 m_planarVelocity;
+	private float m_maxGroundedSpeed;
 	private bool m_isRunning;
 	private bool m_hasJumped;
 	public bool IsJumpingPressed { get; private set; }
 	private bool m_isCrafting;
-	private float m_airControlForceFactor;
-	private float m_airControlTime;
+	private float m_airControlTimeScalar;
+	private float m_airControlDuration;
 
     // - Craft state -
     private CraftType m_craftType;
@@ -152,7 +158,10 @@ public class CharacterMotor : MonoBehaviour
 		DetermineState();
         FixedUpdateState();
 
+		// Update useful variables
 		m_rsoCharacterPosition.value = m_rigidbody.position;
+		m_planarVelocity = new Vector2(m_rigidbody.velocity.x, m_rigidbody.velocity.z);
+		if (m_isGrounded && m_maxGroundedSpeed < m_planarVelocity.magnitude) m_maxGroundedSpeed = m_planarVelocity.magnitude;
 	}
 
     private void LateUpdate()
@@ -289,6 +298,9 @@ public class CharacterMotor : MonoBehaviour
 
 	private void UpdateClimbInput(bool isClimbing)
 	{
+		// Assertion
+		if (!IsRopeValid) return;
+
 		m_isClimbing = isClimbing;
 		if (m_isGrounded) m_rope.UpdateHoldLength(isClimbing);
 	}
@@ -608,28 +620,26 @@ public class CharacterMotor : MonoBehaviour
     
     #region MOVEMENT
 
-    /// <summary>
-    /// if player is not moving and grounded:
-    /// Set the friction to a high value to prevent sliding on slope while immobile
-    /// else
-    /// Set the friction to a low value to slide against wall while falling and walking
-    /// </summary>
-    private void SetFriction()
+	/// <summary>
+	/// Update frictions based on the character locomotion status.
+	/// Used to stop character movement if move inputs are null.
+	/// </summary>
+	private void UpdateFriction()
     {
-        if (m_moveInput == Vector2.zero && m_isGrounded)
+        if (!DoMoveInputs && m_isGrounded)
         {
-            m_collider.sharedMaterial.dynamicFriction = m_ssoCharacter.FrictionNotMovingGround;
+            m_collider.sharedMaterial.dynamicFriction = m_ssoCharacter.FrictionDeceleration;
             m_collider.sharedMaterial.frictionCombine = PhysicMaterialCombine.Maximum;
         }
         else
         {
-            m_collider.sharedMaterial.dynamicFriction = m_ssoCharacter.FrictionMovingFalling;
+            m_collider.sharedMaterial.dynamicFriction = 0;
             m_collider.sharedMaterial.frictionCombine = PhysicMaterialCombine.Minimum;
         }
     }
 
     /// <summary>
-    /// Update drag based on behavior state to allow the player to fall faster
+    /// Update drag based on behavior state to allow the player to fall faster.
     /// </summary>
     private void UpdateDrag()
     {
@@ -639,7 +649,7 @@ public class CharacterMotor : MonoBehaviour
         }
         else if (m_rsoCharacterState.value == BehaviorState.FALL || m_rsoCharacterState.value == BehaviorState.ROPE)
         {
-            m_rigidbody.drag = m_ssoCharacter.DragFall;
+            m_rigidbody.drag = 0;
         }
     }
 
@@ -652,39 +662,39 @@ public class CharacterMotor : MonoBehaviour
     /// </summary>
     private void MoveGrounded()
     {
-        SetFriction();
+        UpdateFriction();
 
-        if (m_moveInput != Vector2.zero)
-        {
-            Vector3 desiredSpeed = (m_rsoCameraRight.value * m_moveInput.x + m_rsoCameraForward.value * m_moveInput.y).normalized;
+		// Assertion
+        if (!DoMoveInputs) return;
 
-			// Orient speed along slope
-			Vector3 slopeRight = Vector3.Cross(Vector3.up, m_groundNormal);
-            desiredSpeed = Quaternion.AngleAxis(Vector3.SignedAngle(Vector3.up, m_groundNormal, slopeRight), slopeRight) * desiredSpeed;
+		Vector3 desiredDirection = (m_rsoCameraRight.value * m_moveInput.x + m_rsoCameraForward.value * m_moveInput.y).normalized;
 
-            // Set desired speed magnitude based on walk/run state
-            desiredSpeed *= m_isRunning ? m_ssoCharacter.RunSpeed : m_ssoCharacter.WalkSpeed;
+		// Orient speed along slope
+		Vector3 slopeRight = Vector3.Cross(Vector3.up, m_groundNormal);
+		desiredDirection = Quaternion.AngleAxis(Vector3.SignedAngle(Vector3.up, m_groundNormal, slopeRight), slopeRight) * desiredDirection;
 
-			// Apply speed modifiers
-			if (m_isStunned)
+		// Set desired speed magnitude based on walk/run state
+		float desiredForce = m_isRunning ? m_ssoCharacter.RunSpeed : m_ssoCharacter.WalkSpeed;
+
+		// Apply speed modifiers
+		if (m_isStunned)
+		{
+			desiredForce = 0f;
+		}
+		else if (m_isSlowed)
+		{
+			if (!m_isSlowedPostStun)
 			{
-				desiredSpeed = Vector3.zero;
+				desiredForce *= m_ssoCharacter.SlowPercentage.Evaluate((m_ssoCharacter.MaxSlowDuration - m_slowTimer) / m_ssoCharacter.MaxSlowDuration);
 			}
-			else if (m_isSlowed)
+			else
 			{
-				if (!m_isSlowedPostStun)
-				{
-					desiredSpeed *= m_ssoCharacter.SlowPercentage.Evaluate((m_ssoCharacter.MaxSlowDuration - m_slowTimer) / m_ssoCharacter.MaxSlowDuration);
-				}
-				else
-				{
-					desiredSpeed *= m_ssoCharacter.SlowPercentage.Evaluate((m_ssoCharacter.PostStunSlowDuration - m_slowTimer) / m_ssoCharacter.PostStunSlowDuration);
-				}
+				desiredForce *= m_ssoCharacter.SlowPercentage.Evaluate((m_ssoCharacter.PostStunSlowDuration - m_slowTimer) / m_ssoCharacter.PostStunSlowDuration);
 			}
+		}
 
-			// Apply final force to move character, auto clamp the speed by substractiong actual speed to desired speed
-			m_rigidbody.AddForce(desiredSpeed - m_rigidbody.velocity, ForceMode.Acceleration);
-        }
+		// Apply final force to move character, auto clamp the speed by substractiong actual speed to desired speed
+		m_rigidbody.AddForce(desiredDirection * desiredForce - m_rigidbody.velocity, ForceMode.Acceleration);
     }
 
     /// <summary>
@@ -696,7 +706,7 @@ public class CharacterMotor : MonoBehaviour
     private void HandleStepOn()
     {
 		// Assertion
-        if (m_raycastHits.Length <= 1 || m_moveInput == Vector2.zero) return;
+        if (m_raycastHits.Length <= 1 || !DoMoveInputs) return;
 		
 		Vector3 stepOnTarget = transform.position;
 		Vector3 moveInput3D = (m_rsoCameraRight.value * m_moveInput.x + m_rsoCameraForward.value * m_moveInput.y).normalized;
@@ -738,30 +748,6 @@ public class CharacterMotor : MonoBehaviour
 				}
 			}
 		}
-    }
-
-    /// <summary>
-    /// (1) Calculate desired speed force based on input and camera direction
-    /// (2) Multiply desired speed force by walk/run speed
-    /// (3) Apply force and auto clamp it by susubstractiong actual speed to desired speed
-    /// (4) Multiply said speed force by falling factor
-    /// </summary>
-    private void MoveFalling()
-    {
-		Vector3 desiredSpeedForce = (m_rsoCameraRight.value * m_moveInput.x + m_rsoCameraForward.value * m_moveInput.y).normalized;
-
-        // Set desired speed magnitude based on walk/run state
-        if (m_isRunning)
-        {
-            desiredSpeedForce *= m_ssoCharacter.RunSpeed;
-        }
-        else
-        {
-            desiredSpeedForce *= m_ssoCharacter.WalkSpeed;
-        }
-
-        // Apply final force to move character, auto clamp the speed by substractiong actual speed to desired speed
-        m_rigidbody.AddForce((desiredSpeedForce * m_ssoCharacter.AirControlSpeedFactor - m_rigidbody.velocity) * m_airControlForceFactor, ForceMode.Acceleration);
     }
 
     private void UpdatePreview()
@@ -808,7 +794,7 @@ public class CharacterMotor : MonoBehaviour
 	private void EnterFallState()
     {
         UpdateDrag();
-        SetFriction();
+        UpdateFriction();
         StartCoyoteTime();
 		StartAirControl();
     }
@@ -817,25 +803,79 @@ public class CharacterMotor : MonoBehaviour
     {
         UpdateCoyoteTime();
 		UpdateAirControl();
-        MoveFalling();
+		CheckFallHeight();
+		MoveFalling();
     }
 
     private void ExitFallState()
     {
         m_hasJumped = false;
-    }
+	}
+
+	private void MoveFalling()
+	{
+		// Assertion
+		if (!DoMoveInputs) return;
+
+		Vector3 desiredDirection = (m_rsoCameraRight.value * m_moveInput.x + m_rsoCameraForward.value * m_moveInput.y).normalized;
+		float desiredForce = Mathf.Clamp(m_planarVelocity.magnitude, 3f, m_planarVelocity.magnitude) * m_ssoCharacter.AirControlScalar;
+
+		if (m_planarVelocity.magnitude >= m_maxGroundedSpeed * m_ssoCharacter.AirControlThreshold)
+		{
+			m_rigidbody.AddForce(-m_rigidbody.velocity, ForceMode.Acceleration);
+			return;
+		}
+
+		m_rigidbody.AddForce(
+			(desiredDirection * desiredForce - m_rigidbody.velocity) * m_airControlTimeScalar,
+			ForceMode.Acceleration
+		);
+	}
 
 	private void StartAirControl()
 	{
-		m_airControlTime = m_ssoCharacter.AirControlTime;
-		m_airControlForceFactor = m_ssoCharacter.MaxAirControlForceFactor;
-    }
+		m_airControlDuration = m_ssoCharacter.AirControlDuration;
+		m_airControlTimeScalar = 1f;
+
+	}
 
 	private void UpdateAirControl()
 	{
-		m_airControlTime -= Time.fixedDeltaTime;
-		m_airControlForceFactor = m_ssoCharacter.MaxAirControlForceFactor * m_airControlTime / m_ssoCharacter.AirControlTime;
+		if (m_airControlDuration < 0)
+		{
+			m_airControlTimeScalar = 0f;
+			return;
+		}
+
+		m_airControlDuration -= Time.fixedDeltaTime;
+		m_airControlTimeScalar = m_airControlDuration / m_ssoCharacter.AirControlDuration;
     }
+
+	private bool m_isCharacterDead;
+
+	/// <summary>
+	/// Handle fall death animation when the distance the character travelled on the y-axis exceed the lethal height. 
+	/// </summary>
+	private void CheckFallHeight()
+	{
+		// Assertions
+		if (m_rsoCharacterState.value != BehaviorState.FALL) return;
+		if (m_isCharacterDead) return;
+
+		m_fallHeight = Math.Abs(m_rigidbody.position.y - m_positionStartFall.y);
+		if (m_fallHeight >= m_ssoRope.MaxLength + m_ssoCharacter.LethalHeight * 2f)
+		{
+			m_isCharacterDead = true;
+			StartCoroutine(AnimateFallDeath());
+		}
+	}
+
+	private IEnumerator AnimateFallDeath()
+	{
+		m_rsePlayFallDeath.Call();
+		yield return new WaitForSeconds(m_ssoCharacter.FallDeathDurationBeforeRespawn);
+		HandleDeath();
+	}
 
 	#endregion
 
@@ -914,7 +954,8 @@ public class CharacterMotor : MonoBehaviour
 		if (!IsRopeValid
 		|| !m_isClimbing
 		|| m_ssoCharacter.RopeHoldingMethod == RopeHolding.HOLD_TO_STOP && !m_isHolding
-		|| m_ssoCharacter.RopeHoldingMethod == RopeHolding.HOLD_TO_LET_GO && m_isHolding)
+		|| m_ssoCharacter.RopeHoldingMethod == RopeHolding.HOLD_TO_LET_GO && m_isHolding
+		|| m_rope.GetTotalLength() <= m_ssoRope.MinimumClimbLength)
 		{
 			m_currentClimbSpeed = m_ssoCharacter.ClimbAcceleration;
 			return;

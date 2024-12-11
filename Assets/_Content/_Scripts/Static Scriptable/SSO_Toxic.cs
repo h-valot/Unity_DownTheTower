@@ -5,6 +5,5 @@ using UnityEngine;
 public class SSO_Toxic : ScriptableObject
 {
 	[InfoBox("Duration since mushrooms trigger to re-enable the trigger.", InfoMessageType.None)]
-	/// <summary> Duration since mushrooms trigger to re-enable the trigger. </summary>
 	public float Cooldown;
 }
