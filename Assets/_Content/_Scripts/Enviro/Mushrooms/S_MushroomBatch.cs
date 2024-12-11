@@ -26,9 +26,10 @@ public class MushroomBatch : MonoBehaviour
     [FoldoutGroup("External References")][SerializeField] private Material _masterMaterial;
 
 
-    [FoldoutGroup("Behavior")][SerializeField] private float _deflateTime = 3f;
-    [FoldoutGroup("Behavior")][SerializeField] private float _inflateTime = 10f;
-    [FoldoutGroup("Behavior")][SerializeField] private float _propagationSpeed = 2f;
+    [FoldoutGroup("Behavior")][SerializeField] private float _deflateTime = 0.5f;
+    [FoldoutGroup("Behavior")][SerializeField] private float _inactiveTime = 10f;
+    [FoldoutGroup("Behavior")][SerializeField] private float _inflateTime = 1f;
+    [FoldoutGroup("Behavior")][SerializeField] private float _propagationSpeed = 6f;
 
 
     // --- INSTANCIATED VARIABLES ---
@@ -203,10 +204,8 @@ public class MushroomBatch : MonoBehaviour
     {
         ClearGameObjects();
         if (mushroomLists[0].matrices.Count == 0) return;
-
-        _mushroomMaterial.SetFloat("_deflateTime", _deflateTime);
-        _mushroomMaterial.SetFloat("_inflateTime", _inflateTime);
         _mushroomMaterial.SetFloat("_propagationSpeed", _propagationSpeed);
+        UpdateState(MushroomState.REST);
     }
 
     private void Update()
@@ -215,8 +214,13 @@ public class MushroomBatch : MonoBehaviour
             Graphics.DrawMeshInstanced(_mushroomMesh, 0, _mushroomMaterial, list.matrices);
     }
 
-    #endregion
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.magenta;
+        Gizmos.DrawWireSphere(transform.position, _radius);
+    }
 
+    #endregion
 
     #region effect
 
@@ -225,27 +229,63 @@ public class MushroomBatch : MonoBehaviour
         if(_currentState != MushroomState.REST) return;
 
         _mushroomMaterial.SetVector("_explosionSource", source);
-        StartCoroutine("TimeSinceExplosion");
+        IEnumerator coroutine = ExecuteEffect(source);
+        StartCoroutine(coroutine);
     }
 
-    IEnumerator TimeSinceExplosion()
+    IEnumerator ExecuteEffect(Vector3 source)
     {
-        
-        float normalizedTime = 0;
-        while (normalizedTime <= 10f)
+        float expTime = 0;
+
+        UpdateState(MushroomState.DEFLATE);
+        while (expTime <= _radius * 2f / _propagationSpeed + _deflateTime)
         {
-            _mushroomMaterial.SetFloat("_timeSinceExplosion", normalizedTime);
-            normalizedTime += Time.deltaTime;
+            _mushroomMaterial.SetFloat("_timeSinceExplosion", expTime);
+            expTime += Time.deltaTime;
             yield return null;
         }
+
+        float inactiveTime = 0;
+        while (inactiveTime <= _inactiveTime)
+        {
+            inactiveTime += Time.deltaTime;
+            yield return null;
+        }
+
+        expTime = _radius * 2f / _propagationSpeed + _inflateTime;
+        _mushroomMaterial.SetVector("_explosionSource", source + (transform.position - source) * 2f);
+        UpdateState(MushroomState.INFLATE);
+
+        while (expTime >= 0f)
+        {
+            _mushroomMaterial.SetFloat("_timeSinceExplosion", expTime);
+            expTime -= Time.deltaTime;
+            yield return null;
+        }
+
+        UpdateState(MushroomState.REST);
     }
 
-
-    private void OnDrawGizmosSelected()
+    private void UpdateState(MushroomState newState)
     {
-        Gizmos.color = Color.magenta;
-        Gizmos.DrawWireSphere(transform.position, _radius);
+        switch (newState) 
+        {
+            case MushroomState.REST:
+                _mushroomMaterial.SetFloat("_animTime", _deflateTime);
+                break;
+            case MushroomState.DEFLATE:
+                break;
+            case MushroomState.INACTIVE:
+                break;
+            case MushroomState.INFLATE:
+                _mushroomMaterial.SetFloat("_animTime", _inflateTime);
+                break;
+        }
+
+        _currentState = newState;
     }
+
+
 
     #endregion
 }
