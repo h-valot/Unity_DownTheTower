@@ -42,11 +42,11 @@ public class CharacterMotor : MonoBehaviour
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CraftInputLocked m_rsoCraftInputLocked;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_RecycleInputLocked m_rsoRecycleInputLocked;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterState m_rsoCharacterState;
-	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterPosition m_rsoCharacterPosition;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterDeath m_rsoCharacterDeath;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CameraForward m_rsoCameraForward;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CameraRight m_rsoCameraRight;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CameraTransform m_rsoCameraTransform;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterPosition m_rsoCharacterPosition;
 
 	#endregion
 
@@ -117,7 +117,7 @@ public class CharacterMotor : MonoBehaviour
 	public void Initialize(Vector3 position, Quaternion rotation)
     {
         // Update drag in rigidbody if changed in characterConfig
-        m_ssoCharacter.OnConfigChanged += UpdateDrag;
+        m_ssoCharacter.OnSSOChanged += UpdateDrag;
 
 		m_rseInitializeCamera.Call(m_aimingLookTo, m_cameraTarget, rotation);
         m_characterGraphics.Initialize(m_aimingLookTo, m_rigidbody, rotation);
@@ -139,7 +139,7 @@ public class CharacterMotor : MonoBehaviour
     private void OnDisable()
     {
         UnsubscibeAllInputs();
-        m_ssoCharacter.OnConfigChanged -= UpdateDrag;
+        m_ssoCharacter.OnSSOChanged -= UpdateDrag;
         m_rsoCharacterState.value = BehaviorState.NONE;
 
         Application.onBeforeRender -= UpdatePreview;
@@ -262,7 +262,7 @@ public class CharacterMotor : MonoBehaviour
 		m_rigidbody.velocity = Vector3.zero;
 		m_rigidbody.position = position;
 		m_characterGraphics.transform.rotation = rotation;
-		m_rsoCharacterPosition.value = transform.position;
+		m_rsoCharacterPosition.value = m_rigidbody.position;
 	}
 
 	private void UpdateMoveInput(Vector2 input)
