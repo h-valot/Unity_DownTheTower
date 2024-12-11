@@ -55677,7 +55677,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_gameStart
       value: 
-      objectReference: {fileID: 1604122681}
+      objectReference: {fileID: 1264795654}
     - target: {fileID: 5152463708352473218, guid: 1271e0e9ae0948d4fbbf1c5ec03c46da,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -108211,6 +108211,18 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1264723160}
   m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1264795654 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5071725326251147000, guid: b9c11633fb8f74f45ae6426c189e0c00,
+    type: 3}
+  m_PrefabInstance: {fileID: 3925373052224556770}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a5d7c5227eb2a0f4d9d3068cba8f94c5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1265117515
 GameObject:
   m_ObjectHideFlags: 0
@@ -116848,312 +116860,19 @@ MonoBehaviour:
   _radius: 3.95
   _density: 1.87
   _overlapModifier: 0.5
-  _isRandom: 1
   _minSizeMultiplier: 0.5
   _maxSizeMultiplier: 1.5
+  mushroomLists: []
   _mushroomTriggerPrefab: {fileID: 0}
   _mushroomPrefab: {fileID: 7762096543299851040, guid: d078e67249fe575408f240e5e29aacb1,
     type: 3}
+  _mushroomMesh: {fileID: 0}
   _masterMaterial: {fileID: 0}
-  mushroomList:
-  - {fileID: 872437597}
-  - {fileID: 2130163371}
-  - {fileID: 1435689613}
-  - {fileID: 1021510725}
-  - {fileID: 2129038203}
-  - {fileID: 1523458068}
-  - {fileID: 1091895741}
-  - {fileID: 297430949}
-  - {fileID: 1206676490}
-  - {fileID: 1082878322}
-  - {fileID: 1743188796}
-  - {fileID: 538891209}
-  - {fileID: 1636617604}
-  - {fileID: 1244511486}
-  - {fileID: 1151366125}
-  - {fileID: 278542637}
-  - {fileID: 1272711901}
-  - {fileID: 551931091}
-  - {fileID: 1016925813}
-  - {fileID: 2032424764}
-  - {fileID: 2077360130}
-  - {fileID: 1550320020}
-  - {fileID: 829325911}
-  - {fileID: 957836392}
-  - {fileID: 673314700}
-  - {fileID: 304086672}
-  - {fileID: 24195077}
-  - {fileID: 2058187097}
-  - {fileID: 1316917072}
-  - {fileID: 1021702920}
-  - {fileID: 1021897184}
-  - {fileID: 434483270}
-  - {fileID: 260022998}
-  - {fileID: 1909340261}
-  - {fileID: 2092638840}
-  - {fileID: 787947360}
-  - {fileID: 1884410833}
-  - {fileID: 936859111}
-  - {fileID: 455681760}
-  - {fileID: 526918161}
-  - {fileID: 705542557}
-  - {fileID: 759177792}
-  - {fileID: 433300174}
-  - {fileID: 392451715}
-  - {fileID: 1504431153}
-  - {fileID: 218571792}
-  - {fileID: 524431230}
-  - {fileID: 1732589703}
-  - {fileID: 1962148224}
-  - {fileID: 1516832713}
-  - {fileID: 983059701}
-  - {fileID: 1678697884}
-  - {fileID: 960687674}
-  - {fileID: 50089394}
-  - {fileID: 1558205717}
-  - {fileID: 901584259}
-  - {fileID: 712130273}
-  - {fileID: 315199866}
-  - {fileID: 1525054019}
-  - {fileID: 673644226}
-  - {fileID: 1047580268}
-  - {fileID: 215521250}
-  - {fileID: 246383542}
-  - {fileID: 1345900311}
-  - {fileID: 1900571207}
-  - {fileID: 901179489}
-  - {fileID: 2029311929}
-  - {fileID: 180712083}
-  - {fileID: 441175598}
-  - {fileID: 1253111801}
-  - {fileID: 138366869}
-  - {fileID: 886348101}
-  - {fileID: 1316215562}
-  - {fileID: 707599375}
-  - {fileID: 1932128205}
-  - {fileID: 866729607}
-  - {fileID: 964409400}
-  - {fileID: 362383511}
-  - {fileID: 251250488}
-  - {fileID: 517116233}
-  - {fileID: 1663696096}
-  - {fileID: 865406421}
-  - {fileID: 1586087493}
-  - {fileID: 8372011}
-  - {fileID: 1731656540}
-  - {fileID: 1023025504}
-  - {fileID: 1889911200}
-  - {fileID: 760827623}
-  - {fileID: 2131001961}
-  - {fileID: 431666473}
-  - {fileID: 87753559}
-  - {fileID: 6966450}
-  - {fileID: 66888843}
-  - {fileID: 767966066}
-  - {fileID: 1498121203}
-  - {fileID: 1186510251}
-  - {fileID: 1025664735}
-  - {fileID: 581622370}
-  - {fileID: 1849571933}
-  - {fileID: 185474533}
-  - {fileID: 1999439703}
-  - {fileID: 2058800605}
-  - {fileID: 13411114}
-  - {fileID: 1627634572}
-  - {fileID: 1481292703}
-  - {fileID: 1576337040}
-  - {fileID: 536857132}
-  - {fileID: 1181742049}
-  - {fileID: 722847188}
-  - {fileID: 41420333}
-  - {fileID: 747546856}
-  - {fileID: 1819294963}
-  - {fileID: 1631133601}
-  - {fileID: 379815}
-  - {fileID: 1560524722}
-  - {fileID: 1771871006}
-  - {fileID: 1322639647}
-  - {fileID: 117138457}
-  - {fileID: 1304375941}
-  - {fileID: 42249542}
-  - {fileID: 838808378}
-  - {fileID: 793544827}
-  - {fileID: 371932136}
-  - {fileID: 1435293827}
-  - {fileID: 1014254395}
-  - {fileID: 6764329}
-  - {fileID: 852374871}
-  - {fileID: 762879283}
-  - {fileID: 904997853}
-  - {fileID: 82235304}
-  - {fileID: 1624239327}
-  - {fileID: 1767778801}
-  - {fileID: 234330667}
-  - {fileID: 207421964}
-  - {fileID: 1583020117}
-  - {fileID: 1777448843}
-  - {fileID: 2067747470}
-  - {fileID: 1987347494}
-  - {fileID: 2053746366}
-  - {fileID: 1181386436}
-  - {fileID: 53595880}
-  - {fileID: 964078833}
-  - {fileID: 709021624}
-  - {fileID: 875439628}
-  - {fileID: 1576857663}
-  - {fileID: 1571406272}
-  - {fileID: 1637875116}
-  - {fileID: 671622778}
-  - {fileID: 1726797621}
-  - {fileID: 1880719989}
-  - {fileID: 144189639}
-  - {fileID: 1238433605}
-  - {fileID: 367030379}
-  - {fileID: 170810083}
-  - {fileID: 1895182319}
-  - {fileID: 1201891811}
-  - {fileID: 960807607}
-  - {fileID: 514621899}
-  - {fileID: 855678020}
-  - {fileID: 1643375961}
-  - {fileID: 917651366}
-  - {fileID: 471212773}
-  - {fileID: 1728492783}
-  - {fileID: 2135235179}
-  - {fileID: 1246500945}
-  - {fileID: 1646471451}
-  - {fileID: 1108040198}
-  - {fileID: 553818052}
-  - {fileID: 244636276}
-  - {fileID: 139795391}
-  - {fileID: 1655716689}
-  - {fileID: 22404487}
-  - {fileID: 1811789638}
-  - {fileID: 1901292427}
-  - {fileID: 1929515148}
-  - {fileID: 498007451}
-  - {fileID: 432041601}
-  - {fileID: 186723905}
-  - {fileID: 2082622494}
-  - {fileID: 1094236760}
-  - {fileID: 182649366}
-  - {fileID: 121510226}
-  - {fileID: 1231984952}
-  - {fileID: 68809019}
-  - {fileID: 1368099688}
-  - {fileID: 1856243520}
-  - {fileID: 799822530}
-  - {fileID: 968728405}
-  - {fileID: 1088416253}
-  - {fileID: 1988553198}
-  - {fileID: 1932305773}
-  - {fileID: 1471534550}
-  - {fileID: 98984242}
-  - {fileID: 478360971}
-  - {fileID: 134579994}
-  - {fileID: 544099837}
-  - {fileID: 1009036050}
-  - {fileID: 1830760864}
-  - {fileID: 1231828455}
-  - {fileID: 1592285148}
-  - {fileID: 1568771452}
-  - {fileID: 369510944}
-  - {fileID: 734501532}
-  - {fileID: 477360955}
-  - {fileID: 1782849813}
-  - {fileID: 133648765}
-  - {fileID: 2085185856}
-  - {fileID: 1689407080}
-  - {fileID: 841739960}
-  - {fileID: 1708380886}
-  - {fileID: 1067776246}
-  - {fileID: 1921292652}
-  - {fileID: 1561413579}
-  - {fileID: 657436740}
-  - {fileID: 335270616}
-  - {fileID: 46514154}
-  - {fileID: 146689869}
-  - {fileID: 748882035}
-  - {fileID: 1706988088}
-  - {fileID: 787775664}
-  - {fileID: 463991761}
-  - {fileID: 1086399150}
-  - {fileID: 2000131776}
-  - {fileID: 85331459}
-  - {fileID: 886959123}
-  - {fileID: 1683645299}
-  - {fileID: 646613818}
-  - {fileID: 1623864853}
-  - {fileID: 1169337535}
-  - {fileID: 1222729334}
-  - {fileID: 393883537}
-  - {fileID: 996394947}
-  - {fileID: 552973664}
-  - {fileID: 289005487}
-  - {fileID: 526809700}
-  - {fileID: 97770454}
-  - {fileID: 110554477}
-  - {fileID: 1903159232}
-  - {fileID: 1205583494}
-  - {fileID: 377661577}
-  - {fileID: 635067018}
-  - {fileID: 2073666414}
-  - {fileID: 19534931}
-  - {fileID: 38155685}
-  - {fileID: 1312955372}
-  - {fileID: 742055542}
-  - {fileID: 1100504800}
-  - {fileID: 1882689534}
-  - {fileID: 25981655}
-  - {fileID: 1810941938}
-  - {fileID: 290724169}
-  - {fileID: 1329057711}
-  - {fileID: 1109726821}
-  - {fileID: 713689731}
-  - {fileID: 758018658}
-  - {fileID: 1131011792}
-  - {fileID: 1760564969}
-  - {fileID: 533929482}
-  - {fileID: 1917029698}
-  - {fileID: 1217165264}
-  - {fileID: 70152006}
-  - {fileID: 519987296}
-  - {fileID: 327499285}
-  - {fileID: 647847525}
-  - {fileID: 1665085103}
-  - {fileID: 862437951}
-  - {fileID: 23501162}
-  - {fileID: 884878134}
-  - {fileID: 278401566}
-  - {fileID: 221769857}
-  - {fileID: 1059150210}
-  - {fileID: 1909111058}
-  - {fileID: 1908249064}
-  - {fileID: 221766253}
-  - {fileID: 477780962}
-  - {fileID: 1576776092}
-  - {fileID: 1092070455}
-  - {fileID: 1265321718}
-  - {fileID: 1011855856}
-  - {fileID: 1683949036}
-  - {fileID: 1889492281}
-  - {fileID: 558547756}
-  - {fileID: 101435495}
-  - {fileID: 29536980}
-  - {fileID: 1567723170}
-  - {fileID: 1841911271}
-  - {fileID: 1571511471}
-  - {fileID: 111892608}
-  - {fileID: 1526550178}
-  - {fileID: 697509949}
-  - {fileID: 1818683317}
-  - {fileID: 1387386746}
-  - {fileID: 145712723}
-  - {fileID: 1537458806}
-  - {fileID: 49779674}
-  - {fileID: 1264723160}
-  - {fileID: 538867745}
-  - {fileID: 409480366}
+  _deflateTime: 3
+  _inflateTime: 10
+  _propagationSpeed: 2
+  _mushroomTrigger: {fileID: 0}
+  _mushroomMaterial: {fileID: 0}
 --- !u!1 &1385982184
 GameObject:
   m_ObjectHideFlags: 0
@@ -133403,85 +133122,19 @@ MonoBehaviour:
   _radius: 2.47
   _density: 1.87
   _overlapModifier: 0.5
-  _isRandom: 1
   _minSizeMultiplier: 0.2
   _maxSizeMultiplier: 0.7
+  mushroomLists: []
   _mushroomTriggerPrefab: {fileID: 0}
   _mushroomPrefab: {fileID: 7762096543299851040, guid: d078e67249fe575408f240e5e29aacb1,
     type: 3}
+  _mushroomMesh: {fileID: 0}
   _masterMaterial: {fileID: 0}
-  mushroomList:
-  - {fileID: 701235724}
-  - {fileID: 1009444789}
-  - {fileID: 776126875}
-  - {fileID: 354719269}
-  - {fileID: 1178237229}
-  - {fileID: 796369343}
-  - {fileID: 1469945874}
-  - {fileID: 123376373}
-  - {fileID: 724058517}
-  - {fileID: 383633903}
-  - {fileID: 750753041}
-  - {fileID: 2069553293}
-  - {fileID: 1729841779}
-  - {fileID: 81248744}
-  - {fileID: 1849106607}
-  - {fileID: 780553062}
-  - {fileID: 332270629}
-  - {fileID: 8216295}
-  - {fileID: 227131158}
-  - {fileID: 854712458}
-  - {fileID: 1005918895}
-  - {fileID: 401817929}
-  - {fileID: 339050076}
-  - {fileID: 1279830187}
-  - {fileID: 91569147}
-  - {fileID: 306323691}
-  - {fileID: 1458690692}
-  - {fileID: 671887129}
-  - {fileID: 1856971249}
-  - {fileID: 365569958}
-  - {fileID: 978881391}
-  - {fileID: 2132225611}
-  - {fileID: 307051124}
-  - {fileID: 1644803732}
-  - {fileID: 160010342}
-  - {fileID: 570001863}
-  - {fileID: 1951440021}
-  - {fileID: 910930959}
-  - {fileID: 481730011}
-  - {fileID: 2097487679}
-  - {fileID: 1088444196}
-  - {fileID: 1526601007}
-  - {fileID: 292423579}
-  - {fileID: 1591500959}
-  - {fileID: 2116846873}
-  - {fileID: 1627737026}
-  - {fileID: 1953984862}
-  - {fileID: 466055929}
-  - {fileID: 189963423}
-  - {fileID: 2067647313}
-  - {fileID: 1437028112}
-  - {fileID: 114481894}
-  - {fileID: 1369712510}
-  - {fileID: 405193295}
-  - {fileID: 24791967}
-  - {fileID: 1729500906}
-  - {fileID: 1378057480}
-  - {fileID: 1063568419}
-  - {fileID: 1666235212}
-  - {fileID: 1204705735}
-  - {fileID: 759696467}
-  - {fileID: 1529932574}
-  - {fileID: 2126200866}
-  - {fileID: 793293953}
-  - {fileID: 324844121}
-  - {fileID: 1765380849}
-  - {fileID: 570301337}
-  - {fileID: 1489804439}
-  - {fileID: 244220453}
-  - {fileID: 22620885}
-  - {fileID: 1400195024}
+  _deflateTime: 3
+  _inflateTime: 10
+  _propagationSpeed: 2
+  _mushroomTrigger: {fileID: 0}
+  _mushroomMaterial: {fileID: 0}
 --- !u!1 &1586087493
 GameObject:
   m_ObjectHideFlags: 0
@@ -135276,18 +134929,6 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 848214570}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1604122681 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 5071725326251147000, guid: b9c11633fb8f74f45ae6426c189e0c00,
-    type: 3}
-  m_PrefabInstance: {fileID: 848214570}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a5d7c5227eb2a0f4d9d3068cba8f94c5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1604326570
 GameObject:
   m_ObjectHideFlags: 0
