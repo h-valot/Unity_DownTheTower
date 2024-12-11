@@ -8,6 +8,7 @@ public class Bridge : Switchable
 {
     [Title("Tweakable values")]
     [SerializeField] private Vector3 m_maxRotation;
+    [SerializeField] private Vector3 m_minRotation;
     [SerializeField] private float m_animLength = 1;
 
     protected override void ActivateMechanism()
@@ -18,6 +19,6 @@ public class Bridge : Switchable
     protected override void DeactivateMechanism()
     {
         // Deactivation is not working, it need to be link with the starting rotation of the prefab
-        transform.DOLocalRotate(m_maxRotation, m_animLength);
+        transform.DOLocalRotate(m_minRotation, m_animLength);
     }
 }
