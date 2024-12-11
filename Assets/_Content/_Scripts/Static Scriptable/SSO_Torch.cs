@@ -142,8 +142,8 @@ public class SSO_Torch : ScriptableObject
 	[Range(0.1f, 0.25f)]
 	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
 	[InfoBox("The less, the smoother the preview will be.", InfoMessageType.None)]
-	/// <summary> The less, the smoother the preview will be. </summary>
-	public float PreviewSmoothing;
+	/// <summary> The less, the more accurate the preview will be. </summary>
+	public float PreviewAccuracy;
 
 	[FoldoutGroup("Aim preview")]
 	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
@@ -151,11 +151,30 @@ public class SSO_Torch : ScriptableObject
 	/// <summary> Layer masks the preview system will ignore. </summary>
 	public LayerMask PreviewLayersToIgnore;
 
-	#endregion
+    [FoldoutGroup("Aim preview")]
+    [Range(0.01f, 1f)]
+    [PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+    [InfoBox("Size of line segments (in meters) used to approximate the curve", InfoMessageType.None)]
+    /// <summary> Size of line segments (in meters) used to approximate the curve. </summary>
+    public float LineSegmentSize = 0.15f;
 
-	#region HEIGHT FEEDBACK
+    [FoldoutGroup("Aim preview")]
+    [PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+    [InfoBox("Width of the line", InfoMessageType.None)]
+    /// <summary> Width of the line. </summary>
+    public float LineWidth = 0.1f;
 
-	[FoldoutGroup("Height feedback")]
+    [FoldoutGroup("Aim preview")]
+    [PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+    [InfoBox("Fade in distance (meters) at the start of the preview", InfoMessageType.None)]
+    /// <summary> Fade in distance (meters) at the start of the preview. </summary>
+    public float fadeInDistance = 0.5f;
+
+    #endregion
+
+    #region HEIGHT FEEDBACK
+
+    [FoldoutGroup("Height feedback")]
 	[InfoBox("Color of the torch point light if its distance travelled on y-axis is greater than the character lethal height.", InfoMessageType.None)]
 	/// <summary> Color of the torch point light if its distance travelled on y-axis is greater than the character lethal height. </summary>
 	public Color DeathColor = new Color(255, 52, 52, 255);
