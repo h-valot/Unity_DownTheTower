@@ -3,7 +3,6 @@ using EasyCurvedLine;
 using Sirenix.OdinInspector;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 public class Torch : Permanent
@@ -16,6 +15,7 @@ public class Torch : Permanent
     [SerializeField] private Transform m_torchTop;
     [SerializeField] private Transform m_pointLightBase;
     [SerializeField] private SphereCollider m_lightCollider;
+	[SerializeField] public Transform RaycastTarget;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Torch m_ssoTorch;
 	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Character m_ssoCharacter;
