@@ -1,5 +1,6 @@
 using Sirenix.OdinInspector;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.AI;
@@ -29,7 +30,8 @@ public class GuardianMotor : MonoBehaviour
 	[Title("Debug")]
 	public List<Vector3> m_candidateTargetPositions = new List<Vector3>();
 	private Vector3 m_currentTargetPosition;
-    private float m_minTargetDistance;
+	private CandidateType CurrentTargetType => m_currentTargetPosition == m_rsoCharacterPosition.value ? CandidateType.CHARACTER : CandidateType.TORCH;
+	private float m_minTargetDistance;
 	public bool m_hasTargetInSight;
 
 	// Patrolling
@@ -55,6 +57,19 @@ public class GuardianMotor : MonoBehaviour
         UpdateState();
         UpdateDebugUI();
     }
+
+	private void OnTriggerEnter(Collider collider)
+	{
+		if (collider.TryGetComponent<CharacterMotor>(out var character))
+		{
+			character.HandleDeath();
+		}
+
+		if (collider.TryGetComponent<Torch>(out var torch))
+		{
+			m_rsoTorchManager.value.Remove(torch);
+		}
+	}
 
 	#endregion
 

@@ -415,7 +415,7 @@ public class Torch : Permanent
     /// <summary>
     /// Make torch flicker and desappear.
     /// </summary>
-    public void Deactivate()
+    public void Desactivate()
     {
 		if (m_isDeactivate) return;
 
