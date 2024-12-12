@@ -22,11 +22,16 @@ public class MushroomBatch : MonoBehaviour
 
     [FoldoutGroup("External References")][SerializeField] private GameObject _mushroomTriggerPrefab;
     [FoldoutGroup("External References")][SerializeField] private GameObject _mushroomPrefab;
+    [FoldoutGroup("External References")][SerializeField] private GameObject _particlePrefab;
     [FoldoutGroup("External References")][SerializeField] private Mesh _mushroomMesh;
     [FoldoutGroup("External References")][SerializeField] private Material _masterMaterial;
 
 
+    [FoldoutGroup("Behavior")]
+    [InfoBox("Deflate Time is part of the attack time. Attack time might be a bit higher in game depending on propagation.", InfoMessageType = InfoMessageType.None)]
+    [PropertyRange(0, "_attackTime")]
     [FoldoutGroup("Behavior")][SerializeField] private float _deflateTime = 0.5f;
+    [FoldoutGroup("Behavior")][SerializeField] private float _attackTime = 2f;
     [FoldoutGroup("Behavior")][SerializeField] private float _inactiveTime = 10f;
     [FoldoutGroup("Behavior")][SerializeField] private float _inflateTime = 1f;
     [FoldoutGroup("Behavior")][SerializeField] private float _propagationSpeed = 6f;
@@ -34,6 +39,7 @@ public class MushroomBatch : MonoBehaviour
 
     // --- INSTANCIATED VARIABLES ---
     [HideInInspector] public GameObject _mushroomTrigger;
+    [HideInInspector] public GameObject _particleSystem;
     [HideInInspector] public Material _mushroomMaterial;
 
     // --- PRIVATE VARIABLES ---
@@ -85,6 +91,12 @@ public class MushroomBatch : MonoBehaviour
             _mushroomTrigger = Instantiate(_mushroomTriggerPrefab, transform.position, Quaternion.identity, transform);
             _mushroomTrigger.GetComponent<SphereCollider>().radius = _furthestShroom;
             _mushroomTrigger.transform.SetSiblingIndex(0);
+
+            // 2. Instantiate Particles
+            _particleSystem = Instantiate(_particlePrefab, transform.position, Quaternion.identity, transform);
+            ParticleSystem.ShapeModule shape = _particleSystem.GetComponent<ParticleSystem>().shape;
+            shape.radius = _furthestShroom;
+            _particleSystem.transform.SetSiblingIndex(1);
         }
     }
 
@@ -126,7 +138,9 @@ public class MushroomBatch : MonoBehaviour
         if (_mushroomTrigger != null)
         {
             DestroyImmediate(_mushroomTrigger);
+            DestroyImmediate(_particleSystem);
             _mushroomTrigger = null;
+            _particleSystem = null;
         }
     }
 
@@ -240,13 +254,14 @@ public class MushroomBatch : MonoBehaviour
         float expTime = 0;
 
         UpdateState(MushroomState.DEFLATE);
-        while (expTime <= _radius * 2f / _propagationSpeed + _deflateTime)
+        while (expTime <= _radius * 2f / _propagationSpeed + _attackTime)
         {
             _mushroomMaterial.SetFloat("_timeSinceExplosion", expTime);
             expTime += Time.deltaTime;
             yield return null;
         }
 
+        UpdateState(MushroomState.INACTIVE);
         float inactiveTime = 0;
         while (inactiveTime <= _inactiveTime)
         {
@@ -276,6 +291,12 @@ public class MushroomBatch : MonoBehaviour
                 _mushroomMaterial.SetFloat("_animTime", _deflateTime);
                 break;
             case MushroomState.DEFLATE:
+                // Setting duration and lifetime only works here
+                ParticleSystem.MainModule main = _particlePrefab.GetComponent<ParticleSystem>().main;
+                main.duration = _radius * 2f / _propagationSpeed;
+                main.startLifetime = _attackTime;
+
+                _particleSystem.GetComponent<ParticleSystem>().Play();
                 break;
             case MushroomState.INACTIVE:
                 break;
@@ -285,8 +306,13 @@ public class MushroomBatch : MonoBehaviour
         }
 
         _currentState = newState;
+        Debug.Log(_currentState);
     }
 
+    public MushroomState GetState()
+    {
+        return _currentState;
+    }
 
 
     #endregion
