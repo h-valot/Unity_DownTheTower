@@ -1,7 +1,7 @@
 public enum GuardianBehaviorState
 {
-   NONE,
+   NONE = 0,
    PATROL,
    AGGRO,
-   STATIC,
+   DORMANT,
 }

@@ -8,7 +8,11 @@ public class GuardianMotor : MonoBehaviour
 {
 	#region REFERENCES
 
+	[Title("External references")]
+	[SerializeField] private PatrolPath m_patrolPath;
+
 	[FoldoutGroup("Internal References")][SerializeField] private NavMeshAgent m_agent;
+	[FoldoutGroup("Internal References")][SerializeField] private MeshRenderer m_guardianEyes;
 	[FoldoutGroup("Internal References")][SerializeField] private TextMeshProUGUI m_tmpTarget;
 	[FoldoutGroup("Internal References")][SerializeField] private TextMeshProUGUI m_tmpState;
 
@@ -22,30 +26,31 @@ public class GuardianMotor : MonoBehaviour
 
 	#region VARIABLES
 
-	public List<Vector3> m_validPositions = new List<Vector3>();
+	[Title("Debug")]
+	public List<Vector3> m_candidateTargetPositions = new List<Vector3>();
 	private Vector3 m_currentTargetPosition;
     private float m_minTargetDistance;
-	private bool m_hasTargetInSight;
+	public bool m_hasTargetInSight;
 
 	// Patrolling
-	[SerializeField] private Transform[] m_waypoints; // TODO - Path and waypoints system
-    public bool IsPatrolling;
-	private int m_currentWaypoint;
-
+	public bool IsPatrolPathValid => m_patrolPath && m_patrolPath.Waypoints.Count > 0;
+	public int m_currentWaypoint;
 
 	#endregion
 
 	#region MONOBEHAVIOR
 
 	private void OnEnable()
-    {
-        DetermineState();
+	{
+		m_rsoGuardianState.value = GuardianBehaviorState.NONE;
+		SelectTarget();
+		DetermineState();
 	}
 
     private void Update()
     {
         SelectTarget();
-
+		
         DetermineState();
         UpdateState();
         UpdateDebugUI();
@@ -58,33 +63,37 @@ public class GuardianMotor : MonoBehaviour
 	private void SelectTarget()
 	{
 		// Fill candidates
-		m_validPositions = new List<Vector3> { m_rsoCharacterPosition.value };
+		m_candidateTargetPositions = new List<Vector3> { m_rsoCharacterPosition.value };
 		foreach (var torch in m_rsoTorchManager.value.Torches)
 		{
-			m_validPositions.Add(torch.transform.position);
+			m_candidateTargetPositions.Add(torch.transform.position);
 		}
 
 		// Select a candidate
-		m_minTargetDistance = m_ssoGuardian.MaxRange;
-		Vector3 bestPosition = m_currentTargetPosition;
+		m_minTargetDistance = m_ssoGuardian.SightRange;
+		Vector3 bestTargetPosition = m_currentTargetPosition;
 		m_hasTargetInSight = false;
-		foreach (var position in m_validPositions)
+		foreach (var candidateTargetPosition in m_candidateTargetPositions)
 		{
-			float distance = Vector3.Distance(bestPosition, position);
-
-			// Assertions
-			if (distance > m_ssoGuardian.MaxRange) continue;
+			// Assert: there is a better target near to the guardian
+			float distance = Vector3.Distance(transform.position, candidateTargetPosition);
 			if (distance > m_minTargetDistance) continue;
 
+			// Assert: the candidate is outside the sight or the passive range
+			Vector3 guardianCandidateDirection = (candidateTargetPosition - transform.position).normalized;
+			bool isTargetInSightCone = Vector3.Dot(transform.forward, guardianCandidateDirection) >= m_ssoGuardian.AngleSight;
+			if (distance > (isTargetInSightCone ? m_ssoGuardian.SightRange : m_ssoGuardian.PassiveRange)) continue;
+
+			// Update the best target position with the candidate
 			m_hasTargetInSight = true;
 			m_minTargetDistance = distance;
-			bestPosition = position;
+			bestTargetPosition = candidateTargetPosition;
 		}
 
 		// Set candidate as the current target
-		if (m_currentTargetPosition != bestPosition) 
+		if (m_currentTargetPosition != bestTargetPosition) 
 		{
-			m_currentTargetPosition = bestPosition;
+			m_currentTargetPosition = bestTargetPosition;
 		}
     }
 
@@ -95,13 +104,11 @@ public class GuardianMotor : MonoBehaviour
     {
         if (m_rsoGuardianState.value != GuardianBehaviorState.PATROL && !m_hasTargetInSight)
         {
-            Debug.Log("switching to patrol");
             SwitchState(GuardianBehaviorState.PATROL);
         }
 
         if (m_rsoGuardianState.value != GuardianBehaviorState.AGGRO && m_hasTargetInSight)
         {
-            Debug.Log("switching to aggro");
             SwitchState(GuardianBehaviorState.AGGRO);
         }
     }
@@ -161,9 +168,10 @@ public class GuardianMotor : MonoBehaviour
     #region PATROL
 
     private void EnterPatrolState()
-    {
-
-    }
+	{
+		m_guardianEyes.sharedMaterial = m_ssoGuardian.PatrolMaterial;
+		m_agent.destination = m_patrolPath.Waypoints[m_currentWaypoint].Position;
+	}
 
     private void UpdatePatrolState()
     {
@@ -178,14 +186,14 @@ public class GuardianMotor : MonoBehaviour
 	private void Patrolling()
 	{
 		// Assertion
-		if (m_waypoints.Length <= 0) return;
+		if (!IsPatrolPathValid) return;
 
-		if ((transform.position - m_waypoints[m_currentWaypoint].position).magnitude <= 0.5f)
+		if ((transform.position - m_patrolPath.Waypoints[m_currentWaypoint].Position).magnitude <= 0.5f)
 		{
 			m_currentWaypoint++;
-			if (m_currentWaypoint >= m_waypoints.Length) m_currentWaypoint = 0;
+			if (m_currentWaypoint >= m_patrolPath.Waypoints.Count) m_currentWaypoint = 0;
 
-			m_agent.destination = m_waypoints[m_currentWaypoint].transform.position;
+			m_agent.destination = m_patrolPath.Waypoints[m_currentWaypoint].Position;
 		}
 	}
 
@@ -195,7 +203,8 @@ public class GuardianMotor : MonoBehaviour
 
 	private void EnterAggroState()
     {
-    }
+		m_guardianEyes.sharedMaterial = m_ssoGuardian.AggroMaterial;
+	}
 
     private void UpdateAggroState()
     {

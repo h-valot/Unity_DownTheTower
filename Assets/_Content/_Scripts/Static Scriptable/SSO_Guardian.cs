@@ -6,10 +6,16 @@ public class SSO_Guardian : ScriptableObject
 {
 	[Title("Debug")]
 	public Material AggroMaterial;
-	public Material ScanMaterial;
+	public Material PatrolMaterial;
 	public Material DormantMaterial;
 
 	[Title("Sight")]
-	public float MaxRange;
+	public float SightRange;
+
+	public float PassiveRange;
+
     public LayerMask TargetLayerToIgnore;
+
+	[PropertyRange(-1f, 1f)]
+	public float AngleSight;
 }
