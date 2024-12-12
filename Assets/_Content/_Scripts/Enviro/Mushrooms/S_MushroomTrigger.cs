@@ -1,5 +1,3 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -17,13 +15,13 @@ public class MushroomTrigger : MonoBehaviour
     private void OnTriggerStay(Collider other)
     {
         Vector3 newPos = other.transform.position;
-        foreach (ObjectPosition op in _objectLastPositions)
+        foreach (ObjectPosition objectPosition in _objectLastPositions)
         {
-            if (!(op.gObject == other.gameObject)) continue;
+            if (!(objectPosition.gObject == other.gameObject)) continue;
 
-            if (Mathf.Round(op.position.sqrMagnitude) == Mathf.Round(newPos.sqrMagnitude)) return;
+            if (Mathf.Round(objectPosition.position.sqrMagnitude) == Mathf.Round(newPos.sqrMagnitude)) return;
 
-            op.position = new Vector3(newPos.x, newPos.y, newPos.z);
+            objectPosition.position = new Vector3(newPos.x, newPos.y, newPos.z);
             _parent.InitiateExplosion(newPos);
             return;
         }
@@ -48,10 +46,4 @@ public class MushroomTrigger : MonoBehaviour
         }
         if (toDelete.gObject != null) _objectLastPositions.Remove(toDelete);
     }
-}
-
-public class ObjectPosition
-{
-    public GameObject gObject;
-    public Vector3 position;
 }

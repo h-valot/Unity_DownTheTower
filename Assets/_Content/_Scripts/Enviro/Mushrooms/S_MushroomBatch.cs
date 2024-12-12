@@ -256,8 +256,6 @@ public class MushroomBatch : MonoBehaviour
         {
             _mushroomMaterial.SetFloat("_timeSinceExplosion", expTime);
             expTime += Time.deltaTime;
-            if(expTime >= _radius * 2f / _propagationSpeed + _deflateTime)
-                _particleSystem.GetComponent<ParticleSystem>().Stop(true, ParticleSystemStopBehavior.StopEmitting);
             yield return null;
         }
 
@@ -291,6 +289,11 @@ public class MushroomBatch : MonoBehaviour
                 _mushroomMaterial.SetFloat("_animTime", _deflateTime);
                 break;
             case MushroomState.DEFLATE:
+                // Setting duration and lifetime only works here
+                ParticleSystem.MainModule main = _particlePrefab.GetComponent<ParticleSystem>().main;
+                main.duration = _radius * 2f / _propagationSpeed;
+                main.startLifetime = _attackTime;
+
                 _particleSystem.GetComponent<ParticleSystem>().Play();
                 break;
             case MushroomState.INACTIVE:
@@ -301,6 +304,7 @@ public class MushroomBatch : MonoBehaviour
         }
 
         _currentState = newState;
+        Debug.Log(_currentState);
     }
 
     public MushroomState GetState()
