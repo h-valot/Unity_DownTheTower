@@ -1,8 +1,6 @@
 using System;
 using System.Collections;
-using DG.Tweening;
 using Sirenix.OdinInspector;
-using TMPro;
 using UnityEngine;
 
 public class CharacterMotor : MonoBehaviour

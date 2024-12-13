@@ -1,5 +1,36 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &464298537641596447
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4363050616134772245}
+  m_Layer: 8
+  m_Name: RaycastTarget
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4363050616134772245
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 464298537641596447}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3539557874267728587}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1035575013021803281
 GameObject:
   m_ObjectHideFlags: 0
@@ -178,6 +209,7 @@ Transform:
   - {fileID: 3790414532766466559}
   - {fileID: 2291770440046876514}
   - {fileID: 8405497087091573354}
+  - {fileID: 4363050616134772245}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &4567227452422965972
@@ -200,6 +232,7 @@ MonoBehaviour:
   m_torchTop: {fileID: 8405497087091573354}
   m_pointLightBase: {fileID: 2294269590647890243}
   m_lightCollider: {fileID: 5976173811647340609}
+  RaycastTarget: {fileID: 4363050616134772245}
   m_ssoTorch: {fileID: 11400000, guid: 0c5c3bc89382c9e439e0ef105c99e62b, type: 2}
   m_ssoCharacter: {fileID: 11400000, guid: 002492e8a2733234b8bdf7d15dea453b, type: 2}
   m_ssoRope: {fileID: 11400000, guid: ebd551676fad39148a6ccab29ef4ebce, type: 2}
