@@ -10,14 +10,19 @@ public class GuardianMotor : MonoBehaviour
 	#region REFERENCES
 
 	[Title("Override")]
+	[InfoBox("If true, the following value will override the one filled in the SSO_Guardian. NOTE: Use this to create unique guardian.", InfoMessageType.None)]
 	[SerializeField] private bool m_overridePatrolSpeed;
 	[ShowIf("m_overridePatrolSpeed")][SerializeField] private float m_patrolSpeed;
 
+	[InfoBox("If true, the following value will override the one filled in the SSO_Guardian.", InfoMessageType.None)]
 	[SerializeField] private bool m_overrideAggroSpeed;
 	[ShowIf("m_overrideAggroSpeed")][SerializeField] private float m_aggroSpeed;
 
+	[InfoBox("If true (default), on patrol state, the guardian will follow the given path. Otherwise, it will return to the given waypoint if it returns to patrol state (NOTE: The guardian will be look towards the waypoint forward).", InfoMessageType.None)]
 	[SerializeField] private bool m_usePatrolPath = true;
+	[PropertySpace(SpaceAfter = 15f, SpaceBefore = 0f)]
 	[ShowIf("m_usePatrolPath")][SerializeField] private PatrolPath m_patrolPath;
+	[PropertySpace(SpaceAfter = 15f, SpaceBefore = 0f)]
 	[HideIf("m_usePatrolPath")][SerializeField] private Waypoint m_waypoint;
 
 	[FoldoutGroup("Internal References")][SerializeField] private NavMeshAgent m_agent;
@@ -48,7 +53,7 @@ public class GuardianMotor : MonoBehaviour
 	public int m_currentWaypoint;
 	private float m_updateWaypointTimer;
 
-	private bool m_isCoroutineRunning;
+	private bool m_canSwitchState = true;
 
 	#endregion
 
@@ -57,12 +62,13 @@ public class GuardianMotor : MonoBehaviour
 	private void Start()
 	{
 		m_rsoGuardianState.value = GuardianBehaviorState.NONE;
+		SelectTarget();
+		DetermineState();
 	}
 
     private void Update()
     {
         SelectTarget();
-		
         DetermineState();
         UpdateState();
         UpdateDebugUI();
@@ -131,33 +137,45 @@ public class GuardianMotor : MonoBehaviour
     /// Determine which behavior state the player should be and trigger a switch of state if neccessary.
     /// </summary>
     private void DetermineState()
-    {
-		// Don't change state while a coroutine is running
-		if (m_isCoroutineRunning) return;
+	{
+		// Don't switch state while a coroutine is running
+		if (!m_canSwitchState) return;
 
-        if (m_rsoGuardianState.value != GuardianBehaviorState.PATROL && !m_hasTargetInSight)
+		if (m_rsoGuardianState.value != GuardianBehaviorState.PATROL && !m_hasTargetInSight)
         {
-			print("st patrol");
             SwitchState(GuardianBehaviorState.PATROL);
         }
 
         if (m_rsoGuardianState.value != GuardianBehaviorState.AGGRO && m_hasTargetInSight)
         {
-			print("st aggro");
             SwitchState(GuardianBehaviorState.AGGRO);
         }
     }
 
-    private void SwitchState(GuardianBehaviorState newState)
-    {
-        ExitState();
-        EnterState(newState);
-    }
-
-    private void EnterState(GuardianBehaviorState newState)
+    private void SwitchState(GuardianBehaviorState newState, bool exitCurrentState = true)
 	{
-		// Don't change state while a coroutine is running
-		if (m_isCoroutineRunning) return;
+		if (exitCurrentState) ExitState();
+        EnterState(newState);
+	}
+
+	private void ExitState()
+	{
+		switch (m_rsoGuardianState.value)
+		{
+			case GuardianBehaviorState.PATROL:
+				ExitPatrolState();
+				break;
+
+			case GuardianBehaviorState.AGGRO:
+				ExitAggroState();
+				break;
+		}
+	}
+
+	private void EnterState(GuardianBehaviorState newState)
+	{
+		// Don't switch state while a coroutine is running
+		if (!m_canSwitchState) return;
 
 		m_rsoGuardianState.value = newState;
 
@@ -172,24 +190,10 @@ public class GuardianMotor : MonoBehaviour
                 break;
         }
     }
-
-    private void ExitState()
-    {
-        switch (m_rsoGuardianState.value)
-        {
-            case GuardianBehaviorState.PATROL:
-                ExitPatrolState();
-                break;
-
-            case GuardianBehaviorState.AGGRO:
-                ExitAggroState();
-                break;
-        }
-    }
     
     private void UpdateState()
-    {
-        switch (m_rsoGuardianState.value)
+	{
+		switch (m_rsoGuardianState.value)
         {
             case GuardianBehaviorState.PATROL:
                 UpdatePatrolState();
@@ -215,7 +219,11 @@ public class GuardianMotor : MonoBehaviour
     private void UpdatePatrolState()
     {
 		// Assertion
-		if (!m_usePatrolPath) return;
+		if (!m_usePatrolPath) 
+		{
+			Reorientate();
+			return;
+		}
 
 		Patrolling();
 		CheckWaypoints();
@@ -224,6 +232,14 @@ public class GuardianMotor : MonoBehaviour
     private void ExitPatrolState()
     {
 
+	}
+
+	private void Reorientate()
+	{
+		if ((transform.position - m_waypoint.Position).magnitude <= m_ssoGuardian.WaypointDistanceTolerance)
+		{
+			transform.LookAt(m_waypoint.transform.position + m_waypoint.transform.forward);
+		}
 	}
 
 	private void Patrolling()
@@ -281,29 +297,35 @@ public class GuardianMotor : MonoBehaviour
 
 	private IEnumerator StartSearchingCharacter()
 	{
-		m_isCoroutineRunning = true;
+		m_canSwitchState = false;
 		while ((transform.position - m_agent.destination).magnitude > m_ssoGuardian.WaypointDistanceTolerance)
 		{
 			yield return null;
 		}
 		yield return new WaitForSeconds(m_ssoGuardian.WaitDurationOnLastTargetPositionReached);
-		m_isCoroutineRunning = false;
+		m_canSwitchState = true;
+
+		// Because this coroutine is executed on exit state. 
+		// The enter state function of the next state should be called but isn't because of m_isCoroutineRunning.
+		// After this coroutine ends, we manually switch to the wanted state without exiting the current state.
+		// Otherwise, this coroutine will be called endlessly.
+		SwitchState(GuardianBehaviorState.PATROL, exitCurrentState: false);
 	}
 
 	private IEnumerator AnimateTorchDestroy(Torch torch)
 	{
-		m_isCoroutineRunning = true;
+		m_canSwitchState = false;
 		yield return new WaitForSeconds(m_ssoGuardian.TimeToDestroyTorch);
 		m_rsoTorchManager.value.Remove(torch);
-		m_isCoroutineRunning = false;
+		m_canSwitchState = true;
 	}
 
 	private IEnumerator AnimateCharacterKill(CharacterMotor character)
 	{
-		m_isCoroutineRunning = true;
+		m_canSwitchState = false;
 		yield return new WaitForSeconds(m_ssoGuardian.TimeToKillCharacter);
 		character.HandleDeath();
-		m_isCoroutineRunning = false;
+		m_canSwitchState = true;
 	}
 
     #endregion
