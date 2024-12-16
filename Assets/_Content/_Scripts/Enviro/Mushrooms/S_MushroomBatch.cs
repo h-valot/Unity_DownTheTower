@@ -306,7 +306,6 @@ public class MushroomBatch : MonoBehaviour
         }
 
         _currentState = newState;
-        Debug.Log(_currentState);
     }
 
     public MushroomState GetState()

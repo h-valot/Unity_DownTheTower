@@ -23,6 +23,7 @@ public class MushroomTrigger : MonoBehaviour
 
             objectPosition.position = new Vector3(newPos.x, newPos.y, newPos.z);
             _parent.InitiateExplosion(newPos);
+            if (other.gameObject.TryGetComponent<CharacterMotor>(out CharacterMotor chara) && _parent.GetState() == MushroomState.DEFLATE) chara.HandleDeath();
             return;
         }
 
@@ -30,8 +31,10 @@ public class MushroomTrigger : MonoBehaviour
         newItem.gObject = other.gameObject;
         newItem.position = newPos;
         _objectLastPositions.Add(newItem);
-        _parent.InitiateExplosion(newItem.position);
+        _parent.InitiateExplosion(newItem.position); 
+        if (other.gameObject.TryGetComponent<CharacterMotor>(out CharacterMotor newChara) && _parent.GetState() == MushroomState.DEFLATE) newChara.HandleDeath();
     }
+
 
     private void OnTriggerExit(Collider other)
     {
