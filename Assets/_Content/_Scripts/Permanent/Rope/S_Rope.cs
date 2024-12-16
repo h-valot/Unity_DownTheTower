@@ -273,6 +273,13 @@ public class Rope : Permanent
 		}
 		UpdateHoldLength();
 
+		// Remove all rope interactables from the character interact
+		characterInteract.Remove(m_baseInteractable);
+		foreach (var interactable in m_interactables)
+		{
+			characterInteract.Remove(interactable);
+		}
+
 		// Delete interactables
 		m_baseInteractable.gameObject.SetActive(false);
 		m_baseInteractable.OnInteractedWithRef -= Reattach;

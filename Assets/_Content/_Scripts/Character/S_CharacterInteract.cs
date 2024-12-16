@@ -20,7 +20,7 @@ public class CharacterInteract : MonoBehaviour
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_InteractableValid m_rsoInteractableValid;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_InteractableRecyclable m_rsoInteractableRecyclable;
 
-	private List<Interactable> m_interactables = new List<Interactable>();
+	[SerializeField] private List<Interactable> m_interactables = new List<Interactable>();
 	private Backpack m_backpack;
 
 	private void Start()
@@ -42,20 +42,22 @@ public class CharacterInteract : MonoBehaviour
 
 	private void Update()
 	{
-		UpdateValidity();
-		CheckInteractableValidity();
-		CheckInteractibleRecyclability();
+		CheckValidity();
+		CheckRecyclability();
 	}
 
 	private void Interact(bool isPressed)
 	{
-		// Assertion
-		if (m_interactables.Count <= 0 || (m_rsoCharacterState.value != BehaviorState.LOCOMOTION && m_rsoCharacterState.value != BehaviorState.FALL)) return;
-
-		if(isPressed)
+		// Assertions
+		if (!isPressed
+		|| m_interactables.Count <= 0 
+		|| (m_rsoCharacterState.value != BehaviorState.LOCOMOTION 
+		&& m_rsoCharacterState.value != BehaviorState.FALL))
 		{
-            GetNearestInteractable()?.InteractionTrigger();
-        }
+			return;
+		}
+
+        GetNearestInteractable()?.InteractionTrigger();
     }
 		
 
@@ -86,7 +88,6 @@ public class CharacterInteract : MonoBehaviour
 	/// </summary>
 	public void Remove(Interactable interactable, bool doRecycle = false)
 	{
-		interactable.IsValid = false;
 		m_interactables.Remove(interactable);
 
 		if (doRecycle) interactable.Recycle();
@@ -98,10 +99,10 @@ public class CharacterInteract : MonoBehaviour
 	private Interactable GetNearestInteractable()
 	{
 		// Assertion
-		if (m_interactables.Count(i => i.IsValid) <= 0) return null;
+		if (m_interactables.Count <= 0) return null;
 
 		// - Get the nearest interactable object from the character -
-		var nearest = m_interactables.FirstOrDefault(i => i.IsValid);
+		var nearest = m_interactables.FirstOrDefault();
 
 		if (!nearest)
 		{
@@ -109,57 +110,36 @@ public class CharacterInteract : MonoBehaviour
 			return null;
 		}
 
-		foreach (var valid in m_interactables.Where(i => i.IsValid))
+		foreach (var interactable in m_interactables)
 		{
-			if (!valid) 
+			if (!interactable) 
 			{
-				Remove(valid);
+				Remove(interactable);
 				continue;
 			}
 
-			if ((valid.transform.position - transform.position).sqrMagnitude <
-				(nearest.transform.position - transform.position).sqrMagnitude)
+			if ((interactable.transform.position - transform.position).sqrMagnitude < (nearest.transform.position - transform.position).sqrMagnitude)
 			{
-				nearest = valid;
+				nearest = interactable;
 			}
 		}
 		return nearest;
 	}
 
-	private void UpdateValidity()
-	{
-		// Assertion
-		if (m_interactables.Count <= 0) return;
-
-		// - Get interactable in front of the character -
-		foreach (var interactable in m_interactables)
-		{
-			// Assertion
-			if (!interactable) continue;
-
-			Vector3 towardsInteract = interactable.transform.position - transform.position;
-
-			interactable.IsValid = Vector3.Dot(
-				new Vector3(m_characterGraphics.transform.forward.x, 0, m_characterGraphics.transform.forward.z).normalized,
-				new Vector3(towardsInteract.x, 0, towardsInteract.z).normalized
-			) > 0.5f;
-		}
-	}
-
-	private void CheckInteractableValidity()
+	private void CheckValidity()
 	{
 		// Assertion
 		if (m_interactables == null) return;
 
 		m_rsoInteractableValid.value =
-			m_interactables.Count(i => i.IsValid) > 0
+			m_interactables.Count > 0
 			&& (m_rsoCharacterState.value == BehaviorState.LOCOMOTION || m_rsoCharacterState.value == BehaviorState.FALL);
 	}
 
-	private void CheckInteractibleRecyclability()
+	private void CheckRecyclability()
 	{
 		m_rsoInteractableRecyclable.value =
-			m_interactables.Where(i => i.IsRecyclable).Count(i => i.IsValid) > 0
+			m_interactables.Where(i => i.IsRecyclable).ToList().Count > 0
 			&& m_rsoCharacterState.value == BehaviorState.LOCOMOTION;
 	}
 
