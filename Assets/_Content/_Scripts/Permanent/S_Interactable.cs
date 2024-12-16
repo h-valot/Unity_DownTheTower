@@ -16,7 +16,6 @@ public class Interactable : MonoBehaviour
 
 	public Action OnInteracted;
 	public Action<CharacterInteract> OnInteractedWithRef;
-	public bool IsValid { get; set; }
 	public bool IsRecyclable => m_isRecyclable && m_objectToRecycle != null;
 
 	private CharacterInteract m_character;
