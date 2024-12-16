@@ -19,12 +19,12 @@ public class SSO_Guardian : ScriptableObject
 
 	[FoldoutGroup("Sight")]
 	[InfoBox("", InfoMessageType.None)]
-	public float SightRange;
+	public float MaxRange;
 
 	[FoldoutGroup("Sight")]
 	[PropertySpace(SpaceAfter = 0, SpaceBefore = 15)]
 	[InfoBox("", InfoMessageType.None)]
-	public float PassiveRange;
+	public float MinRange;
 
 	[FoldoutGroup("Sight")]
 	[PropertySpace(SpaceAfter = 0, SpaceBefore = 15)]

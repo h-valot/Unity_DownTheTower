@@ -1177,5 +1177,11 @@ public class CharacterMotor : MonoBehaviour
 		from = toCache;
 	}
 
+	public bool IsCarryingLight()
+	{
+		return HandObject && (HandObject as Torch) && (HandObject as Torch).IsLit
+		|| RobotObject && (RobotObject as Torch) && (RobotObject as Torch).IsLit;
+	}
+
 	#endregion
 }

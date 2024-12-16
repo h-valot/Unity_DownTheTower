@@ -101,7 +101,7 @@ public class GuardianMotor : MonoBehaviour
 		}
 
 		// Select a candidate
-		m_minTargetDistance = m_ssoGuardian.SightRange;
+		m_minTargetDistance = m_ssoGuardian.MaxRange;
 		Vector3 bestTargetPosition = m_currentTargetPosition;
 		m_hasTargetInSight = false;
 		foreach (var candidateTargetPosition in m_candidateTargetPositions)
@@ -110,20 +110,25 @@ public class GuardianMotor : MonoBehaviour
 			float distance = Vector3.Distance(transform.position, candidateTargetPosition);
 			if (distance > m_minTargetDistance) continue;
 
-			// Assert: the candidate is outside the sight or the passive range
-			Vector3 guardianCandidateDirection = (candidateTargetPosition - transform.position).normalized;
-			bool isTargetInSightCone = Vector3.Dot(transform.forward, guardianCandidateDirection) >= m_ssoGuardian.AngleSight;
-			if (distance > (isTargetInSightCone ? m_ssoGuardian.SightRange : m_ssoGuardian.PassiveRange)) continue;
-
 			// Assert: the target isn't in direct sight
 			Physics.Linecast(m_eyes.transform.position, candidateTargetPosition, out var hit, ~m_ssoGuardian.TargetLayerToIgnore);
-			if (!hit.collider.TryGetComponent<CharacterMotor>(out var character) && !hit.collider.TryGetComponent<Torch>(out var torch)) continue;
+			if (!hit.collider.TryGetComponent<CharacterMotor>(out var character) & !hit.collider.TryGetComponent<Torch>(out var torch)) continue;
+
+			// Gather candidate informations such as lighting and positioning
+			Vector3 guardianCandidateDirection = (candidateTargetPosition - transform.position).normalized;
+			bool isTargetInSightCone = Vector3.Dot(transform.forward, guardianCandidateDirection) >= m_ssoGuardian.AngleSight;
+			bool isTargetLit = character && character.IsCarryingLight() || torch && torch.IsLit;
+
+			// Assertions
+			if (!isTargetLit && !isTargetInSightCone) continue;
+			if (isTargetLit && !isTargetInSightCone && distance > m_ssoGuardian.MinRange) continue;
+			if (isTargetLit && isTargetInSightCone && distance > m_ssoGuardian.MaxRange) continue;
+			if (!isTargetLit && distance > m_ssoGuardian.MinRange) continue;
 
 			// Update the best target position with the candidate
 			m_hasTargetInSight = true;
 			m_minTargetDistance = distance;
 			bestTargetPosition = candidateTargetPosition;
-
 		}
 
 		// Set candidate as the current target
@@ -336,6 +341,14 @@ public class GuardianMotor : MonoBehaviour
 	{
 		m_tmpState.text = m_rsoGuardianState.value.ToString();
 		m_tmpTarget.text = m_hasTargetInSight ? m_currentTargetPosition.ToString() : "none";
+	}
+
+	private void OnDrawGizmos()
+	{
+		Gizmos.color = Color.red;
+		Gizmos.DrawWireSphere(transform.position, m_ssoGuardian.MinRange);
+		Gizmos.color = Color.yellow;
+		Gizmos.DrawWireSphere(transform.position, m_ssoGuardian.MaxRange);
 	}
 
     #endregion
