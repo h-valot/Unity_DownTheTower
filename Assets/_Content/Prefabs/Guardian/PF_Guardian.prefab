@@ -49,7 +49,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5c90f7ec1a31320468ca680ea61beab4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_overridePatrolSpeed: 0
+  m_patrolSpeed: 0
+  m_overrideAggroSpeed: 0
+  m_aggroSpeed: 0
+  m_usePatrolPath: 1
   m_patrolPath: {fileID: 0}
+  m_waypoint: {fileID: 0}
   m_agent: {fileID: 2290026609873240630}
   m_eyes: {fileID: 8327442397819004711}
   m_tmpTarget: {fileID: 6886411499606704374}
@@ -60,6 +66,7 @@ MonoBehaviour:
   m_rsoCharacterPosition: {fileID: 11400000, guid: 7fc614512add369458f5a4d382225bfb,
     type: 2}
   m_rsoTorchManager: {fileID: 11400000, guid: 013e0e8312f52a7408c42a7d0621de0c, type: 2}
+  m_rsoRopes: {fileID: 11400000, guid: cfcda1b93f1aa6148bf1a6e42672dc2f, type: 2}
   m_candidateTargetPositions: []
   m_hasTargetInSight: 0
   m_currentWaypoint: 0

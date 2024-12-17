@@ -35,6 +35,7 @@ public class GuardianMotor : MonoBehaviour
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_GuardianState m_rsoGuardianState;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterPosition m_rsoCharacterPosition;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_TorchManager m_rsoTorchManager;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_Ropes m_rsoRopes;
 
 	#endregion
 
@@ -85,6 +86,12 @@ public class GuardianMotor : MonoBehaviour
 		{
 			StartCoroutine(AnimateTorchDestroy(torch));
 		}
+
+		if (collider.TryGetComponent<Rope>(out var rope))
+		{
+			rope.Detach();
+			Destroy(rope.gameObject);
+		}
 	}
 
 	#endregion
@@ -95,10 +102,8 @@ public class GuardianMotor : MonoBehaviour
 	{
 		// Fill candidates
 		m_candidateTargetPositions = new List<Vector3> { m_rsoCharacterPosition.value + Vector3.up * 0.8f };
-		foreach (var torch in m_rsoTorchManager.value.Torches)
-		{
-			m_candidateTargetPositions.Add(torch.RaycastTarget.position);
-		}
+		foreach (var torch in m_rsoTorchManager.value.Torches) m_candidateTargetPositions.Add(torch.RaycastTarget.position);
+		foreach (var rope in m_rsoRopes.value) m_candidateTargetPositions.Add(rope.RaycastTarget.position);
 
 		// Select a candidate
 		m_minTargetDistance = m_ssoGuardian.MaxRange;
@@ -110,9 +115,17 @@ public class GuardianMotor : MonoBehaviour
 			float distance = Vector3.Distance(transform.position, candidateTargetPosition);
 			if (distance > m_minTargetDistance) continue;
 
-			// Assert: the target isn't in direct sight
+			// Assert: the candidate isn't a valid class
+			Debug.DrawLine(m_eyes.transform.position, candidateTargetPosition);
 			Physics.Linecast(m_eyes.transform.position, candidateTargetPosition, out var hit, ~m_ssoGuardian.TargetLayerToIgnore);
-			if (!hit.collider.TryGetComponent<CharacterMotor>(out var character) & !hit.collider.TryGetComponent<Torch>(out var torch)) continue;
+			bool isCharacter = !hit.collider.TryGetComponent<CharacterMotor>(out var character);
+			bool isTorch = !hit.collider.TryGetComponent<Torch>(out var torch);
+			bool isRope = !hit.collider.TryGetComponent<Rope>(out var rope);
+			if (!isCharacter && !isTorch && !isRope) continue;
+
+			// Assert: torch and rope are still in character's hand
+			if (torch && torch.IsInHand) continue;
+			if (rope && !rope.IsPlaced) continue;
 
 			// Gather candidate informations such as lighting and positioning
 			Vector3 guardianCandidateDirection = (candidateTargetPosition - transform.position).normalized;
