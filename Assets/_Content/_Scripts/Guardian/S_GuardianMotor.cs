@@ -28,8 +28,10 @@ public class GuardianMotor : MonoBehaviour
 
 	[FoldoutGroup("Internal References")][SerializeField] private NavMeshAgent m_agent;
 	[FoldoutGroup("Internal References")][SerializeField] private MeshRenderer m_eyes;
+	[FoldoutGroup("Internal References")][SerializeField] private Transform m_frontEye;
 	[FoldoutGroup("Internal References")][SerializeField] private TextMeshProUGUI m_tmpTarget;
 	[FoldoutGroup("Internal References")][SerializeField] private TextMeshProUGUI m_tmpState;
+	[FoldoutGroup("Internal References")][SerializeField] private LineRenderer m_lineRenderer;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Guardian m_ssoGuardian;
 	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Game m_ssoGame;
@@ -126,7 +128,7 @@ public class GuardianMotor : MonoBehaviour
 		}
 
 		// Select a candidate
-		m_minTargetDistance = m_ssoGuardian.MaxRange;
+		m_minTargetDistance = m_ssoGuardian.LongRange;
 		Candidate bestTarget = m_currentTarget;
 		m_hasTargetInSight = false;
 		foreach (var candidate in m_candidates)
@@ -153,10 +155,10 @@ public class GuardianMotor : MonoBehaviour
 			bool isTargetLit = character && character.IsCarryingLight() || torch && torch.IsLit;
 
 			// Assertions
-			if (!isTargetLit && !isTargetInSightCone) continue;
-			if (isTargetLit && !isTargetInSightCone && distance > m_ssoGuardian.MinRange) continue;
-			if (isTargetLit && isTargetInSightCone && distance > m_ssoGuardian.MaxRange) continue;
-			if (!isTargetLit && distance > m_ssoGuardian.MinRange) continue;
+			if (!isTargetLit && !isTargetInSightCone && distance > m_ssoGuardian.LethalRange) continue;
+			if (isTargetLit && !isTargetInSightCone && distance > m_ssoGuardian.ClearRange) continue;
+			if (isTargetLit && isTargetInSightCone && distance > m_ssoGuardian.LongRange) continue;
+			if (!isTargetLit && distance > m_ssoGuardian.ClearRange) continue;
 
 			// Update the best target with the candidate
 			m_hasTargetInSight = true;
@@ -181,7 +183,6 @@ public class GuardianMotor : MonoBehaviour
 		&& m_targetNotFound
 		&& !m_characterAggroedLately)
 		{
-			print("entering patrol");
 			m_targetNotFound = false;
             SwitchState(GuardianBehaviorState.PATROL);
 			return;
@@ -190,7 +191,6 @@ public class GuardianMotor : MonoBehaviour
         if (m_rsoGuardianState.value != GuardianBehaviorState.AGGRO 
 		&& m_hasTargetInSight)
 		{
-			print("entering aggro");
 			SwitchState(GuardianBehaviorState.AGGRO);
 			return;
 		}
@@ -199,7 +199,6 @@ public class GuardianMotor : MonoBehaviour
 		&& m_rsoGuardianState.value == GuardianBehaviorState.AGGRO
 		&& !m_hasTargetInSight)
 		{
-			print("entering seek");
 			SwitchState(GuardianBehaviorState.SEEK);
 			return;
 		}
@@ -343,18 +342,20 @@ public class GuardianMotor : MonoBehaviour
     {
 		m_eyes.sharedMaterial = m_ssoGuardian.AggroMaterial;
 		m_agent.speed = m_overrideAggroSpeed ? m_aggroSpeed : m_ssoGuardian.AggroSpeed;
+		m_lineRenderer.gameObject.SetActive(true);
 	}
 
     private void UpdateAggroState()
 	{
-
 		ChaseTarget();
-    }
+		UpdateLineTarget();
+	}
 
     private void ExitAggroState()
     {
-
+		m_lineRenderer.gameObject.SetActive(false);
 	}
+
 
 	private void ChaseTarget()
 	{
@@ -405,6 +406,7 @@ public class GuardianMotor : MonoBehaviour
 
 	private void EnterSeekState()
 	{
+		m_eyes.sharedMaterial = m_ssoGuardian.SeekMaterial;
 		m_omniscienceTimer = m_ssoGuardian.OmniscienceDuration;
 		m_seekingTimer = m_ssoGuardian.SeekingDuration;
 
@@ -483,12 +485,21 @@ public class GuardianMotor : MonoBehaviour
 		m_tmpTarget.text = m_hasTargetInSight ? m_currentTarget.Position.ToString() : "none";
 	}
 
+	private Vector3[] m_lineTargetPositions = new Vector3[2];
+	private void UpdateLineTarget()
+	{
+		m_lineTargetPositions[0] = m_frontEye.position;
+		m_lineTargetPositions[1] = m_currentTarget.Position;
+		m_lineRenderer.SetPositions(m_lineTargetPositions);
+	}
 	private void OnDrawGizmos()
 	{
 		Gizmos.color = Color.red;
-		Gizmos.DrawWireSphere(transform.position, m_ssoGuardian.MinRange);
+		Gizmos.DrawWireSphere(transform.position, m_ssoGuardian.LethalRange);
 		Gizmos.color = Color.yellow;
-		Gizmos.DrawWireSphere(transform.position, m_ssoGuardian.MaxRange);
+		Gizmos.DrawWireSphere(transform.position, m_ssoGuardian.ClearRange);
+		Gizmos.color = Color.green;
+		Gizmos.DrawWireSphere(transform.position, m_ssoGuardian.LongRange);
 	}
 
     #endregion
