@@ -25,7 +25,7 @@ public class Rope : Permanent
 	private bool m_isPlaced;
 	private float m_holdLength;
 	private List<Vector3> m_folds = new List<Vector3>();
-	private List<RopeLine> m_ropeLines = new List<RopeLine>();
+	private RopeLine m_ropeLine;
 	private List<Interactable> m_interactables = new List<Interactable>();
 	private Rigidbody m_characterRigidbody;
 	private Transform m_characterAttach;
@@ -239,10 +239,10 @@ public class Rope : Permanent
 		m_ssoRope.PfRopeInteractible.GetComponent<SphereCollider>().radius = m_ssoRope.InteractableSphereRadius;
 		float sphereDiameter = m_ssoRope.PfRopeInteractible.GetComponent<SphereCollider>().radius * 2f;
 
-		for (int i = 0; i < m_ropeLines.Count; i++)
+		for (int i = 1; i < m_ropeLine.Positions.Length; i++)
 		{
-			Vector3 lineDirection = (m_ropeLines[i].Positions[0] - m_ropeLines[i].Positions[1]).normalized;
-			float lineLength = (m_ropeLines[i].Positions[0] - m_ropeLines[i].Positions[1]).magnitude;
+			Vector3 lineDirection = (m_ropeLine.Positions[i-1] - m_ropeLine.Positions[i]).normalized;
+			float lineLength = (m_ropeLine.Positions[i-1] - m_ropeLine.Positions[i]).magnitude;
 			int sphereAmount = Mathf.FloorToInt(lineLength / sphereDiameter) + 1;
 
 			for (int j = 0; j < sphereAmount; j++)
@@ -250,7 +250,7 @@ public class Rope : Permanent
 				var newInteractable = Instantiate(m_ssoRope.PfRopeInteractible, transform);
 				newInteractable.OnInteractedWithRef += Reattach;
 				newInteractable.transform.rotation = Quaternion.LookRotation(lineDirection);
-				newInteractable.transform.position = m_ropeLines[i].Positions[1] + lineDirection * sphereDiameter * j;
+				newInteractable.transform.position = m_ropeLine.Positions[i] + lineDirection * sphereDiameter * j;
 				m_interactables.Add(newInteractable);
 			}
 		}
@@ -355,14 +355,9 @@ public class Rope : Permanent
 		// Assertion
 		if (!m_isConnected) return;
 
-		// Clear lists
-		if (m_ropeLines.Count >= 1)
+		if (m_ropeLine == null)
 		{
-			for (int i = m_ropeLines.Count - 1; i >= 0; i--)
-			{
-				Destroy(m_ropeLines[i].gameObject);
-			}
-			m_ropeLines = new List<RopeLine>();
+			m_ropeLine = Instantiate(m_ssoRope.PfRopeLine, transform);
 		}
 
 		// Get material based in the total distance
@@ -376,15 +371,17 @@ public class Rope : Permanent
 			material = m_ssoRope.MidMaterial;
 		}
 
+		List<Vector3> positions = new List<Vector3>();
 		// Draw lines 
-		for (int i = 0; i < m_folds.Count; i++)
+		foreach (Vector3 fold in m_folds)
 		{
-			RopeLine newRopeLine = Instantiate(m_ssoRope.PfRopeLine, transform);
-			newRopeLine.SetPositions(m_folds[i], i + 1 >= m_folds.Count ? m_characterAttach.position : m_folds[i + 1]);
-			newRopeLine.SetColor(material);
-			m_ropeLines.Add(newRopeLine);
+			positions.Add(fold);
 		}
-	}
+        positions.Add(m_characterAttach.position.CutDigits(2));
+        
+        m_ropeLine.SetPositions(positions.ToArray());
+        m_ropeLine.SetColor(material);
+    }
 
 	#endregion
 }

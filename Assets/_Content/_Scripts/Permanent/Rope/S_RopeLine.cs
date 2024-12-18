@@ -1,5 +1,6 @@
 using Sirenix.OdinInspector;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class RopeLine : MonoBehaviour
 {
@@ -8,11 +9,11 @@ public class RopeLine : MonoBehaviour
 	
 	[HideInInspector] public Vector3[] Positions;
 
-	public void SetPositions(Vector3 from, Vector3 to)
+	public void SetPositions(Vector3[] positions)
 	{
-		Positions = new Vector3[] { from, to };
+		Positions = positions;
 
-		m_lineRenderer.positionCount = 2;
+		m_lineRenderer.positionCount = Positions.Length;
 		m_lineRenderer.SetPositions(Positions);
 	}
 
