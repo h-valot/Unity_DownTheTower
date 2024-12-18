@@ -10,12 +10,14 @@ public class Rope : Permanent
 	[Title("Internal references")]
 	[SerializeField] private BoxCollider m_boxCollider;
 	[SerializeField] private Transform m_ropeAttach;
+	[SerializeField] public Transform RaycastTarget;
 	[SerializeField] private MeshRenderer m_previewMeshRendered;
 	[SerializeField] private GameObject m_previewGameObject;
 	[SerializeField] private Interactable m_baseInteractable;
 	[SerializeField] private ConfigurableJoint m_joint;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Rope m_ssoRope;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_Ropes m_rsoRopes;
 
 	#endregion
 
@@ -70,6 +72,16 @@ public class Rope : Permanent
 		HandleFolds();
 		HandleJoint();
 		DrawLines();
+	}
+
+	private void OnEnable()
+	{
+		m_rsoRopes.value.Add(this);
+	}
+
+	private void OnDisable()
+	{
+		m_rsoRopes.value.Remove(this);
 	}
 
 	#endregion

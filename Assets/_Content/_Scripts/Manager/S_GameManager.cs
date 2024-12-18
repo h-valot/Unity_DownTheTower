@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using DG.Tweening;
 using Sirenix.OdinInspector;
 using UnityEngine;
@@ -15,6 +16,7 @@ public class GameManager : MonoBehaviour
 
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterDeath m_rsoCharacterDeath;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_GamePaused m_rsoGamePaused;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_Ropes m_rsoRopes;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_ToggleCursor m_rseToggleCursor;
 
@@ -43,7 +45,10 @@ public class GameManager : MonoBehaviour
 		Restart();
 		DOTween.SetTweensCapacity(400, 400);
 		m_rseToggleCursor.Call(false);
+
+		// Reset runtime scriptable values
 		m_rsoGamePaused.value = false;
+		m_rsoRopes.value = new List<Rope>();
 	}
 
 	/// <summary>
