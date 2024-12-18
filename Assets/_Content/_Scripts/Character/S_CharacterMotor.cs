@@ -58,7 +58,7 @@ public class CharacterMotor : MonoBehaviour
 	private RaycastHit[] m_raycastHits;
 
     // - Ground -
-	private bool m_isGrounded;
+	[HideInInspector] public bool m_isGrounded;
 	private Vector3 m_groundNormal;
     private float m_coyoteTime;
 	private Vector3 m_positionStartFall;
@@ -73,7 +73,7 @@ public class CharacterMotor : MonoBehaviour
 	private Vector2 m_planarVelocity;
 	private float m_maxGroundedSpeed;
 	private bool m_isRunning;
-	private bool m_hasJumped;
+	[HideInInspector] public bool m_hasJumped;
 	public bool IsJumpingPressed { get; private set; }
 	private bool m_isCrafting;
 	private float m_airControlTimeScalar;
