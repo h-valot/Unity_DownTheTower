@@ -1,6 +1,7 @@
 using Sirenix.OdinInspector;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.AI;
@@ -42,19 +43,27 @@ public class GuardianMotor : MonoBehaviour
 	#region VARIABLES
 
 	[Title("Debug")]
-
-	// Aggro
-	public List<Vector3> m_candidateTargetPositions = new List<Vector3>();
-	private Vector3 m_currentTargetPosition;
-	private float m_minTargetDistance;
-	public bool m_hasTargetInSight;
+	private bool m_canSwitchState = true;
 
 	// Patrol
 	public bool IsPatrolPathValid => m_patrolPath && m_patrolPath.Waypoints.Count > 0;
-	public int m_currentWaypoint;
+	private int m_currentWaypoint;
 	private float m_updateWaypointTimer;
+	private float m_currentAngleSight;
 
-	private bool m_canSwitchState = true;
+	// Aggro
+	public List<Candidate> m_candidates = new List<Candidate>();
+	private Candidate m_currentTarget;
+	private float m_minTargetDistance;
+	private bool m_hasTargetInSight;
+	public bool m_characterAggroedLately;
+
+	// Seek
+	private float m_omniscienceTimer;
+	private Candidate m_omniscienceTarget;
+	private float m_seekingTimer;
+	private bool m_targetNotFound;
+	private int m_seekTargetId;
 
 	#endregion
 
@@ -62,7 +71,9 @@ public class GuardianMotor : MonoBehaviour
 
 	private void Start()
 	{
-		m_rsoGuardianState.value = GuardianBehaviorState.NONE;
+		m_rsoGuardianState.value = GuardianBehaviorState.SEEK;
+		ToggleAngleSightExtension(false);
+
 		SelectTarget();
 		DetermineState();
 	}
@@ -72,8 +83,9 @@ public class GuardianMotor : MonoBehaviour
         SelectTarget();
         DetermineState();
         UpdateState();
+
         UpdateDebugUI();
-    }
+	}
 
 	private void OnTriggerEnter(Collider collider)
 	{
@@ -89,8 +101,7 @@ public class GuardianMotor : MonoBehaviour
 
 		if (collider.TryGetComponent<Rope>(out var rope))
 		{
-			rope.Detach();
-			Destroy(rope.gameObject);
+			StartCoroutine(AnimateRopeDestroy(rope));
 		}
 	}
 
@@ -101,23 +112,32 @@ public class GuardianMotor : MonoBehaviour
 	private void SelectTarget()
 	{
 		// Fill candidates
-		m_candidateTargetPositions = new List<Vector3> { m_rsoCharacterPosition.value + Vector3.up * 0.8f };
-		foreach (var torch in m_rsoTorchManager.value.Torches) m_candidateTargetPositions.Add(torch.RaycastTarget.position);
-		foreach (var rope in m_rsoRopes.value) m_candidateTargetPositions.Add(rope.RaycastTarget.position);
+		int id = 0;
+		m_candidates = new List<Candidate> { new Candidate(id, m_rsoCharacterPosition.value + Vector3.up * 0.8f) };
+		foreach (var torch in m_rsoTorchManager.value.Torches)
+		{
+			id++;
+			m_candidates.Add(new Candidate(id, torch.RaycastTarget.position));
+		}
+		foreach (var rope in m_rsoRopes.value)
+		{
+			id++;
+			m_candidates.Add(new Candidate(id, rope.RaycastTarget.position));
+		}
 
 		// Select a candidate
 		m_minTargetDistance = m_ssoGuardian.MaxRange;
-		Vector3 bestTargetPosition = m_currentTargetPosition;
+		Candidate bestTarget = m_currentTarget;
 		m_hasTargetInSight = false;
-		foreach (var candidateTargetPosition in m_candidateTargetPositions)
+		foreach (var candidate in m_candidates)
 		{
 			// Assert: there is a better target near to the guardian
-			float distance = Vector3.Distance(transform.position, candidateTargetPosition);
+			float distance = Vector3.Distance(transform.position, candidate.Position);
 			if (distance > m_minTargetDistance) continue;
 
 			// Assert: the candidate isn't a valid class
-			Debug.DrawLine(m_eyes.transform.position, candidateTargetPosition);
-			Physics.Linecast(m_eyes.transform.position, candidateTargetPosition, out var hit, ~m_ssoGuardian.TargetLayerToIgnore);
+			Debug.DrawLine(m_eyes.transform.position, candidate.Position);
+			Physics.Linecast(m_eyes.transform.position, candidate.Position, out var hit, ~m_ssoGuardian.TargetLayerToIgnore);
 			bool isCharacter = !hit.collider.TryGetComponent<CharacterMotor>(out var character);
 			bool isTorch = !hit.collider.TryGetComponent<Torch>(out var torch);
 			bool isRope = !hit.collider.TryGetComponent<Rope>(out var rope);
@@ -128,8 +148,8 @@ public class GuardianMotor : MonoBehaviour
 			if (rope && !rope.IsPlaced) continue;
 
 			// Gather candidate informations such as lighting and positioning
-			Vector3 guardianCandidateDirection = (candidateTargetPosition - transform.position).normalized;
-			bool isTargetInSightCone = Vector3.Dot(transform.forward, guardianCandidateDirection) >= m_ssoGuardian.AngleSight;
+			Vector3 guardianCandidateDirection = (candidate.Position - transform.position).normalized;
+			bool isTargetInSightCone = Vector3.Dot(transform.forward, guardianCandidateDirection) >= m_currentAngleSight;
 			bool isTargetLit = character && character.IsCarryingLight() || torch && torch.IsLit;
 
 			// Assertions
@@ -138,17 +158,14 @@ public class GuardianMotor : MonoBehaviour
 			if (isTargetLit && isTargetInSightCone && distance > m_ssoGuardian.MaxRange) continue;
 			if (!isTargetLit && distance > m_ssoGuardian.MinRange) continue;
 
-			// Update the best target position with the candidate
+			// Update the best target with the candidate
 			m_hasTargetInSight = true;
 			m_minTargetDistance = distance;
-			bestTargetPosition = candidateTargetPosition;
+			bestTarget = candidate;
 		}
 
 		// Set candidate as the current target
-		if (m_currentTargetPosition != bestTargetPosition) 
-		{
-			m_currentTargetPosition = bestTargetPosition;
-		}
+		m_currentTarget = bestTarget;
     }
 
     /// <summary>
@@ -159,16 +176,34 @@ public class GuardianMotor : MonoBehaviour
 		// Don't switch state while a coroutine is running
 		if (!m_canSwitchState) return;
 
-		if (m_rsoGuardianState.value != GuardianBehaviorState.PATROL && !m_hasTargetInSight)
-        {
+		if (m_rsoGuardianState.value != GuardianBehaviorState.PATROL
+		&& m_rsoGuardianState.value == GuardianBehaviorState.SEEK 
+		&& m_targetNotFound
+		&& !m_characterAggroedLately)
+		{
+			print("entering patrol");
+			m_targetNotFound = false;
             SwitchState(GuardianBehaviorState.PATROL);
-        }
+			return;
+		}
 
-        if (m_rsoGuardianState.value != GuardianBehaviorState.AGGRO && m_hasTargetInSight)
-        {
-            SwitchState(GuardianBehaviorState.AGGRO);
-        }
-    }
+        if (m_rsoGuardianState.value != GuardianBehaviorState.AGGRO 
+		&& m_hasTargetInSight)
+		{
+			print("entering aggro");
+			SwitchState(GuardianBehaviorState.AGGRO);
+			return;
+		}
+
+		if (m_rsoGuardianState.value != GuardianBehaviorState.SEEK
+		&& m_rsoGuardianState.value == GuardianBehaviorState.AGGRO
+		&& !m_hasTargetInSight)
+		{
+			print("entering seek");
+			SwitchState(GuardianBehaviorState.SEEK);
+			return;
+		}
+	}
 
     private void SwitchState(GuardianBehaviorState newState, bool exitCurrentState = true)
 	{
@@ -186,6 +221,10 @@ public class GuardianMotor : MonoBehaviour
 
 			case GuardianBehaviorState.AGGRO:
 				ExitAggroState();
+				break;
+
+			case GuardianBehaviorState.SEEK:
+				ExitSeekState();
 				break;
 		}
 	}
@@ -206,7 +245,11 @@ public class GuardianMotor : MonoBehaviour
             case GuardianBehaviorState.AGGRO:
                 EnterAggroState();
                 break;
-        }
+
+			case GuardianBehaviorState.SEEK:
+				EnterSeekState();
+				break;
+		}
     }
     
     private void UpdateState()
@@ -220,7 +263,11 @@ public class GuardianMotor : MonoBehaviour
             case GuardianBehaviorState.AGGRO:
                 UpdateAggroState();
                 break;
-        }
+
+			case GuardianBehaviorState.SEEK:
+				UpdateSeekState();
+				break;
+		}
     }
 
     #endregion
@@ -270,7 +317,9 @@ public class GuardianMotor : MonoBehaviour
 			m_currentWaypoint++;
 			if (m_currentWaypoint >= m_patrolPath.Waypoints.Count) m_currentWaypoint = 0;
 
-			m_updateWaypointTimer = m_ssoGuardian.WaitDurationOnWaypointReached;
+			m_updateWaypointTimer = m_patrolPath.Waypoints[m_currentWaypoint].OverrideWaitDurationOnWaypointReached
+				? m_patrolPath.Waypoints[m_currentWaypoint].WaitDurationOnWaypointReached
+				: m_ssoGuardian.WaitDurationOnWaypointReached;
 		}
 	}
 
@@ -289,6 +338,7 @@ public class GuardianMotor : MonoBehaviour
 
 	#region AGGRO
 
+
 	private void EnterAggroState()
     {
 		m_eyes.sharedMaterial = m_ssoGuardian.AggroMaterial;
@@ -296,13 +346,14 @@ public class GuardianMotor : MonoBehaviour
 	}
 
     private void UpdateAggroState()
-    {
+	{
+
 		ChaseTarget();
     }
 
     private void ExitAggroState()
     {
-		StartCoroutine(StartSearchingCharacter());
+
 	}
 
 	private void ChaseTarget()
@@ -310,50 +361,126 @@ public class GuardianMotor : MonoBehaviour
 		// Assertion
 		if (!m_hasTargetInSight) return;
 
-		m_agent.destination = m_currentTargetPosition;
-	}
-
-	private IEnumerator StartSearchingCharacter()
-	{
-		m_canSwitchState = false;
-		while ((transform.position - m_agent.destination).magnitude > m_ssoGuardian.WaypointDistanceTolerance)
+		m_agent.destination = m_currentTarget.Position;
+		if (!m_characterAggroedLately && m_currentTarget.Id == 0)
 		{
-			yield return null;
+			m_characterAggroedLately = true;
 		}
-		yield return new WaitForSeconds(m_ssoGuardian.WaitDurationOnLastTargetPositionReached);
-		m_canSwitchState = true;
-
-		// Because this coroutine is executed on exit state. 
-		// The enter state function of the next state should be called but isn't because of m_isCoroutineRunning.
-		// After this coroutine ends, we manually switch to the wanted state without exiting the current state.
-		// Otherwise, this coroutine will be called endlessly.
-		SwitchState(GuardianBehaviorState.PATROL, exitCurrentState: false);
-	}
-
-	private IEnumerator AnimateTorchDestroy(Torch torch)
-	{
-		m_canSwitchState = false;
-		yield return new WaitForSeconds(m_ssoGuardian.TimeToDestroyTorch);
-		m_rsoTorchManager.value.Remove(torch);
-		m_canSwitchState = true;
 	}
 
 	private IEnumerator AnimateCharacterKill(CharacterMotor character)
 	{
 		m_canSwitchState = false;
-		yield return new WaitForSeconds(m_ssoGuardian.TimeToKillCharacter);
+		yield return new WaitForSeconds(m_ssoGuardian.DelayKillCharacter.x);
 		character.HandleDeath();
+		yield return new WaitForSeconds(m_ssoGuardian.DelayKillCharacter.y);
 		m_canSwitchState = true;
+		m_targetNotFound = true;
 	}
 
-    #endregion
+	private IEnumerator AnimateTorchDestroy(Torch torch)
+	{
+		m_canSwitchState = false;
+		yield return new WaitForSeconds(m_ssoGuardian.DelayDestroyTorch.x);
+		m_rsoTorchManager.value.Remove(torch);
+		yield return new WaitForSeconds(m_ssoGuardian.DelayDestroyTorch.y);
+		m_canSwitchState = true;
+		m_targetNotFound = true;
+	}
 
-    #region DEBUG
+	private IEnumerator AnimateRopeDestroy(Rope rope)
+	{
+		m_canSwitchState = false;
+		yield return new WaitForSeconds(m_ssoGuardian.DelayDestroyRope.x);
+		rope.Detach();
+		Destroy(rope.gameObject);
+		yield return new WaitForSeconds(m_ssoGuardian.DelayDestroyRope.y);
+		m_canSwitchState = true;
+		m_targetNotFound = true;
+	}
 
-    private void UpdateDebugUI()
+	#endregion
+
+	#region SEEK
+
+	private void EnterSeekState()
+	{
+		m_omniscienceTimer = m_ssoGuardian.OmniscienceDuration;
+		m_seekingTimer = m_ssoGuardian.SeekingDuration;
+
+		m_seekTargetId = m_currentTarget.Id;
+		m_omniscienceTarget = GetCandidateById(m_seekTargetId);
+		m_targetNotFound = false;
+	}
+
+	private void UpdateSeekState()
+	{
+		HandleOmniscience();
+		HandleSeek();
+	}
+
+	private void ExitSeekState()
+	{
+
+	}
+
+	private void HandleOmniscience()
+	{
+		m_omniscienceTimer -= Time.fixedDeltaTime;
+		m_omniscienceTarget = GetCandidateById(m_seekTargetId);
+
+		if (m_omniscienceTimer > 0f
+		&& m_omniscienceTarget.Id != -1)
+		{
+			m_agent.destination = m_omniscienceTarget.Position;
+		}
+	}
+
+	private void HandleSeek()
+	{
+		if ((transform.position - m_agent.destination).magnitude > m_ssoGuardian.WaypointDistanceTolerance) return;
+
+		ToggleAngleSightExtension(true);
+
+		m_seekingTimer -= Time.fixedDeltaTime;
+		if (m_seekingTimer >= 0f) return;
+
+		if (m_characterAggroedLately 
+		&& m_seekTargetId != 0)
+		{
+			m_characterAggroedLately = false;
+			m_omniscienceTimer = m_ssoGuardian.OmniscienceDuration;
+			m_seekingTimer = m_ssoGuardian.SeekingDuration;
+			m_seekTargetId = 0;
+			return;
+		}
+
+		ToggleAngleSightExtension(false);
+		m_targetNotFound = true;
+	}
+
+	private void ToggleAngleSightExtension(bool isEnabled)
+	{
+		m_currentAngleSight = isEnabled ? m_ssoGuardian.ExtendedAngleSight : m_ssoGuardian.DefaultAngleSight;
+	}
+
+	private Candidate GetCandidateById(int id)
+	{
+		foreach (var candidate in m_candidates.Where(c => c.Id == id))
+		{
+			return candidate;
+		}
+		return new Candidate(-1, Vector3.zero);
+	}
+
+	#endregion
+
+	#region DEBUG
+
+	private void UpdateDebugUI()
 	{
 		m_tmpState.text = m_rsoGuardianState.value.ToString();
-		m_tmpTarget.text = m_hasTargetInSight ? m_currentTargetPosition.ToString() : "none";
+		m_tmpTarget.text = m_hasTargetInSight ? m_currentTarget.Position.ToString() : "none";
 	}
 
 	private void OnDrawGizmos()

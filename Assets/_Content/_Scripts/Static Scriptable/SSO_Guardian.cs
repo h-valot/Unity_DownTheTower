@@ -35,7 +35,13 @@ public class SSO_Guardian : ScriptableObject
 	[PropertySpace(SpaceAfter = 0, SpaceBefore = 15)]
 	[InfoBox("", InfoMessageType.None)]
 	[PropertyRange(-1f, 1f)]
-	public float AngleSight;
+	public float DefaultAngleSight;
+
+	[FoldoutGroup("Sight")]
+	[PropertySpace(SpaceAfter = 0, SpaceBefore = 15)]
+	[InfoBox("", InfoMessageType.None)]
+	[PropertyRange(-1f, 1f)]
+	public float ExtendedAngleSight;
 
 	#endregion
 
@@ -64,20 +70,34 @@ public class SSO_Guardian : ScriptableObject
 	[InfoBox("Speed of the guardian when it has a target aggroed.", InfoMessageType.None)]
 	public float AggroSpeed;
 
-	[FoldoutGroup("Patrol")]
+	[FoldoutGroup("Aggro")]
 	[PropertySpace(SpaceAfter = 0, SpaceBefore = 15)]
-	[InfoBox("Duration the guardian waits when it reaches the last target position.", InfoMessageType.None)]
-	public float WaitDurationOnLastTargetPositionReached;
+	[InfoBox("Duration during which the guardian stand still before killing the character.", InfoMessageType.None)]
+	public Vector2 DelayKillCharacter;
 
 	[FoldoutGroup("Aggro")]
 	[PropertySpace(SpaceAfter = 0, SpaceBefore = 15)]
 	[InfoBox("Duration during which the guardian stand still before destroying a torch.", InfoMessageType.None)]
-	public float TimeToDestroyTorch;
+	public Vector2 DelayDestroyTorch;
 
 	[FoldoutGroup("Aggro")]
 	[PropertySpace(SpaceAfter = 0, SpaceBefore = 15)]
-	[InfoBox("Duration during which the guardian stand still before killing the character.", InfoMessageType.None)]
-	public float TimeToKillCharacter;
+	[InfoBox("Duration during which the guardian stand still before destroying a rope.", InfoMessageType.None)]
+	public Vector2 DelayDestroyRope;
+
+	#endregion
+
+	#region SEEK
+
+	[FoldoutGroup("Seek")]
+	[PropertySpace(SpaceAfter = 0, SpaceBefore = 15)]
+	[InfoBox("", InfoMessageType.None)]
+	public float OmniscienceDuration;
+
+	[FoldoutGroup("Seek")]
+	[PropertySpace(SpaceAfter = 0, SpaceBefore = 15)]
+	[InfoBox("Duration the guardian waits when it reaches the last target position. During this time, the guardian has an extended angle sight.", InfoMessageType.None)]
+	public float SeekingDuration;
 
 	#endregion
 }

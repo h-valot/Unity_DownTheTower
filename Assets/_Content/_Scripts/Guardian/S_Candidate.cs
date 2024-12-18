@@ -2,20 +2,14 @@ using System;
 using UnityEngine;
 
 [Serializable]
-public class Candidate : MonoBehaviour
+public struct Candidate
 {
+	public int Id;
 	public Vector3 Position;
-	public CandidateType Type;
 
-	public Candidate(Vector3 position, CandidateType type)
+	public Candidate(int id, Vector3 position)
 	{
+		Id = id;
 		Position = position;
-		Type = type;
 	}
-}
-
-public enum CandidateType
-{
-	CHARACTER = 0,
-	TORCH
 }

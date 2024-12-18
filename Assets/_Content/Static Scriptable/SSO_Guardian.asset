@@ -20,11 +20,14 @@ MonoBehaviour:
   TargetLayerToIgnore:
     serializedVersion: 2
     m_Bits: 64
-  AngleSight: 0.5
+  DefaultAngleSight: 0.5
+  ExtendedAngleSight: 0.1
   PatrolSpeed: 3
   WaypointDistanceTolerance: 0.25
-  WaitDurationOnWaypointReached: 3
+  WaitDurationOnWaypointReached: 1
   AggroSpeed: 6
-  WaitDurationOnLastTargetPositionReached: 2
-  TimeToDestroyTorch: 1
-  TimeToKillCharacter: 0
+  DelayKillCharacter: {x: 0, y: 1}
+  DelayDestroyTorch: {x: 0, y: 1}
+  DelayDestroyRope: {x: 0, y: 1}
+  OmniscienceDuration: 1
+  SeekingDuration: 2
