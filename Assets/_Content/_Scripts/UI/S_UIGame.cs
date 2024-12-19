@@ -1,29 +1,24 @@
-using DG.Tweening;
+using System.Collections.Generic;
 using Sirenix.OdinInspector;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class UIGame : MonoBehaviour
 {
-    [Title("Internal references")]
-    [SerializeField] private Image m_imgDeath;
-    [SerializeField] private GameObject m_pnlPause;
-    [SerializeField] private GameObject m_pnlLog;
-    [SerializeField] private TextMeshProUGUI m_tmpLogHeader;
-    [SerializeField] private TextMeshProUGUI m_tmpLogBody;
-	[SerializeField] private TextMeshProUGUI m_tmpVersion;
+	[FoldoutGroup("Internal references")][SerializeField] private GameObject m_pnlPause;
+	[FoldoutGroup("Internal references")][SerializeField] private GameObject m_pnlLog;
+	[FoldoutGroup("Internal references")][SerializeField] private TextMeshProUGUI m_tmpLogHeader;
+	[FoldoutGroup("Internal references")][SerializeField] private TextMeshProUGUI m_tmpLogBody;
+	[FoldoutGroup("Internal references")][SerializeField] private TextMeshProUGUI m_tmpVersion;
+	[FoldoutGroup("Internal references")][SerializeField] private List<UIWindow> m_subwindows = new List<UIWindow>();
 
 	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Game m_ssoGame;
-
+	
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Pause m_rsePause;
-	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Cancel m_rseCancel;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_ToggleInputs m_rseToggleInputs;
-	[FoldoutGroup("Scriptable")][SerializeField] private RSE_LogContent m_rseLogContent;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_ToggleCursor m_rseToggleCursor;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_GamePaused m_rsoGamePaused;
-	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterDeath m_rsoCharacterDeath;
 
 	private void Start()
 	{
@@ -59,6 +54,7 @@ public class UIGame : MonoBehaviour
 		m_pnlPause.SetActive(true);
 		TogglePauseGame(true);
 		m_rseToggleCursor.Call(true);
+		HideSubwindows();
 	}
 
 	public void Hide()
@@ -66,6 +62,15 @@ public class UIGame : MonoBehaviour
 		m_pnlPause.SetActive(false);
 		TogglePauseGame(false);
 		m_rseToggleCursor.Call(false);
+		HideSubwindows();
+	}
+
+	private void HideSubwindows()
+	{
+		foreach (var subwindow in m_subwindows)
+		{
+			subwindow.Hide();
+		}
 	}
 
 	public void Exit()

@@ -18,11 +18,11 @@ public class UIToggleable : MonoBehaviour
 	[OnValueChanged("UpdateFlavor")]
 	[SerializeField] private string m_flavor;
 
-	[FoldoutGroup("Static variables")][SerializeField] private Sprite m_spToggleEnabled;
-	[FoldoutGroup("Static variables")][SerializeField] private Sprite m_spToggleDisabled;
-	[FoldoutGroup("Static variables")][SerializeField] private Image m_imgToggle;
-	[FoldoutGroup("Static variables")][SerializeField] private TextMeshProUGUI m_tmpTitle;
-	[FoldoutGroup("Static variables")][SerializeField] private TextMeshProUGUI m_tmpFlavor;
+	[FoldoutGroup("Internal references")][SerializeField] private Sprite m_spToggleEnabled;
+	[FoldoutGroup("Internal references")][SerializeField] private Sprite m_spToggleDisabled;
+	[FoldoutGroup("Internal references")][SerializeField] private Image m_imgToggle;
+	[FoldoutGroup("Internal references")][SerializeField] private TextMeshProUGUI m_tmpTitle;
+	[FoldoutGroup("Internal references")][SerializeField] private TextMeshProUGUI m_tmpFlavor;
 
 	[Space(10)]
 	public UnityEvent<bool> OnToggled;

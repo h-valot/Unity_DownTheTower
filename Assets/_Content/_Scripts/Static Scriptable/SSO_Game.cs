@@ -42,6 +42,14 @@ public class SSO_Game : ScriptableObject
 
 	#endregion
 
+	#region DATA
+
+	[FoldoutGroup("Data")]
+	[InfoBox("If true, reset all game data on game start.", InfoMessageType.None)]
+	public bool ResetData;
+
+	#endregion
+
 	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Torch m_ssoTorch;
 	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Character m_ssoCharacter;
 }

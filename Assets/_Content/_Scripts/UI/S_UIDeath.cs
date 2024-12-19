@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public class UIDeath : UIWindow
 {
-	[FoldoutGroup("Static variables")][SerializeField] private Image m_imgDeath;
+	[FoldoutGroup("Internal references")][SerializeField] private Image m_imgDeath;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_PlayFallDeath m_rsePlayFallDeath;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterDeath m_rsoCharacterDeath;

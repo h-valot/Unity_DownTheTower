@@ -13,6 +13,7 @@ public class GameManager : MonoBehaviour
 	[SerializeField] private Light m_directionalLight;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Game m_ssoGame;
+	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Logs m_ssoLogs;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterDeath m_rsoCharacterDeath;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_GamePaused m_rsoGamePaused;
@@ -49,6 +50,14 @@ public class GameManager : MonoBehaviour
 		// Reset runtime scriptable values
 		m_rsoGamePaused.value = false;
 		m_rsoRopes.value = new List<Rope>();
+
+		if (m_ssoGame.ResetData)
+		{
+			foreach (var log in m_ssoLogs.Logs)
+			{
+				log.IsDiscovered = false;
+			}
+		}
 	}
 
 	/// <summary>

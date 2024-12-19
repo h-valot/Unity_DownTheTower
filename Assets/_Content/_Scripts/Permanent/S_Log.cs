@@ -3,20 +3,16 @@ using UnityEngine;
 
 public class Log : Interactable
 {
-	[Title("Title")]
-	[HideLabel]
-	[MultiLineProperty(2)]
-	[SerializeField] private string m_header;
+	[SerializeField] private SSO_Log m_ssoLog;
 
-	[Title("Flavor")]
-	[HideLabel]
-	[MultiLineProperty(7)]
-	[SerializeField] private string m_body;
-
-	[FoldoutGroup("Scriptable")][SerializeField] private RSE_LogContent m_rseLogContent;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSE_DisplayLog m_rseDisplayLog;
 
     public override void InteractionTrigger()
     {
-        m_rseLogContent.Call(m_header, m_body);
+		// Assertion
+		if (!m_ssoLog) return;
+
+		m_ssoLog.IsDiscovered = true;
+		m_rseDisplayLog.Call(m_ssoLog);
     }
 }

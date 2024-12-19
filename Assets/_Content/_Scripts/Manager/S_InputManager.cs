@@ -6,8 +6,7 @@ public class InputManager : MonoBehaviour
 {
 	#region REFERENCES
 
-	[Title("Internal references")]
-	[SerializeField] private PlayerInput m_playerInput;
+	[FoldoutGroup("Internal references")][SerializeField] private PlayerInput m_playerInput;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Inputs m_ssoInputs;
 
@@ -40,7 +39,7 @@ public class InputManager : MonoBehaviour
 	private bool m_throw;
 	private bool m_jump;
 	private bool m_climb;
-	private bool m_isCursorEnabled;
+	public bool m_isCursorEnabled;
 	private bool m_interact;
 
 	#endregion

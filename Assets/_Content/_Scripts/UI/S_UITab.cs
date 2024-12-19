@@ -5,12 +5,12 @@ using UnityEngine.UI;
 
 public class UITab : MonoBehaviour, IPointerDownHandler
 {
-	[Required("When pressed, all ui tab linked panel will be withdrawn. Then, this one will be highlighted.")]
-	[SerializeField] private GameObject m_linkedPanel;
+	[FoldoutGroup("Tweakable values")][SerializeField] private Color m_colorHighlighted;
+	[FoldoutGroup("Tweakable values")][SerializeField] private Color m_colorWithdrawn;
 
-	[FoldoutGroup("Static variables")][SerializeField] private Color m_colorHighlighted;
-	[FoldoutGroup("Static variables")][SerializeField] private Color m_colorWithdrawn;
-	[FoldoutGroup("Static variables")][SerializeField] private Image m_imgBackground;
+	[Required("When pressed, all ui tab linked panel will be withdrawn. Then, this one will be highlighted.")]
+	[FoldoutGroup("Internal references")][SerializeField] private GameObject m_linkedPanel;
+	[FoldoutGroup("Internal references")][SerializeField] private Image m_imgBackground;
 
 	[FoldoutGroup("Scriptables")][SerializeField] private RSE_WithdrawTabs m_rseWithdrawTabs;
 

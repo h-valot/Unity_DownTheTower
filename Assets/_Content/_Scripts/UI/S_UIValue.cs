@@ -17,9 +17,9 @@ public class UIValue : MonoBehaviour
 	[OnValueChanged("UpdateFlavor")]
 	[SerializeField] private string m_flavor;
 
-	[FoldoutGroup("Static variables")][SerializeField] private TextMeshProUGUI m_tmpTitle;
-	[FoldoutGroup("Static variables")][SerializeField] private TextMeshProUGUI m_tmpFlavor;
-	[FoldoutGroup("Static variables")][SerializeField] private TMP_InputField m_inpInput;
+	[FoldoutGroup("Internal references")][SerializeField] private TextMeshProUGUI m_tmpTitle;
+	[FoldoutGroup("Internal references")][SerializeField] private TextMeshProUGUI m_tmpFlavor;
+	[FoldoutGroup("Internal references")][SerializeField] private TMP_InputField m_inpInput;
 
 	[Space(10)]
 	public UnityEvent OnChanged;
