@@ -3,8 +3,10 @@ using UnityEngine;
 
 public class UIWindow : MonoBehaviour
 {
-	[FoldoutGroup("Static variables")][SerializeField] protected GameObject m_graphicsParent;
+	[FoldoutGroup("Tweakable values")][SerializeField] protected bool m_toggleCursor = true;
 	
+	[FoldoutGroup("Internal references")][SerializeField] protected GameObject m_graphicsParent;
+
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_ToggleCursor m_rseToggleCursor;
 
 	public bool IsActive => m_graphicsParent.activeInHierarchy;
@@ -29,12 +31,12 @@ public class UIWindow : MonoBehaviour
 	public virtual void Hide()
 	{
 		m_graphicsParent.SetActive(false);
-		m_rseToggleCursor.Call(false);
+		if (m_toggleCursor) m_rseToggleCursor.Call(false);
 	}
 
 	public virtual void Show()
 	{
 		m_graphicsParent.SetActive(true);
-		m_rseToggleCursor.Call(true);
+		if (m_toggleCursor) m_rseToggleCursor.Call(true);
 	}
 }

@@ -1,16 +1,14 @@
 using Sirenix.OdinInspector;
 using UnityEngine;
 
-public class Settings : MonoBehaviour
+public class UISettings : UIWindow
 {
-	[SerializeField] private GameObject m_graphicsParent;
-	[SerializeField] private UITab m_openingTab;
-
-	[FoldoutGroup("Static variables")][SerializeField] private UIValue m_valueMouseSensibilityX;
-	[FoldoutGroup("Static variables")][SerializeField] private UIValue m_valueMouseSensibilityY;
-	[FoldoutGroup("Static variables")][SerializeField] private UIToggleable m_toggleableInvertMouseY;
-	[FoldoutGroup("Static variables")][SerializeField] private UIValue m_valueGamepadSensibilityX;
-	[FoldoutGroup("Static variables")][SerializeField] private UIValue m_valueGamepadSensibilityY;
+	[FoldoutGroup("Internal references")][SerializeField] private UITab m_openingTab;
+	[FoldoutGroup("Internal references")][SerializeField] private UIValue m_valueMouseSensibilityX;
+	[FoldoutGroup("Internal references")][SerializeField] private UIValue m_valueMouseSensibilityY;
+	[FoldoutGroup("Internal references")][SerializeField] private UIValue m_valueGamepadSensibilityX;
+	[FoldoutGroup("Internal references")][SerializeField] private UIValue m_valueGamepadSensibilityY;
+	[FoldoutGroup("Internal references")][SerializeField] private UIToggleable m_toggleableInvertMouseY;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Inputs m_ssoInputs;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_GamePaused m_rsoGamePaused;
@@ -25,28 +23,11 @@ public class Settings : MonoBehaviour
 		m_rsoGamePaused.OnChanged -= HideOnPaused;
 	}
 
-	public void Toggle()
+	public override void Show()
 	{
-		if (m_graphicsParent.activeInHierarchy)
-		{
-			Hide();
-		}
-		else 
-		{
-			Show();
-		}
-	}
-
-	public void Show()
-	{
-		m_graphicsParent.SetActive(true);
+		base.Show();
 		m_openingTab.Highlight();
 		InitializeSettings();
-	}
-
-	public void Hide()
-	{
-		m_graphicsParent.SetActive(false);
 	}
 
 	private void HideOnPaused()

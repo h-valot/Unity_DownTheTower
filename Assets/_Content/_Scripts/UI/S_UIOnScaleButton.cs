@@ -7,18 +7,18 @@ using UnityEngine.UI;
 
 public class UIOnScaleButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPointerEnterHandler, IPointerExitHandler
 {
-	[Title("Tweakable values")]
-	[SerializeField] private float m_scaleDuration = 0.05f;
-	[SerializeField] private float m_scaleDownMultiplier = 0.9f;
-	[SerializeField] private float m_scaleUpMultiplier = 1.1f;
+	[FoldoutGroup("Tweakable values")][SerializeField] private float m_scaleDuration = 0.05f;
+	[FoldoutGroup("Tweakable values")][SerializeField] private float m_scaleDownMultiplier = 0.9f;
+	[FoldoutGroup("Tweakable values")][SerializeField] private float m_scaleUpMultiplier = 1.1f;
 
-	[Title("Internal references")]
+	[FoldoutGroup("Internal references")]
 	[InfoBox("It will be scaled down on pointer down and reset to normal on pointer up", InfoMessageType.None)]
 	[SerializeField] private GameObject m_graphicsParent;
+
+	[FoldoutGroup("Internal references")]
 	[InfoBox("It will be darken on pointer down and hide on pointer up", InfoMessageType.None)]
 	[SerializeField] private Image m_imgBlack = null;
 
-	[Space(10)]
 	public UnityEvent OnClick;
 
 	public void OnPointerDown(PointerEventData data)
