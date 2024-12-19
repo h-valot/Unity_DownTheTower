@@ -9,7 +9,8 @@ public class TestIk : MonoBehaviour
 	[SerializeField] private Animator m_animator;
 	[SerializeField] private Transform m_rightHandLiftTorchTarget = null;
 	[SerializeField] private Transform m_rightHandAimTorchTarget = null;
-	[SerializeField] private Transform m_leftFootObj;
+    [SerializeField] private Transform m_rightHandObj;
+    [SerializeField] private Transform m_leftFootObj;
 	[SerializeField] private Transform m_rightFootObj;
 
 	[Title("External references")]
@@ -41,8 +42,8 @@ public class TestIk : MonoBehaviour
 		if (transform == null) return;
 
 		m_animator.SetIKPositionWeight(AvatarIKGoal.RightHand, 1);
-		m_animator.SetIKRotationWeight(AvatarIKGoal.RightHand, 1);
-		m_animator.SetIKPosition(AvatarIKGoal.RightHand, transform.position);
+		m_animator.SetIKRotationWeight(AvatarIKGoal.RightHand, 0);
+		m_animator.SetIKPosition(AvatarIKGoal.RightHand, Vector3.Lerp(m_rightHandObj.transform.position, transform.position,2f));
 		m_animator.SetIKRotation(AvatarIKGoal.RightHand, transform.rotation);
 	}
 
