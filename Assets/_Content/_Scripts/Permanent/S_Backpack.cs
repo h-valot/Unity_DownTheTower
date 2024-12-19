@@ -5,7 +5,7 @@ using UnityEngine;
 public class Backpack : Interactable
 {
     [Title("Internal Variables")]
-    [SerializeField] private MeshRenderer m_mesh;
+    [SerializeField] private SkinnedMeshRenderer m_mesh;
     [SerializeField] private SphereCollider m_sphereCollider;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_BackpackCrafting m_rsoPackbackCrafting;
@@ -23,7 +23,7 @@ public class Backpack : Interactable
         m_startPosition = transform.position;
         m_startRotation = transform.eulerAngles;
         m_startScale = transform.localScale;
-        m_mesh.material.SetFloat("_craftingPercent", 1f);
+        m_mesh.material.SetFloat("_craftingPercent", 0f);
     }
 
     private void OnEnable()
@@ -80,14 +80,16 @@ public class Backpack : Interactable
 	{
 		if (isStarting)
 		{
-			m_mesh.material.DOFloat(0f, "_craftingPercent", duration)
+            m_mesh.material.DOFloat(1f, "_craftingPercent", duration)
 						   .SetEase(Ease.Linear)
 						   .SetId(gameObject.GetInstanceID() + "craftingPercent");
 		}
 		else
 		{
 			DOTween.Kill(gameObject.GetInstanceID() + "craftingPercent");
-			m_mesh.material.SetFloat("_craftingPercent", 1f);
-		}
+            m_mesh.material.DOFloat(0f, "_craftingPercent", duration*2)
+                           .SetEase(Ease.InQuint)
+                           .SetId(gameObject.GetInstanceID() + "craftingPercent");
+        }
 	}
 }

@@ -82,6 +82,7 @@ public class CharacterMotor : MonoBehaviour
     // - Craft state -
     private CraftType m_craftType;
 	private Coroutine m_craftCoroutine;
+	private float m_craftRemainingTime;
 	[HideInInspector] public Permanent HandObject;
 	[HideInInspector] public Permanent RobotObject;
 	[HideInInspector] public bool IsAiming;
@@ -1058,7 +1059,7 @@ public class CharacterMotor : MonoBehaviour
 
 			if (!HandObject)
 			{
-				m_craftCoroutine = StartCoroutine(Craft(CraftType.ROPE, m_ssoRope.CraftingDuration));
+				m_craftCoroutine = StartCoroutine(Craft(CraftType.ROPE, m_ssoTorch.CraftingDuration));
 			}
 		}
 	}
@@ -1072,10 +1073,10 @@ public class CharacterMotor : MonoBehaviour
     {
 		if (m_craftCoroutine != null)
 		{
+			m_rseBackpackCrafting.Call(false, m_ssoTorch.CraftingDuration - m_craftRemainingTime);
+
 			StopCoroutine(m_craftCoroutine);
 			m_craftCoroutine = null;
-
-			m_rseBackpackCrafting.Call(false, -1);
 		}
 
 		if (!HandObject && RobotObject) 
@@ -1113,7 +1114,15 @@ public class CharacterMotor : MonoBehaviour
 	{
 		m_rseBackpackCrafting.Call(true, duration);
 
-		yield return new WaitForSeconds(duration);
+        m_craftRemainingTime = duration;
+
+		while(m_craftRemainingTime> 0)
+		{
+			m_craftRemainingTime -= Time.deltaTime;
+			yield return null;
+		}
+
+        //yield return new WaitForSeconds(duration);
 
 		HandObject = Instantiate(
 			craftType == CraftType.TORCH ? (Permanent)m_ssoTorch.PfTorch : (Permanent)m_ssoRope.PfRope, 
@@ -1122,7 +1131,7 @@ public class CharacterMotor : MonoBehaviour
 			m_handSocket.transform
 		);
 
-		m_rseBackpackCrafting.Call(false, -1);
+		m_rseBackpackCrafting.Call(false, duration);
 		m_craftCoroutine = null;
 	}
 
