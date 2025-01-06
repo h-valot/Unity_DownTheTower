@@ -361,7 +361,8 @@ public class CharacterMotor : MonoBehaviour
 
 		// Assertion
 		if (!m_isJumpingRope) return;
-		
+		if (m_coyoteTime >= 0f) return;
+
 		if (m_ssoCharacter.JumpRopeMethod == JumpMethod.SLACKEN)
 		{
 			m_rope.IncreaseHoldLength(m_ssoCharacter.JumpRopeSlackenAmount);
