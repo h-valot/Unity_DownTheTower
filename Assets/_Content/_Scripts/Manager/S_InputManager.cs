@@ -20,7 +20,6 @@ public class InputManager : MonoBehaviour
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Throw m_rseThrow;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_ToggleHandObject m_rseToggleHandObject;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Pause m_rsePause;
-	[FoldoutGroup("Scriptable")][SerializeField] private RSE_HideUI m_rseHideUI;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Recycle m_rseRecycle;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_ToggleCursor m_rseToggleCursor;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Climb m_rseClimb;
@@ -28,6 +27,7 @@ public class InputManager : MonoBehaviour
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_GamePaused m_rsoGamePaused;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CraftInputLocked m_rsoCraftInputLocked;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_RecycleInputLocked m_rsoRecycleInputLocked;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_InputAdviceDisplayed m_rsoInputAdviceDisplayed;
 
 	#endregion
 
@@ -213,7 +213,7 @@ public class InputManager : MonoBehaviour
 
 	public void OnHideUI(InputValue value)
 	{
-		m_rseHideUI.Call();
+		m_rsoInputAdviceDisplayed.value = !m_rsoInputAdviceDisplayed.value;
 	}
 
 	public void OnPause()

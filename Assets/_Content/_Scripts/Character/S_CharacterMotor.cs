@@ -35,6 +35,7 @@ public class CharacterMotor : MonoBehaviour
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_InitializeCamera m_rseInitializeCamera;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_PlayFallDeath m_rsePlayFallDeath;
 
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_InputsLocked m_rsoInputsLocked;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_MovementDatas m_rsoMovementDatas;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CameraStyle m_rsoCameraStyle;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CraftInputLocked m_rsoCraftInputLocked;
@@ -283,7 +284,13 @@ public class CharacterMotor : MonoBehaviour
 			return;
 		}
 
-		ToggleRopeConstraint(m_ssoCharacter.RopeHoldingMethod == RopeHolding.HOLD_TO_LET_GO ? !isHolding : isHolding);
+		if (!isHolding && m_isGrounded)
+		{
+			isHolding = true;
+			ToggleRopeConstraint(false);
+		}
+
+		ToggleRopeConstraint(!isHolding);
 		m_isHolding = isHolding;
 	}
 
@@ -344,6 +351,7 @@ public class CharacterMotor : MonoBehaviour
 		if (!isPressed) return;
 		if (m_isStunned) return;
 		if (m_hasJumped) return;
+		if (m_rsoInputsLocked.value) return;
 
 		m_rigidbody.AddForce(Vector3.up * m_ssoCharacter.JumpForce, ForceMode.Impulse);
 		m_hasJumped = true;
@@ -362,16 +370,9 @@ public class CharacterMotor : MonoBehaviour
 
 		// Assertion
 		if (!m_isJumpingRope) return;
-		
-		if (m_ssoCharacter.JumpRopeMethod == JumpMethod.SLACKEN)
-		{
-			m_rope.IncreaseHoldLength(m_ssoCharacter.JumpRopeSlackenAmount);
-		}
-		else if (m_ssoCharacter.JumpRopeMethod == JumpMethod.RELEASE)
-		{
-			DesequipRope();
-		}
+		if (m_coyoteTime >= 0f) return;
 
+		DesequipRope();
 		float force = m_ssoCharacter.JumpOffRopeModifier * m_rigidbody.velocity.magnitude;
 		Vector3 direction = (m_rsoCameraRight.value * m_moveInput.x + m_rsoCameraForward.value * m_moveInput.y).normalized;
 		m_rigidbody.AddForce(direction * force, ForceMode.Impulse);
@@ -892,7 +893,7 @@ public class CharacterMotor : MonoBehaviour
 
 		if (!m_isClimbing)
 		{
-			ToggleRopeConstraint(m_ssoCharacter.RopeHoldingMethod == RopeHolding.HOLD_TO_LET_GO ? !m_isHolding : m_isHolding);
+			ToggleRopeConstraint(!m_isHolding);
 			m_rope.IncreaseHoldLength(m_ssoCharacter.EntranceOffset);
 		}
 	}
@@ -952,8 +953,7 @@ public class CharacterMotor : MonoBehaviour
 		// Assertions
 		if (!IsRopeValid
 		|| !m_isClimbing
-		|| m_ssoCharacter.RopeHoldingMethod == RopeHolding.HOLD_TO_STOP && !m_isHolding
-		|| m_ssoCharacter.RopeHoldingMethod == RopeHolding.HOLD_TO_LET_GO && m_isHolding
+		|| m_isHolding
 		|| m_rope.GetTotalLength() <= m_ssoRope.MinimumClimbLength)
 		{
 			m_currentClimbSpeed = m_ssoCharacter.ClimbAcceleration;
@@ -973,24 +973,15 @@ public class CharacterMotor : MonoBehaviour
 		// Assert: the character is falling if there is no more rope
 		if (!m_rope) return true;
 
-		bool isFalling = false;
-		switch (m_ssoCharacter.RopeHoldingMethod)
+		bool isFalling;
+		if (m_isHolding)
 		{
-			case RopeHolding.HOLD_TO_STOP:
-				isFalling = !m_isHolding;
-				break;
-
-			case RopeHolding.HOLD_TO_LET_GO:
-				if (m_isHolding)
-				{
-					isFalling = true;
-				}
-				else
-				{
-					// If the character IS NOT holding the rope, let it fall till it reaches the rope limit constraint
-					isFalling = (m_rope.CurrentFold - m_rigidbody.position).magnitude < m_rope.HoldLength - k_fallingForcesThreshold;
-				}
-				break;
+			isFalling = true;
+		}
+		else
+		{
+			// If the character IS NOT holding the rope, let it fall till it reaches the rope limit constraint
+			isFalling = (m_rope.CurrentFold - m_rigidbody.position).magnitude < m_rope.HoldLength - k_fallingForcesThreshold;
 		}
 		return isFalling;
 	}
@@ -1033,6 +1024,7 @@ public class CharacterMotor : MonoBehaviour
 	private void EnterCraftState()
 	{
 		// Assertion
+		if (m_rsoInputsLocked.value) return;
 		if (m_craftType == HandObject?.Type) return;
 
 		if (m_craftType == CraftType.TORCH)
@@ -1070,7 +1062,10 @@ public class CharacterMotor : MonoBehaviour
     }
 
     private void ExitCraftState()
-    {
+	{
+		// Assertion
+		if (m_rsoInputsLocked.value) return;
+
 		if (m_craftCoroutine != null)
 		{
 			m_rseBackpackCrafting.Call(false, m_ssoTorch.CraftingDuration - m_craftRemainingTime);
@@ -1140,6 +1135,7 @@ public class CharacterMotor : MonoBehaviour
 		// Assertions
 		if (m_rsoCharacterState.value == BehaviorState.ROPE) return;
 		if (HandObject == null) return;
+		if (m_rsoInputsLocked.value) return;
 
 		IsAiming = isInputPressed;
 		m_rsoCameraStyle.value = IsAiming ? CameraStyle.AIMING : CameraStyle.BASIC;
