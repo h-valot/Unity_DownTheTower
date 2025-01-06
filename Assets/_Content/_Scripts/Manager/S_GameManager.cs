@@ -16,6 +16,7 @@ public class GameManager : MonoBehaviour
 	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Logs m_ssoLogs;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterDeath m_rsoCharacterDeath;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_InputsLocked m_rsoInputsLocked;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_GamePaused m_rsoGamePaused;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_Ropes m_rsoRopes;
 
@@ -90,5 +91,6 @@ public class GameManager : MonoBehaviour
 	private void Pause()
 	{
 		Time.timeScale = m_rsoGamePaused.value ? 0f : 1f;
+		m_rsoInputsLocked.value = m_rsoGamePaused.value;
 	}
 }

@@ -13,7 +13,6 @@ public class UILogDisplayer : UIWindow
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Pause m_rsePause;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Cancel m_rseCancel;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_DisplayLog m_rseDisplayLog;
-	[FoldoutGroup("Scriptable")][SerializeField] private RSE_ToggleInputs m_rseToggleInputs;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_InputAdviceDisplayed m_rsoInputAdviceDisplayed;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_GamePaused m_rsoGamePaused;

@@ -17,7 +17,6 @@ public class UIGame : MonoBehaviour
 	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Game m_ssoGame;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Pause m_rsePause;
-	[FoldoutGroup("Scriptable")][SerializeField] private RSE_ToggleInputs m_rseToggleInputs;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_ToggleCursor m_rseToggleCursor;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_GamePaused m_rsoGamePaused;
@@ -88,6 +87,5 @@ public class UIGame : MonoBehaviour
 	private void TogglePauseGame(bool isPaused)
     {
         m_rsoGamePaused.value = isPaused;
-        m_rseToggleInputs.Call();
     }
 }

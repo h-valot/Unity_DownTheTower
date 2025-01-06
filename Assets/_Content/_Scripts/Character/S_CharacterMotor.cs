@@ -35,6 +35,7 @@ public class CharacterMotor : MonoBehaviour
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_InitializeCamera m_rseInitializeCamera;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_PlayFallDeath m_rsePlayFallDeath;
 
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_InputsLocked m_rsoInputsLocked;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_MovementDatas m_rsoMovementDatas;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CameraStyle m_rsoCameraStyle;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CraftInputLocked m_rsoCraftInputLocked;
@@ -343,6 +344,7 @@ public class CharacterMotor : MonoBehaviour
 		if (!isPressed) return;
 		if (m_isStunned) return;
 		if (m_hasJumped) return;
+		if (m_rsoInputsLocked.value) return;
 
 		m_rigidbody.AddForce(Vector3.up * m_ssoCharacter.JumpForce, ForceMode.Impulse);
 		m_hasJumped = true;
@@ -1033,6 +1035,7 @@ public class CharacterMotor : MonoBehaviour
 	private void EnterCraftState()
 	{
 		// Assertion
+		if (m_rsoInputsLocked.value) return;
 		if (m_craftType == HandObject?.Type) return;
 
 		if (m_craftType == CraftType.TORCH)
@@ -1070,7 +1073,10 @@ public class CharacterMotor : MonoBehaviour
     }
 
     private void ExitCraftState()
-    {
+	{
+		// Assertion
+		if (m_rsoInputsLocked.value) return;
+
 		if (m_craftCoroutine != null)
 		{
 			StopCoroutine(m_craftCoroutine);
@@ -1132,6 +1138,7 @@ public class CharacterMotor : MonoBehaviour
 		// Assertions
 		if (m_rsoCharacterState.value == BehaviorState.ROPE) return;
 		if (HandObject == null) return;
+		if (m_rsoInputsLocked.value) return;
 
 		IsAiming = isInputPressed;
 		m_rsoCameraStyle.value = IsAiming ? CameraStyle.AIMING : CameraStyle.BASIC;
