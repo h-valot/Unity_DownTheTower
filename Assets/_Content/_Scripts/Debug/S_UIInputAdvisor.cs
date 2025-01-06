@@ -1,7 +1,7 @@
 using Sirenix.OdinInspector;
 using UnityEngine;
 
-public class InputAdvisor : MonoBehaviour
+public class UIInputAdvisor : MonoBehaviour
 {
     [Title("Internal References")]
 	[SerializeField] private GameObject m_graphicInteract;
@@ -10,8 +10,7 @@ public class InputAdvisor : MonoBehaviour
     [SerializeField] private GameObject m_ropeInputs;
     [SerializeField] private GameObject m_locomotionInputs;
 
-	[FoldoutGroup("Scriptable")][SerializeField] private RSE_HideUI m_rseHideUI;
-
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_InputAdviceDisplayed m_rsoInputAdviceDisplayed;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_GamePaused m_rsoGamePaused;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterState m_rsoCharacterState;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_InteractableValid m_rsoInteractableValid;
@@ -21,20 +20,20 @@ public class InputAdvisor : MonoBehaviour
 
     private void OnEnable()
     {
-        m_rseHideUI.action += ToggleUI;
+        m_rsoInputAdviceDisplayed.OnChanged += OnInputAdviceDisplayedChanged;
 		m_rsoInteractableValid.OnChanged += ToggleInteract;
 		m_rsoInteractableRecyclable.OnChanged += ToggleRecycle;
         m_rsoCharacterState.OnChanged += SwitchAdvisorInputs;
-		m_rsoGamePaused.OnChanged += HideAdvisor;
+		m_rsoGamePaused.OnChanged += OnGamePaused;
 	}
 
     private void OnDisable()
     {
-        m_rseHideUI.action -= ToggleUI;
+        m_rsoInputAdviceDisplayed.OnChanged -= OnInputAdviceDisplayedChanged;
 		m_rsoInteractableValid.OnChanged -= ToggleInteract;
 		m_rsoInteractableRecyclable.OnChanged -= ToggleRecycle;
         m_rsoCharacterState.OnChanged -= SwitchAdvisorInputs;
-		m_rsoGamePaused.OnChanged -= HideAdvisor;
+		m_rsoGamePaused.OnChanged -= OnGamePaused;
 	}
 
     private void ToggleInteract()
@@ -47,15 +46,19 @@ public class InputAdvisor : MonoBehaviour
         m_graphicRecycle.SetActive(m_rsoInteractableRecyclable.value);
     }
 
-    private void ToggleUI()
+    private void OnInputAdviceDisplayedChanged()
 	{
-		m_isActive = !m_isActive;
-		m_inputPanel.SetActive(m_isActive);
+		Toggle(m_rsoInputAdviceDisplayed.value);
 	}
 
-    private void HideAdvisor()
+    private void OnGamePaused()
     {
-		m_isActive = !m_rsoGamePaused.value;
+		Toggle(!m_rsoGamePaused.value);
+	}
+
+	private void Toggle(bool isEnabled)
+	{
+		m_isActive = isEnabled;
 		m_inputPanel.SetActive(m_isActive);
 	}
 

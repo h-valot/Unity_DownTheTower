@@ -11,9 +11,11 @@ public class UIGame : MonoBehaviour
 	[FoldoutGroup("Internal references")][SerializeField] private TextMeshProUGUI m_tmpLogBody;
 	[FoldoutGroup("Internal references")][SerializeField] private TextMeshProUGUI m_tmpVersion;
 	[FoldoutGroup("Internal references")][SerializeField] private List<UIWindow> m_subwindows = new List<UIWindow>();
+	
+	[FoldoutGroup("External references")][SerializeField] private UILogDisplayer m_uiLogDisplayer;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Game m_ssoGame;
-	
+
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Pause m_rsePause;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_ToggleInputs m_rseToggleInputs;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_ToggleCursor m_rseToggleCursor;
@@ -28,7 +30,7 @@ public class UIGame : MonoBehaviour
     private void OnEnable()
     {
         m_rsePause.action += TogglePausePanel;
-    }
+	}
 
     private void OnDisable()
     {
@@ -37,15 +39,20 @@ public class UIGame : MonoBehaviour
 
     private void TogglePausePanel()
 	{
+		SetPausePanel(!m_pnlPause.activeInHierarchy);
+	}
+
+	public void SetPausePanel(bool doEnabled)
+	{
 		m_tmpVersion.text = $"version: {m_ssoGame.Version} {m_ssoGame.BuildType.ToString().ToLower()}";
 
-		if (m_pnlPause.activeInHierarchy)
-		{
-			Hide();
-		}
-		else 
+		if (doEnabled)
 		{
 			Show();
+		}
+		else
+		{
+			Hide();
 		}
 	}
 
@@ -81,7 +88,6 @@ public class UIGame : MonoBehaviour
 	private void TogglePauseGame(bool isPaused)
     {
         m_rsoGamePaused.value = isPaused;
-        Time.timeScale = isPaused ? 0f : 1f;
         m_rseToggleInputs.Call();
     }
 }

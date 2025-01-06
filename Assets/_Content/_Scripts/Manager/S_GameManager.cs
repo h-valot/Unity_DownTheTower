@@ -25,11 +25,13 @@ public class GameManager : MonoBehaviour
 	private void OnEnable()
 	{
 		m_rsoCharacterDeath.OnChanged += HandleDeath;
+		m_rsoGamePaused.OnChanged += Pause;
 	}
 
 	private void OnDisable()
 	{
 		m_rsoCharacterDeath.OnChanged -= HandleDeath;
+		m_rsoGamePaused.OnChanged -= Pause;
 	}
 
 	private void Start()
@@ -83,5 +85,10 @@ public class GameManager : MonoBehaviour
 		if (!m_rsoCharacterDeath.value) return;
 
         Restart();
+	}
+
+	private void Pause()
+	{
+		Time.timeScale = m_rsoGamePaused.value ? 0f : 1f;
 	}
 }
