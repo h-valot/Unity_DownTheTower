@@ -283,7 +283,13 @@ public class CharacterMotor : MonoBehaviour
 			return;
 		}
 
-		ToggleRopeConstraint(m_ssoCharacter.RopeHoldingMethod == RopeHolding.HOLD_TO_LET_GO ? !isHolding : isHolding);
+		if (!isHolding && m_isGrounded)
+		{
+			isHolding = true;
+			ToggleRopeConstraint(false);
+		}
+
+		ToggleRopeConstraint(!isHolding);
 		m_isHolding = isHolding;
 	}
 
@@ -365,15 +371,7 @@ public class CharacterMotor : MonoBehaviour
 		if (!m_isJumpingRope) return;
 		if (m_coyoteTime >= 0f) return;
 
-		if (m_ssoCharacter.JumpRopeMethod == JumpMethod.SLACKEN)
-		{
-			m_rope.IncreaseHoldLength(m_ssoCharacter.JumpRopeSlackenAmount);
-		}
-		else if (m_ssoCharacter.JumpRopeMethod == JumpMethod.RELEASE)
-		{
-			DesequipRope();
-		}
-
+		DesequipRope();
 		float force = m_ssoCharacter.JumpOffRopeModifier * m_rigidbody.velocity.magnitude;
 		Vector3 direction = (m_rsoCameraRight.value * m_moveInput.x + m_rsoCameraForward.value * m_moveInput.y).normalized;
 		m_rigidbody.AddForce(direction * force, ForceMode.Impulse);
@@ -894,7 +892,7 @@ public class CharacterMotor : MonoBehaviour
 
 		if (!m_isClimbing)
 		{
-			ToggleRopeConstraint(m_ssoCharacter.RopeHoldingMethod == RopeHolding.HOLD_TO_LET_GO ? !m_isHolding : m_isHolding);
+			ToggleRopeConstraint(!m_isHolding);
 			m_rope.IncreaseHoldLength(m_ssoCharacter.EntranceOffset);
 		}
 	}
@@ -954,8 +952,7 @@ public class CharacterMotor : MonoBehaviour
 		// Assertions
 		if (!IsRopeValid
 		|| !m_isClimbing
-		|| m_ssoCharacter.RopeHoldingMethod == RopeHolding.HOLD_TO_STOP && !m_isHolding
-		|| m_ssoCharacter.RopeHoldingMethod == RopeHolding.HOLD_TO_LET_GO && m_isHolding
+		|| m_isHolding
 		|| m_rope.GetTotalLength() <= m_ssoRope.MinimumClimbLength)
 		{
 			m_currentClimbSpeed = m_ssoCharacter.ClimbAcceleration;
@@ -975,24 +972,15 @@ public class CharacterMotor : MonoBehaviour
 		// Assert: the character is falling if there is no more rope
 		if (!m_rope) return true;
 
-		bool isFalling = false;
-		switch (m_ssoCharacter.RopeHoldingMethod)
+		bool isFalling;
+		if (m_isHolding)
 		{
-			case RopeHolding.HOLD_TO_STOP:
-				isFalling = !m_isHolding;
-				break;
-
-			case RopeHolding.HOLD_TO_LET_GO:
-				if (m_isHolding)
-				{
-					isFalling = true;
-				}
-				else
-				{
-					// If the character IS NOT holding the rope, let it fall till it reaches the rope limit constraint
-					isFalling = (m_rope.CurrentFold - m_rigidbody.position).magnitude < m_rope.HoldLength - k_fallingForcesThreshold;
-				}
-				break;
+			isFalling = true;
+		}
+		else
+		{
+			// If the character IS NOT holding the rope, let it fall till it reaches the rope limit constraint
+			isFalling = (m_rope.CurrentFold - m_rigidbody.position).magnitude < m_rope.HoldLength - k_fallingForcesThreshold;
 		}
 		return isFalling;
 	}

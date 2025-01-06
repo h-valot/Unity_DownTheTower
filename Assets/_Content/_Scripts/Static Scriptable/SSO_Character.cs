@@ -102,10 +102,6 @@ public class SSO_Character : ScriptableObject
 	#region ROPE
 
 	[FoldoutGroup("Rope")]
-	[InfoBox("The method the character uses to navigate the rope. HOLD_TO_LET_GO: when the holding input is pressed, the rope constraint will be released. HOLD_TO_STOP: when the holding is pressed, the rope constraint will be applied.", InfoMessageType.None)]
-	public RopeHolding RopeHoldingMethod = RopeHolding.HOLD_TO_LET_GO;
-
-	[FoldoutGroup("Rope")]
 	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
 	[InfoBox("Duration the player have to hold the cancel key to desequip the rope.", InfoMessageType.None)]
 	public float CancelRopeDuration;
@@ -160,15 +156,6 @@ public class SSO_Character : ScriptableObject
 
 
 	[Title("Jumping")]
-	[FoldoutGroup("Rope")]
-	[InfoBox("The method the character uses to jump off the rope. SLACKEN: increase the rope hold length of the `JumpRopeSlackenAmount`. RELEASE: desequip the rope.", InfoMessageType.None)]
-	public JumpMethod JumpRopeMethod;
-
-	[FoldoutGroup("Rope")]
-	[ShowIf("@this.JumpRopeMethod == JumpMethod.SLACKEN")]
-	[InfoBox("Amount the rope hold length will be increased when the character is jump off the rope. (Only if SLACKEN method is selected)", InfoMessageType.None)]
-	public float JumpRopeSlackenAmount;
-
 	[FoldoutGroup("Rope")]
 	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
 	[InfoBox("Modifier applied to the last direction on the rope when the character switches from the rope to free fall.", InfoMessageType.None)]
