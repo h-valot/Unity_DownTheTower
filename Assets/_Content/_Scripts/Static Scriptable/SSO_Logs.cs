@@ -4,7 +4,7 @@ using Sirenix.OdinInspector;
 using UnityEditor;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "SSO_Logs", menuName = "Static Scriptable/Logs")]
+[CreateAssetMenu(fileName = "SSO_Logs", menuName = "Static Scriptable/Log List")]
 public class SSO_Logs : ScriptableObject
 {
 	public List<SSO_Log> Logs = new List<SSO_Log>();
