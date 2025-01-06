@@ -103,7 +103,7 @@ public class Torch : Permanent
 		// TODO - Use trigger enter and exit to prevent penetration test when there is no collider in range.
 
 		// Assertion
-		if (IsInHand || !IsLit) return;
+		if (!IsLit) return;
 
 		var lightOffset = Vector3.zero;
 		Collider[] hitColliders = Physics.OverlapSphere(m_pointLightBase.position, m_ssoTorch.LightOffsetDistance, m_ssoTorch.LayerColliderToInclude);
