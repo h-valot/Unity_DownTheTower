@@ -93,6 +93,7 @@ public class CharacterMotor : MonoBehaviour
 	private Rope m_rope;
 	private bool m_isHolding;
 	private bool IsRopeValid => m_rope && m_rope.IsPlaced;
+	private float m_ropeDragTimer;
 
 	// Cancel
 	private Coroutine m_cancelRopeCoroutine;
@@ -913,6 +914,7 @@ public class CharacterMotor : MonoBehaviour
 		}
 
 		HandleRopeMovement();
+		HandleRopeDrag();
 		HandleClimbing();
 	}
 
@@ -946,6 +948,21 @@ public class CharacterMotor : MonoBehaviour
 			) - m_rigidbody.position).normalized * m_moveInput.y;
 
 		m_rigidbody.AddForce(direction * m_ssoCharacter.ropeMovementForce, ForceMode.Acceleration);
+	}
+	
+	private void HandleRopeDrag()
+	{
+		// Assertion
+		if (m_moveInput.magnitude > m_ssoCharacter.MoveMagnitudeApplyDragThreshold) 
+		{
+			m_rigidbody.drag = 0;
+			m_ropeDragTimer = m_ssoCharacter.RopeDragDuration;
+			return;
+		}
+
+		m_ropeDragTimer -= Time.fixedDeltaTime;
+		m_rigidbody.drag = (1 - m_ropeDragTimer / m_ssoCharacter.RopeDragDuration) * m_ssoCharacter.RopeDrag;
+
 	}
 
 	private void HandleClimbing()

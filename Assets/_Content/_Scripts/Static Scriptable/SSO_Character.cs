@@ -166,6 +166,25 @@ public class SSO_Character : ScriptableObject
 	[InfoBox("Modifier applied to the last direction on the rope when the character switches from the rope to jump of the rope.", InfoMessageType.None)]
 	public float JumpOffRopeModifier;
 
+
+	[Title("Drag")]
+	[FoldoutGroup("Rope")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("Duration to reach the rope drag value.", InfoMessageType.None)]
+	public float RopeDragDuration;
+
+	[FoldoutGroup("Rope")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("Maximum rope drag applied to the character.", InfoMessageType.None)]
+	public float RopeDrag;
+
+	[FoldoutGroup("Rope")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("Apply the rope drag if the character inputs magnitude is below.", InfoMessageType.None)]
+	public float MoveMagnitudeApplyDragThreshold;
+
+
+
 	#endregion
 
 	#region GLOW
