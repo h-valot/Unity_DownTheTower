@@ -13,9 +13,7 @@ public class Rope : Permanent
 	[SerializeField] public Transform RaycastTarget;
 	[SerializeField] private MeshRenderer m_previewMeshRendered;
 	[SerializeField] private GameObject m_previewGameObject;
-	[SerializeField] private Interactable m_baseInteractable;
-	[SerializeField] private Transform m_parentInteractables;
-	[SerializeField] private Transform m_parentPhysics;
+	[SerializeField] private RopeSegment m_baseSegment;
 	[SerializeField] private ConfigurableJoint m_joint;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Rope m_ssoRope;
@@ -30,7 +28,7 @@ public class Rope : Permanent
 	private float m_holdLength;
 	public List<Vector3> m_folds = new List<Vector3>();
 	private RopeLine m_ropeLine;
-	private List<Interactable> m_interactables = new List<Interactable>();
+	private List<RopeSegment> m_segments = new List<RopeSegment>();
 	private Rigidbody m_characterRigidbody;
 	private Transform m_characterAttach;
 	private SoftJointLimit m_linearLimit;
@@ -62,7 +60,7 @@ public class Rope : Permanent
 
 	private void Start()
 	{
-		m_baseInteractable.gameObject.SetActive(false);
+		m_baseSegment.gameObject.SetActive(false);
 	}
 
 	private void Update()
@@ -195,8 +193,7 @@ public class Rope : Permanent
 
 		// Add a final fold to spawn an interactible on it.
 		m_folds.Add(m_characterAttach.position.CutDigits(2));
-		SpawnInteractables();
-		SpawnPhysics();
+		SpawnSegments();
 
 		m_isConnected = false;
 		m_joint.connectedBody = null;
@@ -244,15 +241,15 @@ public class Rope : Permanent
 		}
 	}
 
-	public void SpawnInteractables()
+	public void SpawnSegments()
 	{
 		// Update the interactable component at the base of the rope.
-		m_baseInteractable.GetComponent<SphereCollider>().radius = m_ssoRope.InteractableSphereRadius;
-		m_baseInteractable.gameObject.SetActive(true);
-		m_baseInteractable.OnInteractedWithRef += Reattach;
+		m_baseSegment.SphereTrigger.radius = m_ssoRope.InteractableSphereRadius;
+		m_baseSegment.gameObject.SetActive(true);
+		m_baseSegment.OnInteractedWithRef += Reattach;
 
-		m_ssoRope.PfRopeInteractible.GetComponent<SphereCollider>().radius = m_ssoRope.InteractableSphereRadius;
-		float sphereDiameter = m_ssoRope.PfRopeInteractible.GetComponent<SphereCollider>().radius * 2f;
+		m_ssoRope.PfRopeSegment.SphereTrigger.radius = m_ssoRope.InteractableSphereRadius;
+		float sphereDiameter = m_ssoRope.PfRopeSegment.SphereTrigger.radius * 2f;
 
 		for (int i = 1; i < m_ropeLine.Positions.Length; i++)
 		{
@@ -262,35 +259,19 @@ public class Rope : Permanent
 
 			for (int j = 0; j < sphereAmount; j++)
 			{
-				var newInteractable = Instantiate(m_ssoRope.PfRopeInteractible, m_parentInteractables);
-				newInteractable.transform.rotation = Quaternion.LookRotation(lineDirection);
-				newInteractable.transform.position = m_ropeLine.Positions[i] + lineDirection * sphereDiameter * j;
-				newInteractable.OnInteractedWithRef += Reattach;
-				m_interactables.Add(newInteractable);
+				var newSegment = Instantiate(m_ssoRope.PfRopeSegment, m_segments.Count > 0 ? m_segments[^1].transform : m_baseSegment.transform);
+				newSegment.transform.rotation = Quaternion.LookRotation(lineDirection);
+				newSegment.transform.position = m_ropeLine.Positions[i] - lineDirection * m_ssoRope.PfRopeSegment.InBetweenDistance * i;
+				newSegment.OnInteractedWithRef += Reattach;
+				m_segments.Add(newSegment);
 			}
-		}
-	}
-
-	private List<RopePhysic> m_physics = new List<RopePhysic>();
-	public void SpawnPhysics()
-	{
-		Vector3 lineDirection = (CurrentFold - LastFold).normalized;
-		float lineLength = (CurrentFold - LastFold).magnitude;
-		int componentAmount = Mathf.FloorToInt(lineLength / m_ssoRope.PfRopePhysic.Length) + 1;
-
-		for (int i = 0; i < componentAmount; i++)
-		{
-			var newPhysic = Instantiate(m_ssoRope.PfRopePhysic, m_parentPhysics);
-			newPhysic.transform.rotation = Quaternion.LookRotation(lineDirection);
-			newPhysic.transform.position = LastFold + lineDirection * m_ssoRope.PfRopePhysic.Length * i;
-			m_physics.Add(newPhysic);
 		}
 
 		// Connect them together
-		m_joint.connectedBody = m_physics[0].Rigidbody;
-		for (int i = 0; i < m_physics.Count-1; i++)
+		m_baseSegment.Joint.connectedBody = m_segments[0].Rigidbody;
+		for (int i = 0; i < m_segments.Count - 1; i++)
 		{
-			m_physics[i].Connect(m_physics[i+1].Rigidbody);
+			m_segments[i].Connect(m_segments[i + 1].Rigidbody);
 		}
 	}
 
@@ -312,28 +293,21 @@ public class Rope : Permanent
 		UpdateHoldLength();
 
 		// Remove all rope interactables from the character interact
-		characterInteract.Remove(m_baseInteractable);
-		foreach (var interactable in m_interactables)
+		characterInteract.Remove(m_baseSegment);
+		foreach (var interactable in m_segments)
 		{
 			characterInteract.Remove(interactable);
 		}
 
-		// Delete interactables
-		m_baseInteractable.gameObject.SetActive(false);
-		m_baseInteractable.OnInteractedWithRef -= Reattach;
-		for (int i = m_interactables.Count - 1; i >= 0; i--)
+		// Delete segments
+		m_baseSegment.gameObject.SetActive(false);
+		m_baseSegment.OnInteractedWithRef -= Reattach;
+		for (int i = m_segments.Count - 1; i >= 0; i--)
 		{
-			m_interactables[i].OnInteractedWithRef -= Reattach;
-			Destroy(m_interactables[i].gameObject);
+			m_segments[i].OnInteractedWithRef -= Reattach;
+			Destroy(m_segments[i].gameObject);
 		}
-		m_interactables.Clear();
-
-		// Delete physic segments
-		for (int i = m_physics.Count - 1; i >= 0; i--)
-		{
-			Destroy(m_physics[i].gameObject);
-		}
-		m_physics.Clear();
+		m_segments.Clear();
 	}
 
 	/// <summary>
