@@ -895,7 +895,15 @@ public class CharacterMotor : MonoBehaviour
 		if (!m_isClimbing)
 		{
 			ToggleRopeConstraint(!m_isHolding);
-			m_rope.IncreaseHoldLength(m_ssoCharacter.EntranceOffset);
+
+			// Handle rope extention within the limit of the current rope
+			float offset = m_ssoCharacter.EntranceOffset;
+			if (m_rope.GetTotalLength() + m_ssoCharacter.EntranceOffset >= m_ssoRope.MaxLength)
+			{
+				offset = m_ssoRope.MaxLength - (m_rope.GetTotalLength() + 0.5f);
+				offset = Mathf.Clamp(offset, 0, offset);
+			}
+			m_rope.IncreaseHoldLength(offset);
 		}
 	}
 
