@@ -91,8 +91,13 @@ public class Torch : Permanent
 
     private void Update()
     {
-		// Assertion
-        if (IsInHand || !IsLit) return;
+        // Assertion
+        if (!IsLit) return;
+
+        UpdateLightFlicker();
+
+        // Assertion
+        if (IsInHand) return;
 
 		if (HasMoved()) UpdateTorchFeedback();
 	}
@@ -221,6 +226,19 @@ public class Torch : Permanent
         {
             return false;
         }
+    }
+
+    private void UpdateLightFlicker()
+    {
+        float bigWaveFreq = 2.6f;
+        float bigWaveAmp = 0.11f;
+        float midWaveFreq = -3.8f;
+        float midWaveAmp = 0.05f;
+        float smallWaveFreq = -9.4f;
+        float smallWaveAmp = 0.03f;
+
+        float flickerFactor = 1 - bigWaveAmp - bigWaveAmp*Mathf.Sin(Time.time*bigWaveFreq) - midWaveAmp*Mathf.Sin(Time.time*midWaveFreq) - smallWaveAmp*Mathf.Sin(Time.time*smallWaveFreq);
+        m_light.intensity = m_ssoTorch.LightIntensity * flickerFactor;
     }
 
     #endregion
