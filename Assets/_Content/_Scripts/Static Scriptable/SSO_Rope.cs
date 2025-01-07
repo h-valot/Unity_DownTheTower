@@ -20,20 +20,22 @@ public class SSO_Rope : ScriptableObject
 
 	[FoldoutGroup("Prefabs")]
 	[InfoBox("The prefab of the rope.", InfoMessageType.None)]
-	/// <summary> The prefab of the rope. </summary>
 	public Rope PfRope;
 
 	[FoldoutGroup("Prefabs")]
 	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
 	[InfoBox("The prefab of the rope line graphics.", InfoMessageType.None)]
-	/// <summary> The prefab of the rope line graphics. </summary>
 	public RopeLine PfRopeLine;
 
 	[FoldoutGroup("Prefabs")]
 	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
 	[InfoBox("The prefab of the interatable component of the rope folds.", InfoMessageType.None)]
-	/// <summary> The prefab of the interatable component of the rope folds. </summary>
 	public Interactable PfRopeInteractible;
+
+	[FoldoutGroup("Prefabs")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("The prefab of the physic component of the rope folds.", InfoMessageType.None)]
+	public RopePhysic PfRopePhysic;
 
 	#endregion
 

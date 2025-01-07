@@ -14,6 +14,8 @@ public class Rope : Permanent
 	[SerializeField] private MeshRenderer m_previewMeshRendered;
 	[SerializeField] private GameObject m_previewGameObject;
 	[SerializeField] private Interactable m_baseInteractable;
+	[SerializeField] private Transform m_parentInteractables;
+	[SerializeField] private Transform m_parentPhysics;
 	[SerializeField] private ConfigurableJoint m_joint;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Rope m_ssoRope;
@@ -26,7 +28,7 @@ public class Rope : Permanent
 	private bool m_isConnected;
 	private bool m_isPlaced;
 	private float m_holdLength;
-	private List<Vector3> m_folds = new List<Vector3>();
+	public List<Vector3> m_folds = new List<Vector3>();
 	private RopeLine m_ropeLine;
 	private List<Interactable> m_interactables = new List<Interactable>();
 	private Rigidbody m_characterRigidbody;
@@ -194,6 +196,7 @@ public class Rope : Permanent
 		// Add a final fold to spawn an interactible on it.
 		m_folds.Add(m_characterAttach.position.CutDigits(2));
 		SpawnInteractables();
+		SpawnPhysics();
 
 		m_isConnected = false;
 		m_joint.connectedBody = null;
@@ -259,12 +262,35 @@ public class Rope : Permanent
 
 			for (int j = 0; j < sphereAmount; j++)
 			{
-				var newInteractable = Instantiate(m_ssoRope.PfRopeInteractible, transform);
-				newInteractable.OnInteractedWithRef += Reattach;
+				var newInteractable = Instantiate(m_ssoRope.PfRopeInteractible, m_parentInteractables);
 				newInteractable.transform.rotation = Quaternion.LookRotation(lineDirection);
 				newInteractable.transform.position = m_ropeLine.Positions[i] + lineDirection * sphereDiameter * j;
+				newInteractable.OnInteractedWithRef += Reattach;
 				m_interactables.Add(newInteractable);
 			}
+		}
+	}
+
+	private List<RopePhysic> m_physics = new List<RopePhysic>();
+	public void SpawnPhysics()
+	{
+		Vector3 lineDirection = (CurrentFold - LastFold).normalized;
+		float lineLength = (CurrentFold - LastFold).magnitude;
+		int componentAmount = Mathf.FloorToInt(lineLength / m_ssoRope.PfRopePhysic.Length) + 1;
+
+		for (int i = 0; i < componentAmount; i++)
+		{
+			var newPhysic = Instantiate(m_ssoRope.PfRopePhysic, m_parentPhysics);
+			newPhysic.transform.rotation = Quaternion.LookRotation(lineDirection);
+			newPhysic.transform.position = LastFold + lineDirection * m_ssoRope.PfRopePhysic.Length * i;
+			m_physics.Add(newPhysic);
+		}
+
+		// Connect them together
+		m_joint.connectedBody = m_physics[0].Rigidbody;
+		for (int i = 0; i < m_physics.Count-1; i++)
+		{
+			m_physics[i].Connect(m_physics[i+1].Rigidbody);
 		}
 	}
 
@@ -301,6 +327,13 @@ public class Rope : Permanent
 			Destroy(m_interactables[i].gameObject);
 		}
 		m_interactables.Clear();
+
+		// Delete physic segments
+		for (int i = m_physics.Count - 1; i >= 0; i--)
+		{
+			Destroy(m_physics[i].gameObject);
+		}
+		m_physics.Clear();
 	}
 
 	/// <summary>
