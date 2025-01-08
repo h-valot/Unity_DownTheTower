@@ -7,8 +7,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: MM_Xtileable+NormalMap+CharGlow
-  m_Shader: {fileID: -6465566751694194690, guid: eb8bde6728a86814ba485bbcbce9dc43,
+  m_Name: MM_ColorMap+NormalMap+Rune+SelfGlow
+  m_Shader: {fileID: -6465566751694194690, guid: b3c4bfc9b0fc69c4b86ba4223dbbae0d,
     type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
@@ -24,24 +24,20 @@ Material:
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
-    - _SampleTexture2D_76b66c08cb2e44218236df282b298be2_Texture_1_Texture2D:
-        m_Texture: {fileID: 2800000, guid: 16e28bf93d1f73343a466d1f06584932, type: 3}
+    - _ColorMap:
+        m_Texture: {fileID: 2800000, guid: d7b75134fc5d0fa458e11c3b3922aeec, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
-    - _SampleTexture2D_c38f434310254a05a18928d58147849c_Texture_1_Texture2D:
-        m_Texture: {fileID: 2800000, guid: 0d4b0665df322c243baccdf383209c4c, type: 3}
+    - _NormalMap:
+        m_Texture: {fileID: 2800000, guid: 30acaf06a67272746a2c9629efe053e7, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
-    - _SampleTexture2D_dc931dfb93ea4290917ef10ac84c7f51_Texture_1_Texture2D:
-        m_Texture: {fileID: 2800000, guid: a8c62a132840a074ba83e944ae9b89b1, type: 3}
+    - _RuneGradient:
+        m_Texture: {fileID: 2800000, guid: 8ec53d80f774976448b62ade39d3308b, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
-    - _SampleTexture2D_f51eb00dbff64fdf921261e0e6d7403b_Texture_1_Texture2D:
-        m_Texture: {fileID: 2800000, guid: f55f88d44c0d39b4bac6b857c3960bdf, type: 3}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _normalMap:
-        m_Texture: {fileID: 2800000, guid: 16e28bf93d1f73343a466d1f06584932, type: 3}
+    - _RuneMask:
+        m_Texture: {fileID: 2800000, guid: a2b6702bc49162445b8321145743030f, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - unity_Lightmaps:
@@ -60,15 +56,14 @@ Material:
     m_Floats:
     - _QueueControl: 0
     - _QueueOffset: 0
-    - _basePatternNumber: 10
-    - _offset: 0
-    - _scale: 1
-    - _test: 20.8
+    - _SelfGlowFactor: 0.2
+    - _SelfGlowSaturation: 0.5
+    - _craftingPercent: 1
+    - _runeIntensity: 35
     m_Colors:
-    - _Color: {r: 0, g: 0, b: 0, a: 0}
-    - _color: {r: 0.81960785, g: 0.5019608, b: 0.30588236, a: 0}
+    - _RuneColor: {r: 1, g: 0.67145586, b: 0, a: 1}
   m_BuildTextureStacks: []
---- !u!114 &1361805121589752138
+--- !u!114 &3165337400486860257
 MonoBehaviour:
   m_ObjectHideFlags: 11
   m_CorrespondingSourceObject: {fileID: 0}
