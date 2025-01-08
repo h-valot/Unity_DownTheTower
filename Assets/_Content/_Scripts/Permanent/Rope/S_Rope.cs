@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using DG.Tweening;
+using EasyCurvedLine;
 using Sirenix.OdinInspector;
 using UnityEngine;
 
@@ -435,8 +436,49 @@ public class Rope : Permanent
 		return (CurrentFold - m_characterRigidbody.position).magnitude;
 	}
 
+	[SerializeField] private LineRenderer m_aimLineRenderer;
 	private void DrawLines()
 	{
+		float trajectoryDistance = GetTotalLength();
+		Vector3[] smoothedPoints = LineSmoother.SmoothLine(m_segments.ToArray(), m_ssoRope.LineSegmentSize);
+
+		// set line settings
+		m_aimLineRenderer.positionCount = smoothedPoints.Length;
+		m_aimLineRenderer.SetPositions(smoothedPoints);
+		m_aimLineRenderer.startWidth = m_ssoRope.LineWidth;
+		m_aimLineRenderer.endWidth = m_ssoRope.LineWidth;
+
+		float fadeInDistancePercent = (m_ssoRope.FadeInDistance < trajectoryDistance * 0.25f) 
+			? (m_ssoRope.FadeInDistance / trajectoryDistance) 
+			: 0.25f;
+
+		Gradient gradient = new Gradient();
+
+		// Set color
+		GradientColorKey[] colors = new GradientColorKey[3];
+		colors[0] = new GradientColorKey(new Color(255f, 229f, 0), 0.0f);
+		colors[1] = new GradientColorKey(new Color(255f, 229f, 0), fadeInDistancePercent);
+		colors[2] = new GradientColorKey(new Color(255f, 229f, 0), 1.0f);
+
+		// Blend alpha from alpha at 0% to opaque at fade in distance to transparent at 100%
+		GradientAlphaKey[] alphas = new GradientAlphaKey[3];
+		alphas[0] = new GradientAlphaKey(0.0f, 0.0f);
+		alphas[1] = new GradientAlphaKey(1.0f, fadeInDistancePercent);
+		alphas[2] = new GradientAlphaKey(0.0f, 1.0f);
+
+		gradient.SetKeys(colors, alphas);
+
+		m_aimLineRenderer.colorGradient = gradient;
+
+
+
+
+
+
+
+
+
+
 		// Assertion
 		if (!m_isConnected) return;
 

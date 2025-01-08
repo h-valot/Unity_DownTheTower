@@ -65,6 +65,21 @@ public class SSO_Rope : ScriptableObject
 	[InfoBox("Below this distance, the character can not climb up the rope.", InfoMessageType.None)]
 	public float MinimumClimbLength = 1f;
 
+	[FoldoutGroup("Global settings")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("", InfoMessageType.None)]
+	public float LineSegmentSize;
+
+	[FoldoutGroup("Global settings")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("", InfoMessageType.None)]
+	public float LineWidth;
+
+	[FoldoutGroup("Global settings")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("", InfoMessageType.None)]
+	public float FadeInDistance;
+
 	#endregion
 
 	#region DEPLOYMENT
