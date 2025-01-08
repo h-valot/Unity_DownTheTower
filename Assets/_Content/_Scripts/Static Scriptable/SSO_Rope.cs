@@ -5,15 +5,15 @@ using UnityEngine;
 public class SSO_Rope : ScriptableObject
 {
 	[Title("Debug")]
-	[InfoBox("Material applied to the rope line if the total length is less or equal than half of the max length.", InfoMessageType.None)]
-	public Material SafeMaterial;
+	[InfoBox("Color applied to the rope line if the total length is less or equal than half of the max length.", InfoMessageType.None)]
+	public Color SafeColor;
 
-	[InfoBox("Material applied to the rope line if the total length is less or equal than three quarters of the max length.", InfoMessageType.None)]
-	public Material MidMaterial;
+	[InfoBox("Color applied to the rope line if the total length is less or equal than three quarters of the max length.", InfoMessageType.None)]
+	public Color MidColor;
 
 	[PropertySpace(SpaceBefore = 0, SpaceAfter = 15)]
-	[InfoBox("Material applied to the rope line if the total length is greater than three quarters of the max length.", InfoMessageType.None)]
-	public Material DangerMaterial;
+	[InfoBox("Color applied to the rope line if the total length is greater than three quarters of the max length.", InfoMessageType.None)]
+	public Color DangerColor;
 
 	
 	#region PREFAB

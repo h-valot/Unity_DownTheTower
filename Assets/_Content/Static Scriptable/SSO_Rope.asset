@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7c157d0ef5740a74d8ec4a4c4d788a6e, type: 3}
   m_Name: SSO_Rope
   m_EditorClassIdentifier: 
-  SafeMaterial: {fileID: 2100000, guid: ba23822fb6a3b364099a36e0afdebbeb, type: 2}
-  MidMaterial: {fileID: 2100000, guid: 366714ebc99d310499c50f72b93c87e1, type: 2}
-  DangerMaterial: {fileID: 2100000, guid: 550f01c26defd7e48adfe4458382316d, type: 2}
+  SafeColor: {r: 0.5137255, g: 1, b: 0, a: 1}
+  MidColor: {r: 1, g: 0.7254902, b: 0, a: 1}
+  DangerColor: {r: 1, g: 0, b: 0, a: 1}
   PfRope: {fileID: 2423774863846630498, guid: fd48698d019dac54c9052c72fb4353f6, type: 3}
   PfRopeLine: {fileID: 440317143077410654, guid: 08059428aa4d4934bb46b2f7e68db13b,
     type: 3}
@@ -28,6 +28,9 @@ MonoBehaviour:
   FoldOffset: 0.2
   MinFoldDistance: 0.25
   MinimumClimbLength: 2
+  LineSegmentSize: 0.15
+  LineWidth: 0.05
+  FadeInDistance: 1
   CraftingDuration: 0.25
   DeployLayersToIgnore:
     serializedVersion: 2

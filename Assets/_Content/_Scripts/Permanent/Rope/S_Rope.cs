@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using DG.Tweening;
 using EasyCurvedLine;
 using Sirenix.OdinInspector;
@@ -16,6 +17,7 @@ public class Rope : Permanent
 	[SerializeField] private GameObject m_previewGameObject;
 	[SerializeField] private RopeSegment m_baseSegment;
 	[SerializeField] private ConfigurableJoint m_joint;
+	[SerializeField] private LineRenderer m_lineRenderer;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Rope m_ssoRope;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_Ropes m_rsoRopes;
@@ -29,7 +31,7 @@ public class Rope : Permanent
 	private float m_holdLength;
 	private List<Vector3> m_folds = new List<Vector3>();
 	private RopeLine m_ropeLine;
-    private List<List<RopeSegment>> m_segments = new List<List<RopeSegment>>();
+    private List<RopeSegment> m_segments = new List<RopeSegment>();
 	private Rigidbody m_characterRigidbody;
 	private Transform m_characterAttach;
 	private SoftJointLimit m_linearLimit;
@@ -250,25 +252,23 @@ public class Rope : Permanent
 		m_baseSegment.OnInteractedWithRef += Reattach;
 		m_ssoRope.PfRopeSegment.SphereTrigger.radius = m_ssoRope.InteractableSphereRadius;
 
-		m_segments = new List<List<RopeSegment>>();
+		m_segments = new List<RopeSegment>();
 		float colliderDiameter = m_ssoRope.PfRopeSegment.ColliderRadius * 2f;
 
 		// Spawn segments
 		for (int i = 0; i < m_ropeLine.Positions.Length - 1; i++)
 		{
-			m_segments.Add(new List<RopeSegment>());
 			Vector3 lineDirection = (m_ropeLine.Positions[i + 1] - m_ropeLine.Positions[i]).normalized;
 			float lineLength = (m_ropeLine.Positions[i + 1] - m_ropeLine.Positions[i]).magnitude;
 			int colliderAmount = Mathf.FloorToInt(lineLength / colliderDiameter);
 			colliderAmount = Mathf.Clamp(colliderAmount, 1, colliderAmount);
-			print($"lineLength = {lineLength} so colliderAmount = {colliderAmount}");
 
 			for (int j = 0; j < colliderAmount; j++)
 			{
 				// Assert: The first segment of the first line must be ignored and replaced by the base repe segment.
 				if (j == 0 && i == 0) j++;
 
-				var newSegment = Instantiate(m_ssoRope.PfRopeSegment, j == 1 && i == 0 ? m_baseSegment.transform : j == 0 && i > 0 ? m_segments[i - 1][^1].transform : m_segments[i][^1].transform);
+				var newSegment = Instantiate(m_ssoRope.PfRopeSegment, j == 1 && i == 0 ? m_baseSegment.transform : m_segments[^1].transform);
 				newSegment.transform.rotation = Quaternion.LookRotation(lineDirection);
 				newSegment.OnInteractedWithRef += Reattach;
 
@@ -292,40 +292,21 @@ public class Rope : Permanent
 					newSegment.transform.position = m_ropeLine.Positions[i] + lineDirection * (lineLength / colliderAmount) * j;
 				}
 
+				if (i != m_ropeLine.Positions.Length - 1)
+				{
+					newSegment.DisableCollider();
+				}
+
 				newSegment.SetLimit(m_ssoRope.PfRopeSegment.ColliderRadius + 0.1f);
-				m_segments[i].Add(newSegment);
+				m_segments.Add(newSegment);
 			}
 		}
 
 		// Connect them together
-		m_baseSegment.Joint.connectedBody = m_segments[0][0].Rigidbody;
+		m_baseSegment.Joint.connectedBody = m_segments[0].Rigidbody;
 		for (int i = 0; i < m_segments.Count; i++)
 		{
-			for (int j = 0; j < m_segments[i].Count; j++)
-			{
-				Rigidbody rigidbody;
-
-				if (j + 1 >= m_segments[i].Count 
-				&& i + 1 < m_segments.Count) 
-				{
-					rigidbody = m_segments[i + 1][0].Rigidbody;
-				}
-				else if (j + 1 < m_segments[i].Count)
-				{
-					rigidbody = m_segments[i][j + 1].Rigidbody;
-				}
-				else
-				{
-					continue;
-				}
-
-				if (i != m_segments.Count - 1)
-				{
-					m_segments[i][j].DisableCollider();
-				}
-
-				m_segments[i][j].Connect(rigidbody);
-			}
+				m_segments[^1].Connect(m_segments[^1].Rigidbody);
 		}
 	}
 
@@ -348,12 +329,9 @@ public class Rope : Permanent
 
 		// Remove all rope interactables from the character interact
 		characterInteract.Remove(m_baseSegment);
-		foreach (var segments in m_segments)
+		foreach (var segment in m_segments)
 		{
-			foreach (var segment in segments)
-			{
-				characterInteract.Remove(segment);
-			}
+			characterInteract.Remove(segment);
 		}
 
 		// Delete segments
@@ -361,11 +339,8 @@ public class Rope : Permanent
 		m_baseSegment.OnInteractedWithRef -= Reattach;
 		for (int i = m_segments.Count - 1; i >= 0; i--)
 		{
-			for (int j = m_segments[i].Count - 1; j >= 0; j--)
-			{
-				m_segments[i][j].OnInteractedWithRef -= Reattach;
-				Destroy(m_segments[i][j].gameObject);
-			}
+			m_segments[i].OnInteractedWithRef -= Reattach;
+			Destroy(m_segments[i].gameObject);
 		}
 		m_segments.Clear();
 	}
@@ -436,78 +411,35 @@ public class Rope : Permanent
 		return (CurrentFold - m_characterRigidbody.position).magnitude;
 	}
 
-	[SerializeField] private LineRenderer m_aimLineRenderer;
 	private void DrawLines()
 	{
 		float trajectoryDistance = GetTotalLength();
-		Vector3[] smoothedPoints = LineSmoother.SmoothLine(m_segments.ToArray(), m_ssoRope.LineSegmentSize);
+		Vector3[] smoothedPoints = LineSmoother.SmoothLine(m_segments.Select(s => s.transform.position).ToArray(), m_ssoRope.LineSegmentSize);
 
-		// set line settings
-		m_aimLineRenderer.positionCount = smoothedPoints.Length;
-		m_aimLineRenderer.SetPositions(smoothedPoints);
-		m_aimLineRenderer.startWidth = m_ssoRope.LineWidth;
-		m_aimLineRenderer.endWidth = m_ssoRope.LineWidth;
+		// Set line settings
+		m_lineRenderer.positionCount = smoothedPoints.Length;
+		m_lineRenderer.SetPositions(smoothedPoints);
+		m_lineRenderer.startWidth = m_ssoRope.LineWidth;
+		m_lineRenderer.endWidth = m_ssoRope.LineWidth;
 
-		float fadeInDistancePercent = (m_ssoRope.FadeInDistance < trajectoryDistance * 0.25f) 
-			? (m_ssoRope.FadeInDistance / trajectoryDistance) 
-			: 0.25f;
+		float fadeInDistancePercent = (m_ssoRope.FadeInDistance < trajectoryDistance * 0.25f) ? (m_ssoRope.FadeInDistance / trajectoryDistance) : 0.25f;
 
 		Gradient gradient = new Gradient();
 
 		// Set color
 		GradientColorKey[] colors = new GradientColorKey[3];
-		colors[0] = new GradientColorKey(new Color(255f, 229f, 0), 0.0f);
-		colors[1] = new GradientColorKey(new Color(255f, 229f, 0), fadeInDistancePercent);
-		colors[2] = new GradientColorKey(new Color(255f, 229f, 0), 1.0f);
+		colors[0] = new GradientColorKey(m_ssoRope.SafeColor, 0.0f);
+		colors[1] = new GradientColorKey(m_ssoRope.MidColor, fadeInDistancePercent);
+		colors[2] = new GradientColorKey(m_ssoRope.DangerColor, 1.0f);
 
-		// Blend alpha from alpha at 0% to opaque at fade in distance to transparent at 100%
-		GradientAlphaKey[] alphas = new GradientAlphaKey[3];
-		alphas[0] = new GradientAlphaKey(0.0f, 0.0f);
-		alphas[1] = new GradientAlphaKey(1.0f, fadeInDistancePercent);
-		alphas[2] = new GradientAlphaKey(0.0f, 1.0f);
+		// Set alpha
+		GradientAlphaKey[] alphas = new GradientAlphaKey[2];
+		alphas[0] = new GradientAlphaKey(1, 0);
+		alphas[1] = new GradientAlphaKey(1, 1);
 
 		gradient.SetKeys(colors, alphas);
 
-		m_aimLineRenderer.colorGradient = gradient;
-
-
-
-
-
-
-
-
-
-
-		// Assertion
-		if (!m_isConnected) return;
-
-		if (m_ropeLine == null)
-		{
-			m_ropeLine = Instantiate(m_ssoRope.PfRopeLine, transform);
-		}
-
-		// Get material based in the total distance
-		Material material = m_ssoRope.DangerMaterial;
-		if (GetTotalLength() <= m_ssoRope.MaxLength / 2f)
-		{
-			material = m_ssoRope.SafeMaterial;
-		}
-		else if (GetTotalLength() <= 3 * (m_ssoRope.MaxLength / 4f))
-		{
-			material = m_ssoRope.MidMaterial;
-		}
-
-		List<Vector3> positions = new List<Vector3>();
-		// Draw lines 
-		foreach (Vector3 fold in m_folds)
-		{
-			positions.Add(fold);
-		}
-        positions.Add(m_characterAttach.position.CutDigits(2));
-        
-        m_ropeLine.SetPositions(positions.ToArray());
-        m_ropeLine.SetColor(material);
+		m_lineRenderer.colorGradient = gradient;
     }
 
 	#endregion
