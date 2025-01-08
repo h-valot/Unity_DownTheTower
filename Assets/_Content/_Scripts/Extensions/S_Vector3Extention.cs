@@ -9,9 +9,9 @@ public static class Vector3Extention
 	public static Vector3 CutDigits(this Vector3 vector, int digitAmount = 0)
 	{
 		return new Vector3(
-			vector.x.CutDigits(digitAmount),
-			vector.y.CutDigits(digitAmount),
-			vector.z.CutDigits(digitAmount)
+			vector.x.CutDigitsRound(digitAmount),
+			vector.y.CutDigitsRound(digitAmount),
+			vector.z.CutDigitsRound(digitAmount)
 		);
 	}
 

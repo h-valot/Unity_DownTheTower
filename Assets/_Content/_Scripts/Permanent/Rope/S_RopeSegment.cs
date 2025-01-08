@@ -5,14 +5,14 @@ public class RopeSegment : Interactable
 {
 	[Title("Rope Segment")]
 	public float ColliderRadius;
-	[SerializeField] private float m_inBetweenDistance;
+	public LayerMask LayerToExclude;
 
 	[FoldoutGroup("Internal references")][SerializeField] public Rigidbody Rigidbody;
 	[FoldoutGroup("Internal references")][SerializeField] public ConfigurableJoint Joint;
 	[FoldoutGroup("Internal references")][SerializeField] public SphereCollider SphereTrigger;
 	[FoldoutGroup("Internal references")][SerializeField] public SphereCollider SphereCollider;
 
-	public float InBetweenDistance => m_inBetweenDistance + ColliderRadius;
+	private SoftJointLimit m_softJointLimit;
 
 	private void Start()
 	{
@@ -22,5 +22,29 @@ public class RopeSegment : Interactable
 	public void Connect(Rigidbody rigidbody)
 	{
 		Joint.connectedBody = rigidbody;
+	}
+
+	public void SetLimit(float limit)
+	{
+		m_softJointLimit.limit = limit;
+		Joint.linearLimit = m_softJointLimit;
+	}
+
+	public void Freeze()
+	{
+		Rigidbody.constraints = RigidbodyConstraints.FreezeAll;
+		Rigidbody.isKinematic = true;
+	}
+
+	public void Free()
+	{
+		Joint.xMotion = ConfigurableJointMotion.Free;
+		Joint.yMotion = ConfigurableJointMotion.Free;
+		Joint.zMotion = ConfigurableJointMotion.Free;
+	}
+
+	public void DisableCollider()
+	{
+		SphereCollider.excludeLayers = LayerToExclude;
 	}
 }

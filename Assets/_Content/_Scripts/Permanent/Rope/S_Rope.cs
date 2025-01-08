@@ -26,9 +26,9 @@ public class Rope : Permanent
 	private bool m_isConnected;
 	private bool m_isPlaced;
 	private float m_holdLength;
-	public List<Vector3> m_folds = new List<Vector3>();
+	private List<Vector3> m_folds = new List<Vector3>();
 	private RopeLine m_ropeLine;
-	private List<RopeSegment> m_segments = new List<RopeSegment>();
+    private List<List<RopeSegment>> m_segments = new List<List<RopeSegment>>();
 	private Rigidbody m_characterRigidbody;
 	private Transform m_characterAttach;
 	private SoftJointLimit m_linearLimit;
@@ -243,35 +243,88 @@ public class Rope : Permanent
 
 	public void SpawnSegments()
 	{
-		// Update the interactable component at the base of the rope.
+		// Update the segment components.
 		m_baseSegment.SphereTrigger.radius = m_ssoRope.InteractableSphereRadius;
 		m_baseSegment.gameObject.SetActive(true);
 		m_baseSegment.OnInteractedWithRef += Reattach;
-
 		m_ssoRope.PfRopeSegment.SphereTrigger.radius = m_ssoRope.InteractableSphereRadius;
-		float sphereDiameter = m_ssoRope.PfRopeSegment.SphereTrigger.radius * 2f;
 
-		for (int i = 1; i < m_ropeLine.Positions.Length; i++)
+		m_segments = new List<List<RopeSegment>>();
+		float colliderDiameter = m_ssoRope.PfRopeSegment.ColliderRadius * 2f;
+
+		// Spawn segments
+		for (int i = 0; i < m_ropeLine.Positions.Length - 1; i++)
 		{
-			Vector3 lineDirection = (m_ropeLine.Positions[i-1] - m_ropeLine.Positions[i]).normalized;
-			float lineLength = (m_ropeLine.Positions[i-1] - m_ropeLine.Positions[i]).magnitude;
-			int sphereAmount = Mathf.FloorToInt(lineLength / sphereDiameter) + 1;
+			m_segments.Add(new List<RopeSegment>());
+			Vector3 lineDirection = (m_ropeLine.Positions[i + 1] - m_ropeLine.Positions[i]).normalized;
+			float lineLength = (m_ropeLine.Positions[i + 1] - m_ropeLine.Positions[i]).magnitude;
+			int colliderAmount = Mathf.FloorToInt(lineLength / colliderDiameter);
+			colliderAmount = Mathf.Clamp(colliderAmount, 1, colliderAmount);
+			print($"lineLength = {lineLength} so colliderAmount = {colliderAmount}");
 
-			for (int j = 0; j < sphereAmount; j++)
+			for (int j = 0; j < colliderAmount; j++)
 			{
-				var newSegment = Instantiate(m_ssoRope.PfRopeSegment, m_segments.Count > 0 ? m_segments[^1].transform : m_baseSegment.transform);
+				// Assert: The first segment of the first line must be ignored and replaced by the base repe segment.
+				if (j == 0 && i == 0) j++;
+
+				var newSegment = Instantiate(m_ssoRope.PfRopeSegment, j == 1 && i == 0 ? m_baseSegment.transform : j == 0 && i > 0 ? m_segments[i - 1][^1].transform : m_segments[i][^1].transform);
 				newSegment.transform.rotation = Quaternion.LookRotation(lineDirection);
-				newSegment.transform.position = m_ropeLine.Positions[i] - lineDirection * m_ssoRope.PfRopeSegment.InBetweenDistance * i;
 				newSegment.OnInteractedWithRef += Reattach;
-				m_segments.Add(newSegment);
+
+				// Set the first segment of the line as static
+				if (j == 0)
+				{
+					newSegment.Freeze();
+					newSegment.transform.position = m_ropeLine.Positions[i];
+				}
+
+				// Snap the position of the last segment of the last line 
+				else if (j == colliderAmount - 1 && i == m_ropeLine.Positions.Length - 2)
+				{
+					newSegment.Free();
+					newSegment.transform.position = m_ropeLine.Positions[i] + lineDirection * (lineLength / colliderAmount) * j;
+				}
+
+				// Place in-between segments
+				else
+				{
+					newSegment.transform.position = m_ropeLine.Positions[i] + lineDirection * (lineLength / colliderAmount) * j;
+				}
+
+				newSegment.SetLimit(m_ssoRope.PfRopeSegment.ColliderRadius + 0.1f);
+				m_segments[i].Add(newSegment);
 			}
 		}
 
 		// Connect them together
-		m_baseSegment.Joint.connectedBody = m_segments[0].Rigidbody;
-		for (int i = 0; i < m_segments.Count - 1; i++)
+		m_baseSegment.Joint.connectedBody = m_segments[0][0].Rigidbody;
+		for (int i = 0; i < m_segments.Count; i++)
 		{
-			m_segments[i].Connect(m_segments[i + 1].Rigidbody);
+			for (int j = 0; j < m_segments[i].Count; j++)
+			{
+				Rigidbody rigidbody;
+
+				if (j + 1 >= m_segments[i].Count 
+				&& i + 1 < m_segments.Count) 
+				{
+					rigidbody = m_segments[i + 1][0].Rigidbody;
+				}
+				else if (j + 1 < m_segments[i].Count)
+				{
+					rigidbody = m_segments[i][j + 1].Rigidbody;
+				}
+				else
+				{
+					continue;
+				}
+
+				if (i != m_segments.Count - 1)
+				{
+					m_segments[i][j].DisableCollider();
+				}
+
+				m_segments[i][j].Connect(rigidbody);
+			}
 		}
 	}
 
@@ -294,9 +347,12 @@ public class Rope : Permanent
 
 		// Remove all rope interactables from the character interact
 		characterInteract.Remove(m_baseSegment);
-		foreach (var interactable in m_segments)
+		foreach (var segments in m_segments)
 		{
-			characterInteract.Remove(interactable);
+			foreach (var segment in segments)
+			{
+				characterInteract.Remove(segment);
+			}
 		}
 
 		// Delete segments
@@ -304,8 +360,11 @@ public class Rope : Permanent
 		m_baseSegment.OnInteractedWithRef -= Reattach;
 		for (int i = m_segments.Count - 1; i >= 0; i--)
 		{
-			m_segments[i].OnInteractedWithRef -= Reattach;
-			Destroy(m_segments[i].gameObject);
+			for (int j = m_segments[i].Count - 1; j >= 0; j--)
+			{
+				m_segments[i][j].OnInteractedWithRef -= Reattach;
+				Destroy(m_segments[i][j].gameObject);
+			}
 		}
 		m_segments.Clear();
 	}

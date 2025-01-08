@@ -11,11 +11,12 @@ GameObject:
   - component: {fileID: 8025931762380556335}
   - component: {fileID: 7166873866869648767}
   - component: {fileID: 6864702154251655133}
+  - component: {fileID: 8930627056090275394}
   - component: {fileID: 4896314402593933662}
   - component: {fileID: 8026070910211052772}
   - component: {fileID: 6050372278757894882}
   - component: {fileID: 3879246481950295920}
-  m_Layer: 8
+  m_Layer: 7
   m_Name: PF_RopeSegment
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -52,8 +53,10 @@ MonoBehaviour:
   m_isRecyclable: 0
   m_objectToRecycle: {fileID: 0}
   m_displayGizmos: 0
-  ColliderRadius: 0.25
-  m_inBetweenDistance: 0.5
+  ColliderRadius: 0.5
+  LayerToExclude:
+    serializedVersion: 2
+    m_Bits: 8
   Rigidbody: {fileID: 4896314402593933662}
   Joint: {fileID: 8026070910211052772}
   SphereTrigger: {fileID: 3879246481950295920}
@@ -73,6 +76,21 @@ MonoBehaviour:
   m_isRecyclable: 0
   m_objectToRecycle: {fileID: 0}
   m_displayGizmos: 0
+--- !u!114 &8930627056090275394
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4262987667519140782}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5d23815cfd43e1e42ab6343fa3239383, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_color: {r: 1, g: 0, b: 0, a: 1}
+  m_radius: 0.5
+  m_type: 1
 --- !u!54 &4896314402593933662
 Rigidbody:
   m_ObjectHideFlags: 0
