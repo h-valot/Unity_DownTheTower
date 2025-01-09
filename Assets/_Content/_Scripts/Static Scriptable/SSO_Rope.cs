@@ -75,11 +75,6 @@ public class SSO_Rope : ScriptableObject
 	[InfoBox("", InfoMessageType.None)]
 	public float LineWidth;
 
-	[FoldoutGroup("Global settings")]
-	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
-	[InfoBox("", InfoMessageType.None)]
-	public float FadeInDistance;
-
 	#endregion
 
 	#region DEPLOYMENT

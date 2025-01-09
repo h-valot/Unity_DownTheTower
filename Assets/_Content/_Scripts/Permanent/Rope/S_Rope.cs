@@ -1,7 +1,6 @@
+using System;
 using System.Collections.Generic;
-using System.Linq;
 using DG.Tweening;
-using EasyCurvedLine;
 using Sirenix.OdinInspector;
 using UnityEngine;
 
@@ -15,9 +14,7 @@ public class Rope : Permanent
 	[SerializeField] public Transform RaycastTarget;
 	[SerializeField] private MeshRenderer m_previewMeshRendered;
 	[SerializeField] private GameObject m_previewGameObject;
-	[SerializeField] private RopeSegment m_baseSegment;
 	[SerializeField] private ConfigurableJoint m_joint;
-	[SerializeField] private LineRenderer m_lineRenderer;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Rope m_ssoRope;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_Ropes m_rsoRopes;
@@ -30,16 +27,25 @@ public class Rope : Permanent
 	private bool m_isPlaced;
 	private float m_holdLength;
 	private List<Vector3> m_folds = new List<Vector3>();
-	private RopeLine m_ropeLine;
-    private List<RopeSegment> m_segments = new List<RopeSegment>();
 	private Rigidbody m_characterRigidbody;
-	private Transform m_characterAttach;
+	private Transform m_characterHarness;
 	private SoftJointLimit m_linearLimit;
 
 	[HideInInspector] public bool IsConstrained;
+	public Action OnAttached;
+	public Action OnDetached;
 	public bool IsConnected => m_isConnected;
 	public bool IsPlaced => m_isPlaced;
 	public float HoldLength => m_holdLength;
+	public Rigidbody CharacterRigidbody => m_characterRigidbody;
+	public Vector3 CharacterPosition
+	{
+		get
+		{
+			if (m_characterRigidbody) return m_characterRigidbody.position;
+			else return CurrentFold;
+		}
+	}
 	public Vector3 CurrentFold 
 	{
 		get 
@@ -61,11 +67,6 @@ public class Rope : Permanent
 
 	#region MONOBEHAVIOR
 
-	private void Start()
-	{
-		m_baseSegment.gameObject.SetActive(false);
-	}
-
 	private void Update()
 	{
 		// Assertions
@@ -74,7 +75,6 @@ public class Rope : Permanent
 
 		HandleFolds();
 		HandleJoint();
-		DrawLines();
 	}
 
 	private void OnEnable()
@@ -181,12 +181,32 @@ public class Rope : Permanent
 
 	public void Attach(Transform attach, Rigidbody rigidbody)
 	{
-		m_characterAttach = attach;
+		m_characterHarness = attach;
 		m_characterRigidbody = rigidbody;
 		m_joint.connectedBody = rigidbody;
 		m_isConnected = true;
 
 		if (m_isPlaced) UpdateHoldLength();
+
+		OnAttached?.Invoke();
+	}
+
+	public void Reattach(CharacterInteract characterInteract)
+	{
+		// Attach the character to the rope
+		var characterMotor = characterInteract.GetComponent<CharacterMotor>();
+		Attach(characterMotor.Harness, characterMotor.Rigidbody);
+		characterMotor.Equip(this);
+
+		// Update folds
+		for (int i = m_folds.Count - 1; i >= 0; i--)
+		{
+			// Assert: an object is obstructing the way from the fold towards the character.
+			if (!Physics.Linecast(m_characterHarness.position, m_folds[i], out var hit, m_ssoRope.FoldLayerToInclude)) break;
+
+			m_folds.Remove(m_folds[i]);
+		}
+		UpdateHoldLength();
 	}
 
 	public void Detach()
@@ -195,13 +215,14 @@ public class Rope : Permanent
 		if (!m_isConnected) return;
 
 		// Add a final fold to spawn an interactible on it.
-		m_folds.Add(m_characterAttach.position.CutDigits(2));
-		SpawnSegments();
+		m_folds.Add(m_characterHarness.position.CutDigits(2));
 
 		m_isConnected = false;
 		m_joint.connectedBody = null;
 		m_characterRigidbody = null;
-		m_characterAttach = null;
+		m_characterHarness = null;
+
+		OnDetached?.Invoke();
 	}
 
 	/// <summary>
@@ -210,7 +231,7 @@ public class Rope : Permanent
 	public void HandleFolds()
 	{
 		// Add fold if a collider stands between the character and the last fold
-		if (Physics.Linecast(m_characterAttach.position, CurrentFold, out var addHit, m_ssoRope.FoldLayerToInclude))
+		if (Physics.Linecast(m_characterHarness.position, CurrentFold, out var addHit, m_ssoRope.FoldLayerToInclude))
 		{
 			Vector3 offsetPoint = addHit.point + addHit.normal * m_ssoRope.FoldOffset;
 			Vector3 approximatePoint = offsetPoint.CutDigits(2);
@@ -237,112 +258,11 @@ public class Rope : Permanent
 		// Remove the last fold from the list if there is no collider 
 		// that stands between the character and the previous last fold.
 		if (m_folds.Count >= 2
-		&& !Physics.Linecast(m_characterAttach.position, LastFold, out var removeHit, m_ssoRope.FoldLayerToInclude))
+		&& !Physics.Linecast(m_characterHarness.position, LastFold, out var removeHit, m_ssoRope.FoldLayerToInclude))
 		{
 			IncreaseHoldLength((LastFold - CurrentFold).magnitude);
 			m_folds.Remove(CurrentFold);
 		}
-	}
-
-	public void SpawnSegments()
-	{
-		// Update the segment components.
-		m_baseSegment.SphereTrigger.radius = m_ssoRope.InteractableSphereRadius;
-		m_baseSegment.gameObject.SetActive(true);
-		m_baseSegment.OnInteractedWithRef += Reattach;
-		m_ssoRope.PfRopeSegment.SphereTrigger.radius = m_ssoRope.InteractableSphereRadius;
-
-		m_segments = new List<RopeSegment>();
-		float colliderDiameter = m_ssoRope.PfRopeSegment.ColliderRadius * 2f;
-
-		// Spawn segments
-		for (int i = 0; i < m_ropeLine.Positions.Length - 1; i++)
-		{
-			Vector3 lineDirection = (m_ropeLine.Positions[i + 1] - m_ropeLine.Positions[i]).normalized;
-			float lineLength = (m_ropeLine.Positions[i + 1] - m_ropeLine.Positions[i]).magnitude;
-			int colliderAmount = Mathf.FloorToInt(lineLength / colliderDiameter);
-			colliderAmount = Mathf.Clamp(colliderAmount, 1, colliderAmount);
-
-			for (int j = 0; j < colliderAmount; j++)
-			{
-				// Assert: The first segment of the first line must be ignored and replaced by the base repe segment.
-				if (j == 0 && i == 0) j++;
-
-				var newSegment = Instantiate(m_ssoRope.PfRopeSegment, j == 1 && i == 0 ? m_baseSegment.transform : m_segments[^1].transform);
-				newSegment.transform.rotation = Quaternion.LookRotation(lineDirection);
-				newSegment.OnInteractedWithRef += Reattach;
-
-				// Set the first segment of the line as static
-				if (j == 0)
-				{
-					newSegment.Freeze();
-					newSegment.transform.position = m_ropeLine.Positions[i];
-				}
-
-				// Snap the position of the last segment of the last line 
-				else if (j == colliderAmount - 1 && i == m_ropeLine.Positions.Length - 2)
-				{
-					newSegment.Free();
-					newSegment.transform.position = m_ropeLine.Positions[i] + lineDirection * (lineLength / colliderAmount) * j;
-				}
-
-				// Place in-between segments
-				else
-				{
-					newSegment.transform.position = m_ropeLine.Positions[i] + lineDirection * (lineLength / colliderAmount) * j;
-				}
-
-				if (i != m_ropeLine.Positions.Length - 1)
-				{
-					newSegment.DisableCollider();
-				}
-
-				newSegment.SetLimit(m_ssoRope.PfRopeSegment.ColliderRadius + 0.1f);
-				m_segments.Add(newSegment);
-			}
-		}
-
-		// Connect them together
-		m_baseSegment.Joint.connectedBody = m_segments[0].Rigidbody;
-		for (int i = 0; i < m_segments.Count; i++)
-		{
-				m_segments[^1].Connect(m_segments[^1].Rigidbody);
-		}
-	}
-
-	public void Reattach(CharacterInteract characterInteract)
-	{
-		// Attach the character to the rope
-		var characterMotor = characterInteract.GetComponent<CharacterMotor>();
-		Attach(characterMotor.Attach, characterMotor.Rigidbody);
-		characterMotor.Equip(this);
-
-		// Update folds
-		for (int i = m_folds.Count - 1; i >= 0; i--)
-		{
-			// Assert: an object is obstructing the way from the fold towards the character.
-			if (!Physics.Linecast(m_characterAttach.position, m_folds[i], out var hit, m_ssoRope.FoldLayerToInclude)) break;
-			
-			m_folds.Remove(m_folds[i]);
-		}
-		UpdateHoldLength();
-
-		// Remove all rope interactables from the character interact
-		characterInteract.Remove(m_baseSegment);
-		foreach (var segment in m_segments)
-		{
-			characterInteract.Remove(segment);
-		}
-
-		// Delete segments
-		m_baseSegment.gameObject.SetActive(false);
-		m_baseSegment.OnInteractedWithRef -= Reattach;
-		for (int i = m_segments.Count - 1; i >= 0; i--)
-		{
-			m_segments[i].OnInteractedWithRef -= Reattach;
-			Destroy(m_segments[i].gameObject);
-		}
-		m_segments.Clear();
 	}
 
 	/// <summary>
@@ -410,37 +330,6 @@ public class Rope : Permanent
 		// Only the graphics are connected to harness.
 		return (CurrentFold - m_characterRigidbody.position).magnitude;
 	}
-
-	private void DrawLines()
-	{
-		float trajectoryDistance = GetTotalLength();
-		Vector3[] smoothedPoints = LineSmoother.SmoothLine(m_segments.Select(s => s.transform.position).ToArray(), m_ssoRope.LineSegmentSize);
-
-		// Set line settings
-		m_lineRenderer.positionCount = smoothedPoints.Length;
-		m_lineRenderer.SetPositions(smoothedPoints);
-		m_lineRenderer.startWidth = m_ssoRope.LineWidth;
-		m_lineRenderer.endWidth = m_ssoRope.LineWidth;
-
-		float fadeInDistancePercent = (m_ssoRope.FadeInDistance < trajectoryDistance * 0.25f) ? (m_ssoRope.FadeInDistance / trajectoryDistance) : 0.25f;
-
-		Gradient gradient = new Gradient();
-
-		// Set color
-		GradientColorKey[] colors = new GradientColorKey[3];
-		colors[0] = new GradientColorKey(m_ssoRope.SafeColor, 0.0f);
-		colors[1] = new GradientColorKey(m_ssoRope.MidColor, fadeInDistancePercent);
-		colors[2] = new GradientColorKey(m_ssoRope.DangerColor, 1.0f);
-
-		// Set alpha
-		GradientAlphaKey[] alphas = new GradientAlphaKey[2];
-		alphas[0] = new GradientAlphaKey(1, 0);
-		alphas[1] = new GradientAlphaKey(1, 1);
-
-		gradient.SetKeys(colors, alphas);
-
-		m_lineRenderer.colorGradient = gradient;
-    }
 
 	#endregion
 }

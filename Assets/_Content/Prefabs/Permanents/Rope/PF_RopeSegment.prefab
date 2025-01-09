@@ -11,11 +11,11 @@ GameObject:
   - component: {fileID: 8025931762380556335}
   - component: {fileID: 7166873866869648767}
   - component: {fileID: 6864702154251655133}
-  - component: {fileID: 8930627056090275394}
   - component: {fileID: 4896314402593933662}
   - component: {fileID: 8026070910211052772}
   - component: {fileID: 6050372278757894882}
   - component: {fileID: 3879246481950295920}
+  - component: {fileID: 2549961497605431022}
   m_Layer: 7
   m_Name: PF_RopeSegment
   m_TagString: Untagged
@@ -76,21 +76,6 @@ MonoBehaviour:
   m_isRecyclable: 0
   m_objectToRecycle: {fileID: 0}
   m_displayGizmos: 0
---- !u!114 &8930627056090275394
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4262987667519140782}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5d23815cfd43e1e42ab6343fa3239383, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_color: {r: 1, g: 0, b: 0, a: 1}
-  m_radius: 0.5
-  m_type: 1
 --- !u!54 &4896314402593933662
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -129,7 +114,7 @@ ConfigurableJoint:
   m_ConnectedArticulationBody: {fileID: 0}
   m_Anchor: {x: 0, y: 0, z: 0}
   m_Axis: {x: 1, y: 0, z: 0}
-  m_AutoConfigureConnectedAnchor: 1
+  m_AutoConfigureConnectedAnchor: 0
   m_ConnectedAnchor: {x: 0, y: 0, z: 0}
   serializedVersion: 3
   m_SecondaryAxis: {x: 0, y: 1, z: 0}
@@ -262,3 +247,18 @@ SphereCollider:
   serializedVersion: 3
   m_Radius: 0.75
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &2549961497605431022
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4262987667519140782}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5d23815cfd43e1e42ab6343fa3239383, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_color: {r: 1, g: 0, b: 0, a: 1}
+  m_radius: 0.5
+  m_type: 0

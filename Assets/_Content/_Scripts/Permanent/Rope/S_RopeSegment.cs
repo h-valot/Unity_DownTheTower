@@ -13,9 +13,14 @@ public class RopeSegment : Interactable
 	[FoldoutGroup("Internal references")][SerializeField] public SphereCollider SphereCollider;
 
 	private SoftJointLimit m_softJointLimit;
+	private SoftJointLimitSpring m_softJointLimitSpring;
+	private LayerMask m_defaultLayerToExclude;
+
+	public bool IsConnected => Joint.connectedBody != null;
 
 	private void Start()
 	{
+		m_defaultLayerToExclude = SphereCollider.excludeLayers;
 		SphereCollider.radius = ColliderRadius;
 	}
 
@@ -28,6 +33,21 @@ public class RopeSegment : Interactable
 	{
 		m_softJointLimit.limit = limit;
 		Joint.linearLimit = m_softJointLimit;
+	}
+
+	public void ToggleSpring(bool isEnabled)
+	{
+		if (isEnabled)
+		{
+			m_softJointLimitSpring.spring = 100;
+			m_softJointLimitSpring.damper = 10;
+		}
+		else
+		{
+			m_softJointLimitSpring.spring = 0;
+			m_softJointLimitSpring.damper = 0;
+		}
+		Joint.linearLimitSpring = m_softJointLimitSpring;
 	}
 
 	public void Freeze()
@@ -43,8 +63,27 @@ public class RopeSegment : Interactable
 		Joint.zMotion = ConfigurableJointMotion.Free;
 	}
 
-	public void DisableCollider()
+	public void ToggleCollider(bool isEnabled)
 	{
-		SphereCollider.excludeLayers = LayerToExclude;
+		if (isEnabled)
+		{
+			SphereCollider.excludeLayers = m_defaultLayerToExclude;
+		}
+		else
+		{
+			SphereCollider.excludeLayers = LayerToExclude;
+		}
+	}
+
+	public void ToggleTrigger(bool isEnabled)
+	{
+		if (isEnabled)
+		{
+			SphereTrigger.excludeLayers = m_defaultLayerToExclude;
+		}
+		else
+		{
+			SphereTrigger.excludeLayers = LayerToExclude;
+		}
 	}
 }

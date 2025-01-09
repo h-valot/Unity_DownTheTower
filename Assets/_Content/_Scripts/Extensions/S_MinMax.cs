@@ -1,4 +1,3 @@
-
 using System;
 using UnityEngine;
 
@@ -21,6 +20,8 @@ public class MinMaxInt
 		Min = vector2Int.x;
 		Max = vector2Int.y;
 	}
+
+	public int GetRandomValue => UnityEngine.Random.Range(Min, Max + 1);
 }
 
 [Serializable]
@@ -42,4 +43,6 @@ public class MinMaxFloat
 		Min = vector2.x;
 		Max = vector2.y;
 	}
+
+	public float GetRandomValue => UnityEngine.Random.Range(Min, Max);
 }

@@ -14,7 +14,7 @@ public class CharacterMotor : MonoBehaviour
 	[SerializeField] private Transform m_robotSocket;
 	[SerializeField] private Transform m_aimingLookTo;
 	[SerializeField] private Transform m_cameraTarget;
-	[SerializeField] private Transform m_attach;
+	[SerializeField] private Transform m_harness;
 	[SerializeField] private CharacterGraphics m_characterGraphics;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Character m_ssoCharacter;
@@ -109,7 +109,7 @@ public class CharacterMotor : MonoBehaviour
 	// Misc
 	private const float k_fallingForcesThreshold = 0.2f;
 	public Rigidbody Rigidbody => m_rigidbody;
-	public Transform Attach => m_attach;
+	public Transform Harness => m_harness;
 
 	#endregion
 
@@ -1182,7 +1182,7 @@ public class CharacterMotor : MonoBehaviour
 			// Exception: rope attachment
 			if (m_rope != null) DesequipRope();
 			m_rope = HandObject as Rope;
-			if (m_rope != null) m_rope?.Attach(m_attach, m_rigidbody);
+			if (m_rope != null) m_rope?.Attach(m_harness, m_rigidbody);
 
 			HandObject = null;
 			SwitchObjects(ref RobotObject, ref HandObject, m_handSocket);

@@ -1,34 +1,33 @@
 using UnityEngine;
 
+public enum CuttingType
+{
+	ROUND = 0,
+	FLOOR = 1,
+	CEIL = 2
+}
+
 public static class FloatExtention
 {
 	/// <summary>
-	/// Return the given float with the given amout of digit rounded.
+	/// Return the given float with the given amout of digit.
 	/// </summary>
 	/// <param name="digitAmount">Number of digit left after the comma. 0 by default = similar to floor to int.</param>
-	public static float CutDigitsRound(this float number, int digitAmount = 0)
+	public static float CutDigits(this float number, int digitAmount)
 	{
-		float scalar = Mathf.Pow(10f, digitAmount);
-		return Mathf.Round(number * scalar) / scalar;
+		return number.CutDigits(digitAmount, CuttingType.ROUND);
 	}
 
 	/// <summary>
-	/// Return the given float with the given amout of digit rounded down.
+	/// Return the given float with the given amout of digit.
 	/// </summary>
 	/// <param name="digitAmount">Number of digit left after the comma. 0 by default = similar to floor to int.</param>
-	public static float CutDigitsFloor(this float number, int digitAmount = 0)
+	/// <param name="type">Type of cutting. ROUND: digits are rounded to nearest, FLOOR: digits are rounded down, CEIL: digits are rounded up.</param>
+	public static float CutDigits(this float number, int digitAmount, CuttingType type)
 	{
 		float scalar = Mathf.Pow(10f, digitAmount);
-		return Mathf.Floor(number * scalar) / scalar;
-	}
-
-	/// <summary>
-	/// Return the given float with the given amout of digit rounded up.
-	/// </summary>
-	/// <param name="digitAmount">Number of digit left after the comma. 0 by default = similar to floor to int.</param>
-	public static float CutDigitsCeil(this float number, int digitAmount = 0)
-	{
-		float scalar = Mathf.Pow(10f, digitAmount);
-		return Mathf.Ceil(number * scalar) / scalar;
+		if (type == CuttingType.ROUND) return Mathf.Round(number * scalar) / scalar;
+		else if (type == CuttingType.FLOOR) return Mathf.Floor(number * scalar) / scalar;
+		else return Mathf.Ceil(number * scalar) / scalar;
 	}
 }
