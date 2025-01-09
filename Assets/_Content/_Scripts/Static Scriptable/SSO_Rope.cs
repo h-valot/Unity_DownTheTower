@@ -3,19 +3,7 @@ using UnityEngine;
 
 [CreateAssetMenu(fileName = "SSO_Rope", menuName = "Static Scriptable/Rope")]
 public class SSO_Rope : ScriptableObject
-{
-	[Title("Debug")]
-	[InfoBox("Color applied to the rope line if the total length is less or equal than half of the max length.", InfoMessageType.None)]
-	public Color SafeColor;
-
-	[InfoBox("Color applied to the rope line if the total length is less or equal than three quarters of the max length.", InfoMessageType.None)]
-	public Color MidColor;
-
-	[PropertySpace(SpaceBefore = 0, SpaceAfter = 15)]
-	[InfoBox("Color applied to the rope line if the total length is greater than three quarters of the max length.", InfoMessageType.None)]
-	public Color DangerColor;
-
-	
+{	
 	#region PREFAB
 
 	[FoldoutGroup("Prefabs")]
@@ -74,6 +62,16 @@ public class SSO_Rope : ScriptableObject
 	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
 	[InfoBox("", InfoMessageType.None)]
 	public float LineWidth;
+
+	[FoldoutGroup("Global settings")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("", InfoMessageType.None)]
+	public float MiddlePointDownOffsetModifier;
+
+	[FoldoutGroup("Global settings")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("", InfoMessageType.None)]
+	public Gradient ropeGradient;
 
 	#endregion
 

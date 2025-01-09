@@ -23,7 +23,6 @@ public class Rope : Permanent
 
 	#region VARIABLES
 
-	private bool m_isConnected;
 	private bool m_isPlaced;
 	private float m_holdLength;
 	private List<Vector3> m_folds = new List<Vector3>();
@@ -34,15 +33,16 @@ public class Rope : Permanent
 	[HideInInspector] public bool IsConstrained;
 	public Action OnAttached;
 	public Action OnDetached;
-	public bool IsConnected => m_isConnected;
+	public bool IsConnected => m_characterRigidbody;
 	public bool IsPlaced => m_isPlaced;
 	public float HoldLength => m_holdLength;
 	public Rigidbody CharacterRigidbody => m_characterRigidbody;
+	public List<Vector3> Folds => m_folds;
 	public Vector3 CharacterPosition
 	{
 		get
 		{
-			if (m_characterRigidbody) return m_characterRigidbody.position;
+			if (m_characterHarness) return m_characterHarness.position;
 			else return CurrentFold;
 		}
 	}
@@ -70,7 +70,7 @@ public class Rope : Permanent
 	private void Update()
 	{
 		// Assertions
-		if (!m_isConnected) return;
+		if (!IsConnected) return;
 		if (!m_isPlaced) return;
 
 		HandleFolds();
@@ -184,7 +184,6 @@ public class Rope : Permanent
 		m_characterHarness = attach;
 		m_characterRigidbody = rigidbody;
 		m_joint.connectedBody = rigidbody;
-		m_isConnected = true;
 
 		if (m_isPlaced) UpdateHoldLength();
 
@@ -212,12 +211,11 @@ public class Rope : Permanent
 	public void Detach()
 	{
 		// Assertion
-		if (!m_isConnected) return;
+		if (!IsConnected) return;
 
 		// Add a final fold to spawn an interactible on it.
 		m_folds.Add(m_characterHarness.position.CutDigits(2));
 
-		m_isConnected = false;
 		m_joint.connectedBody = null;
 		m_characterRigidbody = null;
 		m_characterHarness = null;
@@ -305,7 +303,7 @@ public class Rope : Permanent
 	public float GetTotalLength()
 	{
 		// Assertion
-		if (!m_isConnected) return 0;
+		if (!IsConnected) return 0;
 
 		float output = 0;
 		for (int i = 0; i < m_folds.Count; i++)
@@ -322,7 +320,7 @@ public class Rope : Permanent
 	public float GetCurrentFoldCharacterDistance()
 	{
 		// Assertion
-		if (!m_isConnected) return -1;
+		if (!IsConnected) return -1;
 
 		// Note that we do not connect the current fold to the harness
 		// but the character's current position. This avoids re-centering

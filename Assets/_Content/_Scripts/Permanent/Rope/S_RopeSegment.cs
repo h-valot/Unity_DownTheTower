@@ -41,11 +41,13 @@ public class RopeSegment : Interactable
 		{
 			m_softJointLimitSpring.spring = 100;
 			m_softJointLimitSpring.damper = 10;
+			Joint.connectedMassScale = 1000f;
 		}
 		else
 		{
 			m_softJointLimitSpring.spring = 0;
 			m_softJointLimitSpring.damper = 0;
+			Joint.connectedMassScale = 1f;
 		}
 		Joint.linearLimitSpring = m_softJointLimitSpring;
 	}

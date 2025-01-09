@@ -12,9 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7c157d0ef5740a74d8ec4a4c4d788a6e, type: 3}
   m_Name: SSO_Rope
   m_EditorClassIdentifier: 
-  SafeColor: {r: 0.5137255, g: 1, b: 0, a: 1}
-  MidColor: {r: 1, g: 0.7254902, b: 0, a: 1}
-  DangerColor: {r: 1, g: 0, b: 0, a: 1}
   PfRope: {fileID: 2423774863846630498, guid: fd48698d019dac54c9052c72fb4353f6, type: 3}
   PfRopeLine: {fileID: 440317143077410654, guid: 08059428aa4d4934bb46b2f7e68db13b,
     type: 3}
@@ -30,7 +27,37 @@ MonoBehaviour:
   MinimumClimbLength: 2
   LineSegmentSize: 0.15
   LineWidth: 0.05
-  FadeInDistance: 1
+  MiddlePointDownOffsetModifier: 0.1
+  ropeGradient:
+    serializedVersion: 2
+    key0: {r: 0.14320946, g: 1, b: 0, a: 1}
+    key1: {r: 1, g: 0, b: 0, a: 1}
+    key2: {r: 1, g: 0, b: 0, a: 0}
+    key3: {r: 1, g: 0, b: 0, a: 0}
+    key4: {r: 0, g: 0, b: 0, a: 0}
+    key5: {r: 0, g: 0, b: 0, a: 0}
+    key6: {r: 0, g: 0, b: 0, a: 0}
+    key7: {r: 0, g: 0, b: 0, a: 0}
+    ctime0: 0
+    ctime1: 65535
+    ctime2: 65535
+    ctime3: 65535
+    ctime4: 0
+    ctime5: 0
+    ctime6: 0
+    ctime7: 0
+    atime0: 0
+    atime1: 65535
+    atime2: 0
+    atime3: 0
+    atime4: 0
+    atime5: 0
+    atime6: 0
+    atime7: 0
+    m_Mode: 0
+    m_ColorSpace: 0
+    m_NumColorKeys: 2
+    m_NumAlphaKeys: 2
   CraftingDuration: 0.25
   DeployLayersToIgnore:
     serializedVersion: 2

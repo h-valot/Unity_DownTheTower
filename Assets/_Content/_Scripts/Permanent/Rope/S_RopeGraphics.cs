@@ -15,16 +15,13 @@ public class RopeGraphics : MonoBehaviour
 
 	[Title("Debug")]
 	[ShowInInspector] private List<RopeSegment> m_segments = new List<RopeSegment>();
-	private bool m_interactablesEnabled;
-	private bool m_collisionsEnabled;
+	[ShowInInspector] private List<Vector3> m_points = new List<Vector3>();
 	private float m_colliderDiameter;
-	private Vector3 m_lineDirection;
-	private float m_lineLength;
-	private int m_colliderAmount;
-	private Vector3 m_cachedCurrentFold;
 	private Gradient m_gradient = new Gradient();
-	private GradientColorKey[] m_gradientColorKey = new GradientColorKey[3];
+	private GradientColorKey[] m_gradientColorKey = new GradientColorKey[2];
 	private GradientAlphaKey[] m_gradientAlphaKey = new GradientAlphaKey[2];
+
+	#region MONOBEHAVIOUR
 
 	private void Start()
 	{
@@ -52,99 +49,66 @@ public class RopeGraphics : MonoBehaviour
 	private void OnEnable()
 	{
 		m_rope.OnDetached += OnDetached;
-		m_rope.OnAttached += OnPlaced;
+		m_rope.OnAttached += OnAttached;
 	}
 
 	private void OnDisable()
 	{
 		m_rope.OnDetached -= OnDetached;
-		m_rope.OnAttached += OnPlaced;
+		m_rope.OnAttached -= OnAttached;
 	}
+
+	#endregion
 
 	private void HandlePoints()
 	{
-		m_lineDirection = (m_rope.CharacterPosition - m_rope.CurrentFold).normalized;
-		m_lineLength = (m_rope.CharacterPosition - m_rope.CurrentFold).magnitude;
-		m_colliderAmount = Mathf.FloorToInt(m_lineLength / m_colliderDiameter);
+		m_points = new List<Vector3>();
 
-		// print($"m_lineDirection = {m_lineDirection} -- m_lineLength = {m_lineLength} -- m_colliderAmount = {m_colliderAmount} -- m_segments.Count = {m_segments.Count}");
-		// - Instantiate new segment -
-		if (m_colliderAmount > m_segments.Count)
+		for (int i = 0; i < m_rope.Folds.Count; i++)
 		{
-			if (m_segments.Count < 3)
-			{
-				// TODO - Third temporary point for bezier curves
-				// return;
-			}
+			// Get start and end points
+			Vector3 start = m_rope.Folds[i];
+			Vector3 end = i == m_rope.Folds.Count - 1 ? m_rope.CharacterPosition : m_rope.Folds[i + 1];
 
-			var newSegment = Instantiate(m_ssoRope.PfRopeSegment, m_segments[^1].transform);
-			newSegment.OnInteractedWithRef += OnInteracted;
+			// Base calculation to get the best middle point
+			float distance = (end - start).magnitude;
+			Vector3 direction = (end - start).normalized;
+			float dot = Mathf.Abs(Vector3.Dot(direction, Vector3.forward)); // 0 = perpendicular
 
-			// Add point at the new fold position
-			if (m_cachedCurrentFold != m_rope.CurrentFold)
-			{
-				print("fold");
-				newSegment.Freeze();
-				newSegment.transform.position = m_rope.CurrentFold;
-				m_cachedCurrentFold = m_rope.CurrentFold;
-			}
-			// Place in-between points
-			else
-			{
-				print("in between");
-				newSegment.transform.position = m_segments[^1].transform.position + m_lineDirection * (m_lineLength / m_colliderAmount);
-			}
+			// Get middle point
+			Vector3 middle = start + direction * (distance / 2);
+			Vector3 midOffset = middle + Vector3.down * (1 - dot) * m_ssoRope.MiddlePointDownOffsetModifier * distance;
+			Physics.Raycast(middle, Vector3.down, out var hitInfo);
+			Vector3 midRaycastHit = hitInfo.point;
+			middle = midRaycastHit.y > midOffset.y ? midRaycastHit : midOffset;
 
-			newSegment.ToggleCollider(m_collisionsEnabled);
-			newSegment.SetLimit(m_ssoRope.PfRopeSegment.ColliderRadius + 0.1f);
-			m_segments.Add(newSegment);
-		}
-
-		// - Remove last segments to match the line -
-		else if (m_colliderAmount < m_segments.Count && m_segments.Count > 1)
-		{
-			print("remove");
-			Destroy(m_segments[^1].gameObject);
-			m_segments.Remove(m_segments[^1]);
-		}
-
-		// - Connect all segments together -
-		for (int i = 0; i < m_segments.Count; i++)
-		{
-			// Assertion
-			if (m_segments[i].IsConnected) continue;
-
-			if (i == m_segments.Count - 1)
-			{
-				m_segments[i].ToggleSpring(true);
-				m_segments[i].SetLimit(m_ssoRope.PfRopeSegment.ColliderRadius * 2);
-				m_segments[i].Connect(m_rope.CharacterRigidbody);
-				continue;
-			}
-
-			m_segments[i].ToggleSpring(false);
-			m_segments[i].Connect(m_segments[i + 1].Rigidbody);
+			m_points.AddUnique(start.CutDigits(2));
+			m_points.AddUnique(middle.CutDigits(2));
+			m_points.AddUnique(end.CutDigits(2));
 		}
 	}
 
 	private void DrawRope()
 	{
 		// Generate smoothed points using a Bezier curve
-		if (m_segments.Select(s => s.transform.position).ToList().Count < 3) return;
-		Vector3[] smoothedPoints = LineSmoother.SmoothLine(m_segments.Select(s => s.transform.position).ToArray(), m_ssoRope.LineSegmentSize);
+		Vector3[] points = m_rope.IsConnected ? m_points.ToArray() : m_segments.Select(s => s.transform.position).ToArray();
+		if (points.Length < 3) return;
+		Vector3[] smoothedPoints = LineSmoother.SmoothLine(points, m_ssoRope.LineSegmentSize);
 
-		// Update line renderer settingg
+		// Update line renderer settings
 		m_lineRenderer.positionCount = smoothedPoints.Length;
 		m_lineRenderer.SetPositions(smoothedPoints);
 		m_lineRenderer.startWidth = m_ssoRope.LineWidth;
 		m_lineRenderer.endWidth = m_ssoRope.LineWidth;
 
 		// Set colors and alphas
-		// TODO - Make the gradient dynamic
-		m_gradientColorKey[0] = new GradientColorKey(m_ssoRope.SafeColor, 0f);
-		m_gradientColorKey[1] = new GradientColorKey(m_ssoRope.MidColor, 0.75f);
-		m_gradientColorKey[2] = new GradientColorKey(m_ssoRope.DangerColor, 1f);
+		float lengthPercentage = Mathf.Clamp01(m_rope.GetTotalLength() / m_ssoRope.MaxLength);
+
+		m_gradientColorKey[0] = new GradientColorKey(m_ssoRope.ropeGradient.Evaluate(0f), 0f);
+		m_gradientColorKey[1] = new GradientColorKey(m_ssoRope.ropeGradient.Evaluate(lengthPercentage), 1f);
+
 		m_gradientAlphaKey[0] = new GradientAlphaKey(1f, 0f);
+		m_gradientAlphaKey[1] = new GradientAlphaKey(1f, 1f);
 		m_gradient.SetKeys(m_gradientColorKey, m_gradientAlphaKey);
 
 		// Apply gradient to the line renderer
@@ -154,68 +118,59 @@ public class RopeGraphics : MonoBehaviour
 	public void SpawnSegments()
 	{
 		// Spawn segments
-		// for (int i = 0; i < m_points.Count - 1; i++)
-		// {
-		// 	Vector3 lineDirection = (m_points[i + 1] - m_points[i]).normalized;
-		// 	float lineLength = (m_points[i + 1] - m_points[i]).magnitude;
-		// 	int colliderAmount = Mathf.FloorToInt(lineLength / m_colliderDiameter);
-		// 	colliderAmount = Mathf.Clamp(colliderAmount, 1, colliderAmount);
+		for (int i = 0; i < m_points.Count - 1; i++)
+		{
+			Vector3 lineDirection = (m_points[i + 1] - m_points[i]).normalized;
+			float lineLength = (m_points[i + 1] - m_points[i]).magnitude;
+			int colliderAmount = Mathf.FloorToInt(lineLength / m_colliderDiameter);
+			colliderAmount = Mathf.Clamp(colliderAmount, 1, colliderAmount);
 
-		// 	for (int j = 0; j < colliderAmount; j++)
-		// 	{
-		// 		// Assert: The first segment of the first line must be ignored and replaced by the base repe segment.
-		// 		if (j == 0 && i == 0) j++;
+			for (int j = 0; j < colliderAmount; j++)
+			{
+				// Assert: The first segment of the first line must be ignored and replaced by the base repe segment.
+				if (j == 0 && i == 0) j++;
 
-		// 		var newSegment = Instantiate(m_ssoRope.PfRopeSegment, j == 1 && i == 0 ? m_baseSegment.transform : m_segments[^1].transform);
-		// 		newSegment.transform.rotation = Quaternion.LookRotation(lineDirection);
-		// 		newSegment.OnInteractedWithRef += OnInteracted;
+				var newSegment = Instantiate(m_ssoRope.PfRopeSegment, j == 1 && i == 0 ? m_baseSegment.transform : m_segments[^1].transform);
+				newSegment.transform.rotation = Quaternion.LookRotation(lineDirection);
+				newSegment.OnInteractedWithRef += OnInteracted;
 
-		// 		// Set the first segment of the line as static
-		// 		if (j == 0)
-		// 		{
-		// 			newSegment.Freeze();
-		// 			newSegment.transform.position = m_points[i];
-		// 		}
+				// Set the first segment of the line as static
+				if (j == 0)
+				{
+					newSegment.Freeze();
+					newSegment.transform.position = m_points[i];
+				}
 
-		// 		// Snap the position of the last segment of the last line 
-		// 		else if (j == colliderAmount - 1 && i == m_points.Count - 2)
-		// 		{
-		// 			newSegment.Free();
-		// 			newSegment.transform.position = m_points[i] + lineDirection * (lineLength / colliderAmount) * j;
-		// 		}
+				// Snap the position of the last segment of the last line 
+				else if (j == colliderAmount - 1 && i == m_points.Count - 2)
+				{
+					newSegment.Free();
+					newSegment.transform.position = m_points[i] + lineDirection * (lineLength / colliderAmount) * j;
+				}
 
-		// 		// Place in-between segments
-		// 		else
-		// 		{
-		// 			newSegment.transform.position = m_points[i] + lineDirection * (lineLength / colliderAmount) * j;
-		// 		}
+				// Place in-between segments
+				else
+				{
+					newSegment.transform.position = m_points[i] + lineDirection * (lineLength / colliderAmount) * j;
+				}
 
-		// 		newSegment.ToggleCollider(i == m_points.Count - 1);
-		// 		newSegment.SetLimit(m_ssoRope.PfRopeSegment.ColliderRadius + 0.1f);
-		// 		m_segments.Add(newSegment);
-		// 	}
-		// }
+				newSegment.ToggleCollider(i == m_points.Count - 1);
+				newSegment.SetLimit(m_ssoRope.PfRopeSegment.ColliderRadius + 0.1f);
+				m_segments.Add(newSegment);
+			}
+		}
 
-		// // Connect them together
-		// m_baseSegment.Joint.connectedBody = m_segments[0].Rigidbody;
-		// for (int i = 0; i < m_segments.Count; i++)
-		// {
-		// 	m_segments[^1].Connect(m_segments[^1].Rigidbody);
-		// }
+		// Connect them together
+		m_baseSegment.Joint.connectedBody = m_segments[0].Rigidbody;
+		for (int i = 0; i < m_segments.Count; i++)
+		{
+			m_segments[^1].Connect(m_segments[^1].Rigidbody);
+		}
 	}
 
-	private void OnPlaced()
+	private void OnAttached()
 	{
 		m_baseSegment.gameObject.SetActive(true);
-		m_cachedCurrentFold = m_rope.CurrentFold;
-	}
-
-	private void OnInteracted(CharacterInteract characterInteract)
-	{
-		ToggleCollisions(false);
-		ToggleInteractables(false);
-
-		m_rope.Reattach(characterInteract);
 	}
 
 	private void OnDetached()
@@ -226,9 +181,22 @@ public class RopeGraphics : MonoBehaviour
 		SpawnSegments();
 	}
 
+	private void OnInteracted(CharacterInteract characterInteract)
+	{
+		ToggleCollisions(false);
+		ToggleInteractables(false);
+
+		m_rope.Reattach(characterInteract);
+
+		foreach (var segment in m_segments)
+		{
+			Destroy(segment.gameObject);
+		}
+		m_segments.Clear();
+	}
+
 	public void ToggleCollisions(bool isEnabled)
 	{
-		m_collisionsEnabled = isEnabled;
 		foreach (var segment in m_segments)
 		{
 			segment.ToggleCollider(isEnabled);
@@ -237,7 +205,6 @@ public class RopeGraphics : MonoBehaviour
 
 	public void ToggleInteractables(bool isEnabled)
 	{
-		m_interactablesEnabled = isEnabled;
 		foreach (var segment in m_segments)
 		{
 			segment.ToggleTrigger(isEnabled);
