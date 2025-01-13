@@ -6,10 +6,9 @@ public class LightDoor : Switchable
 {
     [Header("Properties")]
     [SerializeField] private int _lightsToActivate;
-    [SerializeField] private List<LightBasket> _sources;
 
     // PRIVATE VARIABLES
-    private int _currentLights;
+    private int _currentLights = 0;
     private bool _isActivated = false;
 
     public void AddToLightCounter()
@@ -24,6 +23,6 @@ public class LightDoor : Switchable
 
     protected override void ActivateMechanism()
     {
-
+        Debug.Log("Activated !");
     }
 }

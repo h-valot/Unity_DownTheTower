@@ -46,6 +46,7 @@ public class LightBasket : MonoBehaviour
         _isFilled = true;
         torches.Remove(torch);
         Destroy(torch.gameObject);
-        Instantiate(_permanentLight, transform.position, Quaternion.identity, transform); 
+        Instantiate(_permanentLight, transform.position, Quaternion.identity, transform);
+        _parentDoor.AddToLightCounter();
     }
 }
