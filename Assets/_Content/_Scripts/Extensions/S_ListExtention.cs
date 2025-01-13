@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 
 public static class ListExtensions
 {
@@ -25,6 +26,14 @@ public static class ListExtensions
 	public static IList<T> Clone<T>(this IList<T> list) where T : ICloneable
 	{
 		return list.Select(item => (T)item.Clone()).ToList();
+	}
+
+	/// <summary>
+	/// Return a new list with all elements from the former list.
+	/// </summary>
+	public static List<T> Duplicate<T>(this List<T> list)
+	{
+		return new List<T>(list);
 	}
 
 	/// <summary>

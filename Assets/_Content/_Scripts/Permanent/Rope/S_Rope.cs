@@ -8,13 +8,12 @@ public class Rope : Permanent
 {
 	#region REFERENCES
 
-	[Title("Internal references")]
-	[SerializeField] private BoxCollider m_boxCollider;
-	[SerializeField] private Transform m_ropeAttach;
-	[SerializeField] public Transform RaycastTarget;
-	[SerializeField] private MeshRenderer m_previewMeshRendered;
-	[SerializeField] private GameObject m_previewGameObject;
-	[SerializeField] private ConfigurableJoint m_joint;
+	[FoldoutGroup("Internal references")][SerializeField] private BoxCollider m_boxCollider;
+	[FoldoutGroup("Internal references")][SerializeField] private Transform m_ropeAttach;
+	[FoldoutGroup("Internal references")][SerializeField] public Transform RaycastTarget;
+	[FoldoutGroup("Internal references")][SerializeField] private MeshRenderer m_previewMeshRendered;
+	[FoldoutGroup("Internal references")][SerializeField] private GameObject m_previewGameObject;
+	[FoldoutGroup("Internal references")][SerializeField] private ConfigurableJoint m_joint;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Rope m_ssoRope;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_Ropes m_rsoRopes;
@@ -302,13 +301,10 @@ public class Rope : Permanent
 	/// </summary>
 	public float GetTotalLength()
 	{
-		// Assertion
-		if (!IsConnected) return 0;
-
 		float output = 0;
-		for (int i = 0; i < m_folds.Count; i++)
+		for (int i = 0; i < m_folds.Count - 1; i++)
 		{
-			Vector3 nextPosition = i + 1 >= m_folds.Count
+			Vector3 nextPosition = i + 1 >= m_folds.Count - 1 && IsConnected
 				? m_characterRigidbody.position
 				: m_folds[i + 1];
 

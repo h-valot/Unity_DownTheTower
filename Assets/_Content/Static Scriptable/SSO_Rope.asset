@@ -13,25 +13,21 @@ MonoBehaviour:
   m_Name: SSO_Rope
   m_EditorClassIdentifier: 
   PfRope: {fileID: 2423774863846630498, guid: fd48698d019dac54c9052c72fb4353f6, type: 3}
-  PfRopeLine: {fileID: 440317143077410654, guid: 08059428aa4d4934bb46b2f7e68db13b,
+  PfRopePhysic: {fileID: 7166873866869648767, guid: aff00aa532bd40f4db74fe2f6d2ac0a1,
     type: 3}
-  PfRopeSegment: {fileID: 7166873866869648767, guid: aff00aa532bd40f4db74fe2f6d2ac0a1,
+  PfRopeInteractable: {fileID: 3610001403625324972, guid: 39203b4ec7f1ed64db2181670fa5b853,
     type: 3}
   MaxLength: 20
-  InteractableSphereRadius: 0.75
   FoldLayerToInclude:
     serializedVersion: 2
     m_Bits: 1
   FoldOffset: 0.2
   MinFoldDistance: 0.25
   MinimumClimbLength: 2
-  LineSegmentSize: 0.15
-  LineWidth: 0.05
-  MiddlePointDownOffsetModifier: 0.1
   ropeGradient:
     serializedVersion: 2
-    key0: {r: 0.14320946, g: 1, b: 0, a: 1}
-    key1: {r: 1, g: 0, b: 0, a: 1}
+    key0: {r: 0.5137255, g: 1, b: 0, a: 1}
+    key1: {r: 1, g: 0.7254902, b: 0, a: 1}
     key2: {r: 1, g: 0, b: 0, a: 0}
     key3: {r: 1, g: 0, b: 0, a: 0}
     key4: {r: 0, g: 0, b: 0, a: 0}
@@ -39,7 +35,7 @@ MonoBehaviour:
     key6: {r: 0, g: 0, b: 0, a: 0}
     key7: {r: 0, g: 0, b: 0, a: 0}
     ctime0: 0
-    ctime1: 65535
+    ctime1: 39321
     ctime2: 65535
     ctime3: 65535
     ctime4: 0
@@ -56,8 +52,14 @@ MonoBehaviour:
     atime7: 0
     m_Mode: 0
     m_ColorSpace: 0
-    m_NumColorKeys: 2
+    m_NumColorKeys: 3
     m_NumAlphaKeys: 2
+  MiddlePointDownOffsetModifier: 0.1
+  LineSegmentSize: 0.15
+  LineWidth: 0.05
+  InteractableSphereRadius: 0.5
+  PhysicSphereRadius: 0.1
+  PhysicJointOffset: 0.25
   CraftingDuration: 0.25
   DeployLayersToIgnore:
     serializedVersion: 2

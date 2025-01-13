@@ -12,13 +12,13 @@ public class SSO_Rope : ScriptableObject
 
 	[FoldoutGroup("Prefabs")]
 	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
-	[InfoBox("The prefab of the rope line graphics.", InfoMessageType.None)]
-	public RopeLine PfRopeLine;
+	[InfoBox("The prefab of the physic component of the rope folds.", InfoMessageType.None)]
+	public RopePhysic PfRopePhysic;
 
 	[FoldoutGroup("Prefabs")]
 	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
-	[InfoBox("The prefab of the physic and interactable component of the rope folds.", InfoMessageType.None)]
-	public RopeSegment PfRopeSegment;
+	[InfoBox("The prefab of the interactable component of the rope folds.", InfoMessageType.None)]
+	public RopeInteractable PfRopeInteractable;
 
 	#endregion
 
@@ -27,11 +27,6 @@ public class SSO_Rope : ScriptableObject
 	[FoldoutGroup("Global settings")]
 	[InfoBox("The max length of the rope. If this length is exceeded, the character will be detach from it.", InfoMessageType.None)]
 	public float MaxLength;
-
-	[FoldoutGroup("Global settings")]
-	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
-	[InfoBox("Radius of the sphere trigger collider of the rope interactable.", InfoMessageType.None)]
-	public float InteractableSphereRadius;
 
 	[FoldoutGroup("Global settings")]
 	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
@@ -53,25 +48,44 @@ public class SSO_Rope : ScriptableObject
 	[InfoBox("Below this distance, the character can not climb up the rope.", InfoMessageType.None)]
 	public float MinimumClimbLength = 1f;
 
-	[FoldoutGroup("Global settings")]
+	#endregion
+
+	#region GRAPHICS
+
+	[FoldoutGroup("Graphics")]
 	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
 	[InfoBox("", InfoMessageType.None)]
-	public float LineSegmentSize;
+	public Gradient ropeGradient;
 
-	[FoldoutGroup("Global settings")]
-	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
-	[InfoBox("", InfoMessageType.None)]
-	public float LineWidth;
-
-	[FoldoutGroup("Global settings")]
+	[FoldoutGroup("Graphics")]
 	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
 	[InfoBox("", InfoMessageType.None)]
 	public float MiddlePointDownOffsetModifier;
 
-	[FoldoutGroup("Global settings")]
+	[FoldoutGroup("Graphics")]
 	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
 	[InfoBox("", InfoMessageType.None)]
-	public Gradient ropeGradient;
+	public float LineSegmentSize;
+
+	[FoldoutGroup("Graphics")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("", InfoMessageType.None)]
+	public float LineWidth;
+
+	[FoldoutGroup("Graphics")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("Radius of the sphere collider of the rope interactable.", InfoMessageType.None)]
+	public float InteractableSphereRadius;
+
+	[FoldoutGroup("Graphics")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("Radius of the sphere trigger of the rope physic.", InfoMessageType.None)]
+	public float PhysicSphereRadius;
+
+	[FoldoutGroup("Graphics")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("", InfoMessageType.None)]
+	public float PhysicJointOffset;
 
 	#endregion
 

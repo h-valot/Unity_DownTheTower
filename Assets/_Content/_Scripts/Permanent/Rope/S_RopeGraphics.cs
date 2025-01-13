@@ -6,35 +6,50 @@ using UnityEngine;
 
 public class RopeGraphics : MonoBehaviour
 {
-	[Title("Internal references")]
-	[SerializeField] private Rope m_rope;
-	[SerializeField] private LineRenderer m_lineRenderer;
-	[SerializeField] private RopeSegment m_baseSegment;
-	
+	#region REFERENCES
+
+	[FoldoutGroup("Internal references")][SerializeField] private Rope m_rope;
+	[FoldoutGroup("Internal references")][SerializeField] private RopePhysic m_basePhysic;
+	[FoldoutGroup("Internal references")][SerializeField] private RopeInteractable m_baseInteractable;
+	[FoldoutGroup("Internal references")][SerializeField] private LineRenderer m_lineRenderer;
+
 	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Rope m_ssoRope;
 
-	[Title("Debug")]
-	[ShowInInspector] private List<RopeSegment> m_segments = new List<RopeSegment>();
-	[ShowInInspector] private List<Vector3> m_points = new List<Vector3>();
+	#endregion
+
+	#region VARIABLES
+
+	private List<Vector3> m_points = new List<Vector3>();
+	private List<RopePhysic> m_physics = new List<RopePhysic>();
+	private List<RopeInteractable> m_interactables = new List<RopeInteractable>();
+
 	private float m_colliderDiameter;
+	private float m_triggerDiameter;
+
+	private GradientAlphaKey[] m_gradientAlphaKey = new GradientAlphaKey[] { new GradientAlphaKey(1f, 0f), new GradientAlphaKey(1f, 1f) };
+	private GradientColorKey[] m_gradientColorKey;
 	private Gradient m_gradient = new Gradient();
-	private GradientColorKey[] m_gradientColorKey = new GradientColorKey[2];
-	private GradientAlphaKey[] m_gradientAlphaKey = new GradientAlphaKey[2];
+
+	#endregion
 
 	#region MONOBEHAVIOUR
 
 	private void Start()
 	{
-		m_baseSegment.gameObject.SetActive(false);
-		m_baseSegment.OnInteractedWithRef += OnInteracted;
-		m_baseSegment.SphereTrigger.radius = m_ssoRope.InteractableSphereRadius;
-		m_ssoRope.PfRopeSegment.SphereTrigger.radius = m_ssoRope.InteractableSphereRadius;
+		m_basePhysic.gameObject.SetActive(false);
+		m_basePhysic.OnInteractedWithRef += OnInteracted;
+		m_basePhysic.SphereCollider.radius = m_ssoRope.PhysicSphereRadius;
+		m_basePhysic.SphereTrigger.radius = m_ssoRope.InteractableSphereRadius;
 
-		m_colliderDiameter = m_ssoRope.PfRopeSegment.ColliderRadius * 2f;
-		m_segments.Add(m_baseSegment);
+		m_baseInteractable.gameObject.SetActive(false);
+		m_baseInteractable.OnInteractedWithRef += OnInteracted;
+		m_baseInteractable.SphereTrigger.radius = m_ssoRope.InteractableSphereRadius;
 
-		ToggleCollisions(false);
-		ToggleInteractables(false);
+		m_ssoRope.PfRopePhysic.SphereTrigger.radius = m_ssoRope.InteractableSphereRadius;
+		m_ssoRope.PfRopePhysic.SphereCollider.radius = m_ssoRope.PhysicSphereRadius;
+		m_ssoRope.PfRopeInteractable.SphereTrigger.radius = m_ssoRope.InteractableSphereRadius;
+		m_triggerDiameter = m_ssoRope.InteractableSphereRadius * 2f;
+		m_colliderDiameter = m_ssoRope.PhysicSphereRadius * 2f;
 	}
 
 	private void FixedUpdate()
@@ -43,6 +58,13 @@ public class RopeGraphics : MonoBehaviour
 		if (!m_rope.IsPlaced) return;
 
 		HandlePoints();
+	}
+
+	private void LateUpdate()
+	{
+		// Assertion
+		if (!m_rope.IsPlaced) return;
+
 		DrawRope();
 	}
 
@@ -59,6 +81,8 @@ public class RopeGraphics : MonoBehaviour
 	}
 
 	#endregion
+
+	#region GRAPHICS
 
 	private void HandlePoints()
 	{
@@ -78,10 +102,10 @@ public class RopeGraphics : MonoBehaviour
 			// Get middle point
 			Vector3 middle = start + direction * (distance / 2);
 			Vector3 midOffset = middle + Vector3.down * (1 - dot) * m_ssoRope.MiddlePointDownOffsetModifier * distance;
-			Physics.Raycast(middle, Vector3.down, out var hitInfo);
-			Vector3 midRaycastHit = hitInfo.point;
-			middle = midRaycastHit.y > midOffset.y ? midRaycastHit : midOffset;
+			Physics.Raycast(middle, Vector3.down, out var RaycastHit);
+			middle = RaycastHit.point.y > midOffset.y ? RaycastHit.point : midOffset;
 
+			// Populate list
 			m_points.AddUnique(start.CutDigits(2));
 			m_points.AddUnique(middle.CutDigits(2));
 			m_points.AddUnique(end.CutDigits(2));
@@ -91,9 +115,34 @@ public class RopeGraphics : MonoBehaviour
 	private void DrawRope()
 	{
 		// Generate smoothed points using a Bezier curve
-		Vector3[] points = m_rope.IsConnected ? m_points.ToArray() : m_segments.Select(s => s.transform.position).ToArray();
-		if (points.Length < 3) return;
-		Vector3[] smoothedPoints = LineSmoother.SmoothLine(points, m_ssoRope.LineSegmentSize);
+		var points = new List<Vector3>();
+
+		if (m_rope.IsConnected)
+		{
+			points = m_points.Duplicate();
+		}
+		else if (!m_rope.IsConnected && m_points.Count < 3)
+		{
+			points = m_physics.Select(s => s.transform.position).ToList();
+		}
+		else
+		{
+			points = m_points.Duplicate();
+			int reducedPointAmount = points.Count - 2;
+			for (int i = points.Count - 1; i >= reducedPointAmount; i--)
+			{
+				points.RemoveAt(i);
+			}
+			foreach (var segment in m_physics.Select(s => s.transform.position).ToList())
+			{
+				points.Add(segment);
+			}
+		}
+
+		// Assert: SmoothLine function can't take less than 3 points
+		if (points.Count < 3) return;
+
+		Vector3[] smoothedPoints = LineSmoother.SmoothLine(points.ToArray(), m_ssoRope.LineSegmentSize);
 
 		// Update line renderer settings
 		m_lineRenderer.positionCount = smoothedPoints.Length;
@@ -101,113 +150,125 @@ public class RopeGraphics : MonoBehaviour
 		m_lineRenderer.startWidth = m_ssoRope.LineWidth;
 		m_lineRenderer.endWidth = m_ssoRope.LineWidth;
 
-		// Set colors and alphas
+		// Set colors
 		float lengthPercentage = Mathf.Clamp01(m_rope.GetTotalLength() / m_ssoRope.MaxLength);
+		float midColorKeyTime = m_ssoRope.ropeGradient.colorKeys[1].time;
 
-		m_gradientColorKey[0] = new GradientColorKey(m_ssoRope.ropeGradient.Evaluate(0f), 0f);
-		m_gradientColorKey[1] = new GradientColorKey(m_ssoRope.ropeGradient.Evaluate(lengthPercentage), 1f);
+		if (lengthPercentage > midColorKeyTime)
+		{
+			// Handle mid color key
+			m_gradientColorKey = new GradientColorKey[3];
+			m_gradientColorKey[0] = new GradientColorKey(m_ssoRope.ropeGradient.Evaluate(0f), 0f);
+			m_gradientColorKey[1] = new GradientColorKey(m_ssoRope.ropeGradient.Evaluate(midColorKeyTime), midColorKeyTime);
+			m_gradientColorKey[2] = new GradientColorKey(m_ssoRope.ropeGradient.Evaluate(lengthPercentage), 1f);
+		}
+		else
+		{
+			// Default gradient right before the mid orange shows up
+			m_gradientColorKey = new GradientColorKey[2];
+			m_gradientColorKey[0] = new GradientColorKey(m_ssoRope.ropeGradient.Evaluate(0f), 0f);
+			m_gradientColorKey[1] = new GradientColorKey(m_ssoRope.ropeGradient.Evaluate(lengthPercentage), 1f);
+		}
 
-		m_gradientAlphaKey[0] = new GradientAlphaKey(1f, 0f);
-		m_gradientAlphaKey[1] = new GradientAlphaKey(1f, 1f);
 		m_gradient.SetKeys(m_gradientColorKey, m_gradientAlphaKey);
 
 		// Apply gradient to the line renderer
 		m_lineRenderer.colorGradient = m_gradient;
 	}
 
-	public void SpawnSegments()
+	private void SpawnPhysics()
 	{
-		// Spawn segments
-		for (int i = 0; i < m_points.Count - 1; i++)
+		// Determine how many physic segment needs to be instantiate
+		Vector3 lineDirection = (m_rope.Folds[^1] - m_rope.Folds[^2]).normalized;
+		float lineLength = (m_rope.Folds[^1] - m_rope.Folds[^2]).magnitude;
+		int physicsAmount = Mathf.FloorToInt(lineLength / (m_colliderDiameter + m_ssoRope.PhysicJointOffset));
+		physicsAmount = Mathf.Clamp(physicsAmount, 1, physicsAmount);
+
+		// Populate physics
+		for (int i = 0; i < physicsAmount; i++)
 		{
-			Vector3 lineDirection = (m_points[i + 1] - m_points[i]).normalized;
-			float lineLength = (m_points[i + 1] - m_points[i]).magnitude;
-			int colliderAmount = Mathf.FloorToInt(lineLength / m_colliderDiameter);
-			colliderAmount = Mathf.Clamp(colliderAmount, 1, colliderAmount);
+			var newPhysic = Instantiate(m_ssoRope.PfRopePhysic, i == 0 ? m_basePhysic.transform : m_physics[^1].transform);
+			newPhysic.transform.rotation = Quaternion.LookRotation(lineDirection);
+			newPhysic.transform.position = m_rope.Folds[^2] + lineDirection * (lineLength / physicsAmount) * i;
+			newPhysic.OnInteractedWithRef += OnInteracted;
 
-			for (int j = 0; j < colliderAmount; j++)
-			{
-				// Assert: The first segment of the first line must be ignored and replaced by the base repe segment.
-				if (j == 0 && i == 0) j++;
+			newPhysic.ToggleFree(i == physicsAmount - 1);
+			newPhysic.SetLimit(m_colliderDiameter + m_ssoRope.PhysicJointOffset);
 
-				var newSegment = Instantiate(m_ssoRope.PfRopeSegment, j == 1 && i == 0 ? m_baseSegment.transform : m_segments[^1].transform);
-				newSegment.transform.rotation = Quaternion.LookRotation(lineDirection);
-				newSegment.OnInteractedWithRef += OnInteracted;
-
-				// Set the first segment of the line as static
-				if (j == 0)
-				{
-					newSegment.Freeze();
-					newSegment.transform.position = m_points[i];
-				}
-
-				// Snap the position of the last segment of the last line 
-				else if (j == colliderAmount - 1 && i == m_points.Count - 2)
-				{
-					newSegment.Free();
-					newSegment.transform.position = m_points[i] + lineDirection * (lineLength / colliderAmount) * j;
-				}
-
-				// Place in-between segments
-				else
-				{
-					newSegment.transform.position = m_points[i] + lineDirection * (lineLength / colliderAmount) * j;
-				}
-
-				newSegment.ToggleCollider(i == m_points.Count - 1);
-				newSegment.SetLimit(m_ssoRope.PfRopeSegment.ColliderRadius + 0.1f);
-				m_segments.Add(newSegment);
-			}
+			m_physics.Add(newPhysic);
 		}
 
 		// Connect them together
-		m_baseSegment.Joint.connectedBody = m_segments[0].Rigidbody;
-		for (int i = 0; i < m_segments.Count; i++)
+		m_basePhysic.Connect(m_physics[0].Rigidbody);
+		for (int i = 0; i < m_physics.Count - 1; i++)
 		{
-			m_segments[^1].Connect(m_segments[^1].Rigidbody);
+			m_physics[i].Connect(m_physics[i + 1].Rigidbody);
+		}
+	}
+
+
+	private void SpawnInteractables()
+	{
+		for (int i = 0; i < m_rope.Folds.Count - 2; i++)
+		{
+			Vector3 lineDirection = (m_rope.Folds[i + 1] - m_rope.Folds[i]).normalized;
+			float lineLength = (m_rope.Folds[i + 1] - m_rope.Folds[i]).magnitude;
+			int interactableAmount = Mathf.FloorToInt(lineLength / m_triggerDiameter);
+			interactableAmount = Mathf.Clamp(interactableAmount, 1, interactableAmount);
+
+			for (int j = 0; j < interactableAmount; j++)
+			{
+				// Assert: The first interactable of the first line must be ignored and replaced by the base rope interactable.
+				if (j == 0 && i == 0) j++;
+
+				var newInteractable = Instantiate(m_ssoRope.PfRopeInteractable, j == 1 && i == 0 ? m_baseInteractable.transform : m_interactables[^1].transform);
+				newInteractable.transform.rotation = Quaternion.LookRotation(lineDirection);
+				newInteractable.transform.position = m_rope.Folds[i] + lineDirection * (lineLength / interactableAmount) * j;
+				newInteractable.OnInteractedWithRef += OnInteracted;
+				m_interactables.Add(newInteractable);
+			}
 		}
 	}
 
 	private void OnAttached()
 	{
-		m_baseSegment.gameObject.SetActive(true);
+		m_basePhysic.gameObject.SetActive(false);
+		m_baseInteractable.gameObject.SetActive(false);
 	}
 
 	private void OnDetached()
 	{
-		ToggleCollisions(true);
-		ToggleInteractables(true);
+		m_basePhysic.gameObject.SetActive(true);
+		m_baseInteractable.gameObject.SetActive(true);
+		m_basePhysic.transform.position = m_rope.Folds[^2];
+		m_basePhysic.SetLimit(m_colliderDiameter + 0.1f);
 
-		SpawnSegments();
+		SpawnPhysics();
+		SpawnInteractables();
 	}
 
 	private void OnInteracted(CharacterInteract characterInteract)
 	{
-		ToggleCollisions(false);
-		ToggleInteractables(false);
-
 		m_rope.Reattach(characterInteract);
 
-		foreach (var segment in m_segments)
+		// Remove and destroy interactables  
+		characterInteract.Remove(m_basePhysic);
+		foreach (var physic in m_physics)
 		{
-			Destroy(segment.gameObject);
+			characterInteract.Remove(physic);
+			Destroy(physic.gameObject);
 		}
-		m_segments.Clear();
+		m_physics.Clear();
+
+		// Remove and destroy physics
+		characterInteract.Remove(m_baseInteractable);
+		foreach (var interactable in m_interactables)
+		{
+			characterInteract.Remove(interactable);
+			Destroy(interactable.gameObject);
+		}
+		m_interactables.Clear();
 	}
 
-	public void ToggleCollisions(bool isEnabled)
-	{
-		foreach (var segment in m_segments)
-		{
-			segment.ToggleCollider(isEnabled);
-		}
-	}
-
-	public void ToggleInteractables(bool isEnabled)
-	{
-		foreach (var segment in m_segments)
-		{
-			segment.ToggleTrigger(isEnabled);
-		}
-	}
+	#endregion
 }
