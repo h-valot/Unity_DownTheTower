@@ -46,6 +46,7 @@ public class CharacterMotor : MonoBehaviour
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CameraRight m_rsoCameraRight;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CameraTransform m_rsoCameraTransform;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterPosition m_rsoCharacterPosition;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterLastPosition m_rsoCharacterLastPosition;
 
 	#endregion
 
@@ -161,6 +162,7 @@ public class CharacterMotor : MonoBehaviour
         FixedUpdateState();
 
 		// Update useful variables
+		m_rsoCharacterLastPosition.value = m_rsoCharacterPosition.value;
 		m_rsoCharacterPosition.value = m_rigidbody.position;
 		m_planarVelocity = new Vector2(m_rigidbody.velocity.x, m_rigidbody.velocity.z);
 		if (m_isGrounded && m_maxGroundedSpeed < m_planarVelocity.magnitude) m_maxGroundedSpeed = m_planarVelocity.magnitude;

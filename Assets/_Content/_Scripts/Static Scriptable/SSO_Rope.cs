@@ -41,6 +41,11 @@ public class SSO_Rope : ScriptableObject
 
 	[FoldoutGroup("Global settings")]
 	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("", InfoMessageType.None)]
+	public int FoldingPrecision;
+
+	[FoldoutGroup("Global settings")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
 	[InfoBox("The distance between the accurate fold hit point and the offsetted fold.", InfoMessageType.None)]
 	public float FoldOffset = 0.2f;
 
@@ -93,18 +98,10 @@ public class SSO_Rope : ScriptableObject
 	[InfoBox("Offset distance applied to the character", InfoMessageType.None)]
 	public float PhysicJointOffset;
 
-	#endregion
-
-	#region UNFOLDER
-
-	[FoldoutGroup("Unfolder")]
+	[FoldoutGroup("Graphics")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
 	[InfoBox("Duration before which the unfolder destroys itself.", InfoMessageType.None)]
 	public float UnfolderTimeoutDelay;
-
-	[FoldoutGroup("Unfolder")]
-	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
-	[InfoBox("Duration of the scale down to zero dotween when the unfolder is destroyed.", InfoMessageType.None)]
-	public float DestroyDuration;
 
 	#endregion
 

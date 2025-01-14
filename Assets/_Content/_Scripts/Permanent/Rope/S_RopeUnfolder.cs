@@ -1,11 +1,9 @@
-using DG.Tweening;
 using Sirenix.OdinInspector;
 using UnityEngine;
 
 public class RopeUnfolder : MonoBehaviour
 {
 	[FoldoutGroup("Internal references")][SerializeField] private SphereCollider m_sphereCollider;
-	[FoldoutGroup("Internal references")][SerializeField] private Transform m_graphicsParent;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Rope m_ssoRope;
 
@@ -57,7 +55,7 @@ public class RopeUnfolder : MonoBehaviour
 			m_timeout -= Time.fixedDeltaTime;
 			if (m_timeout <= 0f)
 			{
-				Disappear();
+				Destroy(gameObject);
 			}
 		}
 	}
@@ -66,19 +64,5 @@ public class RopeUnfolder : MonoBehaviour
 	{
 		m_rope = rope;
 		m_ropeGraphics = ropeGraphics;
-	}
-
-	public void Disappear()
-	{
-		Sequence sequenceDestroy = DOTween.Sequence().Pause();
-		sequenceDestroy.Insert(0f, m_graphicsParent.DOScale(0f, m_ssoRope.DestroyDuration));
-		sequenceDestroy.SetId($"{gameObject.GetInstanceID()}-disappear");
-		sequenceDestroy.Play().OnComplete(Destroy);
-	}
-
-	private void Destroy()
-	{
-		DOTween.Kill($"{gameObject.GetInstanceID()}-disappear");
-		Destroy(gameObject);
 	}
 }

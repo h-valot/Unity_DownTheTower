@@ -16,7 +16,9 @@ public class Rope : Permanent
 	[FoldoutGroup("Internal references")][SerializeField] private ConfigurableJoint m_joint;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Rope m_ssoRope;
+
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_Ropes m_rsoRopes;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterLastPosition m_rsoCharacterLastPosition;
 
 	#endregion
 
@@ -72,7 +74,8 @@ public class Rope : Permanent
 		if (!IsConnected) return;
 		if (!m_isPlaced) return;
 
-		HandleFolds();
+		AddFolds();
+		RemoveFolds();
 		HandleJoint();
 	}
 
@@ -222,39 +225,81 @@ public class Rope : Permanent
 		OnDetached?.Invoke();
 	}
 
+	private List<Vector3> m_foldRaycastPositions = new List<Vector3>();
+	private Vector3[] m_foldValidPositions = new Vector3[]{};
+ 
 	/// <summary>
-	/// Check rope folding using raycasts.
+	/// Add fold if a collider stands between the character and the last fold.
 	/// </summary>
-	public void HandleFolds()
+	private void AddFolds()
 	{
-		// Add fold if a collider stands between the character and the last fold
-		if (Physics.Linecast(m_characterHarness.position, CurrentFold, out var addHit, m_ssoRope.FoldLayerToInclude))
-		{
-			Vector3 offsetPoint = addHit.point + addHit.normal * m_ssoRope.FoldOffset;
-			Vector3 approximatePoint = offsetPoint.CutDigits(2);
+		Vector3 startPosition = m_characterHarness.position;
+		Vector3 endPosition = m_rsoCharacterLastPosition.value + (m_characterHarness.position - m_characterRigidbody.position);
 
-			if (m_folds.Count >= 2)
+		// Assert: Folds can't be added if the character isn't moving.
+		if (startPosition == endPosition) return;
+
+		// - Store every possible raycast starting positions based on the FoldingPrecision entered in SSO_Rope -
+		Vector3 direction = (startPosition - endPosition).normalized;
+		float distance = (startPosition - endPosition).magnitude;
+		m_foldRaycastPositions = new List<Vector3> { startPosition };
+		for (int i = 0; i < m_ssoRope.FoldingPrecision; i++)
+		{
+			distance /= 2;
+			Vector3 newPosition = endPosition + direction * distance;
+			m_foldRaycastPositions.Add(newPosition);
+		}
+
+		// - Get the possible contact point (fold) closest to the edge of the collider -
+		bool isPointAdded = false;
+		m_foldValidPositions = new Vector3[m_foldRaycastPositions.Count];
+		for (int i = 0; i < m_foldRaycastPositions.Count; i++)
+		{
+			if (Physics.Linecast(m_foldRaycastPositions[i], CurrentFold, out var hit, m_ssoRope.FoldLayerToInclude))
 			{
-				// Minimal distance between two fold point to be register
-				if ((CurrentFold - LastFold).magnitude >= m_ssoRope.MinFoldDistance)
+				// Assert: The distance between the two last folds is less than the minimum threshold.
+				if (Folds.Count >= 2
+				&& (CurrentFold - LastFold).magnitude < m_ssoRope.MinFoldDistance)
 				{
-					m_folds.AddUnique(approximatePoint, callback: added => {
-						if (added) IncreaseHoldLength(-(LastFold - CurrentFold).magnitude);
-					});
+					return;
 				}
+
+				// Store the valid position
+				m_foldValidPositions[i] = (hit.point + hit.normal * m_ssoRope.FoldOffset).CutDigits(2);
 			}
-			else
+
+			// Adds the last valid folding position into the folds list.
+			if (i > 0										// Avoid index outside the bounds of the array
+			&& m_foldValidPositions[i] == Vector3.zero     	// AND Current position isn't valid
+			&& m_foldValidPositions[i - 1] != Vector3.zero) // AND Last position is valid
 			{
-				
-				m_folds.AddUnique(approximatePoint, callback: added => {
-					if (added) IncreaseHoldLength(-(LastFold - CurrentFold).magnitude);
-				});
+				m_folds.AddUnique(
+					m_foldValidPositions[i - 1],
+					callback: added => { if (added) IncreaseHoldLength(-(LastFold - CurrentFold).magnitude); }
+				);
+				isPointAdded = true;
+				break;
 			}
 		}
 
-		// Remove the last fold from the list if there is no collider 
-		// that stands between the character and the previous last fold.
-		if (m_folds.Count >= 2
+		// Handle cases where only the start position is valid.
+		if (isPointAdded = false					// Precise point haven't been added 
+		&& m_foldValidPositions[0] == Vector3.zero)	// AND Start position is valid
+		{
+			m_folds.AddUnique(
+				m_foldValidPositions[0],
+				callback: added => { if (added) IncreaseHoldLength(-(LastFold - CurrentFold).magnitude); }
+			);
+		}
+	}
+
+	/// <summary>
+	/// Remove the last fold from the list if there is no collider 
+	/// standing between the character and the previous last fold.
+	/// </summary>
+	private void RemoveFolds()
+	{
+		if (Folds.Count >= 2
 		&& !Physics.Linecast(m_characterHarness.position, LastFold, out var removeHit, m_ssoRope.FoldLayerToInclude))
 		{
 			IncreaseHoldLength((LastFold - CurrentFold).magnitude);
@@ -264,9 +309,9 @@ public class Rope : Permanent
 
 	/// <summary>
 	/// Update hold rope radius to be the distance between the character rope attach 
-	/// position and the last fold of the rope. Only if allowed.
+	/// position and the last fold of the rope. Only if allowed (used by callbacks).
 	/// </summary>
-	/// <param name="isAllowed">Is it allowed to update hold rope radius</param>
+	/// <param name="isAllowed">Is it allowed to update hold rope radius.</param>
 	public void UpdateHoldLength(bool isAllowed = true)
 	{
 		// Assertions

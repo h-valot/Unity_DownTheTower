@@ -154,7 +154,7 @@ public class RopeGraphics : MonoBehaviour
 		m_lineRenderer.endWidth = m_ssoRope.LineWidth;
 
 		// Set colors
-		float lengthPercentage = Mathf.Clamp01(m_rope.GetTotalLength() / m_ssoRope.MaxLength);
+		float lengthPercentage = Mathf.Clamp01((m_rope.IsConnected ? m_rope.GetTotalLength() : GetLength(points)) / m_ssoRope.MaxLength);
 		float midColorKeyTime = m_ssoRope.ropeGradient.colorKeys[1].time;
 
 		if (lengthPercentage > midColorKeyTime)
@@ -238,12 +238,22 @@ public class RopeGraphics : MonoBehaviour
 		m_unfolder.Initialize(m_rope, this);
 	}
 
+	private float GetLength(List<Vector3> positions)
+	{
+		float output = 0;
+		for (int i = 0; i < positions.Count - 2; i++)
+		{
+			output += (positions[i] - positions[i + 1]).magnitude;
+		}
+		return output;
+	}
+
 	private void OnAttached()
 	{
 		m_basePhysic.gameObject.SetActive(false);
 		m_baseInteractable.gameObject.SetActive(false);
 
-		if (m_unfolder) m_unfolder.Disappear();
+		if (m_unfolder) Destroy(m_unfolder.gameObject); ;
 	}
 
 	private void OnDetached()
