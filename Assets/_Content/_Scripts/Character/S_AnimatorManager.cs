@@ -24,7 +24,6 @@ public class AnimatorManager : MonoBehaviour
         m_animator.SetFloat(m_moveSpeedHash, Mathf.Abs(m_characterMotor.Rigidbody.velocity.z) + Mathf.Abs(m_characterMotor.Rigidbody.velocity.x));
         m_animator.SetBool(m_isJumpingHash, m_characterMotor.m_hasJumped);
         m_animator.SetBool(m_isGroundedHash, m_characterMotor.m_isGrounded);
-        print(m_currentState.ToString());
     }
 
     private void DetermineState()
