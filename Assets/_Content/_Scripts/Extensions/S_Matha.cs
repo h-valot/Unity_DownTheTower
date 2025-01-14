@@ -13,5 +13,4 @@ public static class Matha
     {
         return outMin + (value - inMin) * (outMax - outMin) / (inMax - inMin);
     }
-
 }

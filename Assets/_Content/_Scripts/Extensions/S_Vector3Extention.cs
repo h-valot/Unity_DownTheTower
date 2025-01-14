@@ -6,13 +6,19 @@ public static class Vector3Extention
 	/// Return the given vector3's x, y and z with the given amout of digit.
 	/// </summary>
 	/// <param name="digitAmount">Number of digit left after the comma. 0 by default = similar to floor to int.</param>
-	public static Vector3 CutDigits(this Vector3 vector, int digitAmount = 0)
+	public static Vector3 CutDigits(this Vector3 vector, int digitAmount)
 	{
-		return new Vector3(
-			vector.x.CutDigits(digitAmount),
-			vector.y.CutDigits(digitAmount),
-			vector.z.CutDigits(digitAmount)
-		);
+		return vector.CutDigits(digitAmount, CuttingType.ROUND);
+	}
+
+	/// <summary>
+	/// Return the given vector3's x, y and z with the given amout of digit.
+	/// </summary>
+	/// <param name="digitAmount">Number of digit left after the comma. 0 by default = similar to floor to int.</param>
+	/// <param name="type">Type of cutting. ROUND: digits are rounded to nearest, FLOOR: digits are rounded down, CEIL: digits are rounded up.</param>
+	public static Vector3 CutDigits(this Vector3 vector, int digitAmount, CuttingType type)
+	{
+		return new Vector3(vector.x.CutDigits(digitAmount, type), vector.y.CutDigits(digitAmount, type), vector.z.CutDigits(digitAmount, type));
 	}
 
 	/// <summary>

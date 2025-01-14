@@ -9,9 +9,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8025931762380556335}
-  - component: {fileID: 6487783976277832139}
-  - component: {fileID: 8372657453045739406}
-  m_Layer: 8
+  - component: {fileID: 3610001403625324972}
+  - component: {fileID: 3879246481950295920}
+  m_Layer: 7
   m_Name: PF_RopeInteractable
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -33,7 +33,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &6487783976277832139
+--- !u!114 &3610001403625324972
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -42,13 +42,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 4262987667519140782}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fb279576b33499e49ad4ce12b53e105c, type: 3}
+  m_Script: {fileID: 11500000, guid: 4b5cc5f6c2f5f3a498685ee95f61ac75, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_isRecyclable: 0
   m_objectToRecycle: {fileID: 0}
   m_displayGizmos: 0
---- !u!135 &8372657453045739406
+  SphereTrigger: {fileID: 3879246481950295920}
+--- !u!135 &3879246481950295920
 SphereCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -67,5 +68,5 @@ SphereCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Radius: 0.75
+  m_Radius: 0.5
   m_Center: {x: 0, y: 0, z: 0}

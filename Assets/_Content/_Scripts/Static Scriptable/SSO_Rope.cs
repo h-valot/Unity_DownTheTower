@@ -1,39 +1,30 @@
+using DG.Tweening;
 using Sirenix.OdinInspector;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "SSO_Rope", menuName = "Static Scriptable/Rope")]
 public class SSO_Rope : ScriptableObject
-{
-	[Title("Debug")]
-	[InfoBox("Material applied to the rope line if the total length is less or equal than half of the max length.", InfoMessageType.None)]
-	public Material SafeMaterial;
-
-	[InfoBox("Material applied to the rope line if the total length is less or equal than three quarters of the max length.", InfoMessageType.None)]
-	public Material MidMaterial;
-
-	[PropertySpace(SpaceBefore = 0, SpaceAfter = 15)]
-	[InfoBox("Material applied to the rope line if the total length is greater than three quarters of the max length.", InfoMessageType.None)]
-	public Material DangerMaterial;
-
-	
+{	
 	#region PREFAB
 
 	[FoldoutGroup("Prefabs")]
 	[InfoBox("The prefab of the rope.", InfoMessageType.None)]
-	/// <summary> The prefab of the rope. </summary>
 	public Rope PfRope;
 
 	[FoldoutGroup("Prefabs")]
 	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
-	[InfoBox("The prefab of the rope line graphics.", InfoMessageType.None)]
-	/// <summary> The prefab of the rope line graphics. </summary>
-	public RopeLine PfRopeLine;
+	[InfoBox("The prefab of the physic component of the rope folds.", InfoMessageType.None)]
+	public RopePhysic PfRopePhysic;
 
 	[FoldoutGroup("Prefabs")]
 	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
-	[InfoBox("The prefab of the interatable component of the rope folds.", InfoMessageType.None)]
-	/// <summary> The prefab of the interatable component of the rope folds. </summary>
-	public Interactable PfRopeInteractible;
+	[InfoBox("The prefab of the interactable component of the rope folds.", InfoMessageType.None)]
+	public RopeInteractable PfRopeInteractable;
+
+	[FoldoutGroup("Prefabs")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("The prefab of the rigidbody component used to unfold rope when detached.", InfoMessageType.None)]
+	public RopeUnfolder PfRopeUnfolder;
 
 	#endregion
 
@@ -42,11 +33,6 @@ public class SSO_Rope : ScriptableObject
 	[FoldoutGroup("Global settings")]
 	[InfoBox("The max length of the rope. If this length is exceeded, the character will be detach from it.", InfoMessageType.None)]
 	public float MaxLength;
-
-	[FoldoutGroup("Global settings")]
-	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
-	[InfoBox("Radius of the sphere trigger collider of the rope interactable.", InfoMessageType.None)]
-	public float InteractableSphereRadius;
 
 	[FoldoutGroup("Global settings")]
 	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
@@ -67,6 +53,58 @@ public class SSO_Rope : ScriptableObject
 	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
 	[InfoBox("Below this distance, the character can not climb up the rope.", InfoMessageType.None)]
 	public float MinimumClimbLength = 1f;
+
+	#endregion
+
+	#region GRAPHICS
+
+	[FoldoutGroup("Graphics")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("Gradient applied to the rope's graphical line renderer.", InfoMessageType.None)]
+	public Gradient ropeGradient;
+
+	[FoldoutGroup("Graphics")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("Scalar used to determined the curviness of the rope graphics between two rope folds towards the ground.", InfoMessageType.None)]
+	public float MiddlePointDownOffsetModifier;
+
+	[FoldoutGroup("Graphics")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("Size of the line segment used to smooth the rope graphical curve.", InfoMessageType.None)]
+	public float LineSegmentSize;
+
+	[FoldoutGroup("Graphics")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("Width of the rope's graphical line renderer.", InfoMessageType.None)]
+	public float LineWidth;
+
+	[FoldoutGroup("Graphics")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("Radius of the sphere collider of the rope interactable.", InfoMessageType.None)]
+	public float InteractableSphereRadius;
+
+	[FoldoutGroup("Graphics")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("Radius of the sphere trigger of the rope physic.", InfoMessageType.None)]
+	public float PhysicSphereRadius;
+
+	[FoldoutGroup("Graphics")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("Offset distance applied to the character", InfoMessageType.None)]
+	public float PhysicJointOffset;
+
+	#endregion
+
+	#region UNFOLDER
+
+	[FoldoutGroup("Unfolder")]
+	[InfoBox("Duration before which the unfolder destroys itself.", InfoMessageType.None)]
+	public float UnfolderTimeoutDelay;
+
+	[FoldoutGroup("Unfolder")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("Duration of the scale down to zero dotween when the unfolder is destroyed.", InfoMessageType.None)]
+	public float DestroyDuration;
 
 	#endregion
 
