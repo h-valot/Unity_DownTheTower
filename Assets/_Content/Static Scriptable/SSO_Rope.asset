@@ -23,6 +23,7 @@ MonoBehaviour:
   FoldLayerToInclude:
     serializedVersion: 2
     m_Bits: 1
+  FoldingPrecision: 3
   FoldOffset: 0.2
   MinFoldDistance: 0.25
   MinimumClimbLength: 2
@@ -57,13 +58,12 @@ MonoBehaviour:
     m_NumColorKeys: 3
     m_NumAlphaKeys: 2
   MiddlePointDownOffsetModifier: 0.1
-  LineSegmentSize: 0.15
+  LineSegmentSize: 0.1
   LineWidth: 0.05
   InteractableSphereRadius: 0.5
   PhysicSphereRadius: 0.1
   PhysicJointOffset: 0.25
   UnfolderTimeoutDelay: 5
-  DestroyDuration: 3
   CraftingDuration: 0.25
   DeployLayersToIgnore:
     serializedVersion: 2
