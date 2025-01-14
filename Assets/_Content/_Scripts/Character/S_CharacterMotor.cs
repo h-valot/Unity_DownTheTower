@@ -108,6 +108,7 @@ public class CharacterMotor : MonoBehaviour
 
 	// Misc
 	private const float k_fallingForcesThreshold = 0.2f;
+	private BehaviorState m_previousState;
 	public Rigidbody Rigidbody => m_rigidbody;
 	public Transform Harness => m_harness;
 
@@ -412,7 +413,8 @@ public class CharacterMotor : MonoBehaviour
     /// <param name="newState">New state to switch to</param>
     private void SwitchState(BehaviorState newState)
     {
-        ExitState();
+		m_previousState = m_rsoCharacterState.value;
+		ExitState();
         EnterState(newState);
     }
 
@@ -896,14 +898,18 @@ public class CharacterMotor : MonoBehaviour
 		{
 			ToggleRopeConstraint(!m_isHolding);
 
-			// Handle rope extention within the limit of the current rope
-			float offset = m_ssoCharacter.EntranceOffset;
-			if (m_rope.GetTotalLength() + m_ssoCharacter.EntranceOffset >= m_ssoRope.MaxLength)
+			// If the character is falling and attach himself to a rope, we won't it to be slacken.
+			if (m_previousState != BehaviorState.FALL)
 			{
-				offset = m_ssoRope.MaxLength - (m_rope.GetTotalLength() + 0.5f);
-				offset = Mathf.Clamp(offset, 0, offset);
+				// Handle rope extention within the limit of the current rope
+				float offset = m_ssoCharacter.EntranceOffset;
+				if (m_rope.GetTotalLength() + m_ssoCharacter.EntranceOffset >= m_ssoRope.MaxLength)
+				{
+					offset = m_ssoRope.MaxLength - (m_rope.GetTotalLength() + 0.5f);
+					offset = Mathf.Clamp(offset, 0, offset);
+				}
+				m_rope.IncreaseHoldLength(offset);
 			}
-			m_rope.IncreaseHoldLength(offset);
 		}
 	}
 
