@@ -1,3 +1,4 @@
+using DG.Tweening;
 using Sirenix.OdinInspector;
 using UnityEngine;
 
@@ -19,6 +20,11 @@ public class SSO_Rope : ScriptableObject
 	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
 	[InfoBox("The prefab of the interactable component of the rope folds.", InfoMessageType.None)]
 	public RopeInteractable PfRopeInteractable;
+
+	[FoldoutGroup("Prefabs")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("The prefab of the rigidbody component used to unfold rope when detached.", InfoMessageType.None)]
+	public RopeUnfolder PfRopeUnfolder;
 
 	#endregion
 
@@ -54,22 +60,22 @@ public class SSO_Rope : ScriptableObject
 
 	[FoldoutGroup("Graphics")]
 	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
-	[InfoBox("", InfoMessageType.None)]
+	[InfoBox("Gradient applied to the rope's graphical line renderer.", InfoMessageType.None)]
 	public Gradient ropeGradient;
 
 	[FoldoutGroup("Graphics")]
 	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
-	[InfoBox("", InfoMessageType.None)]
+	[InfoBox("Scalar used to determined the curviness of the rope graphics between two rope folds towards the ground.", InfoMessageType.None)]
 	public float MiddlePointDownOffsetModifier;
 
 	[FoldoutGroup("Graphics")]
 	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
-	[InfoBox("", InfoMessageType.None)]
+	[InfoBox("Size of the line segment used to smooth the rope graphical curve.", InfoMessageType.None)]
 	public float LineSegmentSize;
 
 	[FoldoutGroup("Graphics")]
 	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
-	[InfoBox("", InfoMessageType.None)]
+	[InfoBox("Width of the rope's graphical line renderer.", InfoMessageType.None)]
 	public float LineWidth;
 
 	[FoldoutGroup("Graphics")]
@@ -84,8 +90,21 @@ public class SSO_Rope : ScriptableObject
 
 	[FoldoutGroup("Graphics")]
 	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
-	[InfoBox("", InfoMessageType.None)]
+	[InfoBox("Offset distance applied to the character", InfoMessageType.None)]
 	public float PhysicJointOffset;
+
+	#endregion
+
+	#region UNFOLDER
+
+	[FoldoutGroup("Unfolder")]
+	[InfoBox("Duration before which the unfolder destroys itself.", InfoMessageType.None)]
+	public float UnfolderTimeoutDelay;
+
+	[FoldoutGroup("Unfolder")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("Duration of the scale down to zero dotween when the unfolder is destroyed.", InfoMessageType.None)]
+	public float DestroyDuration;
 
 	#endregion
 

@@ -22,6 +22,7 @@ public class RopeGraphics : MonoBehaviour
 	private List<Vector3> m_points = new List<Vector3>();
 	private List<RopePhysic> m_physics = new List<RopePhysic>();
 	private List<RopeInteractable> m_interactables = new List<RopeInteractable>();
+	private RopeUnfolder m_unfolder;
 
 	private float m_colliderDiameter;
 	private float m_triggerDiameter;
@@ -29,6 +30,8 @@ public class RopeGraphics : MonoBehaviour
 	private GradientAlphaKey[] m_gradientAlphaKey = new GradientAlphaKey[] { new GradientAlphaKey(1f, 0f), new GradientAlphaKey(1f, 1f) };
 	private GradientColorKey[] m_gradientColorKey;
 	private Gradient m_gradient = new Gradient();
+
+	public List<RopePhysic> Physics => m_physics;
 
 	#endregion
 
@@ -102,7 +105,7 @@ public class RopeGraphics : MonoBehaviour
 			// Get middle point
 			Vector3 middle = start + direction * (distance / 2);
 			Vector3 midOffset = middle + Vector3.down * (1 - dot) * m_ssoRope.MiddlePointDownOffsetModifier * distance;
-			Physics.Raycast(middle, Vector3.down, out var RaycastHit);
+			UnityEngine.Physics.Raycast(middle, Vector3.down, out var RaycastHit);
 			middle = RaycastHit.point.y > midOffset.y ? RaycastHit.point : midOffset;
 
 			// Populate list
@@ -206,7 +209,6 @@ public class RopeGraphics : MonoBehaviour
 		}
 	}
 
-
 	private void SpawnInteractables()
 	{
 		for (int i = 0; i < m_rope.Folds.Count - 2; i++)
@@ -230,10 +232,18 @@ public class RopeGraphics : MonoBehaviour
 		}
 	}
 
+	private void SpawnUnfolder()
+	{
+		m_unfolder = Instantiate(m_ssoRope.PfRopeUnfolder, m_physics[^1].transform.position, Quaternion.identity, transform);
+		m_unfolder.Initialize(m_rope, this);
+	}
+
 	private void OnAttached()
 	{
 		m_basePhysic.gameObject.SetActive(false);
 		m_baseInteractable.gameObject.SetActive(false);
+
+		if (m_unfolder) m_unfolder.Disappear();
 	}
 
 	private void OnDetached()
@@ -245,9 +255,10 @@ public class RopeGraphics : MonoBehaviour
 
 		SpawnPhysics();
 		SpawnInteractables();
+		SpawnUnfolder();
 	}
 
-	private void OnInteracted(CharacterInteract characterInteract)
+	public void OnInteracted(CharacterInteract characterInteract)
 	{
 		m_rope.Reattach(characterInteract);
 

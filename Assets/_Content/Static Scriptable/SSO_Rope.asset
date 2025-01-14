@@ -17,6 +17,8 @@ MonoBehaviour:
     type: 3}
   PfRopeInteractable: {fileID: 3610001403625324972, guid: 39203b4ec7f1ed64db2181670fa5b853,
     type: 3}
+  PfRopeUnfolder: {fileID: 1243149839767473784, guid: 5b262542edad9014d98c2f06f98e3b82,
+    type: 3}
   MaxLength: 20
   FoldLayerToInclude:
     serializedVersion: 2
@@ -60,6 +62,8 @@ MonoBehaviour:
   InteractableSphereRadius: 0.5
   PhysicSphereRadius: 0.1
   PhysicJointOffset: 0.25
+  UnfolderTimeoutDelay: 5
+  DestroyDuration: 3
   CraftingDuration: 0.25
   DeployLayersToIgnore:
     serializedVersion: 2
