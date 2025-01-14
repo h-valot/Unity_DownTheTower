@@ -95,7 +95,8 @@ MonoBehaviour:
   m_rseMove: {fileID: 11400000, guid: 4c899dda7396ed24c8e3d098dfe89471, type: 2}
   m_rseJump: {fileID: 11400000, guid: d6896f12727744441bfeccf04390e194, type: 2}
   m_rseCraft: {fileID: 11400000, guid: a5a67e5b9e43b3e47b905af27b5b8657, type: 2}
-  m_rseThrow: {fileID: 11400000, guid: 9c0f340dc33672b4ca20f5f1cf2f8528, type: 2}
+  m_rseThrowRope: {fileID: 11400000, guid: 9c0f340dc33672b4ca20f5f1cf2f8528, type: 2}
+  m_rseThrowTorch: {fileID: 11400000, guid: 069f002d0279a214d949d4364da69fcb, type: 2}
   m_rseRun: {fileID: 11400000, guid: c137e572374debb4488914fb65cbdf94, type: 2}
   m_rseClimb: {fileID: 11400000, guid: 7d02810d659aa0942a571d0f1fde7254, type: 2}
   m_rseCancel: {fileID: 11400000, guid: f98da23f144768649811d562b2a9d4ad, type: 2}
@@ -328,6 +329,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: PF_CharacterGraphics
+      objectReference: {fileID: 0}
+    - target: {fileID: 3977834962296761591, guid: 7544e1a2ef9f92846a2661054cf72879,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

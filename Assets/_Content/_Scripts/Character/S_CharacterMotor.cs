@@ -24,8 +24,9 @@ public class CharacterMotor : MonoBehaviour
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Move m_rseMove;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Jump m_rseJump;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Craft m_rseCraft;
-	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Throw m_rseThrow;
-	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Run m_rseRun;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSE_ThrowRope m_rseThrowRope;
+    [FoldoutGroup("Scriptable")][SerializeField] private RSE_ThrowTorch m_rseThrowTorch;
+    [FoldoutGroup("Scriptable")][SerializeField] private RSE_Run m_rseRun;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Climb m_rseClimb;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Cancel m_rseCancel;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_ToggleHandObject m_rseToggleHandObject;
@@ -210,8 +211,9 @@ public class CharacterMotor : MonoBehaviour
 		m_rseJump.action -= JumpGround;
 		m_rseJump.action -= JumpRope;
 		m_rseCraft.action -= ToggleCraft;
-		m_rseThrow.action -= ToggleAim;
-		m_rseClimb.action -= UpdateClimbInput;
+		m_rseThrowRope.action -= ToggleRopeAim;
+        m_rseThrowTorch.action -= ToggleTorchAim;
+        m_rseClimb.action -= UpdateClimbInput;
 		m_rseCancel.action -= CancelRope;
 		m_rseToggleHandObject.action -= ToggleTorch;
 	}
@@ -231,15 +233,17 @@ public class CharacterMotor : MonoBehaviour
 				m_rseJump.action += JumpGround;
 				m_rseClimb.action += UpdateClimbInput;
 				m_rseCraft.action += ToggleCraft;
-				m_rseThrow.action += ToggleAim;
-				m_rseCancel.action += CancelRope;
+				m_rseThrowRope.action += ToggleRopeAim;
+                m_rseThrowTorch.action += ToggleTorchAim;
+                m_rseCancel.action += CancelRope;
 				break;
 
 			case BehaviorState.ROPE:
 				m_rseMove.action += UpdateMoveInput;
 				m_rseRun.action += UpdateHoldInput;
-				m_rseThrow.action += ToggleAim;
-				m_rseJump.action += JumpRope;
+				m_rseThrowRope.action += ToggleRopeAim;
+                m_rseThrowTorch.action += ToggleTorchAim;
+                m_rseJump.action += JumpRope;
 				m_rseClimb.action += UpdateClimbInput;
 				m_rseCancel.action += CancelRope;
 				break;
@@ -247,8 +251,9 @@ public class CharacterMotor : MonoBehaviour
 			case BehaviorState.FALL:
                 m_rseMove.action += UpdateMoveInput;
 				m_rseRun.action += UpdateRunInput;
-				m_rseThrow.action += ToggleAim;
-				break;
+				m_rseThrowRope.action += ToggleRopeAim;
+                m_rseThrowTorch.action += ToggleTorchAim;
+                break;
 
             case BehaviorState.CRAFT:
 				m_rseCraft.action += ToggleCraft;
@@ -1102,6 +1107,31 @@ public class CharacterMotor : MonoBehaviour
 		}
 	}
 
+	private void RefillTorch()
+	{
+		if (RobotObject != null) return;
+
+		RobotObject = Instantiate(
+			(Permanent)m_ssoTorch.PfTorch,
+            m_robotSocket.transform.position,
+            Quaternion.identity,
+            m_robotSocket.transform
+        );
+    }
+
+	private void RefillRope()
+    {
+        if (HandObject != null) return;
+
+        HandObject = Instantiate(
+            (Permanent)m_ssoRope.PfRope,
+            m_handSocket.transform.position,
+            Quaternion.identity,
+            m_handSocket.transform
+        );
+
+    }
+
 	/// <summary>
 	/// Instantiate the torch prefab after the fixed duration.
 	/// </summary>
@@ -1130,7 +1160,17 @@ public class CharacterMotor : MonoBehaviour
 		m_craftCoroutine = null;
 	}
 
-	private void ToggleAim(bool isInputPressed)
+	private void ToggleTorchAim(bool isInputPressed)
+	{
+		ToggleAim(isInputPressed, )
+	}
+
+	private void ToggleRopeAim(bool isInputPressed)
+	{
+
+	}
+
+	private void ToggleAim(bool isInputPressed, Permanent itemToThrow)
 	{
 		// Assertions
 		if (m_rsoCharacterState.value == BehaviorState.ROPE) return;
