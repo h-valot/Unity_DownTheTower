@@ -177,11 +177,13 @@ Light GetAdditionalPerObjectLight(int perObjectLightIndex, float3 positionWS)
     //Original line
     //float attenuation = DistanceAttenuation(distanceSqr, distanceAndSpotAttenuation.xy) * AngleAttenuation(spotDirection.xyz, lightDirection, distanceAndSpotAttenuation.zw);
     float range = rsqrt(distanceAndSpotAttenuation.x);
-    //half attenuation = ease_out_quad(clamp(1.0f - (distanceSqr / range), 0.0, 1.0));
+    //half attenuation = ease_out_quad(clamp(1.0f - (distanceSqr*0.25 / range), 0.0, 1.0)) * AngleAttenuation(spotDirection.xyz, lightDirection, distanceAndSpotAttenuation.zw);
     //half attenuation = clamp(1.0f - (distanceSqr / range), 0.0, 1.0) * AngleAttenuation(spotDirection.xyz, lightDirection, distanceAndSpotAttenuation.zw);
     //half attenuation = clamp(1.0f - (distanceSqr / range), 0.0, 1.0);
     //float attenuation = DistanceAttenuation(distanceSqr, distanceAndSpotAttenuation.xy) * AngleAttenuation(spotDirection.xyz, lightDirection, distanceAndSpotAttenuation.zw);
-    half attenuation = ease_in_out_quad(clamp(1.0f - (distanceSqr / range), 0.0, 1.0));
+    half attenuation = ease_in_out_quad(clamp(1.0f - (distanceSqr*0.25 / range), 0.0, 1.0)) * AngleAttenuation(spotDirection.xyz, lightDirection, distanceAndSpotAttenuation.zw);
+
+    //half attenuation = lerp(DistanceAttenuation(distanceSqr, distanceAndSpotAttenuation.xy) * AngleAttenuation(spotDirection.xyz, lightDirection, distanceAndSpotAttenuation.zw), ease_in_out_quad(clamp(1.0f - (distanceSqr / range), 0.0, 1.0)), step(0.99f, AngleAttenuation(spotDirection.xyz, lightDirection, distanceAndSpotAttenuation.zw)));
 
     Light light;
     light.direction = lightDirection;
