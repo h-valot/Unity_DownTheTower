@@ -52,6 +52,8 @@ public class CharacterMotor : MonoBehaviour
 
 	#region VARIABLES
 
+	private bool m_isInitialize = false;
+
 	// - Inputs -
 	private Vector2 m_moveInput = new Vector2();
 	public bool DoMoveInputs => m_moveInput.magnitude > 0.1f;
@@ -129,6 +131,8 @@ public class CharacterMotor : MonoBehaviour
 		m_rsoCraftInputLocked.value = false;
 		m_rsoRecycleInputLocked.value = false;
 		SetCharacterPosition(position, rotation);
+
+		m_isInitialize = true;
 	}
 
     private void OnEnable()
@@ -150,6 +154,8 @@ public class CharacterMotor : MonoBehaviour
 
     private void FixedUpdate()
 	{
+		if (!m_isInitialize) return;
+
         // Tkt fréro c'est pour pas soft lock le spherecast de detection du sol
         if (m_rigidbody.position == Vector3.zero)
         {
