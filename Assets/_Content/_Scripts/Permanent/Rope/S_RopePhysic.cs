@@ -1,12 +1,11 @@
 using Sirenix.OdinInspector;
 using UnityEngine;
 
-public class RopePhysic : Interactable
+public class RopePhysic : RopeInteractable
 {
 	[FoldoutGroup("Internal references")][SerializeField] public Rigidbody Rigidbody;
 	[FoldoutGroup("Internal references")][SerializeField] public ConfigurableJoint Joint;
 	[FoldoutGroup("Internal references")][SerializeField] public SphereCollider SphereCollider;
-	[FoldoutGroup("Internal references")][SerializeField] public SphereCollider SphereTrigger;
 
 	private SoftJointLimit m_softJointLimit;
 

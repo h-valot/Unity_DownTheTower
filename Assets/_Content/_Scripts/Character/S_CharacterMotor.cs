@@ -95,7 +95,7 @@ public class CharacterMotor : MonoBehaviour
 	// - Rope state -
 	private Rope m_rope;
 	private bool m_isHolding;
-	private bool IsRopeValid => m_rope && m_rope.IsPlaced;
+	public bool IsRopeValid => m_rope && m_rope.IsPlaced;
 	private float m_ropeDragTimer;
 
 	// Cancel

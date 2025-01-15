@@ -5,9 +5,9 @@ using UnityEngine;
 
 public class CharacterInteract : MonoBehaviour
 {
-	[Title("References")]
-	[SerializeField] private Transform m_backpackAnchor;
-	[SerializeField] private Transform m_characterGraphics;
+	[FoldoutGroup("Internal references")][SerializeField] private Transform m_backpackAnchor;
+	[FoldoutGroup("Internal references")][SerializeField] private Transform m_characterGraphics;
+	[FoldoutGroup("Internal references")][SerializeField] private CharacterMotor m_characterMotor;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Character m_characterConfig;
 
@@ -42,6 +42,7 @@ public class CharacterInteract : MonoBehaviour
 
 	private void Update()
 	{
+		HandleInvalidInteractables();
 		CheckValidity();
 		CheckRecyclability();
 	}
@@ -79,6 +80,9 @@ public class CharacterInteract : MonoBehaviour
 	/// </summary>
 	public void Add(Interactable interactable)
 	{
+		// Assert: Can't add a rope to equip if a rope is already equipped.
+		if (interactable as RopeInteractable && m_characterMotor.IsRopeValid) return;
+
 		m_interactables.Add(interactable);
 	}
 
@@ -126,6 +130,21 @@ public class CharacterInteract : MonoBehaviour
 		return nearest;
 	}
 
+	/// <summary>
+	/// Remove invalid interactables from the interactables list.
+	/// </summary>
+	private void HandleInvalidInteractables()
+	{
+		// Assertion
+		if (m_interactables.Count <= 0) return;
+
+		for (int i = m_interactables.Count - 1; i >= 0; i--)
+		{
+			// Assert: Can't add a rope to equip if a rope is already equipped.
+			if (m_interactables[i] as RopeInteractable && m_characterMotor.IsRopeValid) Remove(m_interactables[i]);
+		}
+	}
+
 	private void CheckValidity()
 	{
 		// Assertion
@@ -133,7 +152,8 @@ public class CharacterInteract : MonoBehaviour
 
 		m_rsoInteractableValid.value =
 			m_interactables.Count > 0
-			&& (m_rsoCharacterState.value == BehaviorState.LOCOMOTION || m_rsoCharacterState.value == BehaviorState.FALL);
+			&& (m_rsoCharacterState.value == BehaviorState.LOCOMOTION 
+			|| m_rsoCharacterState.value == BehaviorState.FALL);
 	}
 
 	private void CheckRecyclability()
