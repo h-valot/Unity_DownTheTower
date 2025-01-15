@@ -581,18 +581,18 @@
     "m_Guid": {
         "m_GuidSerialized": "c47ee35f-d077-49b8-a1d6-04094fefe0d5"
     },
-    "m_Name": "_beamColor",
+    "m_Name": "_BeamColor",
     "m_DefaultRefNameVersion": 1,
-    "m_RefNameGeneratedByDisplayName": "_beamColor",
-    "m_DefaultReferenceName": "_beamColor",
+    "m_RefNameGeneratedByDisplayName": "_BeamColor",
+    "m_DefaultReferenceName": "_BeamColor",
     "m_OverrideReferenceName": "",
     "m_GeneratePropertyBlock": true,
     "m_UseCustomSlotLabel": false,
     "m_CustomSlotLabel": "",
     "m_DismissedVersion": 0,
     "m_Precision": 0,
-    "overrideHLSLDeclaration": false,
-    "hlslDeclarationOverride": 0,
+    "overrideHLSLDeclaration": true,
+    "hlslDeclarationOverride": 2,
     "m_Hidden": false,
     "m_Value": {
         "r": 0.0,
@@ -2009,7 +2009,7 @@
     "m_AlphaMode": 0,
     "m_RenderFace": 2,
     "m_AlphaClip": false,
-    "m_CastShadows": true,
+    "m_CastShadows": false,
     "m_ReceiveShadows": true,
     "m_SupportsLODCrossFade": false,
     "m_CustomEditorGUI": "",
@@ -2287,7 +2287,7 @@
     "m_Type": "UnityEditor.ShaderGraph.Vector1MaterialSlot",
     "m_ObjectId": "8b1bf62ec0c44c73b2e7f21c4d630b20",
     "m_Id": 0,
-    "m_DisplayName": "EdgeFalloff",
+    "m_DisplayName": "_edgeFalloff",
     "m_SlotType": 1,
     "m_Hidden": false,
     "m_ShaderOutputName": "Out",
@@ -2882,10 +2882,10 @@
         "m_Expanded": true,
         "m_Position": {
             "serializedVersion": "2",
-            "x": -958.9998779296875,
-            "y": 364.00006103515627,
-            "width": 208.0,
-            "height": 277.99993896484377
+            "x": -966.4000244140625,
+            "y": 323.1999816894531,
+            "width": 207.99993896484376,
+            "height": 277.6000671386719
         }
     },
     "m_Slots": [
@@ -3442,7 +3442,7 @@
     "m_Type": "UnityEditor.ShaderGraph.Vector4MaterialSlot",
     "m_ObjectId": "f691dbec32d44be88d5d7cdc3a9701fb",
     "m_Id": 0,
-    "m_DisplayName": "_beamColor",
+    "m_DisplayName": "_BeamColor",
     "m_SlotType": 1,
     "m_Hidden": false,
     "m_ShaderOutputName": "Out",
