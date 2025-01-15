@@ -18,7 +18,7 @@ public class MushroomBatch : MonoBehaviour
     [FoldoutGroup("Spawning")][SerializeField] private float _maxSizeMultiplier = 1.5f;
 
     // DrawMeshInstanced can only draw up to 1023 meshes at a time, so we need a new list for every 1023 mushrooms
-    public List<MatrixList> mushroomLists = new List<MatrixList>();
+    [HideInInspector] public List<MatrixList> mushroomLists = new List<MatrixList>();
 
     [FoldoutGroup("External References")][SerializeField] private GameObject _mushroomTriggerPrefab;
     [FoldoutGroup("External References")][SerializeField] private GameObject _mushroomPrefab;

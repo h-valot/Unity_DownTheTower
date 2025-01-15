@@ -4,23 +4,33 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "SSO_Guardian", menuName = "Static Scriptable/Guardian")]
 public class SSO_Guardian : ScriptableObject
 {
-	[Title("Debug")]
-	[InfoBox("Material applied to the guardian debug eye mesh renderer when in aggro state.", InfoMessageType.None)]
-	public Material AggroMaterial;
+    #region FEEDBACKS
 
-	[InfoBox("Material applied to the guardian debug eye mesh renderer when in patrol state.", InfoMessageType.None)]
-	public Material PatrolMaterial;
+    [FoldoutGroup("Feedbacks")]
+    [PropertySpace(SpaceAfter = 0, SpaceBefore = 15)]
+    [InfoBox("Color applied to the guardian eyes when in aggro state.", InfoMessageType.None)]
+	public Color AggroColor;
 
-	[InfoBox("Material applied to the guardian debug eye mesh renderer when in seek state.", InfoMessageType.None)]
-	public Material SeekMaterial;
+    [FoldoutGroup("Feedbacks")]
+    [PropertySpace(SpaceAfter = 0, SpaceBefore = 15)]
+    [InfoBox("Color applied to the guardian eyes when in patrol state.", InfoMessageType.None)]
+	public Color PatrolColor;
 
-	[InfoBox("Material applied to the guardian debug eye mesh renderer when in dormant state.", InfoMessageType.None)]
-	[PropertySpace(SpaceAfter = 15, SpaceBefore = 0)]
-	public Material DormantMaterial;
+    [FoldoutGroup("Feedbacks")]
+    [PropertySpace(SpaceAfter = 0, SpaceBefore = 15)]
+    [InfoBox("Color applied to the guardian eyes when in seek state.", InfoMessageType.None)]
+	public Color SeekColor;
 
-	#region SIGHT
+    [FoldoutGroup("Feedbacks")]
+    [PropertySpace(SpaceAfter = 0, SpaceBefore = 15)]
+    [InfoBox("Color applied to the guardian eyes when in dormant state.", InfoMessageType.None)]
+	public Color DormantColor;
 
-	[FoldoutGroup("Sight")]
+    #endregion
+
+    #region SIGHT
+
+    [FoldoutGroup("Sight")]
 	[InfoBox("Radius of the guardian long sight range. If a light source enters the sphere of the given radius in front of the guardian (cf. DefaultAngleSight), it will become a target.", InfoMessageType.None)]
 	public float LongRange;
 
