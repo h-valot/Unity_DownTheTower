@@ -27,8 +27,10 @@ public class GuardianMotor : MonoBehaviour
 	[HideIf("m_usePatrolPath")][SerializeField] private Waypoint m_waypoint;
 
 	[FoldoutGroup("Internal References")][SerializeField] private NavMeshAgent m_agent;
-	[FoldoutGroup("Internal References")][SerializeField] private MeshRenderer m_eyes;
-	[FoldoutGroup("Internal References")][SerializeField] private Transform m_frontEye;
+	[FoldoutGroup("Internal References")][SerializeField] private MeshRenderer m_guardianMeshRenderer;
+    [FoldoutGroup("Internal References")][SerializeField] private MeshRenderer m_beamMeshRenderer;
+    [FoldoutGroup("Internal References")][SerializeField] private Light m_beamLight;
+    [FoldoutGroup("Internal References")][SerializeField] private Transform m_frontEye;
 	[FoldoutGroup("Internal References")][SerializeField] private TextMeshProUGUI m_tmpTarget;
 	[FoldoutGroup("Internal References")][SerializeField] private TextMeshProUGUI m_tmpState;
 	[FoldoutGroup("Internal References")][SerializeField] private LineRenderer m_lineRenderer;
@@ -67,18 +69,34 @@ public class GuardianMotor : MonoBehaviour
 	private bool m_targetNotFound;
 	private int m_seekTargetId;
 
-	#endregion
+    // Graphics
+    private MaterialPropertyBlock m_guardianPropertyBlock;
+    private MaterialPropertyBlock m_beamPropertyBlock;
 
-	#region MONOBEHAVIOR
+    #endregion
 
-	private void Start()
+    #region MONOBEHAVIOR
+
+    private void Awake()
+    {
+        //Initialize state feedbacks
+        m_guardianPropertyBlock = new MaterialPropertyBlock();
+        m_guardianPropertyBlock.SetColor("_EyesColor", m_ssoGuardian.DormantColor);
+        m_guardianMeshRenderer.SetPropertyBlock(m_guardianPropertyBlock);
+        m_beamPropertyBlock = new MaterialPropertyBlock();
+        m_beamPropertyBlock.SetColor("_BeamColor", m_ssoGuardian.DormantColor);
+        m_beamMeshRenderer.SetPropertyBlock(m_beamPropertyBlock);
+		m_beamLight.color = m_ssoGuardian.DormantColor;
+    }
+
+    private void Start()
 	{
 		m_rsoGuardianState.value = GuardianBehaviorState.SEEK;
 		ToggleAngleSightExtension(false);
 
 		SelectTarget();
 		DetermineState();
-	}
+    }
 
     private void Update()
     {
@@ -138,8 +156,8 @@ public class GuardianMotor : MonoBehaviour
 			if (distance > m_minTargetDistance) continue;
 
 			// Assert: the candidate isn't a valid class
-			Debug.DrawLine(m_eyes.transform.position, candidate.Position);
-			Physics.Linecast(m_eyes.transform.position, candidate.Position, out var hit, ~m_ssoGuardian.TargetLayerToIgnore);
+			Debug.DrawLine(m_frontEye.position, candidate.Position);
+			Physics.Linecast(m_frontEye.position, candidate.Position, out var hit, ~m_ssoGuardian.TargetLayerToIgnore);
 			bool isCharacter = !hit.collider.TryGetComponent<CharacterMotor>(out var character);
 			bool isTorch = !hit.collider.TryGetComponent<Torch>(out var torch);
 			bool isRope = !hit.collider.TryGetComponent<Rope>(out var rope);
@@ -275,8 +293,15 @@ public class GuardianMotor : MonoBehaviour
 
     private void EnterPatrolState()
 	{
-		m_eyes.sharedMaterial = m_ssoGuardian.PatrolMaterial;
-		m_agent.destination = m_usePatrolPath ? m_patrolPath.Waypoints[m_currentWaypoint].Position : m_waypoint.Position;
+        //Update state feedbacks
+        m_guardianPropertyBlock.SetColor("_EyesColor", m_ssoGuardian.PatrolColor);
+        m_guardianMeshRenderer.SetPropertyBlock(m_guardianPropertyBlock);
+		m_beamPropertyBlock.SetColor("_BeamColor", m_ssoGuardian.PatrolColor);
+        m_beamMeshRenderer.SetPropertyBlock(m_beamPropertyBlock);
+
+        m_beamLight.color = m_ssoGuardian.PatrolColor;
+
+        m_agent.destination = m_usePatrolPath ? m_patrolPath.Waypoints[m_currentWaypoint].Position : m_waypoint.Position;
 		m_agent.speed = m_overridePatrolSpeed ? m_patrolSpeed : m_ssoGuardian.PatrolSpeed;
 	}
 
@@ -340,8 +365,14 @@ public class GuardianMotor : MonoBehaviour
 
 	private void EnterAggroState()
     {
-		m_eyes.sharedMaterial = m_ssoGuardian.AggroMaterial;
-		m_agent.speed = m_overrideAggroSpeed ? m_aggroSpeed : m_ssoGuardian.AggroSpeed;
+		//Update state feedbacks
+        m_guardianPropertyBlock.SetColor("_EyesColor", m_ssoGuardian.AggroColor);
+        m_guardianMeshRenderer.SetPropertyBlock(m_guardianPropertyBlock);
+        m_beamPropertyBlock.SetColor("_BeamColor", m_ssoGuardian.AggroColor);
+        m_beamMeshRenderer.SetPropertyBlock(m_beamPropertyBlock);
+        m_beamLight.color = m_ssoGuardian.AggroColor;
+
+        m_agent.speed = m_overrideAggroSpeed ? m_aggroSpeed : m_ssoGuardian.AggroSpeed;
 		m_lineRenderer.gameObject.SetActive(true);
 	}
 
@@ -406,8 +437,14 @@ public class GuardianMotor : MonoBehaviour
 
 	private void EnterSeekState()
 	{
-		m_eyes.sharedMaterial = m_ssoGuardian.SeekMaterial;
-		m_omniscienceTimer = m_ssoGuardian.OmniscienceDuration;
+        //Update state feedbacks
+        m_guardianPropertyBlock.SetColor("_EyesColor", m_ssoGuardian.SeekColor);
+        m_guardianMeshRenderer.SetPropertyBlock(m_guardianPropertyBlock);
+        m_beamPropertyBlock.SetColor("_BeamColor", m_ssoGuardian.SeekColor);
+        m_beamMeshRenderer.SetPropertyBlock(m_beamPropertyBlock);
+        m_beamLight.color = m_ssoGuardian.SeekColor;
+
+        m_omniscienceTimer = m_ssoGuardian.OmniscienceDuration;
 		m_seekingTimer = m_ssoGuardian.SeekingDuration;
 
 		m_seekTargetId = m_currentTarget.Id;
