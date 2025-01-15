@@ -363,6 +363,13 @@ public class CharacterMotor : MonoBehaviour
 		if (m_hasJumped) return;
 		if (m_rsoInputsLocked.value) return;
 
+		if ((m_rsoCharacterState.value == BehaviorState.FALL
+		|| m_rsoCharacterState.value == BehaviorState.ROPE)
+		&& m_coyoteTime > 0f) 
+		{
+			return;
+		}
+
 		m_rigidbody.AddForce(Vector3.up * m_ssoCharacter.JumpForce, ForceMode.Impulse);
 		m_hasJumped = true;
 	}
