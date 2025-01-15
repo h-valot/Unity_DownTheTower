@@ -10,14 +10,8 @@ public class GuardianMotor : MonoBehaviour
 {
 	#region REFERENCES
 
-	[Title("Override")]
-	[InfoBox("If true, the following value will override the one filled in the SSO_Guardian. NOTE: Use this to create unique guardian.", InfoMessageType.None)]
-	[SerializeField] private bool m_overridePatrolSpeed;
-	[ShowIf("m_overridePatrolSpeed")][SerializeField] private float m_patrolSpeed;
-
-	[InfoBox("If true, the following value will override the one filled in the SSO_Guardian.", InfoMessageType.None)]
-	[SerializeField] private bool m_overrideAggroSpeed;
-	[ShowIf("m_overrideAggroSpeed")][SerializeField] private float m_aggroSpeed;
+	[Title("Tweakable values")]
+	[SerializeField] private SSO_Guardian m_ssoGuardian;
 
 	[InfoBox("If true (default), on patrol state, the guardian will follow the given path. Otherwise, it will return to the given waypoint if it returns to patrol state (NOTE: The guardian will be look towards the waypoint forward).", InfoMessageType.None)]
 	[SerializeField] private bool m_usePatrolPath = true;
@@ -33,9 +27,7 @@ public class GuardianMotor : MonoBehaviour
     [FoldoutGroup("Internal References")][SerializeField] private Transform m_frontEye;
 	[FoldoutGroup("Internal References")][SerializeField] private TextMeshProUGUI m_tmpTarget;
 	[FoldoutGroup("Internal References")][SerializeField] private TextMeshProUGUI m_tmpState;
-	[FoldoutGroup("Internal References")][SerializeField] private LineRenderer m_lineRenderer;
 
-	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Guardian m_ssoGuardian;
 	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Game m_ssoGame;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_GuardianState m_rsoGuardianState;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterPosition m_rsoCharacterPosition;
@@ -46,7 +38,6 @@ public class GuardianMotor : MonoBehaviour
 
 	#region VARIABLES
 
-	[Title("Debug")]
 	private bool m_canSwitchState = true;
 
 	// Patrol
@@ -56,11 +47,11 @@ public class GuardianMotor : MonoBehaviour
 	private float m_currentAngleSight;
 
 	// Aggro
-	public List<Candidate> m_candidates = new List<Candidate>();
+	private List<Candidate> m_candidates = new List<Candidate>();
 	private Candidate m_currentTarget;
 	private float m_minTargetDistance;
 	private bool m_hasTargetInSight;
-	public bool m_characterAggroedLately;
+	private bool m_characterAggroedLately;
 
 	// Seek
 	private float m_omniscienceTimer;
@@ -68,6 +59,7 @@ public class GuardianMotor : MonoBehaviour
 	private float m_seekingTimer;
 	private bool m_targetNotFound;
 	private int m_seekTargetId;
+	private float m_seekTimeoutTimer;
 
     // Graphics
     private MaterialPropertyBlock m_guardianPropertyBlock;
@@ -155,9 +147,11 @@ public class GuardianMotor : MonoBehaviour
 			float distance = Vector3.Distance(transform.position, candidate.Position);
 			if (distance > m_minTargetDistance) continue;
 
-			// Assert: the candidate isn't a valid class
+			// Assert: the linecast touches nothing
 			Debug.DrawLine(m_frontEye.position, candidate.Position);
-			Physics.Linecast(m_frontEye.position, candidate.Position, out var hit, ~m_ssoGuardian.TargetLayerToIgnore);
+			if (!Physics.Linecast(m_frontEye.position, candidate.Position, out var hit, ~m_ssoGuardian.TargetLayerToIgnore)) continue;
+
+			// Assert: the candidate isn't a valid class
 			bool isCharacter = !hit.collider.TryGetComponent<CharacterMotor>(out var character);
 			bool isTorch = !hit.collider.TryGetComponent<Torch>(out var torch);
 			bool isRope = !hit.collider.TryGetComponent<Rope>(out var rope);
@@ -293,16 +287,10 @@ public class GuardianMotor : MonoBehaviour
 
     private void EnterPatrolState()
 	{
-        //Update state feedbacks
-        m_guardianPropertyBlock.SetColor("_EyesColor", m_ssoGuardian.PatrolColor);
-        m_guardianMeshRenderer.SetPropertyBlock(m_guardianPropertyBlock);
-		m_beamPropertyBlock.SetColor("_BeamColor", m_ssoGuardian.PatrolColor);
-        m_beamMeshRenderer.SetPropertyBlock(m_beamPropertyBlock);
+		ChangeBeamColor(m_ssoGuardian.PatrolColor);
 
-        m_beamLight.color = m_ssoGuardian.PatrolColor;
-
-        m_agent.destination = m_usePatrolPath ? m_patrolPath.Waypoints[m_currentWaypoint].Position : m_waypoint.Position;
-		m_agent.speed = m_overridePatrolSpeed ? m_patrolSpeed : m_ssoGuardian.PatrolSpeed;
+		m_agent.destination = m_usePatrolPath ? m_patrolPath.Waypoints[m_currentWaypoint].Position : m_waypoint.Position;
+		m_agent.speed = m_ssoGuardian.PatrolSpeed;
 	}
 
     private void UpdatePatrolState()
@@ -362,29 +350,20 @@ public class GuardianMotor : MonoBehaviour
 
 	#region AGGRO
 
-
 	private void EnterAggroState()
     {
-		//Update state feedbacks
-        m_guardianPropertyBlock.SetColor("_EyesColor", m_ssoGuardian.AggroColor);
-        m_guardianMeshRenderer.SetPropertyBlock(m_guardianPropertyBlock);
-        m_beamPropertyBlock.SetColor("_BeamColor", m_ssoGuardian.AggroColor);
-        m_beamMeshRenderer.SetPropertyBlock(m_beamPropertyBlock);
-        m_beamLight.color = m_ssoGuardian.AggroColor;
-
-        m_agent.speed = m_overrideAggroSpeed ? m_aggroSpeed : m_ssoGuardian.AggroSpeed;
-		m_lineRenderer.gameObject.SetActive(true);
+		ChangeBeamColor(m_ssoGuardian.AggroColor);
+        m_agent.speed = m_ssoGuardian.AggroSpeed;
 	}
 
     private void UpdateAggroState()
 	{
 		ChaseTarget();
-		UpdateLineTarget();
 	}
 
     private void ExitAggroState()
     {
-		m_lineRenderer.gameObject.SetActive(false);
+
 	}
 
 
@@ -437,15 +416,11 @@ public class GuardianMotor : MonoBehaviour
 
 	private void EnterSeekState()
 	{
-        //Update state feedbacks
-        m_guardianPropertyBlock.SetColor("_EyesColor", m_ssoGuardian.SeekColor);
-        m_guardianMeshRenderer.SetPropertyBlock(m_guardianPropertyBlock);
-        m_beamPropertyBlock.SetColor("_BeamColor", m_ssoGuardian.SeekColor);
-        m_beamMeshRenderer.SetPropertyBlock(m_beamPropertyBlock);
-        m_beamLight.color = m_ssoGuardian.SeekColor;
+		ChangeBeamColor(m_ssoGuardian.SeekColor);
 
-        m_omniscienceTimer = m_ssoGuardian.OmniscienceDuration;
+		m_omniscienceTimer = m_ssoGuardian.OmniscienceDuration;
 		m_seekingTimer = m_ssoGuardian.SeekingDuration;
+		m_seekTimeoutTimer = m_ssoGuardian.SeekTimeoutTimer;
 
 		m_seekTargetId = m_currentTarget.Id;
 		m_omniscienceTarget = GetCandidateById(m_seekTargetId);
@@ -456,11 +431,12 @@ public class GuardianMotor : MonoBehaviour
 	{
 		HandleOmniscience();
 		HandleSeek();
+		HandleTimeout();
 	}
 
 	private void ExitSeekState()
 	{
-
+		ToggleAngleSightExtension(false);
 	}
 
 	private void HandleOmniscience()
@@ -468,11 +444,16 @@ public class GuardianMotor : MonoBehaviour
 		m_omniscienceTimer -= Time.fixedDeltaTime;
 		m_omniscienceTarget = GetCandidateById(m_seekTargetId);
 
-		if (m_omniscienceTimer > 0f
-		&& m_omniscienceTarget.Id != -1)
-		{
-			m_agent.destination = m_omniscienceTarget.Position;
-		}
+		// Assert: Timer elapsed
+		if (m_omniscienceTimer <= 0) return;
+
+		// Assert: Invalid target
+		if (m_omniscienceTarget.Id == -1) return;
+
+		// Assert: Target is the character but it hasn't been chased since the last time the guardian was patrolling
+		if (m_omniscienceTarget.Id != 0 && m_characterAggroedLately) return;
+
+		m_agent.destination = m_omniscienceTarget.Position;
 	}
 
 	private void HandleSeek()
@@ -484,18 +465,29 @@ public class GuardianMotor : MonoBehaviour
 		m_seekingTimer -= Time.fixedDeltaTime;
 		if (m_seekingTimer >= 0f) return;
 
-		if (m_characterAggroedLately 
-		&& m_seekTargetId != 0)
+		// Seek back to the last character position is chased lately
+		if (m_characterAggroedLately 	// The character has been chased at least once since the last time the guardian was patrolling
+		&& m_seekTargetId != 0)			// AND The current target the guardian is seeking isn't the character
 		{
 			m_characterAggroedLately = false;
 			m_omniscienceTimer = m_ssoGuardian.OmniscienceDuration;
 			m_seekingTimer = m_ssoGuardian.SeekingDuration;
+			m_seekTimeoutTimer = m_ssoGuardian.SeekTimeoutTimer;
 			m_seekTargetId = 0;
 			return;
 		}
 
-		ToggleAngleSightExtension(false);
 		m_targetNotFound = true;
+	}
+
+	private void HandleTimeout()
+	{
+		m_seekTimeoutTimer -= Time.fixedDeltaTime;
+		if (m_seekTimeoutTimer <= 0f)
+		{
+			m_targetNotFound = true;
+			m_characterAggroedLately = false;
+		}
 	}
 
 	private void ToggleAngleSightExtension(bool isEnabled)
@@ -514,6 +506,20 @@ public class GuardianMotor : MonoBehaviour
 
 	#endregion
 
+	#region GRAPHICS
+
+	private void ChangeBeamColor(Color newColor)
+	{
+		m_beamLight.color = newColor;
+		m_beamPropertyBlock.SetColor("_BeamColor", newColor);
+		m_guardianPropertyBlock.SetColor("_EyesColor", newColor);
+
+		m_beamMeshRenderer.SetPropertyBlock(m_beamPropertyBlock);
+		m_guardianMeshRenderer.SetPropertyBlock(m_guardianPropertyBlock);
+	}
+
+	#endregion
+
 	#region DEBUG
 
 	private void UpdateDebugUI()
@@ -522,13 +528,8 @@ public class GuardianMotor : MonoBehaviour
 		m_tmpTarget.text = m_hasTargetInSight ? m_currentTarget.Position.ToString() : "none";
 	}
 
-	private Vector3[] m_lineTargetPositions = new Vector3[2];
-	private void UpdateLineTarget()
-	{
-		m_lineTargetPositions[0] = m_frontEye.position;
-		m_lineTargetPositions[1] = m_currentTarget.Position;
-		m_lineRenderer.SetPositions(m_lineTargetPositions);
-	}
+#if UNITY_EDITOR
+
 	private void OnDrawGizmos()
 	{
 		Gizmos.color = Color.red;
@@ -538,6 +539,8 @@ public class GuardianMotor : MonoBehaviour
 		Gizmos.color = Color.green;
 		Gizmos.DrawWireSphere(transform.position, m_ssoGuardian.LongRange);
 	}
+
+#endif
 
     #endregion
 }

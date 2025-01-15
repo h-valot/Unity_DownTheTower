@@ -10,12 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ee0cd463a0c490b47bf508b517221eb7, type: 3}
-  m_Name: SSO_Guardian
+  m_Name: SSO_Guardian_Default
   m_EditorClassIdentifier: 
-  AggroColor: {r: 0.7490196, g: 0, b: 0, a: 0}
-  PatrolColor: {r: 0, g: 1, b: 0.9843137, a: 0}
-  SeekColor: {r: 1, g: 0.8246851, b: 0, a: 0}
-  DormantColor: {r: 0, g: 0, b: 0, a: 0}
+  AggroColor: {r: 0.7490196, g: 0, b: 0, a: 1}
+  PatrolColor: {r: 0, g: 1, b: 0.9843137, a: 1}
+  SeekColor: {r: 1, g: 0.8246851, b: 0, a: 1}
+  DormantColor: {r: 0, g: 0, b: 0, a: 1}
   LongRange: 8
   ClearRange: 4
   LethalRange: 2
@@ -33,3 +33,4 @@ MonoBehaviour:
   DelayDestroyRope: {x: 0, y: 1}
   OmniscienceDuration: 1
   SeekingDuration: 2
+  SeekTimeoutTimer: 8

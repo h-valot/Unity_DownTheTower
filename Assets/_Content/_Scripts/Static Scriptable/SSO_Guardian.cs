@@ -108,7 +108,6 @@ public class SSO_Guardian : ScriptableObject
 	#region SEEK
 
 	[FoldoutGroup("Seek")]
-	[PropertySpace(SpaceAfter = 0, SpaceBefore = 15)]
 	[InfoBox("Duration during which the guardian knows and moves towards its target current position even if unsee.", InfoMessageType.None)]
 	public float OmniscienceDuration;
 
@@ -116,6 +115,11 @@ public class SSO_Guardian : ScriptableObject
 	[PropertySpace(SpaceAfter = 0, SpaceBefore = 15)]
 	[InfoBox("Duration during which the guardian waits when it reaches the last target position while omnisciente. During this time, the guardian uses the ExtendedAngleSight instead of DefaultAngleSight.", InfoMessageType.None)]
 	public float SeekingDuration;
+
+	[FoldoutGroup("Seek")]
+	[PropertySpace(SpaceAfter = 0, SpaceBefore = 15)]
+	[InfoBox("Duration of the timeout delay. At the end of this duration, the seek state is forced quit.", InfoMessageType.None)]
+	public float SeekTimeoutTimer;
 
 	#endregion
 }
