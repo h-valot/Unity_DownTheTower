@@ -12,7 +12,6 @@ public class Torch : Permanent
     [SerializeField] private Rigidbody m_rigidbody;
     [SerializeField] private MeshRenderer m_meshRenderer;
     [SerializeField] private LineRenderer m_aimLineRenderer;
-    [SerializeField] private Transform m_torchTop;
     [SerializeField] private Transform m_pointLightBase;
     [SerializeField] private SphereCollider m_lightCollider;
 	[SerializeField] public Transform RaycastTarget;
@@ -24,8 +23,10 @@ public class Torch : Permanent
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_TorchManager m_rsoTorchManager;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterPosition m_rsoCharacterPosition;
 
-	// ----- PUBLIC VARIABLES -----
-	[HideInInspector] public bool IsLit;
+    [FoldoutGroup("Config")][SerializeField] private LayerMask LayerToIgnoreAfterHit;
+
+    // ----- PUBLIC VARIABLES -----
+    [HideInInspector] public bool IsLit;
     [HideInInspector] public bool IsInHand;
 
 	// ----- PRIVATE VARIABLES -----
@@ -73,7 +74,6 @@ public class Torch : Permanent
             m_lightPercent = 1f;
             m_propertyBlock.SetFloat("_lightPercent", m_lightPercent);
             m_meshRenderer.SetPropertyBlock(m_propertyBlock);
-            m_torchTop.transform.localPosition = new Vector3(m_torchTop.transform.localPosition.x, m_ssoTorch.TopTorchOffsetDistance, m_torchTop.transform.localPosition.z);
         }
 
         m_rsoTorchManager.value.Add(this);
@@ -148,8 +148,10 @@ public class Torch : Permanent
 		// Assertion
         if (IsInHand) return;
 
-		// If it collide with a flat surface it increase drag to prevent the torch from rolling for eternity
-		if (Vector3.Dot(collision.contacts[0].normal, new Vector3(0, 1, 0)) >= 0.8)
+        m_rigidbody.excludeLayers = LayerToIgnoreAfterHit;
+
+        // If it collide with a flat surface it increase drag to prevent the torch from rolling for eternity
+        if (Vector3.Dot(collision.contacts[0].normal, new Vector3(0, 1, 0)) >= 0.8)
 		{
 			m_rigidbody.drag = 1f;
 			m_rigidbody.angularDrag = 1f;
@@ -197,7 +199,6 @@ public class Torch : Permanent
                     m_meshRenderer.SetPropertyBlock(m_propertyBlock);
                 });
             m_light.DOIntensity(0f, m_ssoTorch.UnlitDuration).SetEase(Ease.Linear).SetId(gameObject.GetInstanceID() + "light");
-            m_torchTop.DOLocalMoveY(0f, m_ssoTorch.UnlitDuration).SetEase(Ease.Linear).SetId(gameObject.GetInstanceID() + "light").OnComplete(() => { m_light.enabled = false; });
         }
 		else
 		{
@@ -211,7 +212,6 @@ public class Torch : Permanent
                    m_meshRenderer.SetPropertyBlock(m_propertyBlock);
                });
             m_light.DOIntensity(m_ssoTorch.LightIntensity, m_ssoTorch.LitDuration).SetEase(Ease.Linear).SetId(gameObject.GetInstanceID() + "light");
-            m_torchTop.DOLocalMoveY(m_ssoTorch.TopTorchOffsetDistance, m_ssoTorch.LitDuration).SetEase(Ease.Linear).SetId(gameObject.GetInstanceID() + "light");
         }
     }
 

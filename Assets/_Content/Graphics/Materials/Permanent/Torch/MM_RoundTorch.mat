@@ -40,10 +40,12 @@ Material:
     m_Floats:
     - _QueueControl: 0
     - _QueueOffset: 0
-    - _lightIntensity: 30
+    - _lightIntensity: 45
     - _lightPercent: 0
+    - _selfGlowIntensity: 0.3
+    - _selfGlowSaturation: 0.5
     m_Colors:
-    - _lightColor: {r: 1, g: 0.5435931, b: 0.345098, a: 1}
+    - _lightColor: {r: 1, g: 0, b: 0, a: 255}
   m_BuildTextureStacks: []
 --- !u!114 &3832289599786061705
 MonoBehaviour:
