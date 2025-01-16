@@ -573,6 +573,16 @@ public class CharacterMotor : MonoBehaviour
 	public void HandleDeath()
 	{
 		if (IsRopeValid) DesequipRope();
+		StartCoroutine(AnimateDeath());
+	}
+
+	public IEnumerator AnimateDeath()
+	{
+		m_characterGraphics.ToggleRagdoll(true);
+		m_rsePlayFallDeath.Call();
+		
+		yield return new WaitForSeconds(m_ssoCharacter.FallDeathDurationBeforeRespawn);
+
 		m_rsoCharacterDeath.value = true;
 		Destroy(gameObject);
 	}
@@ -858,15 +868,8 @@ public class CharacterMotor : MonoBehaviour
 		if (m_fallHeight >= m_ssoRope.MaxLength + m_ssoCharacter.LethalHeight * 2f)
 		{
 			m_isCharacterDead = true;
-			StartCoroutine(AnimateFallDeath());
+			StartCoroutine(AnimateDeath());
 		}
-	}
-
-	private IEnumerator AnimateFallDeath()
-	{
-		m_rsePlayFallDeath.Call();
-		yield return new WaitForSeconds(m_ssoCharacter.FallDeathDurationBeforeRespawn);
-		HandleDeath();
 	}
 
 	#endregion
