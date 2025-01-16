@@ -22,8 +22,7 @@ public class Torch : Permanent
 
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_TorchManager m_rsoTorchManager;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterPosition m_rsoCharacterPosition;
-
-    [FoldoutGroup("Config")][SerializeField] private LayerMask LayerToIgnoreAfterHit;
+    [FoldoutGroup("Scriptable")][SerializeField] private RSO_CameraTransform m_rsoCameraTransform;
 
     // ----- PUBLIC VARIABLES -----
     [HideInInspector] public bool IsLit;
@@ -31,6 +30,8 @@ public class Torch : Permanent
 
 	// ----- PRIVATE VARIABLES -----
 	private Vector3 m_lastPosition;
+
+    private Vector3 m_throwSpeed;
 
     private MaterialPropertyBlock m_propertyBlock;
 
@@ -111,7 +112,7 @@ public class Torch : Permanent
 		if (!IsLit) return;
 
 		var lightOffset = Vector3.zero;
-		Collider[] hitColliders = Physics.OverlapSphere(m_pointLightBase.position, m_ssoTorch.LightOffsetDistance, m_ssoTorch.LayerColliderToInclude);
+		Collider[] hitColliders = Physics.OverlapSphere(m_pointLightBase.position, m_ssoTorch.LightOffsetDistance, m_ssoTorch.LayerLightOffsetToInclude);
 
 		if (hitColliders.Length <= 0)
 		{
@@ -148,7 +149,7 @@ public class Torch : Permanent
 		// Assertion
         if (IsInHand) return;
 
-        m_rigidbody.excludeLayers = LayerToIgnoreAfterHit;
+        m_rigidbody.excludeLayers = m_ssoTorch.LayerToIgnoreAfterHit;
 
         // If it collide with a flat surface it increase drag to prevent the torch from rolling for eternity
         if (Vector3.Dot(collision.contacts[0].normal, new Vector3(0, 1, 0)) >= 0.8)
@@ -253,30 +254,44 @@ public class Torch : Permanent
         m_aimLineRenderer.enabled = true;
 
         List<Vector3> trajectoryPoints = new List<Vector3> ();
+        trajectoryPoints.Add(transform.position);
 
-        // set up starting point and velocity
-        Vector3 startPosition = transform.position;
-        Vector3 startVelocity = Quaternion.AngleAxis(-CalculateThrowAngleOffset(_cameraTransform), _cameraTransform.right) * _cameraTransform.forward * CalculateLaunchForce(_cameraTransform);
         float trajectoryDistance = 0;
+        Vector3 targetPoint;
 
-        trajectoryPoints.Add (startPosition);
-
-        // finding trajectory point using physics
-        for (float time = 0; time < m_ssoTorch.PreviewLength; time += m_ssoTorch.PreviewAccuracy)
+        if (Physics.Raycast(m_rsoCameraTransform.value.position, m_rsoCameraTransform.value.forward, out RaycastHit hit, m_ssoTorch.ThrowRange, ~m_ssoTorch.PreviewLayersToIgnore))
         {
-            Vector3 point = startPosition + time * startVelocity;
-            // defines placement over time using gravity as an accelerator
-            point.y = startPosition.y + startVelocity.y * time + (Physics.gravity.y / 2f * time * time);
+            targetPoint = hit.point;
+        }
+        else
+        {
+            targetPoint = transform.position + m_rsoCameraTransform.value.forward * m_ssoTorch.ThrowRange;
+        }
 
-            trajectoryPoints.Add(point);
+        float throwDuration = (targetPoint - transform.position).magnitude / (m_ssoTorch.ThrowMaxSpeed * m_ssoTorch.SpeedRangeCurve.Evaluate((targetPoint - transform.position).magnitude / m_ssoTorch.ThrowRange));
 
-            if (CheckEndOfPreview(ref trajectoryPoints, point)) break;
+        m_throwSpeed = (targetPoint - transform.position) / throwDuration - (Physics.gravity * throwDuration);
 
-            trajectoryDistance += (trajectoryPoints[^1] - trajectoryPoints[^2]).magnitude;
+        for (int i = 0; i < m_ssoTorch.PreviewPhysicAccuracy; i++)
+        {
+            if(Physics.Linecast(transform.position + (m_throwSpeed + Physics.gravity * (throwDuration / m_ssoTorch.PreviewPhysicAccuracy * i)) * (throwDuration / m_ssoTorch.PreviewPhysicAccuracy * i),
+                transform.position + (m_throwSpeed + Physics.gravity * (throwDuration / m_ssoTorch.PreviewPhysicAccuracy * (i + 1))) * (throwDuration / m_ssoTorch.PreviewPhysicAccuracy * (i + 1)),
+                out RaycastHit hitCurve,
+                ~m_ssoTorch.PreviewLayersToIgnore
+                ))
+            {
+                trajectoryPoints.Add(hitCurve.point);
+                trajectoryDistance += (trajectoryPoints[^1] - trajectoryPoints[^2]).magnitude;
+                break;
+            }
+            else
+            {
+                trajectoryPoints.Add(transform.position + (m_throwSpeed + Physics.gravity * (throwDuration / m_ssoTorch.PreviewPhysicAccuracy * (i + 1))) * (throwDuration / m_ssoTorch.PreviewPhysicAccuracy * (i + 1)));
+                trajectoryDistance += (trajectoryPoints[^1] - trajectoryPoints[^2]).magnitude;
+            }
         }
 
         Vector3[] smoothedPoints = LineSmoother.SmoothLine(trajectoryPoints.ToArray(), m_ssoTorch.LineSegmentSize);
-        //Vector3[] smoothedPoints = trajectoryPoints.ToArray();
 
         // set line settings
         m_aimLineRenderer.positionCount = smoothedPoints.Length;
@@ -284,7 +299,7 @@ public class Torch : Permanent
         m_aimLineRenderer.startWidth = m_ssoTorch.LineWidth;
         m_aimLineRenderer.endWidth = m_ssoTorch.LineWidth;
 
-        float fadeInDistancePercent = (m_ssoTorch.fadeInDistance < trajectoryDistance*0.25f) ? (m_ssoTorch.fadeInDistance / trajectoryDistance) : 0.25f;
+        float fadeInDistancePercent = (m_ssoTorch.FadeInDistance < trajectoryDistance * 0.25f) ? (m_ssoTorch.FadeInDistance / trajectoryDistance) : 0.25f;
 
         Gradient gradient = new Gradient();
 
@@ -305,70 +320,30 @@ public class Torch : Permanent
         m_aimLineRenderer.colorGradient = gradient;
     }
 
-
-    /// <summary> 
-	/// Stop the curve of the previsualisation if it collides with an object and correct last point to match collision.
-	/// </summary>
-    private bool CheckEndOfPreview(ref List<Vector3> trajectoryPoints, Vector3 pointPos)
-    {
-        Vector3 lastPosition = trajectoryPoints[^2];
-        if (Physics.Raycast(lastPosition, (pointPos - lastPosition).normalized, out var hit, (pointPos - lastPosition).magnitude, ~(m_ssoTorch.PreviewLayersToIgnore)))
-        {
-            trajectoryPoints[^1] = hit.point;
-            return true;
-        }
-        return false;
-    }
-
     #endregion
 
     #region THROW
 	
     public override bool Throw(Transform _cameraTransform)
     {
-		// Assertion
+        // Assertion
         if (!IsInHand || !m_ssoTorch.CanThrow) return false;
 
-		if (!IsLit)
-		{
-			ToggleHandEffect();
-		}
+        if (!IsLit)
+        {
+            ToggleHandEffect();
+        }
 
         m_aimLineRenderer.enabled = false;
 
         m_lastPosition = transform.position;
         gameObject.transform.parent = null;
-		m_rigidbody.constraints = RigidbodyConstraints.None;
-		m_rigidbody.velocity = Quaternion.AngleAxis(-CalculateThrowAngleOffset(_cameraTransform), _cameraTransform.right) * _cameraTransform.forward * CalculateLaunchForce(_cameraTransform);
-		IsInHand = false;
+        m_rigidbody.constraints = RigidbodyConstraints.None;
+        m_rigidbody.AddForce(m_throwSpeed, ForceMode.Impulse);
+        IsInHand = false;
 
-		StartCoroutine(WaitAndDeactivateTorch(m_ssoTorch.GroundedLightDuration));
+        StartCoroutine(WaitAndDeactivateTorch(m_ssoTorch.GroundedLightDuration));
         return true;
-    }
-
-
-    private float CalculateThrowAngleOffset(Transform _cameraTransform)
-    {
-        float cameraAngle = SetUpCameraAngle(_cameraTransform);
-        return (-(cameraAngle * cameraAngle) + m_ssoTorch.LaunchCameraAngle.Max * cameraAngle) / 200;
-    }
-
-    private float SetUpCameraAngle(Transform _cameraTransform)
-    {
-        // Setting up the camera angle from just the eulerAngle from a value going from 0 to the difference between min and max camera angle
-        float cameraAngle = _cameraTransform.rotation.eulerAngles.x + 60;
-        if (cameraAngle > 250) cameraAngle = cameraAngle - 360;
-		
-        // Setting the inverse since we want the launch force to be highest when the camera is at its lowest
-        return m_ssoTorch.LaunchCameraAngle.Max - cameraAngle;
-    }
-
-    private float CalculateLaunchForce(Transform _cameraTransform)
-    {
-        return m_ssoTorch.LaunchForce.Min +
-            (Mathf.Clamp(SetUpCameraAngle(_cameraTransform), 0, m_ssoTorch.LaunchCameraAngle.Max / 2) - m_ssoTorch.LaunchCameraAngle.Min) *
-            (m_ssoTorch.LaunchForce.Max - m_ssoTorch.LaunchForce.Min) /
-            (m_ssoTorch.LaunchCameraAngle.Max / 2 - m_ssoTorch.LaunchCameraAngle.Min);
     }
 
     private IEnumerator WaitAndDeactivateTorch(float duration)

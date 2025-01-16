@@ -28,22 +28,48 @@ MonoBehaviour:
   UnlitDuration: 0.1
   TopTorchOffsetDistance: 0.14
   LightOffsetDistance: 0.5
-  CanThrow: 1
-  LayerColliderToInclude:
+  LayerLightOffsetToInclude:
     serializedVersion: 2
-    m_Bits: 129
-  m_launchForce: {x: 0.1, y: 15}
-  m_launchCameraAngle: {x: 0, y: 130}
+    m_Bits: 1
+  CanThrow: 1
+  ThrowMaxSpeed: 35
+  SpeedRangeCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0.23
+      inSlope: 0.77
+      outSlope: 0.77
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0.77
+      outSlope: 0.77
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  ThrowRange: 43
+  LayerToIgnoreAfterHit:
+    serializedVersion: 2
+    m_Bits: 0
   CraftingDuration: 0.2
   IsStartingLit: 1
-  PreviewLength: 10
-  PreviewAccuracy: 0.1
+  PreviewPhysicAccuracy: 10
   PreviewLayersToIgnore:
     serializedVersion: 2
-    m_Bits: 384
+    m_Bits: 396
   LineSegmentSize: 0.15
   LineWidth: 0.05
-  fadeInDistance: 1
+  FadeInDistance: 0.5
   DeathColor: {r: 0.99215686, g: 0.22352941, b: 0.22352941, a: 255}
   DesactivatingTime: 3
   MinSpeedForHitSound: 1

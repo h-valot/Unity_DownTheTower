@@ -236,7 +236,14 @@ MonoBehaviour:
   m_rsoTorchManager: {fileID: 11400000, guid: 013e0e8312f52a7408c42a7d0621de0c, type: 2}
   m_rsoCharacterPosition: {fileID: 11400000, guid: 7fc614512add369458f5a4d382225bfb,
     type: 2}
-  LayerToIgnoreAfterHit:
+  m_rsoCameraTransform: {fileID: 11400000, guid: f7caf230fc006374fb72acc6629f6794,
+    type: 2}
+  m_torchSpeed: 20
+  m_layerToIgnorePreview:
+    serializedVersion: 2
+    m_Bits: 396
+  m_previewPhysicsPrecision: 10
+  m_layerToIgnoreAfterHit:
     serializedVersion: 2
     m_Bits: 0
   IsLit: 0
@@ -249,7 +256,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4724440229257307352}
   serializedVersion: 4
-  m_Mass: 1
+  m_Mass: 1.41
   m_Drag: 0
   m_AngularDrag: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}

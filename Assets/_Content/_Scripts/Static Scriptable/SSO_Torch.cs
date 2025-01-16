@@ -80,38 +80,46 @@ public class SSO_Torch : ScriptableObject
 	[InfoBox("Distance the point light of the torch will be offset when collider with surfaces.", InfoMessageType.None)]
 	public float LightOffsetDistance;
 
-	#endregion
+    [FoldoutGroup("Light")]
+    [PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+    [InfoBox("The point light offset system will include only those layers.", InfoMessageType.None)]
+    public LayerMask LayerLightOffsetToInclude;
 
-	#region THROW
+    #endregion
 
-	[FoldoutGroup("Throw")]
+    #region THROW
+
+    [FoldoutGroup("Throw")]
 	[InfoBox("If true, the torch can be thrown by the character.", InfoMessageType.None)]
 	public bool CanThrow = true;
 
 	[FoldoutGroup("Throw")]
+	[Range(0, 100)]
 	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
-	[InfoBox("The point light offset system will include only those layers.", InfoMessageType.None)]
-	public LayerMask LayerColliderToInclude;
+	[InfoBox("The torches speed when thrown.", InfoMessageType.None)]
+	public float ThrowMaxSpeed = 35;
 
-	[FoldoutGroup("Throw")]
-	[MinMaxSlider(0, 30, true)]
-	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
-	[InfoBox("Minimum and maximum force torches can be thrown.", InfoMessageType.None)]
-	[SerializeField] private Vector2 m_launchForce = new Vector2();
-	public MinMaxFloat LaunchForce { get =>  new MinMaxFloat(m_launchForce); private set => LaunchForce = value; }
+    [FoldoutGroup("Throw")]
+    [PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+    [InfoBox("The curve used to decrease throw speed the shorter the throw.", InfoMessageType.None)]
+    public AnimationCurve SpeedRangeCurve;
 
-	[FoldoutGroup("Throw")]
-	[MinMaxSlider(0, 200, true)]
-	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
-	[InfoBox("Minimum and maximum angle the camera pitch affect the torch throw force.", InfoMessageType.None)]
-	[SerializeField] private Vector2 m_launchCameraAngle = new Vector2();
-	public MinMaxFloat LaunchCameraAngle { get => new MinMaxFloat(m_launchCameraAngle); private set => LaunchCameraAngle = value; }
+    [FoldoutGroup("Throw")]
+    [Range(10, 500)]
+    [PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+    [InfoBox("The torches range when thrown.", InfoMessageType.None)]
+    public float ThrowRange = 200;
 
-	#endregion
+    [FoldoutGroup("Throw")]
+    [PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+    [InfoBox("The torch will not collide with those layer after landing.", InfoMessageType.None)]
+    public LayerMask LayerToIgnoreAfterHit;
 
-	#region CRAFTING
+    #endregion
 
-	[FoldoutGroup("Crafting")]
+    #region CRAFTING
+
+    [FoldoutGroup("Crafting")]
 	[InfoBox("Duration the permanent will take to be crafted.", InfoMessageType.None)]
 	public float CraftingDuration;
 
@@ -123,17 +131,12 @@ public class SSO_Torch : ScriptableObject
 	#endregion
 
 	#region AIM PREVIEW
-
+	
 	[FoldoutGroup("Aim preview")]
-	[Range(0.1f, 10f)]
-	[InfoBox("Length of the preview.", InfoMessageType.None)]
-	public float PreviewLength;
-
-	[FoldoutGroup("Aim preview")]
-	[Range(0.1f, 0.25f)]
+	[Range(1, 100)]
 	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
 	[InfoBox("The less, the smoother the preview will be.", InfoMessageType.None)]
-	public float PreviewAccuracy;
+	public float PreviewPhysicAccuracy = 1;
 
 	[FoldoutGroup("Aim preview")]
 	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
@@ -154,7 +157,7 @@ public class SSO_Torch : ScriptableObject
     [FoldoutGroup("Aim preview")]
     [PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
     [InfoBox("Fade in distance (meters) at the start of the preview", InfoMessageType.None)]
-    public float fadeInDistance = 0.5f;
+    public float FadeInDistance = 0.5f;
 
     #endregion
 
