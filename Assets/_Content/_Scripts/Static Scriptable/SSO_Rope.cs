@@ -79,9 +79,14 @@ public class SSO_Rope : ScriptableObject
 	[FoldoutGroup("Deployment")]
 	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
 	[InfoBox("Layer masks the deployment system will ignore for its physics calculations (raycasts).", InfoMessageType.None)]
-	public LayerMask DeployLayersToIgnore;
+	public LayerMask NoRaycastLayer;
 
-	[FoldoutGroup("Deployment")]
+    [FoldoutGroup("Deployment")]
+    [PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+    [InfoBox("Layer masks the deployment system will ignore for its physics calculations (raycasts).", InfoMessageType.None)]
+    public LayerMask NoCollisionNoRaycastLayer;
+
+    [FoldoutGroup("Deployment")]
 	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
 	[InfoBox("Minimum distance from the pivot point of the permanent to a potential collider above it. If a collider stands in-between, the deployment is invalid.", InfoMessageType.None)]
 	public float HeightLimit = 1f;

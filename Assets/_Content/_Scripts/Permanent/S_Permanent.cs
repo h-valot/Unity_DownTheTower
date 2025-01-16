@@ -90,9 +90,9 @@ public class Permanent : MonoBehaviour
 	/// <param name="hit">Raycast hit info</param>
 	/// <param name="maxHeight">Max height tolerated</param>
 	/// <returns>True if the raycast of a length equals to the given height do not touch a collider.</returns>
-	protected bool IsCeiling(RaycastHit hit, float maxHeight)
+	protected bool IsCeiling(RaycastHit hit, float maxHeight, LayerMask maskToIgnore)
 	{
-		return Physics.Raycast(hit.point + GROUND_RAY_OFFSET, Vector3.up, maxHeight - GROUND_RAY_OFFSET.y);
+		return Physics.Raycast(hit.point + GROUND_RAY_OFFSET, Vector3.up, maxHeight - GROUND_RAY_OFFSET.y, maskToIgnore);
 	}
 
 
@@ -103,9 +103,9 @@ public class Permanent : MonoBehaviour
 	/// <param name="cameraTransform">Transform of the camera</param>
 	/// <param name="minDistanceFromWall">Minimum tolerated distance from the preview permanent and a collider in front of it</param>
 	/// <returns>True if the space does not contains any collider.</returns>
-	protected bool IsSpaceInFront(RaycastHit hit, Transform cameraTransform, float minDistanceFromWall)
+	protected bool IsSpaceInFront(RaycastHit hit, Transform cameraTransform, float minDistanceFromWall, LayerMask maskToIgnore)
 	{
 		return Physics.Raycast(hit.point + GROUND_RAY_OFFSET,
-			Vector3.Normalize(new Vector3(cameraTransform.forward.x, 0, cameraTransform.forward.z)), minDistanceFromWall);
+			Vector3.Normalize(new Vector3(cameraTransform.forward.x, 0, cameraTransform.forward.z)), minDistanceFromWall, maskToIgnore);
 	}
 }

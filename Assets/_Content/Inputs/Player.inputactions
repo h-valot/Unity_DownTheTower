@@ -52,12 +52,12 @@
                 },
                 {
                     "name": "ThrowTorch",
-                    "type": "Button",
+                    "type": "Value",
                     "id": "b6086d3c-48ed-4bc7-a77f-b94eb1880bb3",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "",
-                    "initialStateCheck": false
+                    "initialStateCheck": true
                 },
                 {
                     "name": "ToggleHandObject",
@@ -409,7 +409,7 @@
                 {
                     "name": "",
                     "id": "2deb8d9a-7a8b-44f9-873e-1879f97f5be5",
-                    "path": "<Gamepad>/leftShoulder",
+                    "path": "<Gamepad>/rightShoulder",
                     "interactions": "",
                     "processors": "",
                     "groups": "Gamepad",
@@ -584,22 +584,22 @@
                 },
                 {
                     "name": "",
-                    "id": "748c4e9d-f52c-49e2-aa97-4e54b737ea3e",
-                    "path": "<Gamepad>/leftTrigger",
+                    "id": "ec9793a2-f3f0-4151-8a33-035845fa40fd",
+                    "path": "<Keyboard>/1",
                     "interactions": "",
                     "processors": "",
-                    "groups": "",
+                    "groups": "KeyboardMouse",
                     "action": "ThrowTorch",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
                 {
                     "name": "",
-                    "id": "ec9793a2-f3f0-4151-8a33-035845fa40fd",
-                    "path": "<Mouse>/leftButton",
+                    "id": "748c4e9d-f52c-49e2-aa97-4e54b737ea3e",
+                    "path": "<Gamepad>/leftTrigger",
                     "interactions": "",
                     "processors": "",
-                    "groups": "",
+                    "groups": "Gamepad",
                     "action": "ThrowTorch",
                     "isComposite": false,
                     "isPartOfComposite": false
