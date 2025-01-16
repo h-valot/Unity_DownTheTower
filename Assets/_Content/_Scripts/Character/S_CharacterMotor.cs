@@ -778,12 +778,14 @@ public class CharacterMotor : MonoBehaviour
         UpdateFriction();
         StartCoyoteTime();
 		StartAirControl();
-    }
+
+	}
 
     private void FixedUpdateFallState()
     {
         UpdateCoyoteTime();
 		UpdateAirControl();
+		UpdateZeroDrag();
 		CheckFallHeight();
 		MoveFalling();
     }
@@ -817,8 +819,8 @@ public class CharacterMotor : MonoBehaviour
 	{
 		m_airControlDuration = m_ssoCharacter.AirControlDuration;
 		m_airControlTimeScalar = 1f;
-
 	}
+
 
 	private void UpdateAirControl()
 	{
@@ -830,7 +832,16 @@ public class CharacterMotor : MonoBehaviour
 
 		m_airControlDuration -= Time.fixedDeltaTime;
 		m_airControlTimeScalar = m_airControlDuration / m_ssoCharacter.AirControlDuration;
-    }
+	}
+
+	private void UpdateZeroDrag()
+	{
+		float modifier = 1 - Time.fixedDeltaTime * m_ssoCharacter.ZeroDragScalar;
+		Vector3 velocity = transform.InverseTransformDirection(m_rigidbody.velocity);
+		velocity.x *= modifier;
+		velocity.z *= modifier;
+		m_rigidbody.velocity = transform.TransformDirection(velocity);
+	}
 
 	private bool m_isCharacterDead;
 

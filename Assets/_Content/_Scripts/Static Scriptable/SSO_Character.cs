@@ -97,6 +97,12 @@ public class SSO_Character : ScriptableObject
 	[InfoBox("Percentage of the current velocity magnitude the character is allowed to preform before exiting the air control.", InfoMessageType.None)]
 	public float AirControlThreshold;
 
+	[FoldoutGroup("Fall")]
+	[PropertyRange(1f, 2f)]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("Scalar used to apply drag while falling of X and Z axis.", InfoMessageType.None)]
+	public float ZeroDragScalar;
+
 	#endregion
 
 	#region ROPE
