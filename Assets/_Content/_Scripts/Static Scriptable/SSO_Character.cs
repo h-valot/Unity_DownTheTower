@@ -103,11 +103,6 @@ public class SSO_Character : ScriptableObject
 
 	[FoldoutGroup("Rope")]
 	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
-	[InfoBox("Duration the player have to hold the cancel key to desequip the rope.", InfoMessageType.None)]
-	public float CancelRopeDuration;
-
-	[FoldoutGroup("Rope")]
-	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
 	[InfoBox("Distance the rope constraint length increases when the character enters the rope state.", InfoMessageType.None)]
 	public float EntranceOffset;
 
@@ -182,8 +177,6 @@ public class SSO_Character : ScriptableObject
 	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
 	[InfoBox("Apply the rope drag if the character inputs magnitude is below.", InfoMessageType.None)]
 	public float MoveMagnitudeApplyDragThreshold;
-
-
 
 	#endregion
 

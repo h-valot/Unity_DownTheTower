@@ -98,13 +98,6 @@ public class CharacterMotor : MonoBehaviour
 	public bool IsRopeValid => m_rope && m_rope.IsPlaced;
 	private float m_ropeDragTimer;
 
-	// Cancel
-	private Coroutine m_cancelRopeCoroutine;
-	private float m_cancelRopeTimer;
-
-	// Jump
-	private bool m_isJumpingRope;
-
 	// Climbing
 	private bool m_isClimbing;
 	private float m_currentClimbSpeed;
@@ -288,7 +281,8 @@ public class CharacterMotor : MonoBehaviour
 	private void UpdateHoldInput(bool isHolding)
 	{
 		// Assertion
-		if (!IsRopeValid)
+		if (!IsRopeValid
+		|| m_withinRopeLimit)
 		{
 			m_isHolding = false;
 			return;
@@ -323,31 +317,10 @@ public class CharacterMotor : MonoBehaviour
 
 	private void CancelRope(bool isPressed)
 	{
-		if (!IsRopeValid) 
-		{
-			return;
-		}
+		// Assertions
+		if (!IsRopeValid) return;
+		if (!isPressed) return;
 
-		if (isPressed)
-		{
-			m_cancelRopeTimer = 0f;
-			m_cancelRopeCoroutine = StartCoroutine(StartCancellingRope());
-		}
-		else if (!isPressed
-		&& m_cancelRopeCoroutine != null)
-		{
-			StopCoroutine(m_cancelRopeCoroutine);
-		}
-	}
-
-	private IEnumerator StartCancellingRope()
-	{
-		while (m_cancelRopeTimer < m_ssoCharacter.CancelRopeDuration)
-		{
-			m_cancelRopeTimer += Time.deltaTime;
-			yield return null;
-		}
-		
 		DesequipRope();
 	}
 
@@ -377,19 +350,10 @@ public class CharacterMotor : MonoBehaviour
 	private void JumpRope(bool isPressed)
 	{
 		// Assertion
-		if (!IsRopeValid) 
-		{
-			m_isJumpingRope = false;
-			return;
-		}
+		if (!IsRopeValid) return;
 
-		m_isJumpingRope = isPressed;
+		UpdateHoldInput(isPressed);
 
-		// Assertion
-		if (!m_isJumpingRope) return;
-		if (m_coyoteTime >= 0f) return;
-
-		DesequipRope();
 		float force = m_ssoCharacter.JumpOffRopeModifier * m_rigidbody.velocity.magnitude;
 		Vector3 direction = (m_rsoCameraRight.value * m_moveInput.x + m_rsoCameraForward.value * m_moveInput.y).normalized;
 		m_rigidbody.AddForce(direction * force, ForceMode.Impulse);
@@ -914,16 +878,11 @@ public class CharacterMotor : MonoBehaviour
 			ToggleRopeConstraint(!m_isHolding);
 
 			// If the character is falling and attach himself to a rope, we won't it to be slacken.
-			if (m_previousState != BehaviorState.FALL)
+			// Handle rope extention within the limit of the current rope.
+			if (m_previousState != BehaviorState.FALL
+			&& m_rope.GetTotalLength() + m_ssoCharacter.EntranceOffset <= m_ssoRope.MaxLength - m_ssoRope.MaxLengthOffset)
 			{
-				// Handle rope extention within the limit of the current rope
-				float offset = m_ssoCharacter.EntranceOffset;
-				if (m_rope.GetTotalLength() + m_ssoCharacter.EntranceOffset >= m_ssoRope.MaxLength)
-				{
-					offset = m_ssoRope.MaxLength - (m_rope.GetTotalLength() + 0.5f);
-					offset = Mathf.Clamp(offset, 0, offset);
-				}
-				m_rope.IncreaseHoldLength(offset);
+				m_rope.IncreaseHoldLength(m_ssoCharacter.EntranceOffset);
 			}
 		}
 	}
@@ -945,6 +904,7 @@ public class CharacterMotor : MonoBehaviour
 		HandleRopeMovement();
 		HandleRopeDrag();
 		HandleClimbing();
+		HandleRopeLimit();
 	}
 
 	private void ExitRopeState()
@@ -1059,8 +1019,22 @@ public class CharacterMotor : MonoBehaviour
 		else
 		{
 			m_rope.IsConstrained = false;
-			m_rope.SetHoldLength(9999);
+			m_rope.SetHoldLength(m_ssoRope.MaxLength - m_ssoRope.MaxLengthOffset - m_rope.GetFixedLength());
 		}
+	}
+
+	private bool m_withinRopeLimit;
+	private void HandleRopeLimit()
+	{
+		// Assertion
+		if (m_rope.GetTotalLength() < m_ssoRope.MaxLength - m_ssoRope.MaxLengthOffset)
+		{
+			m_withinRopeLimit = false;
+			return;
+		}
+
+		m_withinRopeLimit = true;
+		m_rope.SetHoldLength(m_ssoRope.MaxLength - m_ssoRope.MaxLengthOffset - m_rope.GetFixedLength());
 	}
 
 	#endregion

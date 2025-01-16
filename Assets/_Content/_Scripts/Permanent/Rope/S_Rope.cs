@@ -25,15 +25,18 @@ public class Rope : Permanent
 	#region VARIABLES
 
 	private bool m_isPlaced;
-	private float m_holdLength;
+	[ShowInInspector] private float m_holdLength;
 	private List<Vector3> m_folds = new List<Vector3>();
+	private List<Vector3> m_foldRaycastPositions = new List<Vector3>();
+	private Vector3[] m_foldValidPositions = new Vector3[] { };
 	private Rigidbody m_characterRigidbody;
 	private Transform m_characterHarness;
 	private SoftJointLimit m_linearLimit;
 
-	[HideInInspector] public bool IsConstrained;
+	[ShowInInspector] public bool IsConstrained;
 	public Action OnAttached;
 	public Action OnDetached;
+	public Action OnLimitReached;
 	public bool IsConnected => m_characterRigidbody;
 	public bool IsPlaced => m_isPlaced;
 	public float HoldLength => m_holdLength;
@@ -224,9 +227,6 @@ public class Rope : Permanent
 
 		OnDetached?.Invoke();
 	}
-
-	private List<Vector3> m_foldRaycastPositions = new List<Vector3>();
-	private Vector3[] m_foldValidPositions = new Vector3[]{};
  
 	/// <summary>
 	/// Add fold if a collider stands between the character and the last fold.
@@ -358,6 +358,18 @@ public class Rope : Permanent
 		return output;
 	}
 
+	public float GetFixedLength()
+	{
+		float output = 0;
+		for (int i = 0; i < m_folds.Count - 1; i++)
+		{
+			if (i + 1 > m_folds.Count - 1) continue;
+
+			output += (m_folds[i + 1] - m_folds[i]).magnitude;
+		}
+		return output;
+	}
+
 	public float GetCurrentFoldCharacterDistance()
 	{
 		// Assertion
@@ -366,7 +378,7 @@ public class Rope : Permanent
 		// Note that we do not connect the current fold to the harness
 		// but the character's current position. This avoids re-centering
 		// issue if spamming holding rope key
-		// Only the graphics are connected to harness.
+		// Only the graphics and folds raycasts are connected to harness.
 		return (CurrentFold - m_characterRigidbody.position).magnitude;
 	}
 

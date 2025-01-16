@@ -35,6 +35,12 @@ public class SSO_Rope : ScriptableObject
 	public float MaxLength;
 
 	[FoldoutGroup("Global settings")]
+	[PropertyRange(0.25f, 3f)]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("Distance substacted to the MaxLength when the rope constraint is lifted.", InfoMessageType.None)]
+	public float MaxLengthOffset;
+
+	[FoldoutGroup("Global settings")]
 	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
 	[InfoBox("The rope folding system will only care about collider of the given layer mask.", InfoMessageType.None)]
 	public LayerMask FoldLayerToInclude;
