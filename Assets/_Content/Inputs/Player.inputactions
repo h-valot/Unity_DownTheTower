@@ -24,7 +24,7 @@
                     "initialStateCheck": true
                 },
                 {
-                    "name": "Run",
+                    "name": "Run [Deprecated]",
                     "type": "Value",
                     "id": "a845db1a-3b23-46fc-8517-c4c5538482c8",
                     "expectedControlType": "Button",
@@ -42,10 +42,19 @@
                     "initialStateCheck": true
                 },
                 {
-                    "name": "Throw",
+                    "name": "ThrowRope",
                     "type": "Value",
                     "id": "cccd9322-1253-48af-9266-47674cc34a5f",
                     "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "ThrowTorch",
+                    "type": "Value",
+                    "id": "b6086d3c-48ed-4bc7-a77f-b94eb1880bb3",
+                    "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": true
@@ -78,7 +87,7 @@
                     "initialStateCheck": true
                 },
                 {
-                    "name": "CraftTorch",
+                    "name": "CraftTorch [Deprecated]",
                     "type": "Value",
                     "id": "9222ea07-1cf3-4c6a-ac37-958a110d6c66",
                     "expectedControlType": "",
@@ -87,7 +96,7 @@
                     "initialStateCheck": true
                 },
                 {
-                    "name": "CraftRope",
+                    "name": "CraftRope [Deprecated]",
                     "type": "Value",
                     "id": "51552c63-0e58-4232-b51f-00f86ed22a0b",
                     "expectedControlType": "Button",
@@ -195,18 +204,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "KeyboardMouse",
-                    "action": "Run",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "8f0834cd-b71b-435d-bc4c-3a7346f2a178",
-                    "path": "<Gamepad>/leftTrigger",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "Gamepad",
-                    "action": "Run",
+                    "action": "Run [Deprecated]",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -239,7 +237,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "KeyboardMouse",
-                    "action": "Throw",
+                    "action": "ThrowRope",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -250,7 +248,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "Gamepad",
-                    "action": "Throw",
+                    "action": "ThrowRope",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -268,7 +266,7 @@
                 {
                     "name": "",
                     "id": "129f360e-b9ad-45b3-8157-8cf1bc56c079",
-                    "path": "<Gamepad>/rightShoulder",
+                    "path": "<Gamepad>/leftShoulder",
                     "interactions": "",
                     "processors": "",
                     "groups": "Gamepad",
@@ -328,50 +326,6 @@
                     "processors": "",
                     "groups": "KeyboardMouse",
                     "action": "Cancel",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "17206964-3db2-44e3-b9fe-ef3538c5733e",
-                    "path": "<Keyboard>/3",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "KeyboardMouse",
-                    "action": "CraftRope",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "3bbb3d11-c9bc-4110-8142-a9304d643e6c",
-                    "path": "<Gamepad>/dpad/left",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "Gamepad",
-                    "action": "CraftRope",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "7be962e4-df27-40c8-a20d-58ec2cdade30",
-                    "path": "<Keyboard>/1",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "KeyboardMouse",
-                    "action": "CraftTorch",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "9b5a708c-2216-4b74-96d6-64974731acd6",
-                    "path": "<Gamepad>/dpad/up",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "Gamepad",
-                    "action": "CraftTorch",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -455,7 +409,7 @@
                 {
                     "name": "",
                     "id": "2deb8d9a-7a8b-44f9-873e-1879f97f5be5",
-                    "path": "<Gamepad>/leftShoulder",
+                    "path": "<Gamepad>/rightShoulder",
                     "interactions": "",
                     "processors": "",
                     "groups": "Gamepad",
@@ -627,6 +581,28 @@
                     "action": "Move",
                     "isComposite": false,
                     "isPartOfComposite": true
+                },
+                {
+                    "name": "",
+                    "id": "ec9793a2-f3f0-4151-8a33-035845fa40fd",
+                    "path": "<Keyboard>/1",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "KeyboardMouse",
+                    "action": "ThrowTorch",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "748c4e9d-f52c-49e2-aa97-4e54b737ea3e",
+                    "path": "<Gamepad>/leftTrigger",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "ThrowTorch",
+                    "isComposite": false,
+                    "isPartOfComposite": false
                 }
             ]
         }

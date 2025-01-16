@@ -66,9 +66,12 @@ MonoBehaviour:
   PhysicJointOffset: 0.25
   UnfolderTimeoutDelay: 5
   CraftingDuration: 0.25
-  DeployLayersToIgnore:
+  NoRaycastLayer:
     serializedVersion: 2
-    m_Bits: 132
+    m_Bits: 388
+  NoCollisionNoRaycastLayer:
+    serializedVersion: 2
+    m_Bits: 260
   HeightLimit: 1
   MinDistanceFromWall: 0.4
   MaxGroundAngle: 0.6

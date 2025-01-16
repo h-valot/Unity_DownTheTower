@@ -19,7 +19,7 @@ public class RuntimeValueModifier : UIWindow
 	{
 		m_cachedTorchLightRange = m_ssoTorch.LightRange;
 		m_cachedGlobalLightIntensity = m_ssoGame.GlobalLightIntensity;
-		m_cachedCharacterRunSpeed = m_ssoCharacter.RunSpeed;
+		m_cachedCharacterRunSpeed = m_ssoCharacter.MaxMoveForce;
 
 		m_toggleableTorchLightRange.Initialize(false);
 		m_toggleableGlobalLightIntensity.Initialize(false);
@@ -34,7 +34,7 @@ public class RuntimeValueModifier : UIWindow
 	{
 		m_ssoTorch.LightRange = m_cachedTorchLightRange;
 		m_ssoGame.GlobalLightIntensity = m_cachedGlobalLightIntensity;
-		m_ssoCharacter.RunSpeed = m_cachedCharacterRunSpeed;
+		m_ssoCharacter.MaxMoveForce = m_cachedCharacterRunSpeed;
 	}
 
 	private void ToggleFloatValue(ref float value, float newValue, float cachedValue)
@@ -44,6 +44,6 @@ public class RuntimeValueModifier : UIWindow
 
 	public void ToggleTorchLightRange() => ToggleFloatValue(ref m_ssoTorch.LightRange, m_ssoGame.NewTorchLightRange, m_cachedTorchLightRange);
 	public void ToggleGlobalLightIntensity() => ToggleFloatValue(ref m_ssoGame.GlobalLightIntensity, m_ssoGame.NewGlobalLightIntensity, m_cachedGlobalLightIntensity);
-	public void ToggleCharacterRunSpeed() => ToggleFloatValue(ref m_ssoCharacter.RunSpeed, m_ssoGame.NewCharacterRunSpeed, m_cachedCharacterRunSpeed);
+	public void ToggleCharacterRunSpeed() => ToggleFloatValue(ref m_ssoCharacter.MaxMoveForce, m_ssoGame.NewCharacterRunSpeed, m_cachedCharacterRunSpeed);
 	
 }	

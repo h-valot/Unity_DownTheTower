@@ -17,8 +17,9 @@ public class InputManager : MonoBehaviour
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Interact m_rseInteract;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Cancel m_rseCancel;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Craft m_rseCraft;
-	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Throw m_rseThrow;
-	[FoldoutGroup("Scriptable")][SerializeField] private RSE_ToggleHandObject m_rseToggleHandObject;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSE_ThrowRope m_rseThrowRope;
+    [FoldoutGroup("Scriptable")][SerializeField] private RSE_ThrowTorch m_rseThrowTorch;
+    [FoldoutGroup("Scriptable")][SerializeField] private RSE_ToggleHandObject m_rseToggleHandObject;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Pause m_rsePause;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Recycle m_rseRecycle;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_ToggleCursor m_rseToggleCursor;
@@ -36,8 +37,9 @@ public class InputManager : MonoBehaviour
 	private Vector2 m_move;
 	private Vector2 m_look;
 	private bool m_run;
-	private bool m_throw;
-	private bool m_jump;
+	private bool m_throwRope;
+    private bool m_throwTorch;
+    private bool m_jump;
 	private bool m_climb;
 	public bool m_isCursorEnabled;
 	private bool m_interact;
@@ -59,10 +61,13 @@ public class InputManager : MonoBehaviour
 		m_run = false;
 		m_rseRun.Call(false);
 
-		m_throw = false;
-		m_rseThrow.Call(false);
+		m_throwRope = false;
+		m_rseThrowRope.Call(false);
 
-		m_jump = false;
+        m_throwTorch = false;
+        m_rseThrowTorch.Call(false);
+
+        m_jump = false;
 		m_rseJump.Call(false);
 
 		m_interact = false;
@@ -138,27 +143,47 @@ public class InputManager : MonoBehaviour
 		m_rseRun.Call(m_run);
 	}
 
-	public void OnThrow(InputValue value)
+	public void OnThrowRope(InputValue value)
     {
 		if (value.Get<float>() >= 0.05f)
 		{
-			if (!m_throw)
+			if (!m_throwRope)
 			{
-				m_throw = true;
-				m_rseThrow.Call(m_throw);
+				m_throwRope = true;
+				m_rseThrowRope.Call(m_throwRope);
 			}
 		}
 		else
 		{
-			if (m_throw)
+			if (m_throwRope)
 			{
-				m_throw = false;
-				m_rseThrow.Call(m_throw);
+				m_throwRope = false;
+				m_rseThrowRope.Call(m_throwRope);
 			}
 		}
 	}
 
-	public void OnToggleHandObject()
+    public void OnThrowTorch(InputValue value)
+    {
+        if (value.Get<float>() >= 0.05f)
+        {
+            if (!m_throwTorch)
+            {
+                m_throwTorch = true;
+                m_rseThrowTorch.Call(m_throwTorch);
+            }
+        }
+        else
+        {
+            if (m_throwTorch)
+            {
+                m_throwTorch = false;
+                m_rseThrowTorch.Call(m_throwTorch);
+            }
+        }
+    }
+
+    public void OnToggleHandObject()
 	{
 		m_rseToggleHandObject.Call();
 	}

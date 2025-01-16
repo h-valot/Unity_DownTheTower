@@ -26,14 +26,15 @@ public class SSO_Character : ScriptableObject
 
 	[FoldoutGroup("Movement")]
 	[InfoBox("Magnitude of the character direction input when walking.", InfoMessageType.None)]
-	public float WalkSpeed;
+	public float MaxMoveForce;
 
 	[FoldoutGroup("Movement")]
-	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
-	[InfoBox("Magnitude of the character direction input when running.", InfoMessageType.None)]
-	public float RunSpeed;
+    [PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+    [InfoBox("Minimum analog input required to start moving.", InfoMessageType.None)]
+	[MinValue(0)][MaxValue(1)]
+    public float MoveAnalogStart;
 
-	[FoldoutGroup("Movement")]
+    [FoldoutGroup("Movement")]
 	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
 	[InfoBox("Magnitude of the up vector when jumping. Note: This value is high because the friction and drag are still being applied on this frame.", InfoMessageType.None)]
     public float JumpForce;

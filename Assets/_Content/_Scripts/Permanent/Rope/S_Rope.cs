@@ -98,6 +98,7 @@ public class Rope : Permanent
 
 	public override void InitializePreview()
 	{
+		Debug.Log("PreviewRope");
 		m_previewGameObject.SetActive(true);
 		m_previewGameObject.transform.rotation = Quaternion.identity;
 	}
@@ -109,7 +110,7 @@ public class Rope : Permanent
 			GetPositionRayDirection(cameraTransform, m_ssoRope.CameraOffsetAngle, m_ssoRope.MaxCameraDownwardClamp), 
 			out var hitInfo, 
 			m_ssoRope.MaxDistFromCamera, 
-			~m_ssoRope.DeployLayersToIgnore))
+			~m_ssoRope.NoRaycastLayer))
 		{
 			if (!m_previewGameObject.activeInHierarchy)
 			{
@@ -121,8 +122,8 @@ public class Rope : Permanent
 
 			UpdateColor(isDeployable: 
 				IsGroundFlat(hitInfo, m_ssoRope.MaxGroundAngle) 
-				&& !IsCeiling(hitInfo, m_ssoRope.HeightLimit) 
-				&& !IsSpaceInFront(hitInfo, cameraTransform, m_ssoRope.MinDistanceFromWall)
+				&& !IsCeiling(hitInfo, m_ssoRope.HeightLimit, ~m_ssoRope.NoCollisionNoRaycastLayer) 
+				&& !IsSpaceAround(hitInfo, cameraTransform, m_ssoRope.MinRadiusAround, ~m_ssoRope.NoCollisionNoRaycastLayer)
 			);
 		}
 		else
@@ -134,9 +135,10 @@ public class Rope : Permanent
 				m_previewGameObject.SetActive(false);
 			}
 		}
-	}
+    }
 
-	private void UpdateColor(bool isDeployable)
+
+    private void UpdateColor(bool isDeployable)
 	{
 		m_previewMeshRendered.material.SetFloat("_colorSwitch", isDeployable ? 0f : 1f);
 	}
@@ -150,11 +152,11 @@ public class Rope : Permanent
 			GetPositionRayDirection(cameraTransform, m_ssoRope.CameraOffsetAngle, m_ssoRope.MaxCameraDownwardClamp),
 			out var hitInfo,
 			m_ssoRope.MaxDistFromCamera,
-			~m_ssoRope.DeployLayersToIgnore))
+			~m_ssoRope.NoRaycastLayer))
 		{
 			if (IsGroundFlat(hitInfo, m_ssoRope.MaxGroundAngle) 
-				&& !IsCeiling(hitInfo, m_ssoRope.HeightLimit) 
-				&& !IsSpaceInFront(hitInfo, cameraTransform, m_ssoRope.MinDistanceFromWall))
+				&& !IsCeiling(hitInfo, m_ssoRope.HeightLimit, ~m_ssoRope.NoCollisionNoRaycastLayer) 
+				&& !IsSpaceAround(hitInfo, cameraTransform, m_ssoRope.MinRadiusAround, ~m_ssoRope.NoCollisionNoRaycastLayer))
 			{
 				transform.SetParent(null, true);
 				Deploy(cameraTransform, hitInfo.point);
@@ -164,8 +166,7 @@ public class Rope : Permanent
 		
 		return false;
 	}
-
-	private void Deploy(Transform cameraTransform, Vector3 deployPoint)
+    private void Deploy(Transform cameraTransform, Vector3 deployPoint)
 	{
 		// Disable hold length constraint to avoid the character to be snapped to the rope when placed
 		SetHoldLength(9999);
@@ -199,7 +200,7 @@ public class Rope : Permanent
 	{
 		// Attach the character to the rope
 		var characterMotor = characterInteract.GetComponent<CharacterMotor>();
-		Attach(characterMotor.Harness, characterMotor.Rigidbody);
+		Attach(characterMotor.Attach, characterMotor.Rigidbody);
 		characterMotor.Equip(this);
 
 		// Update folds
