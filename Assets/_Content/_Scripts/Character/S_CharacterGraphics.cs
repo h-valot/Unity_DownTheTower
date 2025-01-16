@@ -3,6 +3,11 @@ using UnityEngine;
 
 public class CharacterGraphics : MonoBehaviour
 {
+	[FoldoutGroup("Internal references")][SerializeField] private Animator m_animator;
+	[FoldoutGroup("Internal references")][SerializeField] private CapsuleCollider[] m_ragdollCapsuleColliders;
+	[FoldoutGroup("Internal references")][SerializeField] private SphereCollider[] m_ragdollSphereColliders;
+	[FoldoutGroup("Internal references")][SerializeField] private BoxCollider[] m_ragdollBoxColliders;
+
 	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Character m_ssoCharacter;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CameraStyle m_rsoCameraStyle;
@@ -13,14 +18,10 @@ public class CharacterGraphics : MonoBehaviour
 
 	private const float k_MinimumThreshold = 0.1f;
 
-	public void Initialize(Transform aimingLookAt, Rigidbody rigidbody, Quaternion startRotation)
+	private void Awake()
 	{
-		m_aimingLookAt = aimingLookAt;
-		m_rigidbody = rigidbody;
-		m_isInitialized = true;
-
-		transform.localRotation = startRotation;
-    }
+		ToggleRagdoll(false);
+	}
 
 	private void LateUpdate()
     {
@@ -46,6 +47,35 @@ public class CharacterGraphics : MonoBehaviour
 				transform.position.z
 			);
 			transform.forward = -transform.forward;
+		}
+	}
+
+	public void Initialize(Transform aimingLookAt, Rigidbody rigidbody, Quaternion startRotation)
+	{
+		m_aimingLookAt = aimingLookAt;
+		m_rigidbody = rigidbody;
+		m_isInitialized = true;
+
+		transform.localRotation = startRotation;
+	}
+
+	public void ToggleRagdoll(bool isEnabled)
+	{
+		m_animator.enabled = !isEnabled;
+
+		foreach (var capsuleCollider in m_ragdollCapsuleColliders)
+		{
+			capsuleCollider.enabled = isEnabled;
+		}
+
+		foreach (var sphereCollider in m_ragdollSphereColliders)
+		{
+			sphereCollider.enabled = isEnabled;
+		}
+
+		foreach (var boxCollider in m_ragdollBoxColliders)
+		{
+			boxCollider.enabled = isEnabled;
 		}
 	}
 }

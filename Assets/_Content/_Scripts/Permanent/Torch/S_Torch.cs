@@ -50,9 +50,10 @@ public class Torch : Permanent
         m_isDeactivate = false;
         m_hasChangedColor = false;
         m_hasPlayedHitSound = false;
+		m_rigidbody.isKinematic = true;
 
-        // Collisions
-        m_rigidbody.constraints = RigidbodyConstraints.FreezeAll;
+		// Collisions
+		m_rigidbody.constraints = RigidbodyConstraints.FreezeAll;
         m_lightCollider.radius = m_ssoTorch.LightOffsetDistance;
 
         // Preview
@@ -333,6 +334,8 @@ public class Torch : Permanent
         {
             ToggleHandEffect();
         }
+
+		m_rigidbody.isKinematic = false;
 
         m_aimLineRenderer.enabled = false;
 
