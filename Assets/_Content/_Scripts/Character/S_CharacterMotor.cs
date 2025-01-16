@@ -54,7 +54,7 @@ public class CharacterMotor : MonoBehaviour
 
 	// - Inputs -
 	private Vector2 m_moveInput = new Vector2();
-	public bool DoMoveInputs => m_moveInput.magnitude > 0.1f;
+	public bool DoMoveInputs => m_moveInput.magnitude > m_ssoCharacter.MoveAnalogStart;
 
 	// - Collisions -
 	private RaycastHit[] m_raycastHits;
@@ -76,6 +76,7 @@ public class CharacterMotor : MonoBehaviour
 	private float m_maxGroundedSpeed;
 	private bool m_isRunning;
 	[HideInInspector] public bool m_hasJumped;
+	private float m_desiredForce;
 	public bool IsJumpingPressed { get; private set; }
 	private bool m_isCrafting;
 	private float m_airControlTimeScalar;
@@ -172,7 +173,7 @@ public class CharacterMotor : MonoBehaviour
     private void LateUpdate()
     {
 		MovementDatas _movementDatas = new MovementDatas();
-        _movementDatas.dataToString.Add((Mathf.Round(m_rigidbody.velocity.magnitude * 100f) / 100f).ToString());
+        _movementDatas.dataToString.Add(m_desiredForce.ToString());
         _movementDatas.dataToString.Add(m_isGrounded.ToString());
         _movementDatas.dataToString.Add(m_rsoCharacterState.value.ToString());
         m_rsoMovementDatas.value = _movementDatas;
@@ -680,10 +681,16 @@ public class CharacterMotor : MonoBehaviour
 		desiredDirection = Quaternion.AngleAxis(Vector3.SignedAngle(Vector3.up, m_groundNormal, slopeRight), slopeRight) * desiredDirection;
 
 		// Set desired speed magnitude based on walk/run state
-		float desiredForce = m_isRunning ? m_ssoCharacter.RunSpeed : m_ssoCharacter.WalkSpeed;
+		// m_moveInput = Mathf.Clamp(m_moveInput.magnitude, 0, 1) * m_moveInput.normalized;
+        Vector2 desiredForcev2 = new Vector2(
+			Mathf.Clamp01((Mathf.Abs(m_moveInput.x) - m_ssoCharacter.MoveAnalogStart)) / (1 - m_ssoCharacter.MoveAnalogStart),
+            Mathf.Clamp01((Mathf.Abs(m_moveInput.y) - m_ssoCharacter.MoveAnalogStart)) / (1 - m_ssoCharacter.MoveAnalogStart));
+        desiredForcev2 = Mathf.Clamp(desiredForcev2.magnitude, 0, 1) * desiredForcev2.normalized;
+        float desiredForce = desiredForcev2.magnitude * m_ssoCharacter.MaxMoveForce;
+        m_desiredForce = desiredForce;
 
-		// Apply speed modifiers
-		if (m_isStunned)
+        // Apply speed modifiers
+        if (m_isStunned)
 		{
 			desiredForce = 0f;
 		}
