@@ -15,8 +15,8 @@ MonoBehaviour:
   StartWithBag: 1
   PfBackpack: {fileID: 4989554971695821008, guid: 63116bdf185988d46a364d3ad2635d88,
     type: 3}
-  WalkSpeed: 50
-  RunSpeed: 100
+  MaxMoveForce: 70
+  MoveAnalogStart: 0.2
   JumpForce: 370
   CoyoteTime: 0.25
   DragGround: 10
@@ -30,7 +30,6 @@ MonoBehaviour:
   AirControlScalar: 1.93
   AirControlDuration: 3
   AirControlThreshold: 0.87
-  RopeHoldingMethod: 1
   CancelRopeDuration: 0
   EntranceOffset: 3
   MaxPendulumAngle: 60
@@ -43,8 +42,6 @@ MonoBehaviour:
   JumpOffWallForce: 3
   ClimbAcceleration: 1
   MaxClimbSpeed: 5
-  JumpRopeMethod: 1
-  JumpRopeSlackenAmount: 2
   FreeFallFromRopeModifier: 0.9
   JumpOffRopeModifier: 5
   GlowHeight: 2
