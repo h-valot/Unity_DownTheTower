@@ -1,4 +1,5 @@
 using Sirenix.OdinInspector;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class Permanent : MonoBehaviour
@@ -95,17 +96,17 @@ public class Permanent : MonoBehaviour
 		return Physics.Raycast(hit.point + GROUND_RAY_OFFSET, Vector3.up, maxHeight - GROUND_RAY_OFFSET.y, maskToIgnore);
 	}
 
-
 	/// <summary>
-	/// Check that there is space in from of the permanent preview.
+	/// Check that there is space around the permanent preview.
 	/// </summary>
 	/// <param name="hit">Raycast hit info</param>
 	/// <param name="cameraTransform">Transform of the camera</param>
-	/// <param name="minDistanceFromWall">Minimum tolerated distance from the preview permanent and a collider in front of it</param>
+	/// <param name="radius">Minimum tolerated distance from the preview permanent and a collider around it</param>
 	/// <returns>True if the space does not contains any collider.</returns>
-	protected bool IsSpaceInFront(RaycastHit hit, Transform cameraTransform, float minDistanceFromWall, LayerMask maskToIgnore)
+	protected bool IsSpaceAround(RaycastHit hit, Transform cameraTransform, float radius, LayerMask maskToIgnore)
 	{
-		return Physics.Raycast(hit.point + GROUND_RAY_OFFSET,
-			Vector3.Normalize(new Vector3(cameraTransform.forward.x, 0, cameraTransform.forward.z)), minDistanceFromWall, maskToIgnore);
+        //return Physics.Raycast(hit.point + GROUND_RAY_OFFSET,
+        //Vector3.Normalize(new Vector3(cameraTransform.forward.x, 0, cameraTransform.forward.z)), minDistanceFromWall, maskToIgnore);
+		return Physics.SphereCast(new Vector3(hit.point.x, hit.point.y + (radius / 2) + 0.1f, hit.point.z), radius, transform.forward, out RaycastHit hitInfo, 0, maskToIgnore);
 	}
 }

@@ -115,7 +115,7 @@ public class Rope : Permanent
 			UpdateColor(isDeployable: 
 				IsGroundFlat(hitInfo, m_ssoRope.MaxGroundAngle) 
 				&& !IsCeiling(hitInfo, m_ssoRope.HeightLimit, ~m_ssoRope.NoCollisionNoRaycastLayer) 
-				&& !IsSpaceInFront(hitInfo, cameraTransform, m_ssoRope.MinDistanceFromWall, ~m_ssoRope.NoCollisionNoRaycastLayer)
+				&& !IsSpaceAround(hitInfo, cameraTransform, m_ssoRope.MinRadiusAround, ~m_ssoRope.NoCollisionNoRaycastLayer)
 			);
 		}
 		else
@@ -127,9 +127,10 @@ public class Rope : Permanent
 				m_previewGameObject.SetActive(false);
 			}
 		}
-	}
+    }
 
-	private void UpdateColor(bool isDeployable)
+
+    private void UpdateColor(bool isDeployable)
 	{
 		m_previewMeshRendered.material.SetFloat("_colorSwitch", isDeployable ? 0f : 1f);
 	}
@@ -147,7 +148,7 @@ public class Rope : Permanent
 		{
 			if (IsGroundFlat(hitInfo, m_ssoRope.MaxGroundAngle) 
 				&& !IsCeiling(hitInfo, m_ssoRope.HeightLimit, ~m_ssoRope.NoCollisionNoRaycastLayer) 
-				&& !IsSpaceInFront(hitInfo, cameraTransform, m_ssoRope.MinDistanceFromWall, ~m_ssoRope.NoCollisionNoRaycastLayer))
+				&& !IsSpaceAround(hitInfo, cameraTransform, m_ssoRope.MinRadiusAround, ~m_ssoRope.NoCollisionNoRaycastLayer))
 			{
 				transform.SetParent(null, true);
 				Deploy(cameraTransform, hitInfo.point);
@@ -157,8 +158,7 @@ public class Rope : Permanent
 		
 		return false;
 	}
-
-	private void Deploy(Transform cameraTransform, Vector3 deployPoint)
+    private void Deploy(Transform cameraTransform, Vector3 deployPoint)
 	{
 		// Disable hold length constraint to avoid the character to be snapped to the rope when placed
 		SetHoldLength(9999);

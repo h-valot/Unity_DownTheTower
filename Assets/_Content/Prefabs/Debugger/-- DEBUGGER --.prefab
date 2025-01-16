@@ -84,7 +84,6 @@ MonoBehaviour:
   m_sceneLoader: {fileID: 8096640366390723087}
   m_runtimeValueModifier: {fileID: 3605584042015579482}
   m_ssoGame: {fileID: 11400000, guid: c6ad5e1cd823f2647b0c8dc515fee2d5, type: 2}
-  m_rsoInputsLocked: {fileID: 11400000, guid: 42f42056b3a7bf54a9d3df0551639769, type: 2}
   m_rsoGamePaused: {fileID: 11400000, guid: faef31959fcedf747aaeb875374bdc6b, type: 2}
 --- !u!223 &4260637213266472998
 Canvas:
@@ -157,15 +156,134 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 2621920647270650060}
     m_Modifications:
+    - target: {fileID: 87252037036435938, guid: 4b90538f1fe67354381935a1fde24bb3,
+        type: 3}
+      propertyPath: m_Name
+      value: IMG_Jump
+      objectReference: {fileID: 0}
+    - target: {fileID: 148521324139149927, guid: 4b90538f1fe67354381935a1fde24bb3,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 266994963049209183, guid: 4b90538f1fe67354381935a1fde24bb3,
         type: 3}
       propertyPath: m_Name
       value: PF_InputAdvisor
       objectReference: {fileID: 0}
+    - target: {fileID: 412078151382583554, guid: 4b90538f1fe67354381935a1fde24bb3,
+        type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: d1e0279aa8e654945a21a3da9f3c945c,
+        type: 3}
+    - target: {fileID: 1295201166032765861, guid: 4b90538f1fe67354381935a1fde24bb3,
+        type: 3}
+      propertyPath: m_Name
+      value: IMG_Lft_ThrowTorch
+      objectReference: {fileID: 0}
+    - target: {fileID: 1374235725545784420, guid: 4b90538f1fe67354381935a1fde24bb3,
+        type: 3}
+      propertyPath: m_Name
+      value: TXT_PlaceRope
+      objectReference: {fileID: 0}
+    - target: {fileID: 2138098473559132751, guid: 4b90538f1fe67354381935a1fde24bb3,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2505222739099751617, guid: 4b90538f1fe67354381935a1fde24bb3,
+        type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: adf880a381b5c174ca38e82ccd6da97b,
+        type: 3}
+    - target: {fileID: 2758910440565241919, guid: 4b90538f1fe67354381935a1fde24bb3,
+        type: 3}
+      propertyPath: m_text
+      value: (Hold) Throw Torch
+      objectReference: {fileID: 0}
+    - target: {fileID: 2996052032532692889, guid: 4b90538f1fe67354381935a1fde24bb3,
+        type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2996052032532692889, guid: 4b90538f1fe67354381935a1fde24bb3,
+        type: 3}
+      propertyPath: m_AnchorMin.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2996052032532692889, guid: 4b90538f1fe67354381935a1fde24bb3,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: -25
+      objectReference: {fileID: 0}
+    - target: {fileID: 2996052032532692889, guid: 4b90538f1fe67354381935a1fde24bb3,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 25
+      objectReference: {fileID: 0}
+    - target: {fileID: 3542142560095259212, guid: 4b90538f1fe67354381935a1fde24bb3,
+        type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 61d37e183310308449dd2a8e45bd79dc,
+        type: 3}
+    - target: {fileID: 3555409383931015251, guid: 4b90538f1fe67354381935a1fde24bb3,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 4151569407630310048, guid: 4b90538f1fe67354381935a1fde24bb3,
+        type: 3}
+      propertyPath: m_Name
+      value: TXT_ThrowTorch
+      objectReference: {fileID: 0}
+    - target: {fileID: 4576902696598210789, guid: 4b90538f1fe67354381935a1fde24bb3,
+        type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: a78d0e4a036489f4297bfe05c1ee821c,
+        type: 3}
+    - target: {fileID: 4799766187379814969, guid: 4b90538f1fe67354381935a1fde24bb3,
+        type: 3}
+      propertyPath: m_Name
+      value: IMG_Descend
+      objectReference: {fileID: 0}
+    - target: {fileID: 4911509555686711528, guid: 4b90538f1fe67354381935a1fde24bb3,
+        type: 3}
+      propertyPath: m_Name
+      value: IMG_Rgt_PlaceRope
+      objectReference: {fileID: 0}
+    - target: {fileID: 5658335585481724768, guid: 4b90538f1fe67354381935a1fde24bb3,
+        type: 3}
+      propertyPath: m_Name
+      value: IMG_Ascend
+      objectReference: {fileID: 0}
+    - target: {fileID: 5676411096335160927, guid: 4b90538f1fe67354381935a1fde24bb3,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5812902752749755416, guid: 4b90538f1fe67354381935a1fde24bb3,
+        type: 3}
+      propertyPath: m_Name
+      value: IMG_Release
+      objectReference: {fileID: 0}
     - target: {fileID: 5968316235306332959, guid: 4b90538f1fe67354381935a1fde24bb3,
         type: 3}
       propertyPath: m_IsActive
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6815196351457234220, guid: 4b90538f1fe67354381935a1fde24bb3,
+        type: 3}
+      propertyPath: m_Name
+      value: IMG_Lft_TorchON
+      objectReference: {fileID: 0}
+    - target: {fileID: 7143612855378740638, guid: 4b90538f1fe67354381935a1fde24bb3,
+        type: 3}
+      propertyPath: m_Name
+      value: TXT_TorchON
       objectReference: {fileID: 0}
     - target: {fileID: 7929316857604500567, guid: 4b90538f1fe67354381935a1fde24bb3,
         type: 3}
@@ -267,11 +385,65 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8442171992818046072, guid: 4b90538f1fe67354381935a1fde24bb3,
+        type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8442171992818046072, guid: 4b90538f1fe67354381935a1fde24bb3,
+        type: 3}
+      propertyPath: m_AnchorMin.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8442171992818046072, guid: 4b90538f1fe67354381935a1fde24bb3,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: -25
+      objectReference: {fileID: 0}
+    - target: {fileID: 8442171992818046072, guid: 4b90538f1fe67354381935a1fde24bb3,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 25
+      objectReference: {fileID: 0}
+    - target: {fileID: 8477749440587918157, guid: 4b90538f1fe67354381935a1fde24bb3,
+        type: 3}
+      propertyPath: m_ropeInputs
+      value: 
+      objectReference: {fileID: 6279093512762939801}
+    - target: {fileID: 8477749440587918157, guid: 4b90538f1fe67354381935a1fde24bb3,
+        type: 3}
+      propertyPath: m_locomotionInputs
+      value: 
+      objectReference: {fileID: 8450681921174476079}
+    - target: {fileID: 9095508771265636818, guid: 4b90538f1fe67354381935a1fde24bb3,
+        type: 3}
+      propertyPath: m_text
+      value: Torch On / Off
+      objectReference: {fileID: 0}
+    - target: {fileID: 9151077662447703980, guid: 4b90538f1fe67354381935a1fde24bb3,
+        type: 3}
+      propertyPath: m_text
+      value: (Hold) Place Rope
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
-    m_RemovedGameObjects: []
+    m_RemovedGameObjects:
+    - {fileID: 5612400863066893798, guid: 4b90538f1fe67354381935a1fde24bb3, type: 3}
+    - {fileID: 4158523428059233448, guid: 4b90538f1fe67354381935a1fde24bb3, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 4b90538f1fe67354381935a1fde24bb3, type: 3}
+--- !u!1 &6279093512762939801 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4857348542211877454, guid: 4b90538f1fe67354381935a1fde24bb3,
+    type: 3}
+  m_PrefabInstance: {fileID: 1462287293145232343}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &8450681921174476079 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6993471078921578232, guid: 4b90538f1fe67354381935a1fde24bb3,
+    type: 3}
+  m_PrefabInstance: {fileID: 1462287293145232343}
+  m_PrefabAsset: {fileID: 0}
 --- !u!224 &8809464320996237184 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 7929316857604500567, guid: 4b90538f1fe67354381935a1fde24bb3,
