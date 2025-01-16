@@ -77,30 +77,29 @@ public class CharacterMotor : MonoBehaviour
 	private Vector2 m_planarVelocity;
 	private float m_maxGroundedSpeed;
 	private bool m_isRunning;
-	[HideInInspector] public bool m_hasJumped;
-	public bool IsJumpingPressed { get; private set; }
 	private bool m_isCrafting;
 	private float m_airControlTimeScalar;
 	private float m_airControlDuration;
-
-    // - Craft state -
-    private CraftType m_craftType;
-	private Coroutine m_craftCoroutine;
-	private float m_craftRemainingTime;
-	[HideInInspector] public Permanent HandObject;
-	[HideInInspector] public Permanent RobotObject;
-	[HideInInspector] public bool IsAiming;
-	private bool m_startAiming;
+	public bool IsJumpingPressed { get; private set; }
+	[HideInInspector] public bool m_hasJumped;
 
 	// - Rope state -
 	private Rope m_rope;
 	private bool m_isHolding;
-	public bool IsRopeValid => m_rope && m_rope.IsPlaced;
 	private float m_ropeDragTimer;
-
-	// Climbing
+	private bool m_withinRopeLimit;
 	private bool m_isClimbing;
 	private float m_currentClimbSpeed;
+	public bool IsRopeValid => m_rope && m_rope.IsPlaced;
+
+	// - Craft state -
+	private CraftType m_craftType;
+	private Coroutine m_craftCoroutine;
+	private float m_craftRemainingTime;
+	private bool m_startAiming;
+	[HideInInspector] public Permanent HandObject;
+	[HideInInspector] public Permanent RobotObject;
+	[HideInInspector] public bool IsAiming;
 
 	// Misc
 	private const float k_fallingForcesThreshold = 0.2f;
@@ -755,7 +754,7 @@ public class CharacterMotor : MonoBehaviour
 		// - Handle rope while grounded -
 		if (!IsRopeValid) return;
 
-		if (m_rope.GetTotalLength() > m_ssoRope.MaxLength)
+		if (m_rope.GetTotalLength() >= m_ssoRope.MaxLength - m_ssoRope.MaxLengthOffset - 0.5f)
 		{
 			DesequipRope();
 			return;
@@ -974,6 +973,20 @@ public class CharacterMotor : MonoBehaviour
 		m_rope.IncreaseHoldLength(-clampedClimbSpeed * Time.fixedDeltaTime); // Decreasing hold length
 	}
 
+	private void HandleRopeLimit()
+	{
+		// Assertion
+		if (m_rope.GetTotalLength() < m_ssoRope.MaxLength - m_ssoRope.MaxLengthOffset)
+		{
+			m_withinRopeLimit = false;
+			return;
+		}
+
+		m_isHolding = false;
+		m_withinRopeLimit = true;
+		m_rope.SetHoldLength(m_ssoRope.MaxLength - m_ssoRope.MaxLengthOffset - m_rope.GetFixedLength());
+	}
+
 	private bool IsFallingWithRope()
 	{
 		// Assert: the character is falling if there is no more rope
@@ -1021,20 +1034,6 @@ public class CharacterMotor : MonoBehaviour
 			m_rope.IsConstrained = false;
 			m_rope.SetHoldLength(m_ssoRope.MaxLength - m_ssoRope.MaxLengthOffset - m_rope.GetFixedLength());
 		}
-	}
-
-	private bool m_withinRopeLimit;
-	private void HandleRopeLimit()
-	{
-		// Assertion
-		if (m_rope.GetTotalLength() < m_ssoRope.MaxLength - m_ssoRope.MaxLengthOffset)
-		{
-			m_withinRopeLimit = false;
-			return;
-		}
-
-		m_withinRopeLimit = true;
-		m_rope.SetHoldLength(m_ssoRope.MaxLength - m_ssoRope.MaxLengthOffset - m_rope.GetFixedLength());
 	}
 
 	#endregion
