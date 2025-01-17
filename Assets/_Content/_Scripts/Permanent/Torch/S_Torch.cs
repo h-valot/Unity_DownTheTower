@@ -15,6 +15,7 @@ public class Torch : Permanent
     [SerializeField] private Transform m_pointLightBase;
     [SerializeField] private SphereCollider m_lightCollider;
 	[SerializeField] public Transform RaycastTarget;
+	[SerializeField] private Interactable m_interactable;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Torch m_ssoTorch;
 	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Character m_ssoCharacter;
@@ -83,11 +84,13 @@ public class Torch : Permanent
 
     private void OnEnable()
     {
-        m_rsoCharacterPosition.OnChanged += UpdateTorchFeedback;
+		m_interactable.OnInteracted += OnInteracted;
+		m_rsoCharacterPosition.OnChanged += UpdateTorchFeedback;
     }
 
     private void OnDisable()
     {
+		m_interactable.OnInteracted -= OnInteracted;
         m_rsoCharacterPosition.OnChanged -= UpdateTorchFeedback;
     }
 
@@ -408,10 +411,15 @@ public class Torch : Permanent
 		}
     }
 
-    /// <summary>
-    /// Make torch flicker and desappear.
-    /// </summary>
-    public void Desactivate()
+	private void OnInteracted()
+	{
+		DestroyTorch();
+	}
+
+	/// <summary>
+	/// Make torch flicker and desappear.
+	/// </summary>
+	public void Desactivate()
     {
 		if (m_isDeactivate) return;
 
