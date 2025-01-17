@@ -1,52 +1,31 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 
 public class MushroomTrigger : MonoBehaviour
 {
     private MushroomBatch _parent;
-    private List<ObjectPosition> _objectLastPositions;
 
-    private void Start()
+    private void Awake()
     {
         _parent = transform.parent.GetComponent<MushroomBatch>();
-        _objectLastPositions = new List<ObjectPosition>();
     }
 
     private void OnTriggerStay(Collider other)
     {
-        Vector3 newPos = other.transform.position;
-        foreach (ObjectPosition objectPosition in _objectLastPositions)
+        if (other.TryGetComponent<Rigidbody>(out Rigidbody rigidbody))
         {
-            if (!(objectPosition.gObject == other.gameObject)) continue;
-
-            if (Mathf.Round(objectPosition.position.sqrMagnitude) == Mathf.Round(newPos.sqrMagnitude)) return;
-
-            objectPosition.position = new Vector3(newPos.x, newPos.y, newPos.z);
-            _parent.InitiateExplosion(newPos);
-            if (other.gameObject.TryGetComponent<CharacterMotor>(out CharacterMotor chara) && _parent.GetState() == MushroomState.DEFLATE) chara.HandleDeath();
-            return;
-        }
-
-        ObjectPosition newItem = new ObjectPosition();
-        newItem.gObject = other.gameObject;
-        newItem.position = newPos;
-        _objectLastPositions.Add(newItem);
-        _parent.InitiateExplosion(newItem.position); 
-        if (other.gameObject.TryGetComponent<CharacterMotor>(out CharacterMotor newChara) && _parent.GetState() == MushroomState.DEFLATE) newChara.HandleDeath();
-    }
-
-
-    private void OnTriggerExit(Collider other)
-    {
-        ObjectPosition toDelete = new ObjectPosition();
-        foreach (ObjectPosition op in _objectLastPositions)
-        {
-            if (op.gObject == other.gameObject)
+            if (rigidbody.velocity.magnitude > _parent.m_ssoMushrooms.MinimalVelocityToTrigger)
             {
-                toDelete = op;
-                break;
+                _parent.InitiateExplosion(other.transform.position);
             }
         }
-        if (toDelete.gObject != null) _objectLastPositions.Remove(toDelete);
+        else if (other.TryGetComponent<NavMeshAgent>(out NavMeshAgent navMeshAgent))
+        {
+            if (navMeshAgent.velocity.magnitude > _parent.m_ssoMushrooms.MinimalVelocityToTrigger)
+            {
+                _parent.InitiateExplosion(other.transform.position);
+            }
+        }
     }
 }

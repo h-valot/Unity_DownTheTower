@@ -44,26 +44,28 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bf9314cd71a81d544bfe9ed971e6d60d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _radius: 5
-  _density: 5
-  _overlapModifier: 0.3
-  _minSizeMultiplier: 0.5
-  _maxSizeMultiplier: 1.5
+  m_radius: 3
+  m_density: 5
+  m_overlapModifier: 0.5
+  m_minSizeMultiplier: 0.5
+  m_maxSizeMultiplier: 1.5
   mushroomLists: []
-  _mushroomTriggerPrefab: {fileID: 338019743662669733, guid: c5a78aec403b0ef488528201cc573693,
+  m_ssoMushrooms: {fileID: 11400000, guid: 28e7f28aefd52ff4eb6914fc908d9945, type: 2}
+  m_mushroomTriggerPrefab: {fileID: 338019743662669733, guid: c5a78aec403b0ef488528201cc573693,
     type: 3}
-  _mushroomPrefab: {fileID: 7762096543299851040, guid: d078e67249fe575408f240e5e29aacb1,
+  m_mushroomPrefab: {fileID: 7762096543299851040, guid: d078e67249fe575408f240e5e29aacb1,
     type: 3}
-  _particlePrefab: {fileID: 7809570971166029454, guid: 59b349a5f2ee39045a429baa950e731f,
+  m_particlePrefab: {fileID: 7809570971166029454, guid: 59b349a5f2ee39045a429baa950e731f,
     type: 3}
-  _mushroomMesh: {fileID: 7682724294687611154, guid: 54c06de0e92953844b087f71303f5e4b,
+  m_mushroomMesh: {fileID: 7682724294687611154, guid: 54c06de0e92953844b087f71303f5e4b,
     type: 3}
-  _masterMaterial: {fileID: 2100000, guid: 273a9825b095e834ab681253660889c3, type: 2}
-  _deflateTime: 0.05
-  _attackTime: 2
-  _inactiveTime: 10
-  _inflateTime: 2
-  _propagationSpeed: 6
-  _mushroomTrigger: {fileID: 0}
-  _particleSystem: {fileID: 0}
-  _mushroomMaterial: {fileID: 0}
+  m_masterMaterial: {fileID: 2100000, guid: 273a9825b095e834ab681253660889c3, type: 2}
+  m_deflateTime: 0.5
+  m_attackTime: 2
+  m_inactiveTime: 10
+  m_inflateTime: 1
+  m_propagationSpeed: 6
+  MushroomTrigger: {fileID: 0}
+  ParticleSystem: {fileID: 0}
+  MushroomMaterial: {fileID: 0}
+  m_spawnedGameObjects: []
