@@ -255,8 +255,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1397502318455657992}
-  - component: {fileID: 238746786854470765}
   - component: {fileID: 4290115715115516763}
+  - component: {fileID: 238746786854470765}
   m_Layer: 8
   m_Name: PF_MemoryCristal
   m_TagString: Untagged
@@ -280,6 +280,26 @@ Transform:
   - {fileID: 3439714053988089855}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4290115715115516763
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7780660473698035610}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f9be0794dfdadb743b60dac71547329a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Type: 7
+  m_isRecyclable: 0
+  m_objectToRecycle: {fileID: 3851904558965398304}
+  m_displayGizmos: 0
+  m_direction: {x: 0, y: 1, z: 0}
+  m_duration: 3
+  m_firstDoor: {fileID: 0}
+  m_secondDoor: {fileID: 0}
 --- !u!135 &238746786854470765
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -301,25 +321,6 @@ SphereCollider:
   serializedVersion: 3
   m_Radius: 2.2716072
   m_Center: {x: 0, y: 1.7716072, z: 0}
---- !u!114 &4290115715115516763
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7780660473698035610}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f9be0794dfdadb743b60dac71547329a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_isRecyclable: 0
-  m_objectToRecycle: {fileID: 3851904558965398304}
-  m_displayGizmos: 0
-  m_direction: {x: 0, y: 1, z: 0}
-  m_duration: 3
-  m_firstDoor: {fileID: 0}
-  m_secondDoor: {fileID: 0}
 --- !u!1001 &7547022375063686951
 PrefabInstance:
   m_ObjectHideFlags: 0

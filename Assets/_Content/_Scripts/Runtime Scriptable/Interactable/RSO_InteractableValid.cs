@@ -2,4 +2,4 @@ using RuntimeScriptables;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "RSO_InteractableValid", menuName = "Runtime Scriptable/Interactable/Valid")]
-public class RSO_InteractableValid : RuntimeScriptableObject<bool> { }
+public class RSO_InteractableValid : RuntimeScriptableObject<InteractableType> { }

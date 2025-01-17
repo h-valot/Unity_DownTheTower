@@ -9,7 +9,7 @@ public class CharacterInteract : MonoBehaviour
 	[FoldoutGroup("Internal references")][SerializeField] private Transform m_characterGraphics;
 	[FoldoutGroup("Internal references")][SerializeField] private CharacterMotor m_characterMotor;
 
-	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Character m_characterConfig;
+	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Character m_ssoCharacter;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Recycle m_rseRecycle;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Interact m_rseInteract;
@@ -151,9 +151,9 @@ public class CharacterInteract : MonoBehaviour
 		if (m_interactables == null) return;
 
 		m_rsoInteractableValid.value =
-			m_interactables.Count > 0
-			&& (m_rsoCharacterState.value == BehaviorState.LOCOMOTION 
-			|| m_rsoCharacterState.value == BehaviorState.FALL);
+			m_interactables.Count > 0 && (m_rsoCharacterState.value == BehaviorState.LOCOMOTION || m_rsoCharacterState.value == BehaviorState.FALL)
+			? GetNearestInteractable().Type
+			: InteractableType.NONE;
 	}
 
 	private void CheckRecyclability()
@@ -166,10 +166,10 @@ public class CharacterInteract : MonoBehaviour
 	private void GetBackpackDebug()
 	{
 		// Assertion
-		if (!m_characterConfig.StartWithBag) return;
+		if (!m_ssoCharacter.StartWithBag) return;
 
 		m_backpack = FindAnyObjectByType<Backpack>();
-		if (m_backpack == null) m_backpack = Instantiate(m_characterConfig.PfBackpack);
+		if (m_backpack == null) m_backpack = Instantiate(m_ssoCharacter.PfBackpack);
 		m_backpack.ForceSetupBackpack(this);
 	}
 

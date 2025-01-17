@@ -9,8 +9,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 674196786399082250}
-  - component: {fileID: 2459281216287085478}
   - component: {fileID: 1150021416558879970}
+  - component: {fileID: 2459281216287085478}
   m_Layer: 8
   m_Name: Elevator
   m_TagString: Untagged
@@ -35,6 +35,23 @@ Transform:
   - {fileID: 335248291019666581}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1150021416558879970
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1851997870629431980}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37557274e2b75344ba08499a8aaa2a3e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_maxHeight: 5
+  m_rideTime: 3
+  m_interactable: {fileID: 9148584914362091126}
+  IsUp: 0
+  m_characterMotor: {fileID: 0}
 --- !u!65 &2459281216287085478
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -56,23 +73,6 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 3, y: 1.5, z: 3}
   m_Center: {x: 0, y: 1, z: 0}
---- !u!114 &1150021416558879970
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1851997870629431980}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 37557274e2b75344ba08499a8aaa2a3e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_maxHeight: 5
-  m_minHeight: 0
-  m_rideTime: 3
-  m_interactable: {fileID: 9148584914362091126}
-  IsUp: 0
 --- !u!1 &9073261231649071094
 GameObject:
   m_ObjectHideFlags: 0
@@ -187,8 +187,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 335248291019666581}
-  - component: {fileID: 1004941864531955870}
   - component: {fileID: 8329827888591133748}
+  - component: {fileID: 1004941864531955870}
   m_Layer: 8
   m_Name: Interactible
   m_TagString: Untagged
@@ -211,6 +211,23 @@ Transform:
   m_Children: []
   m_Father: {fileID: 674196786399082250}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8329827888591133748
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9148584914362091126}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a35e4c2b0957df24da7655291c99a720, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Type: 5
+  m_isRecyclable: 0
+  m_objectToRecycle: {fileID: 0}
+  m_displayGizmos: 0
+  m_elevator: {fileID: 0}
 --- !u!65 &1004941864531955870
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -232,19 +249,3 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 2.5, y: 1, z: 2.5}
   m_Center: {x: 0, y: 0.75, z: 0}
---- !u!114 &8329827888591133748
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9148584914362091126}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a35e4c2b0957df24da7655291c99a720, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_isRecyclable: 0
-  m_objectToRecycle: {fileID: 0}
-  m_displayGizmos: 0
-  m_elevator: {fileID: 0}

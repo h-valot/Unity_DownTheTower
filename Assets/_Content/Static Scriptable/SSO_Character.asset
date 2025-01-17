@@ -12,9 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 211f3b163f2b6e241bcab8b78755ce69, type: 3}
   m_Name: SSO_Character
   m_EditorClassIdentifier: 
-  StartWithBag: 1
-  PfBackpack: {fileID: 4989554971695821008, guid: 63116bdf185988d46a364d3ad2635d88,
-    type: 3}
   MaxMoveForce: 70
   MoveAnalogStart: 0.15
   JumpForce: 370
@@ -128,6 +125,26 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   MaxSlowDuration: 3
+  StartWithBag: 1
+  PfBackpack: {fileID: 4989554971695821008, guid: 63116bdf185988d46a364d3ad2635d88,
+    type: 3}
+  InteractableFlavors:
+  - Type: 0
+    Flavor: 
+  - Type: 1
+    Flavor: Read
+  - Type: 2
+    Flavor: Attach
+  - Type: 3
+    Flavor: Destroy
+  - Type: 4
+    Flavor: Call elevator
+  - Type: 5
+    Flavor: Use elevator
+  - Type: 6
+    Flavor: Pull lever
+  - Type: 7
+    Flavor: Interact
   StartingStyle: 0
   TopClamp: 70
   BottomClamp: -60

@@ -5,6 +5,8 @@ using UnityEngine;
 public class Interactable : MonoBehaviour
 {
 	[Title("Interactible")]
+	[SerializeField] public InteractableType Type;
+
 	[Tooltip("If set as true destroys the `Object To Recycle` on interaction triggered. Otherwise, don't.")]
 	[SerializeField] private bool m_isRecyclable;
 

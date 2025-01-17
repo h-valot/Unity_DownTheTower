@@ -9,8 +9,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5512993724034968474}
-  - component: {fileID: 1834935975302476477}
   - component: {fileID: 6303369563507938974}
+  - component: {fileID: 1834935975302476477}
   m_Layer: 8
   m_Name: PF_Log
   m_TagString: Untagged
@@ -34,6 +34,24 @@ Transform:
   - {fileID: 5721709942324078920}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6303369563507938974
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2477040682049364892}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 703b33ed0cfd0184aa550976c9ddf79e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Type: 1
+  m_isRecyclable: 0
+  m_objectToRecycle: {fileID: 0}
+  m_displayGizmos: 0
+  m_ssoLog: {fileID: 0}
+  m_rseDisplayLog: {fileID: 11400000, guid: b8f2fa8cb72d726419e2f414aec8f019, type: 2}
 --- !u!135 &1834935975302476477
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -55,23 +73,6 @@ SphereCollider:
   serializedVersion: 3
   m_Radius: 1
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &6303369563507938974
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2477040682049364892}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 703b33ed0cfd0184aa550976c9ddf79e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_isRecyclable: 0
-  m_objectToRecycle: {fileID: 0}
-  m_displayGizmos: 0
-  m_ssoLog: {fileID: 0}
-  m_rseDisplayLog: {fileID: 11400000, guid: b8f2fa8cb72d726419e2f414aec8f019, type: 2}
 --- !u!1 &7982071871248496947
 GameObject:
   m_ObjectHideFlags: 0

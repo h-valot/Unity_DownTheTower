@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Sirenix.OdinInspector;
 using UnityEngine;
 
@@ -12,15 +13,6 @@ public class SSO_Character : ScriptableObject
 	public void OnValidate() => OnSSOChanged?.Invoke();
 	public Action OnSSOChanged;
 
-
-	[Title("Debug")]
-	[InfoBox("If true, the character starts the play mode with a backpack.", InfoMessageType.None)]
-	public bool StartWithBag;
-
-	[ShowIf("StartWithBag")]
-	[PropertySpace(SpaceBefore = 0, SpaceAfter = 15)]
-	[InfoBox("Prefab of the backpack. Spawned only if the `StartWithBag` debug is true.", InfoMessageType.None)]
-	public Backpack PfBackpack;
 
 	#region MOVEMENT
 
@@ -252,6 +244,25 @@ public class SSO_Character : ScriptableObject
 	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
 	[InfoBox("Maximum duration of the slow status.", InfoMessageType.None)]
 	public float MaxSlowDuration;
+
+	#endregion
+
+	#region INTERACT
+
+	[FoldoutGroup("Interact")]
+	[InfoBox("If true, the character starts the play mode with a backpack.", InfoMessageType.None)]
+	public bool StartWithBag;
+
+	[FoldoutGroup("Interact")]
+	[ShowIf("StartWithBag")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("Prefab of the backpack. Spawned only if the `StartWithBag` debug is true.", InfoMessageType.None)]
+	public Backpack PfBackpack;
+
+	[FoldoutGroup("Interact")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("List of string used to customize the contextual display while interacting.", InfoMessageType.None)]
+	public List<InteractableFlavors> InteractableFlavors = new List<InteractableFlavors>();
 
 	#endregion
 

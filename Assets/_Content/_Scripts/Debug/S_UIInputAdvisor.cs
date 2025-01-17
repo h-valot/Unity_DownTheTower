@@ -1,14 +1,19 @@
+using System.Linq;
 using Sirenix.OdinInspector;
+using TMPro;
 using UnityEngine;
 
 public class UIInputAdvisor : MonoBehaviour
 {
     [Title("Internal References")]
 	[SerializeField] private GameObject m_graphicInteract;
+	[SerializeField] private TextMeshProUGUI m_tmpInteract;
     [SerializeField] private GameObject m_graphicRecycle;
     [SerializeField] private GameObject m_inputPanel;
     [SerializeField] private GameObject m_ropeInputs;
     [SerializeField] private GameObject m_locomotionInputs;
+
+	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Character m_ssoCharacter;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_InputAdviceDisplayed m_rsoInputAdviceDisplayed;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_GamePaused m_rsoGamePaused;
@@ -37,11 +42,12 @@ public class UIInputAdvisor : MonoBehaviour
 	}
 
     private void ToggleInteract()
-    {
-        m_graphicInteract.SetActive(m_rsoInteractableValid.value);
-    }
+	{
+		m_graphicInteract.SetActive(m_rsoInteractableValid.value != InteractableType.NONE);
+		m_tmpInteract.text = m_ssoCharacter.InteractableFlavors.FirstOrDefault(i => i.Type == m_rsoInteractableValid.value).Flavor;
+	}
 
-    private void ToggleRecycle()
+	private void ToggleRecycle()
     {
         m_graphicRecycle.SetActive(m_rsoInteractableRecyclable.value);
     }
