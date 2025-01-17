@@ -9,7 +9,7 @@ public class ToxicGas: MonoBehaviour
     [SerializeField] private GameObject m_gaz;
     [SerializeField] private List<ExplosiveMushroom> m_mushrooms;
 
-	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Toxic m_ssoToxic;
+	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Mushrooms m_ssoToxic;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_KillCharacter m_rseKillCharacter;
 
