@@ -12,6 +12,7 @@ public class CharacterMotor : MonoBehaviour
 	[SerializeField] private CapsuleCollider m_collider;
 	[SerializeField] private Transform m_handSocket;
 	[SerializeField] private Transform m_robotSocket;
+	[SerializeField] private Transform m_bagSocket;
 	[SerializeField] private Transform m_aimingLookTo;
 	[SerializeField] private Transform m_cameraTarget;
 	[SerializeField] private Transform m_attach;
@@ -1096,10 +1097,11 @@ public class CharacterMotor : MonoBehaviour
 			case CraftType.ROPE:
                 HandObject = Instantiate(
                     (Permanent)m_ssoRope.PfRope,
-                    m_handSocket.transform.position,
-                    Quaternion.identity,
-                    m_handSocket.transform
+                    m_bagSocket.transform.position,
+                    m_bagSocket.rotation,
+					m_bagSocket.transform
                 );
+				HandObject.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
                 break;
 		}
 
@@ -1143,9 +1145,17 @@ public class CharacterMotor : MonoBehaviour
 
 		// Handle preview on input pressed
 		if (IsAiming)
-        {
-            AimingObject = itemToThrow;
-            itemToThrow.InitializePreview();
+		{
+			// Placing rope in hand
+			if (itemToThrow is Rope)
+			{
+				itemToThrow.transform.parent = m_handSocket.transform;
+				itemToThrow.transform.localScale = Vector3.one;
+				itemToThrow.transform.localPosition = Vector3.zero;
+				itemToThrow.transform.rotation = m_handSocket.rotation;
+			}
+			AimingObject = itemToThrow;
+			itemToThrow.InitializePreview();
 			m_startAiming = true;
 		}
 
@@ -1154,7 +1164,21 @@ public class CharacterMotor : MonoBehaviour
 		{
 			// Assertion
 			if (!m_startAiming) return;
-			if (!itemToThrow.Throw(m_rsoCameraTransform.value)) return;
+			if (!itemToThrow.Throw(m_rsoCameraTransform.value))
+			{
+				AimingObject = null;
+				m_startAiming = false;
+				// Placing rope back in bag
+				if (itemToThrow is Rope)
+				{
+					itemToThrow.transform.parent = m_bagSocket.transform;
+					itemToThrow.transform.rotation = m_bagSocket.rotation;
+					itemToThrow.transform.localPosition = Vector3.zero;
+					itemToThrow.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
+				}
+				Debug.Log("Failed to Throw");
+				return;
+			}
 
 			// Rope Handling
 			if (itemToThrow is Rope) {
