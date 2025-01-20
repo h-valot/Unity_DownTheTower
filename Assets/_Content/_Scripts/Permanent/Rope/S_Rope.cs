@@ -98,7 +98,6 @@ public class Rope : Permanent
 
 	public override void InitializePreview()
 	{
-		Debug.Log("PreviewRope");
 		m_previewGameObject.SetActive(true);
 		m_previewGameObject.transform.rotation = Quaternion.identity;
 	}

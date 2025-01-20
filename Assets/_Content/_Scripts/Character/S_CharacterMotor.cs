@@ -1176,7 +1176,6 @@ public class CharacterMotor : MonoBehaviour
 					itemToThrow.transform.localPosition = Vector3.zero;
 					itemToThrow.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
 				}
-				Debug.Log("Failed to Throw");
 				return;
 			}
 
