@@ -1,9 +1,12 @@
+using Sirenix.OdinInspector;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
 public class MushroomTrigger : MonoBehaviour
 {
+    [FoldoutGroup("Scriptable")][SerializeField] private RSE_PlayFallDeath m_rsePlayFallDeath;
+
     private MushroomBatch _parent;
 
     private void Awake()
@@ -17,6 +20,13 @@ public class MushroomTrigger : MonoBehaviour
         {
             if (rigidbody.velocity.magnitude > _parent.m_ssoMushrooms.MinimalVelocityToTrigger)
             {
+                if(other.TryGetComponent<CharacterMotor>(out CharacterMotor characterMotor))
+                {
+                    if(_parent.GetState() == MushroomState.DEFLATE || _parent.GetState() == MushroomState.CHARGED)
+                    {
+                        m_rsePlayFallDeath.Call();
+                    }
+                }
                 _parent.InitiateExplosion(other.transform.position);
             }
         }

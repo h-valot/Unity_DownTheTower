@@ -11,6 +11,11 @@ public class SSO_Mushrooms : ScriptableObject
 
     [FoldoutGroup("Explosion")]
     [PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+    [InfoBox("Layer used by the mushroom triggers.", InfoMessageType.None)]
+    public LayerMask LayerToFindOverlappingTrigger;
+
+    [FoldoutGroup("Explosion")]
+    [PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
     [InfoBox("Speed at which the deflate wave move (graphic).", InfoMessageType.None)]
     public float DeflateWaveSpeed;
 

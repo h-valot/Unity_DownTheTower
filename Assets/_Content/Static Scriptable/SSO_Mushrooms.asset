@@ -13,8 +13,11 @@ MonoBehaviour:
   m_Name: SSO_Mushrooms
   m_EditorClassIdentifier: 
   MinimalVelocityToTrigger: 0.1
-  DeflateWaveSpeed: 60
-  DeflateDuration: 0.05
+  LayerToFindOverlappingTrigger:
+    serializedVersion: 2
+    m_Bits: 256
+  DeflateWaveSpeed: 8
+  DeflateDuration: 0.1
   DeflateIdleDuration: 1
   SafeDuration: 10
   InflateDuration: 2

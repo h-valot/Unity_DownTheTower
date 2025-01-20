@@ -9,7 +9,7 @@ public class MushroomBatch : MonoBehaviour
     #region editor variables
 
     [Header("Area Properties")]
-    [FoldoutGroup("Spawning")][SerializeField] private float m_radius = 3;
+    [FoldoutGroup("Spawning")][SerializeField] public float m_radius = 3;
     [FoldoutGroup("Spawning")][SerializeField] private float m_density = 5;
 
     [Header("Mushroom Placement Properties")]
@@ -29,13 +29,9 @@ public class MushroomBatch : MonoBehaviour
 
 
     [FoldoutGroup("Behavior")]
-    [InfoBox("Deflate Time is part of the attack time. Attack time might be a bit higher in game depending on propagation.", InfoMessageType = InfoMessageType.None)]
-    [PropertyRange(0, "m_attackTime")]
-    [FoldoutGroup("Behavior")][SerializeField] private float m_deflateTime = 0.5f;
-    [FoldoutGroup("Behavior")][SerializeField] private float m_attackTime = 2f;
-    [FoldoutGroup("Behavior")][SerializeField] private float m_inactiveTime = 10f;
-    [FoldoutGroup("Behavior")][SerializeField] private float m_inflateTime = 1f;
-    [FoldoutGroup("Behavior")][SerializeField] private float m_propagationSpeed = 6f;
+    [InfoBox("Duration while the mushrooms are safe to cross.", InfoMessageType = InfoMessageType.None)]
+    [PropertyRange(0, 100)]
+    [FoldoutGroup("Behavior")][SerializeField] private float m_safeDuration = 10f;
 
 
     // --- INSTANCIATED VARIABLES ---
@@ -48,6 +44,7 @@ public class MushroomBatch : MonoBehaviour
 
     // used during runtime
     private MushroomState m_currentState = MushroomState.CHARGED;
+    private float m_distanceFurtherestMushroom;
 
     private MaterialPropertyBlock m_propertyBlock;
 
@@ -249,7 +246,79 @@ public class MushroomBatch : MonoBehaviour
     {
         if(m_currentState != MushroomState.CHARGED) return;
 
+        List<MushroomBatch> mushroomBatches = new List<MushroomBatch>();
+        mushroomBatches.AddUnique(this);
+
+        Collider[] Colliders = Physics.OverlapSphere(transform.position, m_radius, m_ssoMushrooms.LayerToFindOverlappingTrigger);
+        //Find every mushroomBactch that collide using this FindOverlappingBatches
+        if (Colliders.Length > 0)
+        {
+            foreach (Collider collider in Colliders)
+            {
+                MushroomBatch mushroomBatch = collider.GetComponentInParent<MushroomBatch>();
+
+                if (mushroomBatch != null && mushroomBatch != this)
+                {
+                    int batchesNumber = mushroomBatches.Count;
+                    mushroomBatches.AddUnique(mushroomBatch);
+                    // true if a new batch was added
+                    if (batchesNumber < mushroomBatches.Count)
+                    {
+                        mushroomBatch.FindOverlappingBatches(ref mushroomBatches);
+                    }
+                }
+            }
+        }
+
+        m_distanceFurtherestMushroom = Vector3.Distance(transform.position, source) + m_radius;
+
+        if (mushroomBatches.Count > 1)
+        {
+            foreach(MushroomBatch mushroomBatch in mushroomBatches)
+            {
+                if (mushroomBatch != this)
+                {
+                    float newDistance = ((mushroomBatch.transform.position - source) + (mushroomBatch.transform.position - source).normalized * mushroomBatch.m_radius).magnitude;
+
+                    if (newDistance > m_distanceFurtherestMushroom) m_distanceFurtherestMushroom = newDistance;
+                }
+            }
+        }
+
+        foreach (MushroomBatch mushroomBatch in mushroomBatches)
+        {
+            mushroomBatch.Explode(source, m_distanceFurtherestMushroom);
+        }
+    }
+
+    public void FindOverlappingBatches(ref List<MushroomBatch> mushroomBatches)
+    {
+        Collider[] Colliders = Physics.OverlapSphere(transform.position, m_radius, m_ssoMushrooms.LayerToFindOverlappingTrigger);
+        //Find every mushroomBactch that collide using this FindOverlappingBatches
+        if (Colliders.Length > 0)
+        {
+            foreach (Collider collider in Colliders)
+            {
+                MushroomBatch mushroomBatch = collider.GetComponentInParent<MushroomBatch>();
+
+                if (mushroomBatch != null && mushroomBatch != this)
+                {
+                    int batchesNumber = mushroomBatches.Count;
+                    mushroomBatches.AddUnique(mushroomBatch);
+                    // true if a new batch was added
+                    if (batchesNumber < mushroomBatches.Count)
+                    {
+                        mushroomBatch.FindOverlappingBatches(ref mushroomBatches);
+                    }
+                }
+            }
+        }
+    }
+
+    public void Explode(Vector3 source ,float distanceFurtherestMushroom)
+    {
         m_propertyBlock.SetVector("_source", source);
+        m_distanceFurtherestMushroom = distanceFurtherestMushroom;
 
         IEnumerator coroutine = ExecuteEffect();
         StartCoroutine(coroutine);
@@ -259,11 +328,11 @@ public class MushroomBatch : MonoBehaviour
     {
         UpdateState(MushroomState.DEFLATE);
 
-        yield return new WaitForSeconds(m_radius * 2f / m_ssoMushrooms.DeflateWaveSpeed + m_ssoMushrooms.DeflateIdleDuration);
+        yield return new WaitForSeconds(m_distanceFurtherestMushroom / m_ssoMushrooms.DeflateWaveSpeed + m_ssoMushrooms.DeflateIdleDuration);
 
         UpdateState(MushroomState.SAFE);
 
-        yield return new WaitForSeconds(m_ssoMushrooms.SafeDuration - m_ssoMushrooms.InflateDuration);
+        yield return new WaitForSeconds(m_safeDuration - m_ssoMushrooms.InflateDuration);
 
         UpdateState(MushroomState.INFLATE);
 
@@ -283,9 +352,10 @@ public class MushroomBatch : MonoBehaviour
                 m_propertyBlock.SetFloat("_isInflating", 0f);
                 m_propertyBlock.SetFloat("_startTime", Time.time);
 
-                ParticleSystem.MainModule main = m_particlePrefab.GetComponent<ParticleSystem>().main;
-                main.duration = m_radius * 2f / m_ssoMushrooms.DeflateWaveSpeed;
-                main.startLifetime = m_radius * 2f / m_ssoMushrooms.DeflateWaveSpeed + m_ssoMushrooms.DeflateIdleDuration;
+                ParticleSystem.MainModule main = ParticleSystem.GetComponent<ParticleSystem>().main;
+                main.duration = m_distanceFurtherestMushroom / m_ssoMushrooms.DeflateWaveSpeed;
+                main.startLifetime = m_distanceFurtherestMushroom / m_ssoMushrooms.DeflateWaveSpeed + m_ssoMushrooms.DeflateIdleDuration;
+
                 ParticleSystem.GetComponent<ParticleSystem>().Play();
                 break;
 
