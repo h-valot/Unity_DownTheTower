@@ -74,28 +74,10 @@ BlendTree:
     m_CycleOffset: 0
     m_DirectBlendParameter: MoveSpeed
     m_Mirror: 0
-  - serializedVersion: 2
-    m_Motion: {fileID: -7955037871088759745, guid: 27d9e2694d711be42a8631acbc94a6d4,
-      type: 3}
-    m_Threshold: 2
-    m_Position: {x: 0, y: 0}
-    m_TimeScale: 1
-    m_CycleOffset: 0
-    m_DirectBlendParameter: MoveSpeed
-    m_Mirror: 0
-  - serializedVersion: 2
-    m_Motion: {fileID: 5490587425831455267, guid: d13c8ea1e9491a4438f8d589acaa9b03,
-      type: 3}
-    m_Threshold: 15
-    m_Position: {x: 0, y: 0}
-    m_TimeScale: 1.5
-    m_CycleOffset: 0
-    m_DirectBlendParameter: MoveSpeed
-    m_Mirror: 0
   m_BlendParameter: MoveSpeed
   m_BlendParameterY: MoveSpeed
   m_MinThreshold: 0
-  m_MaxThreshold: 15
+  m_MaxThreshold: 0
   m_UseAutomaticThresholds: 0
   m_NormalizedBlendValues: 0
   m_BlendType: 0
@@ -128,7 +110,7 @@ BlendTree:
   - serializedVersion: 2
     m_Motion: {fileID: 1827226128182048838, guid: 6c670ea8c84cf324980a21b4b9b927a0,
       type: 3}
-    m_Threshold: 15
+    m_Threshold: 9
     m_Position: {x: 0, y: 0}
     m_TimeScale: 1.5
     m_CycleOffset: 0
@@ -137,7 +119,7 @@ BlendTree:
   m_BlendParameter: MoveSpeed
   m_BlendParameterY: MoveSpeed
   m_MinThreshold: 0
-  m_MaxThreshold: 15
+  m_MaxThreshold: 9
   m_UseAutomaticThresholds: 0
   m_NormalizedBlendValues: 0
   m_BlendType: 0
@@ -545,7 +527,7 @@ BlendTree:
   - serializedVersion: 2
     m_Motion: {fileID: -2805380940262304345, guid: 624ffc388f3d12049918dae4488676e4,
       type: 3}
-    m_Threshold: 2
+    m_Threshold: 100
     m_Position: {x: 0, y: 0}
     m_TimeScale: 1
     m_CycleOffset: 0
@@ -554,7 +536,7 @@ BlendTree:
   m_BlendParameter: MoveSpeed
   m_BlendParameterY: MoveSpeed
   m_MinThreshold: 0
-  m_MaxThreshold: 2
+  m_MaxThreshold: 100
   m_UseAutomaticThresholds: 0
   m_NormalizedBlendValues: 0
   m_BlendType: 0
@@ -718,11 +700,11 @@ AnimatorStateMachine:
   m_AnyStateTransitions: []
   m_EntryTransitions: []
   m_StateMachineTransitions:
+  - first: {fileID: -5083185603000737935}
+    second: []
   - first: {fileID: -3335372137293327345}
     second: []
   - first: {fileID: -1300040432103020997}
-    second: []
-  - first: {fileID: -5083185603000737935}
     second: []
   m_StateMachineBehaviours: []
   m_AnyStatePosition: {x: -170, y: 130, z: 0}
