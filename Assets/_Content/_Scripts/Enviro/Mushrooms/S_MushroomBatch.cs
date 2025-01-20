@@ -47,7 +47,7 @@ public class MushroomBatch : MonoBehaviour
     private float m_furthestShroom = -1f;
 
     // used during runtime
-    private MushroomState m_currentState = MushroomState.REST;
+    private MushroomState m_currentState = MushroomState.CHARGED;
 
     private MaterialPropertyBlock m_propertyBlock;
 
@@ -219,9 +219,14 @@ public class MushroomBatch : MonoBehaviour
     {
         ClearGameObjects();
         if (mushroomLists[0].matrices.Count == 0) return;
+
         m_propertyBlock = new MaterialPropertyBlock();
-        m_propertyBlock.SetFloat("_propagationSpeed", m_propagationSpeed);
-        UpdateState(MushroomState.REST);
+        m_propertyBlock.SetFloat("_deflateWaveSpeed", m_ssoMushrooms.DeflateWaveSpeed);
+        m_propertyBlock.SetFloat("_deflateDuration", m_ssoMushrooms.DeflateDuration);
+        m_propertyBlock.SetFloat("_isInflating", 1f);
+        m_propertyBlock.SetFloat("_inflateDuration", m_ssoMushrooms.InflateDuration);
+
+        UpdateState(MushroomState.CHARGED);
     }
 
     private void Update()
@@ -242,66 +247,55 @@ public class MushroomBatch : MonoBehaviour
 
     public void InitiateExplosion(Vector3 source)
     {
-        if(m_currentState != MushroomState.REST) return;
+        if(m_currentState != MushroomState.CHARGED) return;
 
-        m_propertyBlock.SetVector("_explosionSource", source);
-        IEnumerator coroutine = ExecuteEffect(source);
+        m_propertyBlock.SetVector("_source", source);
+
+        IEnumerator coroutine = ExecuteEffect();
         StartCoroutine(coroutine);
     }
 
-    IEnumerator ExecuteEffect(Vector3 source)
+    IEnumerator ExecuteEffect()
     {
-        float expTime = 0;
-
         UpdateState(MushroomState.DEFLATE);
-        while (expTime <= m_radius * 2f / m_propagationSpeed + m_attackTime)
-        {
-            m_propertyBlock.SetFloat("_timeSinceExplosion", expTime);
-            expTime += Time.deltaTime;
-            yield return null;
-        }
 
-        UpdateState(MushroomState.INACTIVE);
-        float inactiveTime = 0;
-        while (inactiveTime <= m_inactiveTime)
-        {
-            inactiveTime += Time.deltaTime;
-            yield return null;
-        }
+        yield return new WaitForSeconds(m_radius * 2f / m_ssoMushrooms.DeflateWaveSpeed + m_ssoMushrooms.DeflateIdleDuration);
 
-        expTime = m_radius * 2f / m_propagationSpeed + m_inflateTime;
-        m_propertyBlock.SetVector("_explosionSource", source + (transform.position - source) * 2f);
+        UpdateState(MushroomState.SAFE);
+
+        yield return new WaitForSeconds(m_ssoMushrooms.SafeDuration - m_ssoMushrooms.InflateDuration);
+
         UpdateState(MushroomState.INFLATE);
 
-        while (expTime >= 0f)
-        {
-            m_propertyBlock.SetFloat("_timeSinceExplosion", expTime);
-            expTime -= Time.deltaTime;
-            yield return null;
-        }
+        yield return new WaitForSeconds(m_ssoMushrooms.InflateDuration);
 
-        UpdateState(MushroomState.REST);
+        UpdateState(MushroomState.CHARGED);
     }
 
     private void UpdateState(MushroomState newState)
     {
         switch (newState) 
         {
-            case MushroomState.REST:
-                m_propertyBlock.SetFloat("_animTime", m_deflateTime);
+            case MushroomState.CHARGED:
                 break;
-            case MushroomState.DEFLATE:
-                // Setting duration and lifetime only works here
-                ParticleSystem.MainModule main = m_particlePrefab.GetComponent<ParticleSystem>().main;
-                main.duration = m_radius * 2f / m_propagationSpeed;
-                main.startLifetime = m_attackTime;
 
+            case MushroomState.DEFLATE:
+                m_propertyBlock.SetFloat("_isInflating", 0f);
+                m_propertyBlock.SetFloat("_startTime", Time.time);
+
+                ParticleSystem.MainModule main = m_particlePrefab.GetComponent<ParticleSystem>().main;
+                main.duration = m_radius * 2f / m_ssoMushrooms.DeflateWaveSpeed;
+                main.startLifetime = m_radius * 2f / m_ssoMushrooms.DeflateWaveSpeed + m_ssoMushrooms.DeflateIdleDuration;
                 ParticleSystem.GetComponent<ParticleSystem>().Play();
                 break;
-            case MushroomState.INACTIVE:
+
+            case MushroomState.SAFE:
                 break;
+
             case MushroomState.INFLATE:
-                m_propertyBlock.SetFloat("_animTime", m_inflateTime);
+                m_propertyBlock.SetFloat("_isInflating", 1f);
+                m_propertyBlock.SetFloat("_startTime", Time.time);
+                m_propertyBlock.SetFloat("_inflateDuration", m_ssoMushrooms.InflateDuration);
                 break;
         }
 

@@ -38,7 +38,7 @@ public class ToxicGas: MonoBehaviour
 
     private IEnumerator Refill()
     {
-        yield return new WaitForSeconds(m_ssoToxic.Cooldown);
+        yield return new WaitForSeconds(m_ssoToxic.DeflateDuration);
         m_gaz.SetActive(true);
 
         foreach (var mushroom in m_mushrooms)

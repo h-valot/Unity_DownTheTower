@@ -1,7 +1,7 @@
 public enum MushroomState
 {
-    REST = 0,
+    CHARGED = 0,
     DEFLATE,
-    INACTIVE,
+    SAFE,
     INFLATE
 }
