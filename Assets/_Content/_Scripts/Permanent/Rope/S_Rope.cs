@@ -136,6 +136,10 @@ public class Rope : Permanent
 		}
     }
 
+	public override void DisablePreview()
+    {
+        m_previewGameObject.SetActive(false);
+    }
 
     private void UpdateColor(bool isDeployable)
 	{
@@ -144,9 +148,9 @@ public class Rope : Permanent
 
 	public override bool Throw(Transform cameraTransform)
 	{
-		m_previewGameObject.SetActive(false);
+		DisablePreview();
 
-		if (Physics.Raycast(
+        if (Physics.Raycast(
 			cameraTransform.position,
 			GetPositionRayDirection(cameraTransform, m_ssoRope.CameraOffsetAngle, m_ssoRope.MaxCameraDownwardClamp),
 			out var hitInfo,

@@ -26,6 +26,14 @@ public class Permanent : MonoBehaviour
 
 	}
 
+    /// <summary>
+    /// 	disables the throw preview.
+    /// </summary>
+    public virtual void DisablePreview()
+	{
+
+	}
+
 	/// <summary>
 	/// 	called when the player presses the placement input.
 	/// </summary>
