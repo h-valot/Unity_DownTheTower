@@ -23,14 +23,12 @@ public class ChronoCheckpoint : MonoBehaviour
 
 	private void OnTriggerEnter(Collider collider)
 	{
-		// Assertion
+		// Assertions
 		if (m_isActivated) return;
+		if (!collider.TryGetComponent<CharacterMotor>(out var character)) return;
 
-		if (collider.TryGetComponent<CharacterMotor>(out var character))
-		{
-			m_isActivated = true;
-			m_rseCheckpointReached.Call(m_checkpointName);
-		}
+		m_isActivated = true;
+		m_rseCheckpointReached.Call(m_checkpointName);
 	}
 
 	private void Restart()

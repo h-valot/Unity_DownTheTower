@@ -22,11 +22,12 @@ public class ChronoManager : UIWindow
 	private bool m_resetOnPaused;
 	private DateTime m_startPauseDate;
 	private StringBuilder m_output;
-	private List<string> m_checkpoints;
+	private List<string> m_checkpoints = new List<string>();
 
-	private void Awake()
+	public override void Start()
 	{
-		Restart();
+		base.Start();
+		Reset();
 	}
 
 	private void OnEnable()
@@ -93,7 +94,7 @@ public class ChronoManager : UIWindow
 	{
 		// Assertion
 		if (!m_ssoGame.EnableChrono) return;
-		
+
 		TimeSpan time = m_currentTime.Subtract(m_elapsedOnPaused);
 		m_checkpoints.Add($"{checkpointName}: {time.Minutes}:{time.Seconds}:{time.Milliseconds}");
 	}
@@ -103,8 +104,8 @@ public class ChronoManager : UIWindow
 		m_startPauseDate = DateTime.Now;
 		m_rsoStartDate.value = DateTime.Now;
 
-		m_currentTime = DateTime.Now.Subtract(DateTime.Now);
-		m_elapsedOnPaused = DateTime.Now.Subtract(DateTime.Now);
+		m_currentTime = TimeSpan.Zero;
+		m_elapsedOnPaused = TimeSpan.Zero;
 
 		m_checkpoints = new List<string>();
 	}
@@ -115,5 +116,6 @@ public class ChronoManager : UIWindow
 		m_rseRestartChrono.Call();
 		UpdateGraphics();
 		if (m_rsoGamePaused.value) m_resetOnPaused = true;
+		print(m_rsoStartDate.value);
 	}
 }
