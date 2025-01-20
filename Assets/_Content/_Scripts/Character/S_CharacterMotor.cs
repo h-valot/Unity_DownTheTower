@@ -351,7 +351,7 @@ public class CharacterMotor : MonoBehaviour
 
 		if ((m_rsoCharacterState.value == BehaviorState.FALL
 		|| m_rsoCharacterState.value == BehaviorState.ROPE)
-		&& m_coyoteTime > 0f) 
+		&& m_coyoteTime < 0f) 
 		{
 			return;
 		}
