@@ -326,7 +326,6 @@ public class CharacterMotor : MonoBehaviour
 	private void CancelAction(bool isPressed)
     {
         if (!isPressed) return;
-		Debug.Log("Cancel !");
 
 		if (m_startAiming)
 		{
