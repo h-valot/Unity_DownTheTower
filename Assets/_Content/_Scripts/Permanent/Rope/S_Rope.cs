@@ -11,7 +11,8 @@ public class Rope : Permanent
 	[FoldoutGroup("Internal references")][SerializeField] private BoxCollider m_boxCollider;
 	[FoldoutGroup("Internal references")][SerializeField] private Transform m_ropeAttach;
 	[FoldoutGroup("Internal references")][SerializeField] public Transform RaycastTarget;
-	[FoldoutGroup("Internal references")][SerializeField] private MeshRenderer m_previewMeshRendered;
+    [FoldoutGroup("Internal references")][SerializeField] private MeshRenderer m_anchorMeshRenderer;
+    [FoldoutGroup("Internal references")][SerializeField] private MeshRenderer m_previewMeshRendered;
 	[FoldoutGroup("Internal references")][SerializeField] private GameObject m_previewGameObject;
 	[FoldoutGroup("Internal references")][SerializeField] private ConfigurableJoint m_joint;
 
@@ -118,6 +119,7 @@ public class Rope : Permanent
 
 			// Update preview position
 			m_previewGameObject.transform.position = new Vector3(hitInfo.point.x, hitInfo.point.y + m_ssoRope.HeightLimit / 2, hitInfo.point.z);
+			m_previewGameObject.transform.rotation = Quaternion.Euler(0, m_previewGameObject.transform.eulerAngles.y, 0);
 
 			UpdateColor(isDeployable: 
 				IsGroundFlat(hitInfo, m_ssoRope.MaxGroundAngle) 
@@ -177,7 +179,8 @@ public class Rope : Permanent
 			m_boxCollider.enabled = true;
 			m_folds = new List<Vector3>() { m_ropeAttach.position.CutDigits(2) };
 			m_isPlaced = true;
-		});
+            m_anchorMeshRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
+        });
 	}
 
 	#endregion
