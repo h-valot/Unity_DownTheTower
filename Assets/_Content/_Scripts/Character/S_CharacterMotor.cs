@@ -221,7 +221,7 @@ public class CharacterMotor : MonoBehaviour
 		m_rseThrowRope.action -= ToggleRopeAim;
         m_rseThrowTorch.action -= ToggleTorchAim;
         m_rseClimb.action -= UpdateClimbInput;
-		m_rseCancel.action -= CancelRope;
+		m_rseCancel.action -= CancelAction;
 		m_rseToggleHandObject.action -= ToggleTorch;
 	}
 
@@ -241,7 +241,7 @@ public class CharacterMotor : MonoBehaviour
 				m_rseCraft.action += ToggleCraft;
 				m_rseThrowRope.action += ToggleRopeAim;
                 m_rseThrowTorch.action += ToggleTorchAim;
-                m_rseCancel.action += CancelRope;
+                m_rseCancel.action += CancelAction;
 				break;
 
 			case BehaviorState.ROPE:
@@ -251,7 +251,7 @@ public class CharacterMotor : MonoBehaviour
                 m_rseThrowTorch.action += ToggleTorchAim;
                 m_rseJump.action += JumpRope;
 				m_rseClimb.action += UpdateClimbInput;
-				m_rseCancel.action += CancelRope;
+				m_rseCancel.action += CancelAction;
 				break;
 
 			case BehaviorState.FALL:
@@ -322,14 +322,18 @@ public class CharacterMotor : MonoBehaviour
 		if (m_isGrounded) m_rope.UpdateHoldLength(isClimbing);
 	}
 
-	private void CancelRope(bool isPressed)
-	{
-		// Assertions
-		if (!IsRopeValid) return;
-		if (!isPressed) return;
+	private void CancelAction(bool isPressed)
+    {
+        if (!isPressed) return;
 
-		DesequipRope();
-	}
+		if (m_startAiming)
+		{
+			CancelAim();
+			return;
+		}
+
+        if (IsRopeValid) DesequipRope();
+    }
 
 	/// <summary>
 	/// If the input is pressed and If the player hasn't jumped:
@@ -1154,10 +1158,10 @@ public class CharacterMotor : MonoBehaviour
 				itemToThrow.transform.localPosition = Vector3.zero;
 				itemToThrow.transform.rotation = m_handSocket.rotation;
 			}
-			AimingObject = itemToThrow;
 			itemToThrow.InitializePreview();
 			m_startAiming = true;
-		}
+            AimingObject = itemToThrow;
+        }
 
 		// Handle pernament throw on input released
 		else
@@ -1166,16 +1170,7 @@ public class CharacterMotor : MonoBehaviour
 			if (!m_startAiming) return;
 			if (!itemToThrow.Throw(m_rsoCameraTransform.value))
 			{
-				AimingObject = null;
-				m_startAiming = false;
-				// Placing rope back in bag
-				if (itemToThrow is Rope)
-				{
-					itemToThrow.transform.parent = m_bagSocket.transform;
-					itemToThrow.transform.rotation = m_bagSocket.rotation;
-					itemToThrow.transform.localPosition = Vector3.zero;
-					itemToThrow.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
-				}
+				CancelAim();
 				return;
 			}
 
@@ -1204,7 +1199,23 @@ public class CharacterMotor : MonoBehaviour
 
     private void CancelAim()
     {
+		// Placing rope back in bag
+		if (AimingObject is Rope)
+		{
+			AimingObject.transform.parent = m_bagSocket.transform;
+			AimingObject.transform.rotation = m_bagSocket.rotation;
+			AimingObject.transform.localPosition = Vector3.zero;
+			AimingObject.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
+		}
+		else if (AimingObject is Torch) {
+			Torch torch = (Torch)AimingObject;
+			torch.DisablePreview();
+		}
 
+        IsAiming = false;
+        AimingObject = null;
+        m_startAiming = false;
+		m_rsoCameraStyle.value = CameraStyle.BASIC;
     }
 
     public bool IsCarryingLight()
