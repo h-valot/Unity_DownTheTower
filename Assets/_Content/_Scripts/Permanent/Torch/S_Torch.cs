@@ -352,6 +352,11 @@ public class Torch : Permanent
         return true;
     }
 
+    public void DisablePreview()
+    {
+        m_aimLineRenderer.enabled = false;
+    }
+
     private IEnumerator WaitAndDeactivateTorch(float duration)
     {
         yield return new WaitForSeconds(duration);
