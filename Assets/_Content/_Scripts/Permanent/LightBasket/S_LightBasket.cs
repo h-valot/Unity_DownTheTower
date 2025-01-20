@@ -7,8 +7,7 @@ using UnityEngine.Experimental.GlobalIllumination;
 public class LightBasket : MonoBehaviour
 {
     [SerializeField] private LightDoor _parentDoor;
-    [SerializeField] private GameObject _permanentLight;
-    [SerializeField] private float _maxVelocitySnap;
+    [SerializeField] private float _maxVelocitySnap = 1;
 
     private bool _isFilled = false;
     private List<Rigidbody> torches = new List<Rigidbody>();
@@ -44,9 +43,7 @@ public class LightBasket : MonoBehaviour
     private void ActivateBasket(Rigidbody torch)
     {
         _isFilled = true;
-        torches.Remove(torch);
-        Destroy(torch.gameObject);
-        Instantiate(_permanentLight, transform.position, Quaternion.identity, transform);
+        torch.GetComponent<Torch>().DetachAndCancelDeactivation();
         _parentDoor.AddToLightCounter();
     }
 }

@@ -29,8 +29,8 @@ public class Torch : Permanent
     [HideInInspector] public bool IsLit;
     [HideInInspector] public bool IsInHand;
 
-	// ----- PRIVATE VARIABLES -----
-	private Vector3 m_lastPosition;
+    // ----- PRIVATE VARIABLES -----
+    private Vector3 m_lastPosition;
 
     private Vector3 m_throwSpeed;
 
@@ -39,6 +39,8 @@ public class Torch : Permanent
     private bool m_hasChangedColor;
     private bool m_hasPlayedHitSound;
     private bool m_isDeactivate;
+
+    private Coroutine m_thrownCoroutine;
 
     private float m_lightPercent;
     private Color m_emitColor;
@@ -353,19 +355,26 @@ public class Torch : Permanent
         m_rigidbody.AddForce(m_throwSpeed, ForceMode.Impulse);
         IsInHand = false;
 
-        StartCoroutine(WaitAndDeactivateTorch(m_ssoTorch.GroundedLightDuration));
+        m_thrownCoroutine = StartCoroutine(WaitAndDeactivateTorch(m_ssoTorch.GroundedLightDuration));
         return true;
     }
 
     private IEnumerator WaitAndDeactivateTorch(float duration)
     {
         yield return new WaitForSeconds(duration);
-        m_rsoTorchManager.value.Remove(this);
+        m_rsoTorchManager.value.Remove(this, true);
     }
 
     public override bool StateInHand()
     {
         return IsInHand;
+    }
+
+    public void DetachAndCancelDeactivation()
+    {
+        if (m_thrownCoroutine == null) return;
+        StopCoroutine(m_thrownCoroutine);
+        m_rsoTorchManager.value.Remove(this, false);
     }
 
     #endregion
@@ -412,7 +421,7 @@ public class Torch : Permanent
 
 		if (m_rsoCharacterPosition.value.y - transform.position.y > m_ssoCharacter.LethalHeight + m_ssoRope.MaxLength)
 		{
-			m_rsoTorchManager.value.Remove(this);
+			m_rsoTorchManager.value.Remove(this, true);
 		}
     }
 
