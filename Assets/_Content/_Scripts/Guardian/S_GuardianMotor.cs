@@ -383,7 +383,7 @@ public class GuardianMotor : MonoBehaviour
 	{
 		m_canSwitchState = false;
 		yield return new WaitForSeconds(m_ssoGuardian.DelayKillCharacter.x);
-		character.HandleDeath();
+		character.HandleDeath(DeathType.DEFAULT);
 		yield return new WaitForSeconds(m_ssoGuardian.DelayKillCharacter.y);
 		m_canSwitchState = true;
 		m_targetNotFound = true;

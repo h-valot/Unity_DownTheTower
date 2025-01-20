@@ -17,7 +17,7 @@ public class ToxicGas: MonoBehaviour
     {
         if (torch.IsInHand)
         {
-            m_rseKillCharacter.Call();
+            m_rseKillCharacter.Call(DeathType.GAS);
         }
         else
         {
@@ -33,7 +33,7 @@ public class ToxicGas: MonoBehaviour
 
     public void Enter(CharacterMotor character)
     {
-        m_rseKillCharacter.Call();
+        m_rseKillCharacter.Call(DeathType.GAS);
     }
 
     private IEnumerator Refill()

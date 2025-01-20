@@ -17,13 +17,19 @@ public class MushroomTrigger : MonoBehaviour
         Vector3 newPos = other.transform.position;
         foreach (ObjectPosition objectPosition in _objectLastPositions)
         {
+			// Assertion
             if (!(objectPosition.gObject == other.gameObject)) continue;
-
             if (Mathf.Round(objectPosition.position.sqrMagnitude) == Mathf.Round(newPos.sqrMagnitude)) return;
 
             objectPosition.position = new Vector3(newPos.x, newPos.y, newPos.z);
             _parent.InitiateExplosion(newPos);
-            if (other.gameObject.TryGetComponent<CharacterMotor>(out CharacterMotor chara) && _parent.GetState() == MushroomState.DEFLATE) chara.HandleDeath();
+
+            if (other.gameObject.TryGetComponent<CharacterMotor>(out var character) 
+			&& _parent.GetState() == MushroomState.DEFLATE)
+			{
+				character.HandleDeath(DeathType.GAS);
+			}
+
             return;
         }
 
@@ -32,9 +38,13 @@ public class MushroomTrigger : MonoBehaviour
         newItem.position = newPos;
         _objectLastPositions.Add(newItem);
         _parent.InitiateExplosion(newItem.position); 
-        if (other.gameObject.TryGetComponent<CharacterMotor>(out CharacterMotor newChara) && _parent.GetState() == MushroomState.DEFLATE) newChara.HandleDeath();
-    }
 
+        if (other.gameObject.TryGetComponent<CharacterMotor>(out var newChara) 
+		&& _parent.GetState() == MushroomState.DEFLATE) 
+		{
+			newChara.HandleDeath(DeathType.GAS);
+		}
+    }
 
     private void OnTriggerExit(Collider other)
     {

@@ -12,7 +12,7 @@ public class CameraMotor : MonoBehaviour
 
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Look m_rseLook;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_InitializeCamera m_rseInitializeCamera;
-	[FoldoutGroup("Scriptable")][SerializeField] private RSE_PlayFallDeath m_rsePlayFallDeath;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSE_DisplayDeath m_rsePlayFallDeath;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterDeath m_rsoCharacterDeath;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CameraStyle m_rsoCameraStyle;
