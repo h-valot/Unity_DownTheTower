@@ -2,6 +2,6 @@ using UnityEngine;
 
 public class ObjectPosition
 {
-    public GameObject gObject;
+    public Transform gObject;
     public Vector3 position;
 }

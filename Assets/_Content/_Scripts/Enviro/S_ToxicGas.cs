@@ -9,7 +9,7 @@ public class ToxicGas: MonoBehaviour
     [SerializeField] private GameObject m_gaz;
     [SerializeField] private List<ExplosiveMushroom> m_mushrooms;
 
-	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Toxic m_ssoToxic;
+	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Mushrooms m_ssoToxic;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_KillCharacter m_rseKillCharacter;
 
@@ -38,7 +38,7 @@ public class ToxicGas: MonoBehaviour
 
     private IEnumerator Refill()
     {
-        yield return new WaitForSeconds(m_ssoToxic.Cooldown);
+        yield return new WaitForSeconds(m_ssoToxic.DeflateDuration);
         m_gaz.SetActive(true);
 
         foreach (var mushroom in m_mushrooms)
