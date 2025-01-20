@@ -16,21 +16,21 @@ public class MushroomTrigger : MonoBehaviour
 
     private void OnTriggerStay(Collider other)
     {
-        if (other.TryGetComponent<Rigidbody>(out Rigidbody rigidbody))
+        if (other.TryGetComponent<Rigidbody>(out var rigidbody))
         {
             if (rigidbody.velocity.magnitude > _parent.m_ssoMushrooms.MinimalVelocityToTrigger)
             {
-                if(other.TryGetComponent<CharacterMotor>(out CharacterMotor characterMotor))
+                if(other.TryGetComponent<CharacterMotor>(out var character))
                 {
                     if(_parent.GetState() == MushroomState.DEFLATE || _parent.GetState() == MushroomState.CHARGED)
                     {
-                        m_rsePlayFallDeath.Call();
-                    }
+						character.HandleDeath(DeathType.GAS);
+					}
                 }
                 _parent.InitiateExplosion(other.transform.position);
             }
         }
-        else if (other.TryGetComponent<NavMeshAgent>(out NavMeshAgent navMeshAgent))
+        else if (other.TryGetComponent<NavMeshAgent>(out var navMeshAgent))
         {
             if (navMeshAgent.velocity.magnitude > _parent.m_ssoMushrooms.MinimalVelocityToTrigger)
             {

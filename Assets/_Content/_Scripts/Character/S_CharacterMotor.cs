@@ -7,16 +7,15 @@ public class CharacterMotor : MonoBehaviour
 {
 	#region REFERENCES
 
-	[Title("Internal references")]
-	[SerializeField] private Rigidbody m_rigidbody;
-	[SerializeField] private CapsuleCollider m_collider;
-	[SerializeField] private Transform m_handSocket;
-	[SerializeField] private Transform m_robotSocket;
-	[SerializeField] private Transform m_bagSocket;
-	[SerializeField] private Transform m_aimingLookTo;
-	[SerializeField] private Transform m_cameraTarget;
-	[SerializeField] private Transform m_attach;
-	[SerializeField] private CharacterGraphics m_characterGraphics;
+	[FoldoutGroup("Internal references")][SerializeField] private Rigidbody m_rigidbody;
+	[FoldoutGroup("Internal references")][SerializeField] private CapsuleCollider m_collider;
+	[FoldoutGroup("Internal references")][SerializeField] private Transform m_handSocket;
+	[FoldoutGroup("Internal references")][SerializeField] private Transform m_robotSocket;
+	[FoldoutGroup("Internal references")][SerializeField] private Transform m_bagSocket;
+	[FoldoutGroup("Internal references")][SerializeField] private Transform m_aimingLookTo;
+	[FoldoutGroup("Internal references")][SerializeField] private Transform m_cameraTarget;
+	[FoldoutGroup("Internal references")][SerializeField] private Transform m_attach;
+	[FoldoutGroup("Internal references")][SerializeField] private CharacterGraphics m_characterGraphics;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Character m_ssoCharacter;
 	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Torch m_ssoTorch;
@@ -35,7 +34,7 @@ public class CharacterMotor : MonoBehaviour
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_BackpackCrafting m_rseBackpackCrafting;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_SetCharacterPosition m_rseSetCharacterPosition;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_InitializeCamera m_rseInitializeCamera;
-	[FoldoutGroup("Scriptable")][SerializeField] private RSE_PlayFallDeath m_rsePlayFallDeath;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSE_DisplayDeath m_rseDisplayDeath;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_InputsLocked m_rsoInputsLocked;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_MovementDatas m_rsoMovementDatas;
@@ -493,11 +492,73 @@ public class CharacterMotor : MonoBehaviour
 		}
 	}
 
-    #endregion
+	#endregion
 
-    #region GROUND
+	#region DEATH
 
-    private void CheckGround()
+	public void HandleDeath(DeathType type)
+	{
+		if (IsRopeValid) DesequipRope();
+
+		switch (type)
+		{
+			case DeathType.DEFAULT:
+				StartCoroutine(AnimateDefaultDeath());
+				break;
+
+			case DeathType.HEIGHT:
+				StartCoroutine(AnimateHeightDeath());
+				break;
+
+			case DeathType.GAS:
+				StartCoroutine(AnimateGasDeath());
+				break;
+		}
+	}
+
+	public IEnumerator AnimateDefaultDeath()
+	{
+		m_characterGraphics.ToggleRagdoll(true);
+		m_rseDisplayDeath.Call();
+
+		yield return new WaitForSeconds(m_ssoCharacter.FallDeathDurationBeforeRespawn);
+
+		m_rsoCharacterDeath.value = true;
+		Destroy(gameObject);
+	}
+
+	public IEnumerator AnimateHeightDeath()
+	{
+		m_rseDisplayDeath.Call();
+
+		yield return new WaitForSeconds(m_ssoCharacter.FallDeathDurationBeforeRespawn);
+
+		m_rsoCharacterDeath.value = true;
+		Destroy(gameObject);
+	}
+
+	public IEnumerator AnimateGasDeath()
+	{
+		// TODO Disable all inputs
+
+		// TODO Blur and fade camera to black
+
+		// TODO Slow character's speed down to zero
+
+		m_characterGraphics.ToggleRagdoll(true);
+		m_rseDisplayDeath.Call();
+
+		yield return new WaitForSeconds(m_ssoCharacter.FallDeathDurationBeforeRespawn);
+
+		m_rsoCharacterDeath.value = true;
+		Destroy(gameObject);
+	}
+
+	#endregion
+
+	#region GROUND
+
+	private void CheckGround()
     {
         m_isGrounded = false;
         m_groundNormal = Vector3.down;
@@ -536,7 +597,7 @@ public class CharacterMotor : MonoBehaviour
 		m_fallHeight = (m_rigidbody.position.y - m_positionStartFall.y) * -1f;
 		if (m_fallHeight >= m_ssoCharacter.LethalHeight)
 		{
-			HandleDeath();
+			HandleDeath(DeathType.DEFAULT);
 		}
 		else if (m_fallHeight >= m_ssoCharacter.StunHeight)
 		{
@@ -583,23 +644,6 @@ public class CharacterMotor : MonoBehaviour
 				m_isSlowedPostStun = false;
 			}
 		}
-	}
-
-	public void HandleDeath()
-	{
-		if (IsRopeValid) DesequipRope();
-		StartCoroutine(AnimateDeath());
-	}
-
-	public IEnumerator AnimateDeath()
-	{
-		m_characterGraphics.ToggleRagdoll(true);
-		m_rsePlayFallDeath.Call();
-		
-		yield return new WaitForSeconds(m_ssoCharacter.FallDeathDurationBeforeRespawn);
-
-		m_rsoCharacterDeath.value = true;
-		Destroy(gameObject);
 	}
 
 	private void StartCoyoteTime()
@@ -889,7 +933,7 @@ public class CharacterMotor : MonoBehaviour
 		if (m_fallHeight >= m_ssoRope.MaxLength + m_ssoCharacter.LethalHeight * 2f)
 		{
 			m_isCharacterDead = true;
-			StartCoroutine(AnimateDeath());
+			HandleDeath(DeathType.HEIGHT);
 		}
 	}
 
@@ -1323,7 +1367,7 @@ public class CharacterMotor : MonoBehaviour
         }
     }
 
-    #endregion
+	#endregion
 
-    #endregion
+	#endregion
 }

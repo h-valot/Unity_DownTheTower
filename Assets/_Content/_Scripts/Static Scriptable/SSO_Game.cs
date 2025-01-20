@@ -9,9 +9,13 @@ public class SSO_Game : ScriptableObject
 	[Title("Build")]
 	public string Version;
 
-	[PropertySpace(SpaceBefore = 15, SpaceAfter = 15)]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
 	[InfoBox("The type of build the game will be. DEBUG: Activate all debug fonctionalities. RELEASE: Disable all debug fonctionalities.", InfoMessageType.None)]
 	public BuildType BuildType;
+
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 15)]
+	[InfoBox("Enable the chrono debugging  system.", InfoMessageType.None)]
+	public bool EnableChrono;
 
 	#endregion
 
