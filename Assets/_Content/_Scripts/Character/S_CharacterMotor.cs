@@ -258,11 +258,13 @@ public class CharacterMotor : MonoBehaviour
                 m_rseMove.action += UpdateMoveInput;
 				m_rseThrowRope.action += ToggleRopeAim;
                 m_rseThrowTorch.action += ToggleTorchAim;
+                m_rseCancel.action += CancelAction;
                 break;
 
             case BehaviorState.CRAFT:
 				m_rseCraft.action += ToggleCraft;
-				break;
+                m_rseCancel.action += CancelAction;
+                break;
         }
 	}
 
@@ -325,6 +327,7 @@ public class CharacterMotor : MonoBehaviour
 	private void CancelAction(bool isPressed)
     {
         if (!isPressed) return;
+		Debug.Log("Cancel !");
 
 		if (m_startAiming)
 		{
@@ -1207,11 +1210,8 @@ public class CharacterMotor : MonoBehaviour
 			AimingObject.transform.localPosition = Vector3.zero;
 			AimingObject.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
 		}
-		else if (AimingObject is Torch) {
-			Torch torch = (Torch)AimingObject;
-			torch.DisablePreview();
-		}
 
+		AimingObject.DisablePreview();
         IsAiming = false;
         AimingObject = null;
         m_startAiming = false;

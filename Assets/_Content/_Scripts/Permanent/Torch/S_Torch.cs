@@ -324,10 +324,15 @@ public class Torch : Permanent
         m_aimLineRenderer.colorGradient = gradient;
     }
 
+    public override void DisablePreview()
+    {
+        m_aimLineRenderer.enabled = false;
+    }
+
     #endregion
 
     #region THROW
-	
+
     public override bool Throw(Transform _cameraTransform)
     {
         // Assertion
@@ -340,7 +345,7 @@ public class Torch : Permanent
 
 		m_rigidbody.isKinematic = false;
 
-        m_aimLineRenderer.enabled = false;
+        DisablePreview();
 
         m_lastPosition = transform.position;
         gameObject.transform.parent = null;
@@ -350,11 +355,6 @@ public class Torch : Permanent
 
         StartCoroutine(WaitAndDeactivateTorch(m_ssoTorch.GroundedLightDuration));
         return true;
-    }
-
-    public void DisablePreview()
-    {
-        m_aimLineRenderer.enabled = false;
     }
 
     private IEnumerator WaitAndDeactivateTorch(float duration)
