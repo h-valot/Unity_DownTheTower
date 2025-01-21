@@ -14,7 +14,7 @@ public class CharacterMotor : MonoBehaviour
 	[FoldoutGroup("Internal references")][SerializeField] private Transform m_bagSocket;
 	[FoldoutGroup("Internal references")][SerializeField] private Transform m_aimingLookTo;
 	[FoldoutGroup("Internal references")][SerializeField] private Transform m_cameraTarget;
-	[FoldoutGroup("Internal references")][SerializeField] private Transform m_attach;
+	[FoldoutGroup("Internal references")][SerializeField] private Transform m_harness;
 	[FoldoutGroup("Internal references")][SerializeField] private CharacterGraphics m_characterGraphics;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Character m_ssoCharacter;
@@ -46,6 +46,7 @@ public class CharacterMotor : MonoBehaviour
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CameraForward m_rsoCameraForward;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CameraRight m_rsoCameraRight;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CameraTransform m_rsoCameraTransform;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_HarnessPosition m_rsoHarnessPosition;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterPosition m_rsoCharacterPosition;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterLastPosition m_rsoCharacterLastPosition;
 
@@ -108,7 +109,7 @@ public class CharacterMotor : MonoBehaviour
 	private const float k_fallingForcesThreshold = 0.2f;
 	private BehaviorState m_previousState;
 	public Rigidbody Rigidbody => m_rigidbody;
-	public Transform Attach => m_attach;
+	public Transform Harness => m_harness;
 
 	#endregion
 
@@ -168,6 +169,7 @@ public class CharacterMotor : MonoBehaviour
 		// Update useful variables
 		m_rsoCharacterLastPosition.value = m_rsoCharacterPosition.value;
 		m_rsoCharacterPosition.value = m_rigidbody.position;
+		m_rsoHarnessPosition.value = m_harness.position;
 		m_planarVelocity = new Vector2(m_rigidbody.velocity.x, m_rigidbody.velocity.z);
 		if (m_isGrounded && m_maxGroundedSpeed < m_planarVelocity.magnitude) m_maxGroundedSpeed = m_planarVelocity.magnitude;
 	}
@@ -1225,7 +1227,7 @@ public class CharacterMotor : MonoBehaviour
                 // Exception: rope attachment
                 if (m_rope != null) DesequipRope();
                 m_rope = itemToThrow as Rope;
-                if (m_rope != null) m_rope?.Attach(m_attach, m_rigidbody);
+                if (m_rope != null) m_rope?.Attach(m_harness, m_rigidbody);
 
                 itemToThrow = null;
                 HandObject = null;

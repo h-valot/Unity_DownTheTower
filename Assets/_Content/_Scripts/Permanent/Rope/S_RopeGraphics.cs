@@ -95,7 +95,7 @@ public class RopeGraphics : MonoBehaviour
 		{
 			// Get start and end points
 			Vector3 start = m_rope.Folds[i];
-			Vector3 end = i == m_rope.Folds.Count - 1 ? m_rope.CharacterPosition : m_rope.Folds[i + 1];
+			Vector3 end = i == m_rope.Folds.Count - 1 ? m_rope.HarnessPosition : m_rope.Folds[i + 1];
 
 			// Base calculation to get the best middle point
 			float distance = (end - start).magnitude;

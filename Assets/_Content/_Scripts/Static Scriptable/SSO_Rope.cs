@@ -46,6 +46,7 @@ public class SSO_Rope : ScriptableObject
 	public LayerMask FoldLayerToInclude;
 
 	[FoldoutGroup("Global settings")]
+	[PropertyRange(1, 5)]
 	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
 	[InfoBox("", InfoMessageType.None)]
 	public int FoldingPrecision;
@@ -56,9 +57,10 @@ public class SSO_Rope : ScriptableObject
 	public float FoldOffset = 0.2f;
 
 	[FoldoutGroup("Global settings")]
+	[PropertyRange(0.01f, 0.5f)]
 	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
 	[InfoBox("The distance between two following folds can't be smaller than the given float.", InfoMessageType.None)]
-	public float MinFoldDistance = 0.25f;
+	public float MinFoldDistance;
 
 	[FoldoutGroup("Global settings")]
 	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
