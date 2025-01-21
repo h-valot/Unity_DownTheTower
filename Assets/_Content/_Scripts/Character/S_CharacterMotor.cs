@@ -281,12 +281,15 @@ public class CharacterMotor : MonoBehaviour
 
 	private void UpdateMoveInput(Vector2 input)
 	{
+		if (m_rsoInputsLocked.value) return;
+
 		m_moveInput = input;
 	}
 
 	private void UpdateHoldInput(bool isHolding)
 	{
-		// Assertion
+		if (m_rsoInputsLocked.value) return;
+		
 		if (!IsRopeValid
 		|| m_withinRopeLimit)
 		{
@@ -307,6 +310,7 @@ public class CharacterMotor : MonoBehaviour
 	private void ToggleTorch()
 	{
 		// Assertion
+		if (m_rsoInputsLocked.value) return;
 		if (!(RobotObject as Torch)) return;
 
 		((Torch)RobotObject)?.ToggleHandEffect();
@@ -315,6 +319,7 @@ public class CharacterMotor : MonoBehaviour
 	private void UpdateClimbInput(bool isClimbing)
 	{
 		// Assertion
+		if (m_rsoInputsLocked.value) return;
 		if (!IsRopeValid) return;
 
 		m_isClimbing = isClimbing;
@@ -322,8 +327,9 @@ public class CharacterMotor : MonoBehaviour
 	}
 
 	private void CancelAction(bool isPressed)
-    {
-        if (!isPressed) return;
+	{
+		if (m_rsoInputsLocked.value) return;
+		if (!isPressed) return;
 
 		if (m_startAiming)
 		{
@@ -336,6 +342,7 @@ public class CharacterMotor : MonoBehaviour
 
 	private void UpdateJumpInput(bool isPressed)
 	{
+		if (m_rsoInputsLocked.value) return;
 		m_isJumping = isPressed;
 	}
 
@@ -345,6 +352,7 @@ public class CharacterMotor : MonoBehaviour
 	private void JumpGround(bool isPressed)
 	{
 		// Assertions
+		if (m_rsoInputsLocked.value) return;
 		if (!isPressed) return;
 		if (m_isStunned) return;
 		if (m_hasJumped) return;
@@ -364,6 +372,7 @@ public class CharacterMotor : MonoBehaviour
 	private void JumpRope(bool isPressed)
 	{
 		// Assertion
+		if (m_rsoInputsLocked.value) return;
 		if (!IsRopeValid) return;
 
 		UpdateHoldInput(isPressed);
@@ -1214,8 +1223,9 @@ public class CharacterMotor : MonoBehaviour
 
 	private void ToggleRopeAim(bool isInputPressed)
 	{
-        // Assertions
-        if (m_startAiming && isInputPressed) return;
+		// Assertions
+		if (m_rsoInputsLocked.value) return;
+		if (m_startAiming && isInputPressed) return;
         if (m_startAiming && AimingObject != HandObject) return;
         if (m_rsoCharacterState.value == BehaviorState.ROPE) return;
 
@@ -1225,8 +1235,8 @@ public class CharacterMotor : MonoBehaviour
 	private void ToggleAim(bool isInputPressed, Permanent itemToThrow)
 	{
 		// Assertions
-		if (itemToThrow == null) return;
 		if (m_rsoInputsLocked.value) return;
+		if (itemToThrow == null) return;
 
 		IsAiming = isInputPressed;
 		m_rsoCameraStyle.value = IsAiming ? CameraStyle.AIMING : CameraStyle.BASIC;
@@ -1386,8 +1396,10 @@ public class CharacterMotor : MonoBehaviour
 
     private void ToggleCraft(CraftType craftType, bool isInputPressed)
     {
-        // Prevent switching to craft state if not in locomotion or crafting state or already crafting another item
-        if (m_rsoCharacterState.value != BehaviorState.LOCOMOTION
+		if (m_rsoInputsLocked.value) return;
+
+		// Prevent switching to craft state if not in locomotion or crafting state or already crafting another item
+		if (m_rsoCharacterState.value != BehaviorState.LOCOMOTION
         || m_rsoCharacterState.value != BehaviorState.CRAFT)
         {
             // If craft button is pressed

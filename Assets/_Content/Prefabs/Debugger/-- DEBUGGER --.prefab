@@ -85,7 +85,7 @@ MonoBehaviour:
   m_sceneLoader: {fileID: 8096640366390723087}
   m_runtimeValueModifier: {fileID: 3605584042015579482}
   m_ssoGame: {fileID: 11400000, guid: c6ad5e1cd823f2647b0c8dc515fee2d5, type: 2}
-  m_rsoGamePaused: {fileID: 11400000, guid: faef31959fcedf747aaeb875374bdc6b, type: 2}
+  m_rsoPause: {fileID: 11400000, guid: a2ea92c3ee051664782983f5eda912ec, type: 2}
 --- !u!223 &4260637213266472998
 Canvas:
   m_ObjectHideFlags: 0
@@ -408,14 +408,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8477749440587918157, guid: 4b90538f1fe67354381935a1fde24bb3,
         type: 3}
-      propertyPath: m_ropeInputs
+      propertyPath: m_rsoPause
       value: 
-      objectReference: {fileID: 6279093512762939801}
-    - target: {fileID: 8477749440587918157, guid: 4b90538f1fe67354381935a1fde24bb3,
-        type: 3}
-      propertyPath: m_locomotionInputs
-      value: 
-      objectReference: {fileID: 8450681921174476079}
+      objectReference: {fileID: 11400000, guid: a2ea92c3ee051664782983f5eda912ec,
+        type: 2}
     - target: {fileID: 9095508771265636818, guid: 4b90538f1fe67354381935a1fde24bb3,
         type: 3}
       propertyPath: m_text
@@ -433,18 +429,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 4b90538f1fe67354381935a1fde24bb3, type: 3}
---- !u!1 &6279093512762939801 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 4857348542211877454, guid: 4b90538f1fe67354381935a1fde24bb3,
-    type: 3}
-  m_PrefabInstance: {fileID: 1462287293145232343}
-  m_PrefabAsset: {fileID: 0}
---- !u!1 &8450681921174476079 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 6993471078921578232, guid: 4b90538f1fe67354381935a1fde24bb3,
-    type: 3}
-  m_PrefabInstance: {fileID: 1462287293145232343}
-  m_PrefabAsset: {fileID: 0}
 --- !u!224 &8809464320996237184 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 7929316857604500567, guid: 4b90538f1fe67354381935a1fde24bb3,

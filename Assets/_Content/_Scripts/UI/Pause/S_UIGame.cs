@@ -16,10 +16,9 @@ public class UIGame : MonoBehaviour
 
 	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Game m_ssoGame;
 
-	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Pause m_rsePause;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_ToggleCursor m_rseToggleCursor;
 
-	[FoldoutGroup("Scriptable")][SerializeField] private RSO_GamePaused m_rsoGamePaused;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_Pause m_rsoPause;
 
 	private void Start()
 	{
@@ -28,17 +27,17 @@ public class UIGame : MonoBehaviour
 
     private void OnEnable()
     {
-        m_rsePause.action += TogglePausePanel;
+		m_rsoPause.OnChanged += TogglePausePanel;
 	}
 
     private void OnDisable()
     {
-        m_rsePause.action -= TogglePausePanel;
+		m_rsoPause.OnChanged -= TogglePausePanel;
     }
 
     private void TogglePausePanel()
 	{
-		SetPausePanel(!m_pnlPause.activeInHierarchy);
+		SetPausePanel(m_rsoPause.value);
 	}
 
 	public void SetPausePanel(bool doEnabled)
@@ -58,7 +57,6 @@ public class UIGame : MonoBehaviour
 	private void Show()
 	{
 		m_pnlPause.SetActive(true);
-		TogglePauseGame(true);
 		m_rseToggleCursor.Call(true);
 		HideSubwindows();
 	}
@@ -66,7 +64,6 @@ public class UIGame : MonoBehaviour
 	public void Hide()
 	{
 		m_pnlPause.SetActive(false);
-		TogglePauseGame(false);
 		m_rseToggleCursor.Call(false);
 		HideSubwindows();
 	}
@@ -83,9 +80,4 @@ public class UIGame : MonoBehaviour
 	{
 		Application.Quit();
 	}
-
-	private void TogglePauseGame(bool isPaused)
-    {
-        m_rsoGamePaused.value = isPaused;
-    }
 }

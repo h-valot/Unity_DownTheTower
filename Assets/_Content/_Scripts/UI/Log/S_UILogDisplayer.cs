@@ -10,12 +10,12 @@ public class UILogDisplayer : UIWindow
 	[FoldoutGroup("External references")][SerializeField] private UILogCollection m_uiLogCollection;
 	[FoldoutGroup("External references")][SerializeField] private UIGame m_uiGame;
 
-	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Pause m_rsePause;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Cancel m_rseCancel;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_DisplayLog m_rseDisplayLog;
 
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_InputsLocked m_rsoInputsLocked;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_InputAdviceDisplayed m_rsoInputAdviceDisplayed;
-	[FoldoutGroup("Scriptable")][SerializeField] private RSO_GamePaused m_rsoGamePaused;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_Pause m_rsoPause;
 
 	private bool m_logCollectionDisplayed;
 
@@ -23,14 +23,14 @@ public class UILogDisplayer : UIWindow
 	{
 		m_rseDisplayLog.action += Display;
 		m_rseCancel.action += Hide;
-		m_rsePause.action += Hide;
+		m_rsoPause.OnChanged += Hide;
 	}
 
 	private void OnDisable()
 	{
 		m_rseDisplayLog.action -= Display;
 		m_rseCancel.action -= Hide;
-		m_rsePause.action -= Hide;
+		m_rsoPause.OnChanged -= Hide;
 	}
 
 	private void Display(SSO_Log ssoLog)
@@ -44,8 +44,8 @@ public class UILogDisplayer : UIWindow
 			m_uiGame.SetPausePanel(false);
 		}
 
+		m_rsoInputsLocked.value = true;
 		m_rsoInputAdviceDisplayed.value = false;
-		m_rsoGamePaused.value = true;
 		base.Show();
 	}
 
@@ -60,8 +60,8 @@ public class UILogDisplayer : UIWindow
 		}
 		else
 		{
+			m_rsoInputsLocked.value = false;
 			m_rsoInputAdviceDisplayed.value = true;
-			m_rsoGamePaused.value = false;
 		}
 	}
 }

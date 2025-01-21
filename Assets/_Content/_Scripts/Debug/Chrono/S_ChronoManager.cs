@@ -14,7 +14,7 @@ public class ChronoManager : UIWindow
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_CheckpointReached m_rseCheckpointReached;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_RestartChrono m_rseRestartChrono;
 
-	[FoldoutGroup("Scriptable")][SerializeField] private RSO_GamePaused m_rsoGamePaused;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_Pause m_rsoPause;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_StartDate m_rsoStartDate;
 
 	private TimeSpan m_currentTime;
@@ -33,20 +33,20 @@ public class ChronoManager : UIWindow
 	private void OnEnable()
 	{
 		m_rseCheckpointReached.action += AddCheckpoint;
-		m_rsoGamePaused.OnChanged += OnGamePaused;
+		m_rsoPause.OnChanged += OnPaused;
 	}
 
 	private void OnDisable()
 	{
 		m_rseCheckpointReached.action -= AddCheckpoint;
-		m_rsoGamePaused.OnChanged -= OnGamePaused;
+		m_rsoPause.OnChanged -= OnPaused;
 	}
 
 	private void Update()
 	{
 		// Assertions
 		if (!m_ssoGame.EnableChrono) return;
-		if (m_rsoGamePaused.value) return;
+		if (m_rsoPause.value) return;
 
 		m_currentTime = DateTime.Now.Subtract(m_rsoStartDate.value);
 		UpdateGraphics();
@@ -67,15 +67,15 @@ public class ChronoManager : UIWindow
 		m_tmpChrono.text = m_output.ToString();
 	}
 
-	private void OnGamePaused()
+	private void OnPaused()
 	{
 		// Assertion
 		if (!m_ssoGame.EnableChrono) return;
 
-		if (m_rsoGamePaused.value)
+		if (m_rsoPause.value)
 		{
 			m_startPauseDate = DateTime.Now;
-			Show();
+			base.Show();
 		}
 		else
 		{
@@ -86,7 +86,7 @@ public class ChronoManager : UIWindow
 			}
 
 			m_elapsedOnPaused += DateTime.Now.Subtract(m_startPauseDate);
-			Hide();
+			base.Hide();
 		}
 	}
 
@@ -115,7 +115,6 @@ public class ChronoManager : UIWindow
 		Restart();
 		m_rseRestartChrono.Call();
 		UpdateGraphics();
-		if (m_rsoGamePaused.value) m_resetOnPaused = true;
-		print(m_rsoStartDate.value);
+		if (m_rsoPause.value) m_resetOnPaused = true;
 	}
 }
