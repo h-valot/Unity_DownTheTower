@@ -1,3 +1,4 @@
+using DG.Tweening;
 using Sirenix.OdinInspector;
 using System.Collections;
 using System.Collections.Generic;
@@ -22,6 +23,7 @@ public class GuardianMotor : MonoBehaviour
 
 	[FoldoutGroup("Internal References")][SerializeField] private NavMeshAgent m_agent;
 	[FoldoutGroup("Internal References")][SerializeField] private MeshRenderer m_guardianMeshRenderer;
+    [FoldoutGroup("Internal References")][SerializeField] private Transform m_beamTransform;
     [FoldoutGroup("Internal References")][SerializeField] private MeshRenderer m_beamMeshRenderer;
     [FoldoutGroup("Internal References")][SerializeField] private Light m_beamLight;
     [FoldoutGroup("Internal References")][SerializeField] private Transform m_frontEye;
@@ -64,6 +66,7 @@ public class GuardianMotor : MonoBehaviour
     // Graphics
     private MaterialPropertyBlock m_guardianPropertyBlock;
     private MaterialPropertyBlock m_beamPropertyBlock;
+	private Quaternion m_beamBaseRotation;
 
     #endregion
 
@@ -76,9 +79,11 @@ public class GuardianMotor : MonoBehaviour
         m_guardianPropertyBlock.SetColor("_EyesColor", m_ssoGuardian.DormantColor);
         m_guardianMeshRenderer.SetPropertyBlock(m_guardianPropertyBlock);
         m_beamPropertyBlock = new MaterialPropertyBlock();
-        m_beamPropertyBlock.SetColor("_BeamColor", m_ssoGuardian.DormantColor);
+        m_beamPropertyBlock.SetColor("_beamColor", m_ssoGuardian.DormantColor);
+        m_beamPropertyBlock.SetFloat("_focus", 0f);
         m_beamMeshRenderer.SetPropertyBlock(m_beamPropertyBlock);
 		m_beamLight.color = m_ssoGuardian.DormantColor;
+		m_beamBaseRotation = m_beamMeshRenderer.transform.rotation;
     }
 
     private void Start()
@@ -287,10 +292,12 @@ public class GuardianMotor : MonoBehaviour
 
     private void EnterPatrolState()
 	{
-		ChangeBeamColor(m_ssoGuardian.PatrolColor);
+		UpdateBeamGraphics(m_ssoGuardian.PatrolColor, m_ssoGuardian.PatrolFocus, m_ssoGuardian.PatrolOpacity);
 
 		m_agent.destination = m_usePatrolPath ? m_patrolPath.Waypoints[m_currentWaypoint].Position : m_waypoint.Position;
 		m_agent.speed = m_ssoGuardian.PatrolSpeed;
+
+		m_beamTransform.localRotation = Quaternion.Euler(20f,0,0);
 	}
 
     private void UpdatePatrolState()
@@ -352,14 +359,16 @@ public class GuardianMotor : MonoBehaviour
 
 	private void EnterAggroState()
     {
-		ChangeBeamColor(m_ssoGuardian.AggroColor);
+		UpdateBeamGraphics(m_ssoGuardian.AggroColor, m_ssoGuardian.AggroFocus, m_ssoGuardian.AggroOpacity);
         m_agent.speed = m_ssoGuardian.AggroSpeed;
 	}
 
     private void UpdateAggroState()
 	{
 		ChaseTarget();
-	}
+
+		m_beamTransform.LookAt(m_currentTarget.Position);
+    }
 
     private void ExitAggroState()
     {
@@ -373,6 +382,7 @@ public class GuardianMotor : MonoBehaviour
 		if (!m_hasTargetInSight) return;
 
 		m_agent.destination = m_currentTarget.Position;
+
 		if (!m_characterAggroedLately && m_currentTarget.Id == 0)
 		{
 			m_characterAggroedLately = true;
@@ -416,7 +426,7 @@ public class GuardianMotor : MonoBehaviour
 
 	private void EnterSeekState()
 	{
-		ChangeBeamColor(m_ssoGuardian.SeekColor);
+		UpdateBeamGraphics(m_ssoGuardian.SeekColor, m_ssoGuardian.SeekFocus, m_ssoGuardian.SeekOpacity);
 
 		m_omniscienceTimer = m_ssoGuardian.OmniscienceDuration;
 		m_seekingTimer = m_ssoGuardian.SeekingDuration;
@@ -425,7 +435,9 @@ public class GuardianMotor : MonoBehaviour
 		m_seekTargetId = m_currentTarget.Id;
 		m_omniscienceTarget = GetCandidateById(m_seekTargetId);
 		m_targetNotFound = false;
-	}
+
+        m_beamTransform.localRotation = Quaternion.Euler(0, 0, 0);
+    }
 
 	private void UpdateSeekState()
 	{
@@ -508,11 +520,13 @@ public class GuardianMotor : MonoBehaviour
 
 	#region GRAPHICS
 
-	private void ChangeBeamColor(Color newColor)
+	private void UpdateBeamGraphics(Color newColor, float focusPercent, float opacity)
 	{
 		m_beamLight.color = newColor;
-		m_beamPropertyBlock.SetColor("_BeamColor", newColor);
-		m_guardianPropertyBlock.SetColor("_EyesColor", newColor);
+		m_beamPropertyBlock.SetColor("_beamColor", newColor);
+		m_beamPropertyBlock.SetFloat("_focus", focusPercent);
+        m_beamPropertyBlock.SetFloat("_opacity", opacity);
+        m_guardianPropertyBlock.SetColor("_EyesColor", newColor);
 
 		m_beamMeshRenderer.SetPropertyBlock(m_beamPropertyBlock);
 		m_guardianMeshRenderer.SetPropertyBlock(m_guardianPropertyBlock);

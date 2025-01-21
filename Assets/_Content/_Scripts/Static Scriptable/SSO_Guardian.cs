@@ -10,21 +10,53 @@ public class SSO_Guardian : ScriptableObject
     [PropertySpace(SpaceAfter = 0, SpaceBefore = 15)]
     [InfoBox("Color applied to the guardian eyes when in aggro state.", InfoMessageType.None)]
 	public Color AggroColor;
+    [FoldoutGroup("Feedbacks")]
+    [PropertySpace(SpaceAfter = 0, SpaceBefore = 15)]
+    [InfoBox("Opacity of the beam when in aggro state.", InfoMessageType.None)]
+    public float AggroOpacity;
+    [FoldoutGroup("Feedbacks")]
+    [PropertySpace(SpaceAfter = 0, SpaceBefore = 15)]
+    [InfoBox("Size of the beam when in aggro state.", InfoMessageType.None)]
+    public float AggroFocus;
 
     [FoldoutGroup("Feedbacks")]
     [PropertySpace(SpaceAfter = 0, SpaceBefore = 15)]
     [InfoBox("Color applied to the guardian eyes when in patrol state.", InfoMessageType.None)]
 	public Color PatrolColor;
+    [FoldoutGroup("Feedbacks")]
+    [PropertySpace(SpaceAfter = 0, SpaceBefore = 15)]
+    [InfoBox("Opacity of the beam when in patrol state.", InfoMessageType.None)]
+    public float PatrolOpacity;
+    [FoldoutGroup("Feedbacks")]
+    [PropertySpace(SpaceAfter = 0, SpaceBefore = 15)]
+    [InfoBox("Size of the beam when in patrol state.", InfoMessageType.None)]
+    public float PatrolFocus;
 
     [FoldoutGroup("Feedbacks")]
     [PropertySpace(SpaceAfter = 0, SpaceBefore = 15)]
     [InfoBox("Color applied to the guardian eyes when in seek state.", InfoMessageType.None)]
 	public Color SeekColor;
+    [FoldoutGroup("Feedbacks")]
+    [PropertySpace(SpaceAfter = 0, SpaceBefore = 15)]
+    [InfoBox("Opacity of the beam when in seek state.", InfoMessageType.None)]
+    public float SeekOpacity;
+    [FoldoutGroup("Feedbacks")]
+    [PropertySpace(SpaceAfter = 0, SpaceBefore = 15)]
+    [InfoBox("Size of the beam when in seek state.", InfoMessageType.None)]
+    public float SeekFocus;
 
     [FoldoutGroup("Feedbacks")]
     [PropertySpace(SpaceAfter = 0, SpaceBefore = 15)]
     [InfoBox("Color applied to the guardian eyes when in dormant state.", InfoMessageType.None)]
 	public Color DormantColor;
+    [FoldoutGroup("Feedbacks")]
+    [PropertySpace(SpaceAfter = 0, SpaceBefore = 15)]
+    [InfoBox("Opacity of the beam when in dormant state.", InfoMessageType.None)]
+    public float DormantOpacity;
+    [FoldoutGroup("Feedbacks")]
+    [PropertySpace(SpaceAfter = 0, SpaceBefore = 15)]
+    [InfoBox("Size of the beam when in dormant state.", InfoMessageType.None)]
+    public float DormantFocus;
 
     #endregion
 
