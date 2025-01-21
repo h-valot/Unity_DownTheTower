@@ -393,7 +393,7 @@ public class GuardianMotor : MonoBehaviour
 	{
 		m_canSwitchState = false;
 		yield return new WaitForSeconds(m_ssoGuardian.DelayDestroyTorch.x);
-		m_rsoTorchManager.value.Remove(torch);
+		m_rsoTorchManager.value.Remove(torch, true);
 		yield return new WaitForSeconds(m_ssoGuardian.DelayDestroyTorch.y);
 		m_canSwitchState = true;
 		m_targetNotFound = true;
