@@ -25,6 +25,9 @@ public class Torch : Permanent
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterPosition m_rsoCharacterPosition;
     [FoldoutGroup("Scriptable")][SerializeField] private RSO_CameraTransform m_rsoCameraTransform;
 
+    [Title("Variables")]
+    [SerializeField] private bool m_isSpawned;
+
     // ----- PUBLIC VARIABLES -----
     [HideInInspector] public bool IsLit;
     [HideInInspector] public bool IsInHand;
@@ -49,15 +52,20 @@ public class Torch : Permanent
 
     private void Awake()
     {
-        IsInHand = true;
+        if (!m_isSpawned)
+        {
+            IsInHand = true;
+            m_rigidbody.isKinematic = true;
+        }
         m_isDeactivate = false;
         m_hasChangedColor = false;
         m_hasPlayedHitSound = false;
-		m_rigidbody.isKinematic = true;
 
-		// Collisions
-		m_rigidbody.constraints = RigidbodyConstraints.FreezeAll;
+        // Collisions
+        m_rigidbody.constraints = RigidbodyConstraints.FreezeAll;
         m_lightCollider.radius = m_ssoTorch.LightOffsetDistance;
+
+        if (m_isSpawned) m_rigidbody.constraints = RigidbodyConstraints.None;
 
         // Preview
         m_aimLineRenderer.useWorldSpace = true;
@@ -81,7 +89,7 @@ public class Torch : Permanent
             m_meshRenderer.SetPropertyBlock(m_propertyBlock);
         }
 
-        m_rsoTorchManager.value.Add(this);
+        if(!m_isSpawned) m_rsoTorchManager.value.Add(this);
     }
 
     private void OnEnable()
@@ -359,7 +367,7 @@ public class Torch : Permanent
         return true;
     }
 
-    private IEnumerator WaitAndDeactivateTorch(float duration)
+    public IEnumerator WaitAndDeactivateTorch(float duration)
     {
         yield return new WaitForSeconds(duration);
         m_rsoTorchManager.value.Remove(this, true);

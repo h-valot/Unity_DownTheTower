@@ -18,6 +18,6 @@ public class LightDoor : LightReciever
 
     protected override void ActivateMechanism()
     {
-        transform.DOScaleY(0.01f, 1);
+        transform.DOMoveY(transform.position.y - m_height - 0.5f, m_animLength);
     }
 }
