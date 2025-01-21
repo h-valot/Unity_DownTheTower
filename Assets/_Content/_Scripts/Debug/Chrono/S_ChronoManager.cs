@@ -26,8 +26,8 @@ public class ChronoManager : UIWindow
 
 	public override void Start()
 	{
-		base.Start();
 		Reset();
+		base.Start();
 	}
 
 	private void OnEnable()

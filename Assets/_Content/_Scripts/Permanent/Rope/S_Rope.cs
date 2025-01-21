@@ -22,6 +22,7 @@ public class Rope : Permanent
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_HarnessPosition m_rsoHarnessPosition;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterPosition m_rsoCharacterPosition;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterLastPosition m_rsoCharacterLastPosition;
+	public RSE_DebugLog m_rseDebugLog;
 
 	#endregion
 
@@ -181,8 +182,8 @@ public class Rope : Permanent
 			m_boxCollider.enabled = true;
 			m_folds = new List<Vector3>() { m_ropeAttach.position.CutDigits(2) };
 			m_isPlaced = true;
-            m_anchorMeshRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
-        });
+			m_anchorMeshRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
+		});
 	}
 
 	#endregion

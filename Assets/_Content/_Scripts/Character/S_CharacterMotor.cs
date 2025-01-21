@@ -506,24 +506,27 @@ public class CharacterMotor : MonoBehaviour
 
 	#region DEATH
 
+	public RSE_DebugLog m_rseDebugLog;
 	public void HandleDeath(DeathType type)
 	{
-		if (IsRopeValid) DesequipRope();
+		m_rseDebugLog.Call($"Character died from {type}");
 
-		switch (type)
-		{
-			case DeathType.DEFAULT:
-				StartCoroutine(AnimateDefaultDeath());
-				break;
+		// if (IsRopeValid) DesequipRope();
 
-			case DeathType.HEIGHT:
-				StartCoroutine(AnimateHeightDeath());
-				break;
+		// switch (type)
+		// {
+		// 	case DeathType.DEFAULT:
+		// 		StartCoroutine(AnimateDefaultDeath());
+		// 		break;
 
-			case DeathType.GAS:
-				StartCoroutine(AnimateGasDeath());
-				break;
-		}
+		// 	case DeathType.HEIGHT:
+		// 		StartCoroutine(AnimateHeightDeath());
+		// 		break;
+
+		// 	case DeathType.GAS:
+		// 		StartCoroutine(AnimateGasDeath());
+		// 		break;
+		// }
 	}
 
 	public IEnumerator AnimateDefaultDeath()
