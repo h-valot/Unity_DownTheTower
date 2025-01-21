@@ -99,7 +99,7 @@ public class CharacterMotor : MonoBehaviour
 	private CraftType m_craftType;
 	private Coroutine m_craftCoroutine;
 	private float m_craftRemainingTime;
-	private bool m_startAiming;
+	public bool m_startAiming;
 	[HideInInspector] public Permanent HandObject;
 	[HideInInspector] public Permanent RobotObject;
 	[HideInInspector] public bool IsAiming;
