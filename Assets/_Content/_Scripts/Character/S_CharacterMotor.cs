@@ -187,12 +187,12 @@ public class CharacterMotor : MonoBehaviour
 
 	private void OnDrawGizmos()
     {
-        Gizmos.color = Color.cyan;
-        if(m_raycastHits != null)
-        {
-            foreach (RaycastHit _hit in m_raycastHits)
+        if (m_raycastHits != null)
+		{
+			Gizmos.color = Color.cyan;
+			foreach (var hit in m_raycastHits)
             {
-                Gizmos.DrawSphere(_hit.point, 0.05f);
+                Gizmos.DrawSphere(hit.point, 0.05f);
             }
 		}
 
@@ -564,32 +564,29 @@ public class CharacterMotor : MonoBehaviour
         m_isGrounded = false;
         m_groundNormal = Vector3.down;
 
-        Vector3 _start = transform.position + Vector3.up * (m_collider.height - m_collider.radius);
-        float _radius = m_collider.radius + m_ssoCharacter.SkinWidth;
-        Vector3 _direction = Vector3.down;
-        float _distance = m_collider.height - 2 * m_collider.radius;
-        m_raycastHits = Physics.SphereCastAll(_start, _radius, _direction, _distance, m_ssoCharacter.GroundLayerToInclude);
+        Vector3 start = transform.position + Vector3.up * m_collider.height;
+        float radius = m_collider.radius + m_ssoCharacter.SkinWidth;
+        Vector3 direction = Vector3.down;
+        float distance = m_collider.height;
+        m_raycastHits = Physics.SphereCastAll(start, radius, direction, distance, m_ssoCharacter.GroundLayerToInclude);
 
-        // Check each points
-        foreach (RaycastHit hit in m_raycastHits)
+        foreach (var hit in m_raycastHits)
         {
-            // Exclude hit point that come from the spherecast spawning inside a collider
+            // Assert: Exclude hit point that come from the spherecast spawning inside a collider
             if (hit.point == Vector3.zero) continue;
 
             // Check if it is on the bottom round part of the capsule
-            if (hit.point.y < transform.position.y + m_collider.radius)
-            {
-                float _angle = Vector3.Angle(hit.normal, Vector3.up);
-                if (_angle < 46f)
-                {
-                    m_isGrounded = true;
-                    // Take the smallest normal from ground check as the new ground normal
-                    if (Vector3.Dot(hit.normal, Vector3.up) > Vector3.Dot(m_groundNormal, Vector3.up))
-                    {
-                        m_groundNormal = hit.normal;
-                    }
-                }
-            }
+            if (hit.point.y < transform.position.y + m_collider.radius
+			&& Vector3.Angle(hit.normal, Vector3.up) < 46f)
+			{
+				m_isGrounded = true;
+
+				// Take the smallest normal from ground check as the new ground normal
+				if (Vector3.Dot(hit.normal, Vector3.up) > Vector3.Dot(m_groundNormal, Vector3.up))
+				{
+					m_groundNormal = hit.normal;
+				}
+			}
         }
     }
 	
@@ -725,10 +722,10 @@ public class CharacterMotor : MonoBehaviour
 		desiredDirection = Quaternion.AngleAxis(Vector3.SignedAngle(Vector3.up, m_groundNormal, slopeRight), slopeRight) * desiredDirection;
 
 		// Set desired speed magnitude based on walk/run state
-		// m_moveInput = Mathf.Clamp(m_moveInput.magnitude, 0, 1) * m_moveInput.normalized;
         Vector2 desiredForcev2 = new Vector2(
-			Mathf.Clamp01((Mathf.Abs(m_moveInput.x) - m_ssoCharacter.MoveAnalogStart)) / (1 - m_ssoCharacter.MoveAnalogStart),
-            Mathf.Clamp01((Mathf.Abs(m_moveInput.y) - m_ssoCharacter.MoveAnalogStart)) / (1 - m_ssoCharacter.MoveAnalogStart));
+			Mathf.Clamp01(Mathf.Abs(m_moveInput.x) - m_ssoCharacter.MoveAnalogStart) / (1 - m_ssoCharacter.MoveAnalogStart),
+            Mathf.Clamp01(Mathf.Abs(m_moveInput.y) - m_ssoCharacter.MoveAnalogStart) / (1 - m_ssoCharacter.MoveAnalogStart)
+		);
         desiredForcev2 = Mathf.Clamp(desiredForcev2.magnitude, 0, 1) * desiredForcev2.normalized;
         float desiredForce = desiredForcev2.magnitude * m_ssoCharacter.MaxMoveForce;
         m_desiredForce = desiredForce;
@@ -779,7 +776,8 @@ public class CharacterMotor : MonoBehaviour
 				if (hit.point.y - transform.position.y < m_ssoCharacter.StepOnHeight)
 				{
 					// We take the highest that is higher than skin width to not trigger step on very small objects
-					if (hit.point.y > stepOnTarget.y && hit.point.y > transform.position.y + m_ssoCharacter.SkinWidth)
+					if (hit.point.y > stepOnTarget.y 
+					&& hit.point.y > transform.position.y + m_ssoCharacter.SkinWidth)
 					{
 						stepOnTarget = hit.point;
 					}
@@ -864,7 +862,8 @@ public class CharacterMotor : MonoBehaviour
 		UpdateZeroDrag();
 		CheckFallHeight();
 		MoveFalling();
-    }
+		HandleEdgeCatching();
+	}
 
     private void ExitFallState()
     {
@@ -956,7 +955,7 @@ public class CharacterMotor : MonoBehaviour
 		{
 			ToggleRopeConstraint(!m_isHolding);
 
-			// If the character is falling and attach himself to a rope, we won't it to be slacken.
+			// If the character is falling and attached to a rope, we won't it to be slacken.
 			// Handle rope extention within the limit of the current rope.
 			if (m_previousState != BehaviorState.FALL
 			&& m_rope.GetTotalLength() + m_ssoCharacter.EntranceOffset <= m_ssoRope.MaxLength - m_ssoRope.MaxLengthOffset)
@@ -980,6 +979,7 @@ public class CharacterMotor : MonoBehaviour
 			return;
 		}
 
+		HandleEdgeCatching();
 		HandleRopeMovement();
 		HandleRopeDrag();
 		HandleClimbing();
@@ -1017,6 +1017,42 @@ public class CharacterMotor : MonoBehaviour
 
 		m_rigidbody.AddForce(direction * m_ssoCharacter.ropeMovementForce, ForceMode.Acceleration);
 	}
+
+	private void HandleEdgeCatching()
+	{
+		// Assertions
+		if (m_raycastHits.Length <= 1 || !DoMoveInputs) return;
+
+		// - Get a highest position than the character's one -
+		Vector3 highestEdge = m_rigidbody.position;
+		Vector3 moveInput3d = (m_rsoCameraRight.value * m_moveInput.x + m_rsoCameraForward.value * m_moveInput.y).normalized;
+		
+		foreach (var hit in m_raycastHits)
+		{
+			Vector3 hitDirection = hit.point - m_rigidbody.position;
+			hitDirection = new Vector3(hitDirection.x, 0, hitDirection.z);
+
+			if (Vector3.Dot(moveInput3d, hitDirection) > 0.15f
+			&& hit.point.y > highestEdge.y)
+			{
+				highestEdge = hit.point;
+			}
+		}
+
+		// - Override the character's position -
+		if (highestEdge != m_rigidbody.position)
+		{
+			// Is ground at highest edge position flat ?
+			if (Physics.Raycast(
+				origin: highestEdge + (new Vector3(highestEdge.x, 0, highestEdge.z) - new Vector3(m_rigidbody.position.x, 0, m_rigidbody.position.z)).normalized * m_ssoCharacter.SkinWidth + new Vector3(0, m_ssoCharacter.SkinWidth, 0), 
+				direction: Vector3.down, 
+				maxDistance: m_ssoCharacter.SkinWidth * 2, 
+				layerMask: m_ssoCharacter.GroundLayerToInclude))
+			{
+				SetCharacterPosition(highestEdge, Quaternion.identity);
+			}
+		}
+	}
 	
 	private void HandleRopeDrag()
 	{
@@ -1039,7 +1075,7 @@ public class CharacterMotor : MonoBehaviour
 		if (!IsRopeValid
 		|| !m_isClimbing
 		|| m_isHolding
-		|| m_rope.GetTotalLength() <= m_ssoRope.MinimumClimbLength)
+		|| m_rope.GetTotalLength() <= m_rope.GetHeight() + 0.25f)
 		{
 			m_currentClimbSpeed = m_ssoCharacter.ClimbAcceleration;
 			return;
@@ -1050,7 +1086,7 @@ public class CharacterMotor : MonoBehaviour
 		m_positionStartFall = m_rigidbody.position;
 		m_currentClimbSpeed += m_currentClimbSpeed * Time.fixedDeltaTime;
 		float clampedClimbSpeed = Mathf.Clamp(m_currentClimbSpeed, 0, m_ssoCharacter.MaxClimbSpeed);
-		m_rope.IncreaseHoldLength(-clampedClimbSpeed * Time.fixedDeltaTime); // Decreasing hold length
+		m_rope.IncreaseHoldLength(-clampedClimbSpeed * Time.fixedDeltaTime); // Decreasing rope holding length
 	}
 
 	private void HandleRopeLimit()
