@@ -78,10 +78,9 @@ public class CharacterMotor : MonoBehaviour
 	// - Movement -
 	private Vector2 m_planarVelocity;
 	private float m_maxGroundedSpeed;
-	private bool m_isRunning;
+	private bool m_isJumping;
 	[HideInInspector] public bool m_hasJumped;
 	private float m_desiredForce;
-	public bool IsJumpingPressed { get; private set; }
 	private bool m_isCrafting;
 	private float m_airControlTimeScalar;
 	private float m_airControlDuration;
@@ -213,6 +212,7 @@ public class CharacterMotor : MonoBehaviour
 	{
 		m_rseSetCharacterPosition.action -= SetCharacterPosition;
 		m_rseKillCharacter.action -= HandleDeath;
+		m_rseJump.action -= UpdateJumpInput;
 
 		m_rseMove.action -= UpdateMoveInput;
         m_rseThrowRope.action -= UpdateHoldInput;
@@ -231,6 +231,7 @@ public class CharacterMotor : MonoBehaviour
 		m_rseSetCharacterPosition.action += SetCharacterPosition;
 		m_rseKillCharacter.action += HandleDeath;
 		m_rseToggleHandObject.action += ToggleTorch;
+		m_rseJump.action += UpdateJumpInput;
 
 		switch (m_rsoCharacterState.value)
         {
@@ -283,11 +284,6 @@ public class CharacterMotor : MonoBehaviour
 		m_moveInput = input;
 	}
 
-	private void UpdateRunInput(bool isPressed)
-	{
-		m_isRunning = isPressed;
-    }
-
 	private void UpdateHoldInput(bool isHolding)
 	{
 		// Assertion
@@ -338,9 +334,13 @@ public class CharacterMotor : MonoBehaviour
         if (IsRopeValid) DesequipRope();
     }
 
+	private void UpdateJumpInput(bool isPressed)
+	{
+		m_isJumping = isPressed;
+	}
+
 	/// <summary>
-	/// If the input is pressed and If the player hasn't jumped:
-	/// Add a vertical impulse to the player
+	/// Add a vertical impulse to the character.
 	/// </summary>
 	private void JumpGround(bool isPressed)
 	{
@@ -834,7 +834,7 @@ public class CharacterMotor : MonoBehaviour
 			return;
 		}
 
-		HandleClimbing();
+		HandleRopeClimb();
 	}
 
     private void ExitLocomotionState()
@@ -951,7 +951,8 @@ public class CharacterMotor : MonoBehaviour
 	{
 		EnterFallState();
 
-		if (!m_isClimbing)
+		if (!m_isClimbing
+		&& !m_isJumping)
 		{
 			ToggleRopeConstraint(!m_isHolding);
 
@@ -980,19 +981,18 @@ public class CharacterMotor : MonoBehaviour
 		}
 
 		HandleEdgeCatching();
+
 		HandleRopeMovement();
 		HandleRopeDrag();
-		HandleClimbing();
+		HandleRopeClimb();
 		HandleRopeLimit();
 	}
 
 	private void ExitRopeState()
 	{
 		ToggleRopeConstraint(false);
-
 		m_isHolding = false;
-		m_isRunning = false;
-		m_hasJumped = false;
+		ExitFallState();
 	}
 
 	private void HandleRopeMovement()
@@ -1069,7 +1069,7 @@ public class CharacterMotor : MonoBehaviour
 
 	}
 
-	private void HandleClimbing()
+	private void HandleRopeClimb()
 	{
 		// Assertions
 		if (!IsRopeValid
