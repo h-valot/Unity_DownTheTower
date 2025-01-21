@@ -1,9 +1,7 @@
-using DG.Tweening;
 using Sirenix.OdinInspector;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using TMPro;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -27,8 +25,6 @@ public class GuardianMotor : MonoBehaviour
     [FoldoutGroup("Internal References")][SerializeField] private MeshRenderer m_beamMeshRenderer;
     [FoldoutGroup("Internal References")][SerializeField] private Light m_beamLight;
     [FoldoutGroup("Internal References")][SerializeField] private Transform m_frontEye;
-	[FoldoutGroup("Internal References")][SerializeField] private TextMeshProUGUI m_tmpTarget;
-	[FoldoutGroup("Internal References")][SerializeField] private TextMeshProUGUI m_tmpState;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Game m_ssoGame;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_GuardianState m_rsoGuardianState;
@@ -66,25 +62,15 @@ public class GuardianMotor : MonoBehaviour
     // Graphics
     private MaterialPropertyBlock m_guardianPropertyBlock;
     private MaterialPropertyBlock m_beamPropertyBlock;
-	private Quaternion m_beamBaseRotation;
 
     #endregion
 
     #region MONOBEHAVIOR
 
-    private void Awake()
-    {
-        //Initialize state feedbacks
-        m_guardianPropertyBlock = new MaterialPropertyBlock();
-        m_guardianPropertyBlock.SetColor("_EyesColor", m_ssoGuardian.DormantColor);
-        m_guardianMeshRenderer.SetPropertyBlock(m_guardianPropertyBlock);
-        m_beamPropertyBlock = new MaterialPropertyBlock();
-        m_beamPropertyBlock.SetColor("_beamColor", m_ssoGuardian.DormantColor);
-        m_beamPropertyBlock.SetFloat("_focus", 0f);
-        m_beamMeshRenderer.SetPropertyBlock(m_beamPropertyBlock);
-		m_beamLight.color = m_ssoGuardian.DormantColor;
-		m_beamBaseRotation = m_beamMeshRenderer.transform.rotation;
-    }
+	private void Awake()
+	{
+		UpdateBeamGraphics(m_ssoGuardian.PatrolColor, m_ssoGuardian.PatrolFocus, m_ssoGuardian.PatrolOpacity);
+	}
 
     private void Start()
 	{
@@ -100,8 +86,6 @@ public class GuardianMotor : MonoBehaviour
         SelectTarget();
         DetermineState();
         UpdateState();
-
-        UpdateDebugUI();
 	}
 
 	private void OnTriggerEnter(Collider collider)
@@ -128,6 +112,11 @@ public class GuardianMotor : MonoBehaviour
 
 	private void SelectTarget()
 	{
+		// Assertions
+		if (m_rsoCharacterPosition.value == Vector3.zero) return;
+		if (m_rsoTorchManager.value == null) return;
+		if (m_rsoRopes.value == null) return;
+
 		// Fill candidates
 		int id = 0;
 		m_candidates = new List<Candidate> { new Candidate(id, m_rsoCharacterPosition.value + Vector3.up * 0.8f) };
@@ -523,38 +512,17 @@ public class GuardianMotor : MonoBehaviour
 	private void UpdateBeamGraphics(Color newColor, float focusPercent, float opacity)
 	{
 		m_beamLight.color = newColor;
+
+		if (m_beamPropertyBlock == null) m_beamPropertyBlock = new MaterialPropertyBlock();
 		m_beamPropertyBlock.SetColor("_beamColor", newColor);
 		m_beamPropertyBlock.SetFloat("_focus", focusPercent);
         m_beamPropertyBlock.SetFloat("_opacity", opacity);
-        m_guardianPropertyBlock.SetColor("_EyesColor", newColor);
-
 		m_beamMeshRenderer.SetPropertyBlock(m_beamPropertyBlock);
+
+		if (m_guardianPropertyBlock == null) m_guardianPropertyBlock = new MaterialPropertyBlock();
+		m_guardianPropertyBlock.SetColor("_EyesColor", newColor);
 		m_guardianMeshRenderer.SetPropertyBlock(m_guardianPropertyBlock);
 	}
 
 	#endregion
-
-	#region DEBUG
-
-	private void UpdateDebugUI()
-	{
-		m_tmpState.text = m_rsoGuardianState.value.ToString();
-		m_tmpTarget.text = m_hasTargetInSight ? m_currentTarget.Position.ToString() : "none";
-	}
-
-#if UNITY_EDITOR
-
-	private void OnDrawGizmos()
-	{
-		Gizmos.color = Color.red;
-		Gizmos.DrawWireSphere(transform.position, m_ssoGuardian.LethalRange);
-		Gizmos.color = Color.yellow;
-		Gizmos.DrawWireSphere(transform.position, m_ssoGuardian.ClearRange);
-		Gizmos.color = Color.green;
-		Gizmos.DrawWireSphere(transform.position, m_ssoGuardian.LongRange);
-	}
-
-#endif
-
-    #endregion
 }
