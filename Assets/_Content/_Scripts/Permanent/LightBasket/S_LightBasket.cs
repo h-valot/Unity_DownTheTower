@@ -6,7 +6,7 @@ using UnityEngine.Experimental.GlobalIllumination;
 
 public class LightBasket : MonoBehaviour
 {
-    [SerializeField] private LightDoor _parentDoor;
+    [SerializeField] private LightReciever _parentDoor;
     [SerializeField] private float _maxVelocitySnap = 1;
 
     private bool _isFilled = false;
