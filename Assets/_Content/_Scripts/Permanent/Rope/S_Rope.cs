@@ -11,12 +11,21 @@ public class Rope : Permanent
 	[FoldoutGroup("Internal references")][SerializeField] private BoxCollider m_boxCollider;
 	[FoldoutGroup("Internal references")][SerializeField] private Transform m_ropeAttach;
 	[FoldoutGroup("Internal references")][SerializeField] public Transform RaycastTarget;
-    [FoldoutGroup("Internal references")][SerializeField] private MeshRenderer m_anchorMeshRenderer;
+    [FoldoutGroup("Internal references")][SerializeField] private MeshRenderer m_topMeshRenderer;
+    [FoldoutGroup("Internal references")][SerializeField] private MeshRenderer m_baseMeshRenderer;
+    [FoldoutGroup("Internal references")][SerializeField] private MeshRenderer m_detail0MeshRenderer;
+    [FoldoutGroup("Internal references")][SerializeField] private MeshRenderer m_detail1MeshRenderer;
+    [FoldoutGroup("Internal references")][SerializeField] private MeshRenderer m_detail2MeshRenderer;
     [FoldoutGroup("Internal references")][SerializeField] private MeshRenderer m_previewMeshRendered;
 	[FoldoutGroup("Internal references")][SerializeField] private GameObject m_previewGameObject;
 	[FoldoutGroup("Internal references")][SerializeField] private ConfigurableJoint m_joint;
 
-	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Rope m_ssoRope;
+    [FoldoutGroup("Internal references")][SerializeField] private Transform m_topTransform;
+    [FoldoutGroup("Internal references")][SerializeField] private Transform m_detail0Transform;
+    [FoldoutGroup("Internal references")][SerializeField] private Transform m_detail1Transform;
+    [FoldoutGroup("Internal references")][SerializeField] private Transform m_detail2Transform;
+
+    [FoldoutGroup("Scriptable")][SerializeField] private SSO_Rope m_ssoRope;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_Ropes m_rsoRopes;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_HarnessPosition m_rsoHarnessPosition;
@@ -70,11 +79,19 @@ public class Rope : Permanent
 		}
 	}
 
-	#endregion
+	//Graphics
+	private MaterialPropertyBlock m_materialPropertyBlock;
 
-	#region MONOBEHAVIOR
+    #endregion
 
-	private void Update()
+    #region MONOBEHAVIOR
+
+    private void Awake()
+    {
+        m_materialPropertyBlock = new MaterialPropertyBlock();
+    }
+
+    private void Update()
 	{
 		// Assertions
 		if (!IsConnected) return;
@@ -117,7 +134,7 @@ public class Rope : Permanent
 			if (!m_previewGameObject.activeInHierarchy) m_previewGameObject.SetActive(true);
 
 			// Update preview position
-			m_previewGameObject.transform.position = new Vector3(hitInfo.point.x, hitInfo.point.y + m_ssoRope.HeightLimit / 2, hitInfo.point.z);
+			m_previewGameObject.transform.position = new Vector3(hitInfo.point.x, hitInfo.point.y, hitInfo.point.z);
 			m_previewGameObject.transform.rotation = Quaternion.Euler(0, m_previewGameObject.transform.eulerAngles.y, 0);
 
 			UpdateColor(isDeployable: 
@@ -169,21 +186,41 @@ public class Rope : Permanent
 		
 		return false;
 	}
+
     private void Deploy(Transform cameraTransform, Vector3 deployPoint)
 	{
 		// Disable hold length constraint to avoid the character to be snapped to the rope when placed
 		SetHoldLength(9999);
 
 		transform.eulerAngles = new Vector3(0, cameraTransform.rotation.eulerAngles.y, 0);
+		transform.DOScale(1f, 0.3f);
 		transform.DOJump(deployPoint, 1f, 0, 0.3f).OnComplete(() =>
 		{
 			// Rope custom initialization commands
 			m_boxCollider.enabled = true;
 			m_folds = new List<Vector3>() { m_ropeAttach.position.CutDigits(2) };
 			m_isPlaced = true;
-            m_anchorMeshRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
+            m_topMeshRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
+            m_baseMeshRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
+            m_detail0MeshRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
+            m_detail1MeshRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
+            m_detail2MeshRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
+			OpenAnchor();
         });
 	}
+
+	private void OpenAnchor()
+	{
+		Debug.Log(m_detail2Transform.localEulerAngles.y);
+        m_topTransform.DOLocalMoveY(0, m_ssoRope.DeployDuration);
+        m_detail0Transform.DOLocalRotate(new Vector3(0, m_detail0Transform.localEulerAngles.y, 0), m_ssoRope.DeployDuration);
+        m_detail1Transform.DOLocalRotate(new Vector3(0, m_detail1Transform.localEulerAngles.y, 0), m_ssoRope.DeployDuration);
+        m_detail2Transform.DOLocalRotate(new Vector3(0, m_detail2Transform.localEulerAngles.y, 0), m_ssoRope.DeployDuration);
+
+		m_materialPropertyBlock.SetFloat("_deployed", 1f);
+        m_topMeshRenderer.SetPropertyBlock(m_materialPropertyBlock);
+        m_baseMeshRenderer.SetPropertyBlock(m_materialPropertyBlock);
+    }
 
 	#endregion
 

@@ -114,7 +114,11 @@ public class SSO_Rope : ScriptableObject
 	[InfoBox("Duration the permanent will take to be crafted.", InfoMessageType.None)]
 	public float CraftingDuration = 0f;
 
-	[FoldoutGroup("Deployment")]
+    [FoldoutGroup("Deployment")]
+    [InfoBox("Duration the animation to deploy the rope when landing.", InfoMessageType.None)]
+    public float DeployDuration = 0.25f;
+
+    [FoldoutGroup("Deployment")]
 	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
 	[InfoBox("Layer masks the deployment system will ignore for its physics calculations (raycasts).", InfoMessageType.None)]
 	public LayerMask NoRaycastLayer;
