@@ -26,7 +26,7 @@ MonoBehaviour:
     m_Bits: 1
   FoldingPrecision: 3
   FoldOffset: 0.2
-  MinFoldDistance: 0.25
+  MinFoldDistance: 0.01
   MinimumClimbLength: 2
   ropeGradient:
     serializedVersion: 2
@@ -73,7 +73,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 260
   HeightLimit: 1
-  MinDistanceFromWall: 0.4
+  MinRadiusAround: 0.5
   MaxGroundAngle: 0.6
   MaxDistFromCamera: 8
   CameraOffsetAngle: 20

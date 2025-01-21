@@ -7,16 +7,15 @@ public class CharacterMotor : MonoBehaviour
 {
 	#region REFERENCES
 
-	[Title("Internal references")]
-	[SerializeField] private Rigidbody m_rigidbody;
-	[SerializeField] private CapsuleCollider m_collider;
-	[SerializeField] private Transform m_handSocket;
-	[SerializeField] private Transform m_robotSocket;
-	[SerializeField] private Transform m_bagSocket;
-	[SerializeField] private Transform m_aimingLookTo;
-	[SerializeField] private Transform m_cameraTarget;
-	[SerializeField] private Transform m_attach;
-	[SerializeField] private CharacterGraphics m_characterGraphics;
+	[FoldoutGroup("Internal references")][SerializeField] private Rigidbody m_rigidbody;
+	[FoldoutGroup("Internal references")][SerializeField] private CapsuleCollider m_collider;
+	[FoldoutGroup("Internal references")][SerializeField] private Transform m_handSocket;
+	[FoldoutGroup("Internal references")][SerializeField] private Transform m_robotSocket;
+	[FoldoutGroup("Internal references")][SerializeField] private Transform m_bagSocket;
+	[FoldoutGroup("Internal references")][SerializeField] private Transform m_aimingLookTo;
+	[FoldoutGroup("Internal references")][SerializeField] private Transform m_cameraTarget;
+	[FoldoutGroup("Internal references")][SerializeField] private Transform m_harness;
+	[FoldoutGroup("Internal references")][SerializeField] private CharacterGraphics m_characterGraphics;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Character m_ssoCharacter;
 	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Torch m_ssoTorch;
@@ -35,7 +34,7 @@ public class CharacterMotor : MonoBehaviour
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_BackpackCrafting m_rseBackpackCrafting;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_SetCharacterPosition m_rseSetCharacterPosition;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_InitializeCamera m_rseInitializeCamera;
-	[FoldoutGroup("Scriptable")][SerializeField] private RSE_PlayFallDeath m_rsePlayFallDeath;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSE_DisplayDeath m_rseDisplayDeath;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_InputsLocked m_rsoInputsLocked;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_MovementDatas m_rsoMovementDatas;
@@ -47,6 +46,7 @@ public class CharacterMotor : MonoBehaviour
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CameraForward m_rsoCameraForward;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CameraRight m_rsoCameraRight;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CameraTransform m_rsoCameraTransform;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_HarnessPosition m_rsoHarnessPosition;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterPosition m_rsoCharacterPosition;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterLastPosition m_rsoCharacterLastPosition;
 
@@ -109,7 +109,7 @@ public class CharacterMotor : MonoBehaviour
 	private const float k_fallingForcesThreshold = 0.2f;
 	private BehaviorState m_previousState;
 	public Rigidbody Rigidbody => m_rigidbody;
-	public Transform Attach => m_attach;
+	public Transform Harness => m_harness;
 
 	#endregion
 
@@ -169,6 +169,7 @@ public class CharacterMotor : MonoBehaviour
 		// Update useful variables
 		m_rsoCharacterLastPosition.value = m_rsoCharacterPosition.value;
 		m_rsoCharacterPosition.value = m_rigidbody.position;
+		m_rsoHarnessPosition.value = m_harness.position;
 		m_planarVelocity = new Vector2(m_rigidbody.velocity.x, m_rigidbody.velocity.z);
 		if (m_isGrounded && m_maxGroundedSpeed < m_planarVelocity.magnitude) m_maxGroundedSpeed = m_planarVelocity.magnitude;
 	}
@@ -221,7 +222,7 @@ public class CharacterMotor : MonoBehaviour
 		m_rseThrowRope.action -= ToggleRopeAim;
         m_rseThrowTorch.action -= ToggleTorchAim;
         m_rseClimb.action -= UpdateClimbInput;
-		m_rseCancel.action -= CancelRope;
+		m_rseCancel.action -= CancelAction;
 		m_rseToggleHandObject.action -= ToggleTorch;
 	}
 
@@ -241,7 +242,7 @@ public class CharacterMotor : MonoBehaviour
 				m_rseCraft.action += ToggleCraft;
 				m_rseThrowRope.action += ToggleRopeAim;
                 m_rseThrowTorch.action += ToggleTorchAim;
-                m_rseCancel.action += CancelRope;
+                m_rseCancel.action += CancelAction;
 				break;
 
 			case BehaviorState.ROPE:
@@ -251,18 +252,20 @@ public class CharacterMotor : MonoBehaviour
                 m_rseThrowTorch.action += ToggleTorchAim;
                 m_rseJump.action += JumpRope;
 				m_rseClimb.action += UpdateClimbInput;
-				m_rseCancel.action += CancelRope;
+				m_rseCancel.action += CancelAction;
 				break;
 
 			case BehaviorState.FALL:
                 m_rseMove.action += UpdateMoveInput;
 				m_rseThrowRope.action += ToggleRopeAim;
                 m_rseThrowTorch.action += ToggleTorchAim;
+                m_rseCancel.action += CancelAction;
                 break;
 
             case BehaviorState.CRAFT:
 				m_rseCraft.action += ToggleCraft;
-				break;
+                m_rseCancel.action += CancelAction;
+                break;
         }
 	}
 
@@ -322,14 +325,18 @@ public class CharacterMotor : MonoBehaviour
 		if (m_isGrounded) m_rope.UpdateHoldLength(isClimbing);
 	}
 
-	private void CancelRope(bool isPressed)
-	{
-		// Assertions
-		if (!IsRopeValid) return;
-		if (!isPressed) return;
+	private void CancelAction(bool isPressed)
+    {
+        if (!isPressed) return;
 
-		DesequipRope();
-	}
+		if (m_startAiming)
+		{
+			CancelAim();
+			return;
+		}
+
+        if (IsRopeValid) DesequipRope();
+    }
 
 	/// <summary>
 	/// If the input is pressed and If the player hasn't jumped:
@@ -345,7 +352,7 @@ public class CharacterMotor : MonoBehaviour
 
 		if ((m_rsoCharacterState.value == BehaviorState.FALL
 		|| m_rsoCharacterState.value == BehaviorState.ROPE)
-		&& m_coyoteTime > 0f) 
+		&& m_coyoteTime < 0f) 
 		{
 			return;
 		}
@@ -486,11 +493,73 @@ public class CharacterMotor : MonoBehaviour
 		}
 	}
 
-    #endregion
+	#endregion
 
-    #region GROUND
+	#region DEATH
 
-    private void CheckGround()
+	public void HandleDeath(DeathType type)
+	{
+		if (IsRopeValid) DesequipRope();
+
+		switch (type)
+		{
+			case DeathType.DEFAULT:
+				StartCoroutine(AnimateDefaultDeath());
+				break;
+
+			case DeathType.HEIGHT:
+				StartCoroutine(AnimateHeightDeath());
+				break;
+
+			case DeathType.GAS:
+				StartCoroutine(AnimateGasDeath());
+				break;
+		}
+	}
+
+	public IEnumerator AnimateDefaultDeath()
+	{
+		m_characterGraphics.ToggleRagdoll(true);
+		m_rseDisplayDeath.Call();
+
+		yield return new WaitForSeconds(m_ssoCharacter.FallDeathDurationBeforeRespawn);
+
+		m_rsoCharacterDeath.value = true;
+		Destroy(gameObject);
+	}
+
+	public IEnumerator AnimateHeightDeath()
+	{
+		m_rseDisplayDeath.Call();
+
+		yield return new WaitForSeconds(m_ssoCharacter.FallDeathDurationBeforeRespawn);
+
+		m_rsoCharacterDeath.value = true;
+		Destroy(gameObject);
+	}
+
+	public IEnumerator AnimateGasDeath()
+	{
+		// TODO Disable all inputs
+
+		// TODO Blur and fade camera to black
+
+		// TODO Slow character's speed down to zero
+
+		m_characterGraphics.ToggleRagdoll(true);
+		m_rseDisplayDeath.Call();
+
+		yield return new WaitForSeconds(m_ssoCharacter.FallDeathDurationBeforeRespawn);
+
+		m_rsoCharacterDeath.value = true;
+		Destroy(gameObject);
+	}
+
+	#endregion
+
+	#region GROUND
+
+	private void CheckGround()
     {
         m_isGrounded = false;
         m_groundNormal = Vector3.down;
@@ -529,7 +598,7 @@ public class CharacterMotor : MonoBehaviour
 		m_fallHeight = (m_rigidbody.position.y - m_positionStartFall.y) * -1f;
 		if (m_fallHeight >= m_ssoCharacter.LethalHeight)
 		{
-			HandleDeath();
+			HandleDeath(DeathType.DEFAULT);
 		}
 		else if (m_fallHeight >= m_ssoCharacter.StunHeight)
 		{
@@ -576,23 +645,6 @@ public class CharacterMotor : MonoBehaviour
 				m_isSlowedPostStun = false;
 			}
 		}
-	}
-
-	public void HandleDeath()
-	{
-		if (IsRopeValid) DesequipRope();
-		StartCoroutine(AnimateDeath());
-	}
-
-	public IEnumerator AnimateDeath()
-	{
-		m_characterGraphics.ToggleRagdoll(true);
-		m_rsePlayFallDeath.Call();
-		
-		yield return new WaitForSeconds(m_ssoCharacter.FallDeathDurationBeforeRespawn);
-
-		m_rsoCharacterDeath.value = true;
-		Destroy(gameObject);
 	}
 
 	private void StartCoyoteTime()
@@ -882,7 +934,7 @@ public class CharacterMotor : MonoBehaviour
 		if (m_fallHeight >= m_ssoRope.MaxLength + m_ssoCharacter.LethalHeight * 2f)
 		{
 			m_isCharacterDead = true;
-			StartCoroutine(AnimateDeath());
+			HandleDeath(DeathType.HEIGHT);
 		}
 	}
 
@@ -1154,10 +1206,10 @@ public class CharacterMotor : MonoBehaviour
 				itemToThrow.transform.localPosition = Vector3.zero;
 				itemToThrow.transform.rotation = m_handSocket.rotation;
 			}
-			AimingObject = itemToThrow;
 			itemToThrow.InitializePreview();
 			m_startAiming = true;
-		}
+            AimingObject = itemToThrow;
+        }
 
 		// Handle pernament throw on input released
 		else
@@ -1166,16 +1218,7 @@ public class CharacterMotor : MonoBehaviour
 			if (!m_startAiming) return;
 			if (!itemToThrow.Throw(m_rsoCameraTransform.value))
 			{
-				AimingObject = null;
-				m_startAiming = false;
-				// Placing rope back in bag
-				if (itemToThrow is Rope)
-				{
-					itemToThrow.transform.parent = m_bagSocket.transform;
-					itemToThrow.transform.rotation = m_bagSocket.rotation;
-					itemToThrow.transform.localPosition = Vector3.zero;
-					itemToThrow.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
-				}
+				CancelAim();
 				return;
 			}
 
@@ -1184,7 +1227,7 @@ public class CharacterMotor : MonoBehaviour
                 // Exception: rope attachment
                 if (m_rope != null) DesequipRope();
                 m_rope = itemToThrow as Rope;
-                if (m_rope != null) m_rope?.Attach(m_attach, m_rigidbody);
+                if (m_rope != null) m_rope?.Attach(m_harness, m_rigidbody);
 
                 itemToThrow = null;
                 HandObject = null;
@@ -1204,7 +1247,20 @@ public class CharacterMotor : MonoBehaviour
 
     private void CancelAim()
     {
+		// Placing rope back in bag
+		if (AimingObject is Rope)
+		{
+			AimingObject.transform.parent = m_bagSocket.transform;
+			AimingObject.transform.rotation = m_bagSocket.rotation;
+			AimingObject.transform.localPosition = Vector3.zero;
+			AimingObject.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
+		}
 
+		AimingObject.DisablePreview();
+        IsAiming = false;
+        AimingObject = null;
+        m_startAiming = false;
+		m_rsoCameraStyle.value = CameraStyle.BASIC;
     }
 
     public bool IsCarryingLight()
@@ -1312,7 +1368,7 @@ public class CharacterMotor : MonoBehaviour
         }
     }
 
-    #endregion
+	#endregion
 
-    #endregion
+	#endregion
 }

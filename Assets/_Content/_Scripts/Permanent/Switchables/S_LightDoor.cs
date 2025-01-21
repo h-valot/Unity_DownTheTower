@@ -1,28 +1,23 @@
+using DG.Tweening;
+using Sirenix.OdinInspector;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class LightDoor : Switchable
+public class LightDoor : LightReciever
 {
-    [Header("Properties")]
-    [SerializeField] private int _lightsToActivate;
+    [Title("Tweakable values")]
+    [SerializeField] private float m_animLength = 1;
 
-    // PRIVATE VARIABLES
-    private int _currentLights = 0;
-    private bool _isActivated = false;
+    private float m_height;
 
-    public void AddToLightCounter()
+    private void OnEnable()
     {
-        _currentLights++;
-        if(_currentLights >= _lightsToActivate && !_isActivated)
-        {
-            ActivateMechanism();
-            _isActivated = true;
-        }
+        m_height = transform.localScale.y;
     }
 
     protected override void ActivateMechanism()
     {
-        Debug.Log("Activated !");
+        transform.DOScaleY(0.01f, 1);
     }
 }

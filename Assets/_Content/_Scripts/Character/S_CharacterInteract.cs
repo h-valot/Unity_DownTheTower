@@ -20,7 +20,7 @@ public class CharacterInteract : MonoBehaviour
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_InteractableValid m_rsoInteractableValid;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_InteractableRecyclable m_rsoInteractableRecyclable;
 
-	[SerializeField] private List<Interactable> m_interactables = new List<Interactable>();
+	private List<Interactable> m_interactables = new List<Interactable>();
 	private Backpack m_backpack;
 
 	private void Start()

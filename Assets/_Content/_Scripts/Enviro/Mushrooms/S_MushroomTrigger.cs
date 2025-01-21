@@ -1,40 +1,39 @@
 using Sirenix.OdinInspector;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
 public class MushroomTrigger : MonoBehaviour
 {
-    [FoldoutGroup("Scriptable")][SerializeField] private RSE_PlayFallDeath m_rsePlayFallDeath;
+    [FoldoutGroup("Scriptable")][SerializeField] private RSE_DisplayDeath m_rseDisplayDeath;
 
-    private MushroomBatch _parent;
+    private MushroomBatch m_parent;
 
     private void Awake()
     {
-        _parent = transform.parent.GetComponent<MushroomBatch>();
+        m_parent = transform.parent.GetComponent<MushroomBatch>();
     }
 
     private void OnTriggerStay(Collider other)
     {
-        if (other.TryGetComponent<Rigidbody>(out Rigidbody rigidbody))
+        if (other.TryGetComponent<Rigidbody>(out var rigidbody))
         {
-            if (rigidbody.velocity.magnitude > _parent.m_ssoMushrooms.MinimalVelocityToTrigger)
+            if (rigidbody.velocity.magnitude > m_parent.m_ssoMushrooms.MinimalVelocityToTrigger)
             {
-                if(other.TryGetComponent<CharacterMotor>(out CharacterMotor characterMotor))
+                if (other.TryGetComponent<CharacterMotor>(out var character))
                 {
-                    if(_parent.GetState() == MushroomState.DEFLATE || _parent.GetState() == MushroomState.CHARGED)
+                    if (m_parent.GetState() == MushroomState.DEFLATE || m_parent.GetState() == MushroomState.CHARGED)
                     {
-                        m_rsePlayFallDeath.Call();
-                    }
+						character.HandleDeath(DeathType.GAS);
+					}
                 }
-                _parent.InitiateExplosion(other.transform.position);
+                m_parent.InitiateExplosion(other.transform.position);
             }
         }
-        else if (other.TryGetComponent<NavMeshAgent>(out NavMeshAgent navMeshAgent))
+        else if (other.TryGetComponent<NavMeshAgent>(out var navMeshAgent))
         {
-            if (navMeshAgent.velocity.magnitude > _parent.m_ssoMushrooms.MinimalVelocityToTrigger)
+            if (navMeshAgent.velocity.magnitude > m_parent.m_ssoMushrooms.MinimalVelocityToTrigger)
             {
-                _parent.InitiateExplosion(other.transform.position);
+                m_parent.InitiateExplosion(other.transform.position);
             }
         }
     }
