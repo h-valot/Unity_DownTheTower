@@ -124,20 +124,15 @@ public class MushroomBatch : MonoBehaviour
     [Button]
     public void ClearAll()
     {
-        if (mushroomLists.Count == 0) return;
         ClearGameObjects();
 
-        while (mushroomLists.Count > 0)
-        {
-            mushroomLists.RemoveAt(0);
-        }
-        if (MushroomTrigger != null)
-        {
-            DestroyImmediate(MushroomTrigger);
-            DestroyImmediate(ParticleSystem);
-            MushroomTrigger = null;
-            ParticleSystem = null;
-        }
+        int children = transform.childCount;
+        for (int i = 0; i < children; ++i)
+            DestroyImmediate(transform.GetChild(0).gameObject);
+
+        mushroomLists.Clear();
+        MushroomTrigger = null;
+        ParticleSystem = null;
     }
 
     private int GetRaycastSamples()
