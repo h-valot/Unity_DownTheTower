@@ -11,16 +11,16 @@ public class UISettings : UIWindow
 	[FoldoutGroup("Internal references")][SerializeField] private UIToggleable m_toggleableInvertMouseY;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Inputs m_ssoInputs;
-	[FoldoutGroup("Scriptable")][SerializeField] private RSO_GamePaused m_rsoGamePaused;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_Pause m_rsoPause;
 
 	private void OnEnable()
 	{
-		m_rsoGamePaused.OnChanged += HideOnPaused;
+		m_rsoPause.OnChanged += OnPaused;
 	}
 
 	private void OnDisable()
 	{
-		m_rsoGamePaused.OnChanged -= HideOnPaused;
+		m_rsoPause.OnChanged -= OnPaused;
 	}
 
 	public override void Show()
@@ -30,10 +30,10 @@ public class UISettings : UIWindow
 		InitializeSettings();
 	}
 
-	private void HideOnPaused()
+	private void OnPaused()
 	{
 		// Assertion
-		if (m_rsoGamePaused.value) return;
+		if (m_rsoPause.value) return;
 
 		Hide();
 	}
