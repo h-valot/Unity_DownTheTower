@@ -1238,7 +1238,7 @@ public class CharacterMotor : MonoBehaviour
 			if (itemToThrow is Rope)
 			{
 				itemToThrow.transform.parent = m_handSocket.transform;
-				itemToThrow.transform.localScale = Vector3.one;
+				//itemToThrow.transform.localScale = Vector3.one;
 				itemToThrow.transform.localPosition = Vector3.zero;
 				itemToThrow.transform.rotation = m_handSocket.rotation;
 			}
@@ -1289,7 +1289,7 @@ public class CharacterMotor : MonoBehaviour
 			AimingObject.transform.parent = m_bagSocket.transform;
 			AimingObject.transform.rotation = m_bagSocket.rotation;
 			AimingObject.transform.localPosition = Vector3.zero;
-			AimingObject.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
+			//AimingObject.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
 		}
 
 		AimingObject.DisablePreview();
