@@ -20,12 +20,11 @@ public class InputManager : MonoBehaviour
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_ThrowRope m_rseThrowRope;
     [FoldoutGroup("Scriptable")][SerializeField] private RSE_ThrowTorch m_rseThrowTorch;
     [FoldoutGroup("Scriptable")][SerializeField] private RSE_ToggleHandObject m_rseToggleHandObject;
-	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Pause m_rsePause;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Recycle m_rseRecycle;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_ToggleCursor m_rseToggleCursor;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Climb m_rseClimb;
 
-	[FoldoutGroup("Scriptable")][SerializeField] private RSO_GamePaused m_rsoGamePaused;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_Pause m_rsoPause;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CraftInputLocked m_rsoCraftInputLocked;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_RecycleInputLocked m_rsoRecycleInputLocked;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_InputAdviceDisplayed m_rsoInputAdviceDisplayed;
@@ -39,10 +38,11 @@ public class InputManager : MonoBehaviour
 	private bool m_run;
 	private bool m_throwRope;
     private bool m_throwTorch;
-    private bool m_jump;
+	private bool m_jump;
 	private bool m_climb;
-	public bool m_isCursorEnabled;
+	private bool m_isCursorEnabled;
 	private bool m_interact;
+	private bool m_pause;
 
 	#endregion
 
@@ -72,7 +72,7 @@ public class InputManager : MonoBehaviour
 
 		m_interact = false;
 		m_rseInteract.Call(false);
-    }
+	}
 
 	private void Update()
 	{
@@ -128,7 +128,7 @@ public class InputManager : MonoBehaviour
 			);
 		}
 
-		if (m_rsoGamePaused.value) m_look = Vector2.zero;
+		if (m_rsoPause.value) m_look = Vector2.zero;
     }
 
 	public void OnJump(InputValue value)
@@ -243,7 +243,7 @@ public class InputManager : MonoBehaviour
 
 	public void OnPause()
 	{
-		m_rsePause.Call();
+		m_rsoPause.value = !m_rsoPause.value;
 	}
 
 	#endregion

@@ -14,6 +14,7 @@ public class CharacterInteract : MonoBehaviour
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Recycle m_rseRecycle;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Interact m_rseInteract;
 
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_InputsLocked m_rsoInputsLocked;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CraftInputLocked m_rsoCraftInputLocked;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_RecycleInputLocked m_rsoRecycleInputLocked;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterState m_rsoCharacterState;
@@ -50,7 +51,8 @@ public class CharacterInteract : MonoBehaviour
 	private void Interact(bool isPressed)
 	{
 		// Assertions
-		if (!isPressed
+		if (m_rsoInputsLocked.value
+		|| !isPressed
 		|| m_interactables.Count <= 0 
 		|| (m_rsoCharacterState.value != BehaviorState.LOCOMOTION 
 		&& m_rsoCharacterState.value != BehaviorState.FALL))

@@ -17,7 +17,7 @@ public class GameManager : MonoBehaviour
 
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterDeath m_rsoCharacterDeath;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_InputsLocked m_rsoInputsLocked;
-	[FoldoutGroup("Scriptable")][SerializeField] private RSO_GamePaused m_rsoGamePaused;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_Pause m_rsoPause;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_Ropes m_rsoRopes;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_ToggleCursor m_rseToggleCursor;
@@ -26,13 +26,13 @@ public class GameManager : MonoBehaviour
 	private void OnEnable()
 	{
 		m_rsoCharacterDeath.OnChanged += HandleDeath;
-		m_rsoGamePaused.OnChanged += Pause;
+		m_rsoPause.OnChanged += Pause;
 	}
 
 	private void OnDisable()
 	{
 		m_rsoCharacterDeath.OnChanged -= HandleDeath;
-		m_rsoGamePaused.OnChanged -= Pause;
+		m_rsoPause.OnChanged -= Pause;
 	}
 
 	private void Start()
@@ -51,7 +51,7 @@ public class GameManager : MonoBehaviour
 		m_rseToggleCursor.Call(false);
 
 		// Reset runtime scriptable values
-		m_rsoGamePaused.value = false;
+		m_rsoPause.value = false;
 		m_rsoRopes.value = new List<Rope>();
 
 		if (m_ssoGame.ResetData)
@@ -90,7 +90,7 @@ public class GameManager : MonoBehaviour
 
 	private void Pause()
 	{
-		Time.timeScale = m_rsoGamePaused.value ? 0f : 1f;
-		m_rsoInputsLocked.value = m_rsoGamePaused.value;
+		Time.timeScale = m_rsoPause.value ? 0f : 1f;
+		m_rsoInputsLocked.value = m_rsoPause.value;
 	}
 }

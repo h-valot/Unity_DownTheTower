@@ -5,61 +5,73 @@ using UnityEngine;
 
 public class UIInputAdvisor : MonoBehaviour
 {
-    [Title("Internal References")]
-	[SerializeField] private GameObject m_graphicInteract;
-	[SerializeField] private TextMeshProUGUI m_tmpInteract;
-    [SerializeField] private GameObject m_graphicRecycle;
-    [SerializeField] private GameObject m_inputPanel;
-    [SerializeField] private GameObject m_ropeInputs;
-    [SerializeField] private GameObject m_locomotionInputs;
+	[FoldoutGroup("Internal References")][SerializeField] private GameObject m_graphicInteract;
+	[FoldoutGroup("Internal References")][SerializeField] private TextMeshProUGUI m_tmpInteract;
+	[FoldoutGroup("Internal References")][SerializeField] private GameObject m_graphicRecycle;
+	[FoldoutGroup("Internal References")][SerializeField] private GameObject m_inputPanel;
+	[FoldoutGroup("Internal References")][SerializeField] private GameObject m_ropeInputs;
+	[FoldoutGroup("Internal References")][SerializeField] private GameObject m_locomotionInputs;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Character m_ssoCharacter;
 
-	[FoldoutGroup("Scriptable")][SerializeField] private RSO_InputAdviceDisplayed m_rsoInputAdviceDisplayed;
-	[FoldoutGroup("Scriptable")][SerializeField] private RSO_GamePaused m_rsoGamePaused;
-	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterState m_rsoCharacterState;
-	[FoldoutGroup("Scriptable")][SerializeField] private RSO_InteractableValid m_rsoInteractableValid;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_InteractableRecyclable m_rsoInteractableRecyclable;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_InputAdviceDisplayed m_rsoInputAdviceDisplayed;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_InteractableValid m_rsoInteractableValid;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterState m_rsoCharacterState;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_Pause m_rsoPause;
 
 	private bool m_isActive = true;
 
     private void OnEnable()
     {
+		m_rsoInteractableRecyclable.OnChanged += ToggleRecycle;
         m_rsoInputAdviceDisplayed.OnChanged += OnInputAdviceDisplayedChanged;
 		m_rsoInteractableValid.OnChanged += ToggleInteract;
-		m_rsoInteractableRecyclable.OnChanged += ToggleRecycle;
         m_rsoCharacterState.OnChanged += SwitchAdvisorInputs;
-		m_rsoGamePaused.OnChanged += OnGamePaused;
+		m_rsoPause.OnChanged += OnPaused;
 	}
 
     private void OnDisable()
     {
+		m_rsoInteractableRecyclable.OnChanged -= ToggleRecycle;
         m_rsoInputAdviceDisplayed.OnChanged -= OnInputAdviceDisplayedChanged;
 		m_rsoInteractableValid.OnChanged -= ToggleInteract;
-		m_rsoInteractableRecyclable.OnChanged -= ToggleRecycle;
         m_rsoCharacterState.OnChanged -= SwitchAdvisorInputs;
-		m_rsoGamePaused.OnChanged -= OnGamePaused;
+		m_rsoPause.OnChanged -= OnPaused;
 	}
 
     private void ToggleInteract()
 	{
+		if (m_rsoPause.value) return;
+
 		m_graphicInteract.SetActive(m_rsoInteractableValid.value != InteractableType.NONE);
 		m_tmpInteract.text = m_ssoCharacter.InteractableFlavors.FirstOrDefault(i => i.Type == m_rsoInteractableValid.value).Flavor;
 	}
 
 	private void ToggleRecycle()
-    {
-        m_graphicRecycle.SetActive(m_rsoInteractableRecyclable.value);
+	{
+		if (m_rsoPause.value) return;
+
+		m_graphicRecycle.SetActive(m_rsoInteractableRecyclable.value);
     }
 
     private void OnInputAdviceDisplayedChanged()
 	{
+		if (m_rsoPause.value) return;
+
 		Toggle(m_rsoInputAdviceDisplayed.value);
 	}
 
-    private void OnGamePaused()
+    private void OnPaused()
     {
-		Toggle(!m_rsoGamePaused.value);
+		if (m_rsoPause.value)
+		{
+			Toggle(false);
+		}
+		else
+		{
+			Toggle(true);
+		}
 	}
 
 	private void Toggle(bool isEnabled)
