@@ -187,5 +187,8 @@ public class CharacterInteract : MonoBehaviour
 		m_backpack.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
 		m_backpack.transform.localScale = Vector3.one;
 		m_backpack.ToggleCollider(false);
-	}
+
+		m_characterMotor.BagRobotSocket = m_backpack.RobotSocket;
+		m_characterMotor.BagCraftSocket = m_backpack.CraftSocket;
+    }
 }

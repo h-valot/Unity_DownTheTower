@@ -10,8 +10,8 @@ public class CharacterMotor : MonoBehaviour
 	[FoldoutGroup("Internal references")][SerializeField] private Rigidbody m_rigidbody;
 	[FoldoutGroup("Internal references")][SerializeField] private CapsuleCollider m_collider;
 	[FoldoutGroup("Internal references")][SerializeField] private Transform m_handSocket;
-	[FoldoutGroup("Internal references")][SerializeField] private Transform m_robotSocket;
-	[FoldoutGroup("Internal references")][SerializeField] private Transform m_bagSocket;
+	[FoldoutGroup("Internal references")][SerializeField] public Transform BagRobotSocket;
+	[FoldoutGroup("Internal references")][SerializeField] public Transform BagCraftSocket;
 	[FoldoutGroup("Internal references")][SerializeField] private Transform m_aimingLookTo;
 	[FoldoutGroup("Internal references")][SerializeField] private Transform m_cameraTarget;
 	[FoldoutGroup("Internal references")][SerializeField] private Transform m_harness;
@@ -1187,17 +1187,17 @@ public class CharacterMotor : MonoBehaviour
 			case CraftType.TORCH:
                 RobotObject = Instantiate(
                     (Permanent)m_ssoTorch.PfTorch,
-                    m_robotSocket.transform.position,
+                    BagRobotSocket.transform.position,
                     Quaternion.identity,
-                    m_robotSocket.transform
+                    BagRobotSocket.transform
                 );
                 break;
 			case CraftType.ROPE:
                 HandObject = Instantiate(
                     (Permanent)m_ssoRope.PfRope,
-                    m_bagSocket.transform.position,
-                    m_bagSocket.rotation,
-					m_bagSocket.transform
+                    BagCraftSocket.transform.position,
+                    BagCraftSocket.rotation,
+					BagCraftSocket.transform
                 );
 				HandObject.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
                 break;
@@ -1294,8 +1294,8 @@ public class CharacterMotor : MonoBehaviour
 		// Placing rope back in bag
 		if (AimingObject is Rope)
 		{
-			AimingObject.transform.parent = m_bagSocket.transform;
-			AimingObject.transform.rotation = m_bagSocket.rotation;
+			AimingObject.transform.parent = BagCraftSocket.transform;
+			AimingObject.transform.rotation = BagCraftSocket.rotation;
 			AimingObject.transform.localPosition = Vector3.zero;
 			//AimingObject.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
 		}
@@ -1356,7 +1356,7 @@ public class CharacterMotor : MonoBehaviour
             if (HandObject?.Type == CraftType.TORCH
             && !RobotObject)
             {
-                SwitchObjects(ref HandObject, ref RobotObject, m_robotSocket);
+                SwitchObjects(ref HandObject, ref RobotObject, BagRobotSocket);
             }
 
             if (!HandObject)
