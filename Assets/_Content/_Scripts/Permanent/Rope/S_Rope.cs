@@ -31,6 +31,7 @@ public class Rope : Permanent
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_HarnessPosition m_rsoHarnessPosition;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterPosition m_rsoCharacterPosition;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterLastPosition m_rsoCharacterLastPosition;
+	public RSE_DebugLog m_rseDebugLog;
 
 	#endregion
 
@@ -67,7 +68,7 @@ public class Rope : Permanent
 		get 
 		{
 			if (m_folds.Count >= 1) return m_folds[^1];
-			else return Vector3.zero;
+			else return m_ropeAttach.position;
 		}
 	}
 	public Vector3 LastFold 
@@ -166,7 +167,7 @@ public class Rope : Permanent
 	{
 		DisablePreview();
 
-        if (Physics.Raycast(
+		if (Physics.Raycast(
 			cameraTransform.position,
 			GetPositionRayDirection(cameraTransform, m_ssoRope.CameraOffsetAngle, m_ssoRope.MaxCameraDownwardClamp),
 			out var hitInfo,
@@ -228,11 +229,11 @@ public class Rope : Permanent
 
 	public void Attach(Transform harness, Rigidbody rigidbody)
 	{
+		m_characterHarness = harness;
 		m_characterRigidbody = rigidbody;
 		m_joint.connectedBody = rigidbody;
-		m_characterHarness = harness;
 
-		if (m_isPlaced) UpdateHoldLength();
+		if (m_isPlaced) UpdateHoldLength(); 
 
 		OnAttached?.Invoke();
 	}

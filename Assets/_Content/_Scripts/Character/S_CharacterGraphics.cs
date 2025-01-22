@@ -4,9 +4,7 @@ using UnityEngine;
 public class CharacterGraphics : MonoBehaviour
 {
 	[FoldoutGroup("Internal references")][SerializeField] private Animator m_animator;
-	[FoldoutGroup("Internal references")][SerializeField] private CapsuleCollider[] m_ragdollCapsuleColliders;
-	[FoldoutGroup("Internal references")][SerializeField] private SphereCollider[] m_ragdollSphereColliders;
-	[FoldoutGroup("Internal references")][SerializeField] private BoxCollider[] m_ragdollBoxColliders;
+	[FoldoutGroup("Internal references")][SerializeField] private Rigidbody[] m_ragdollRigidbodies;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Character m_ssoCharacter;
 
@@ -62,20 +60,9 @@ public class CharacterGraphics : MonoBehaviour
 	public void ToggleRagdoll(bool isEnabled)
 	{
 		m_animator.enabled = !isEnabled;
-
-		foreach (var capsuleCollider in m_ragdollCapsuleColliders)
+		foreach (var rigidbody in m_ragdollRigidbodies)
 		{
-			capsuleCollider.enabled = isEnabled;
-		}
-
-		foreach (var sphereCollider in m_ragdollSphereColliders)
-		{
-			sphereCollider.enabled = isEnabled;
-		}
-
-		foreach (var boxCollider in m_ragdollBoxColliders)
-		{
-			boxCollider.enabled = isEnabled;
+			rigidbody.isKinematic = !isEnabled;
 		}
 	}
 }

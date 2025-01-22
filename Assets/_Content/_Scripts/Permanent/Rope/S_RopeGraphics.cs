@@ -182,8 +182,8 @@ public class RopeGraphics : MonoBehaviour
 	private void SpawnPhysics()
 	{
 		// Determine how many physic segment needs to be instantiate
-		Vector3 lineDirection = (m_rope.Folds[^1] - m_rope.Folds[^2]).normalized;
-		float lineLength = (m_rope.Folds[^1] - m_rope.Folds[^2]).magnitude;
+		Vector3 lineDirection = (m_rope.CurrentFold - m_rope.LastFold).normalized;
+		float lineLength = (m_rope.CurrentFold - m_rope.LastFold).magnitude;
 		int physicsAmount = Mathf.FloorToInt(lineLength / (m_colliderDiameter + m_ssoRope.PhysicJointOffset));
 		physicsAmount = Mathf.Clamp(physicsAmount, 1, physicsAmount);
 
@@ -192,7 +192,7 @@ public class RopeGraphics : MonoBehaviour
 		{
 			var newPhysic = Instantiate(m_ssoRope.PfRopePhysic, i == 0 ? m_basePhysic.transform : m_physics[^1].transform);
 			newPhysic.transform.rotation = Quaternion.LookRotation(lineDirection);
-			newPhysic.transform.position = m_rope.Folds[^2] + lineDirection * (lineLength / physicsAmount) * i;
+			newPhysic.transform.position = m_rope.LastFold + lineDirection * (lineLength / physicsAmount) * i;
 			newPhysic.OnInteractedWithRef += OnInteracted;
 
 			newPhysic.ToggleFree(i == physicsAmount - 1);
@@ -260,7 +260,7 @@ public class RopeGraphics : MonoBehaviour
 	{
 		m_basePhysic.gameObject.SetActive(true);
 		m_baseInteractable.gameObject.SetActive(true);
-		m_basePhysic.transform.position = m_rope.Folds[^2];
+		m_basePhysic.transform.position = m_rope.LastFold;
 		m_basePhysic.SetLimit(m_colliderDiameter + 0.1f);
 
 		SpawnPhysics();

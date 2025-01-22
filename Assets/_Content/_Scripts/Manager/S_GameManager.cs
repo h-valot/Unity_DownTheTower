@@ -35,6 +35,11 @@ public class GameManager : MonoBehaviour
 		m_rsoPause.OnChanged -= Pause;
 	}
 
+	private void Awake()
+	{
+		ResetRSO();
+	}
+
 	private void Start()
 	{
 		if (!m_directionalLight)
@@ -49,18 +54,6 @@ public class GameManager : MonoBehaviour
 		Restart();
 		DOTween.SetTweensCapacity(400, 400);
 		m_rseToggleCursor.Call(false);
-
-		// Reset runtime scriptable values
-		m_rsoPause.value = false;
-		m_rsoRopes.value = new List<Rope>();
-
-		if (m_ssoGame.ResetData)
-		{
-			foreach (var log in m_ssoLogs.Logs)
-			{
-				log.IsDiscovered = false;
-			}
-		}
 	}
 
 	/// <summary>
@@ -92,5 +85,27 @@ public class GameManager : MonoBehaviour
 	{
 		Time.timeScale = m_rsoPause.value ? 0f : 1f;
 		m_rsoInputsLocked.value = m_rsoPause.value;
+	}
+
+	private void ResetRSO()
+	{
+		// Character
+		m_rsoCharacterDeath.value = false;
+
+		// Input
+		m_rsoInputsLocked.value = false;
+		m_rsoPause.value = false;
+
+		// Permanent
+		m_rsoRopes.value = new List<Rope>();
+
+		// Data
+		if (m_ssoGame.ResetData)
+		{
+			foreach (var log in m_ssoLogs.Logs)
+			{
+				log.IsDiscovered = false;
+			}
+		}
 	}
 }
