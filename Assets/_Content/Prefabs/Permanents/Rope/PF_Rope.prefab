@@ -157,7 +157,7 @@ Rigidbody:
   m_UseGravity: 0
   m_IsKinematic: 1
   m_Interpolate: 0
-  m_Constraints: 112
+  m_Constraints: 126
   m_CollisionDetection: 0
 --- !u!1 &2230200671839839552
 GameObject:
@@ -378,7 +378,7 @@ ConfigurableJoint:
     spring: 0
     damper: 0
   m_LinearLimit:
-    limit: 9999
+    limit: 0
     bounciness: 0
     contactDistance: 0
   m_AngularXLimitSpring:
@@ -582,6 +582,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Base Interactable
       objectReference: {fileID: 0}
+    - target: {fileID: 4262987667519140782, guid: 39203b4ec7f1ed64db2181670fa5b853,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8025931762380556335, guid: 39203b4ec7f1ed64db2181670fa5b853,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -667,6 +672,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Base Physic
+      objectReference: {fileID: 0}
+    - target: {fileID: 4262987667519140782, guid: aff00aa532bd40f4db74fe2f6d2ac0a1,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4896314402593933662, guid: aff00aa532bd40f4db74fe2f6d2ac0a1,
         type: 3}

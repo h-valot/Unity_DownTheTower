@@ -192,11 +192,11 @@ public class Rope : Permanent
 
 	public void Attach(Transform harness, Rigidbody rigidbody)
 	{
+		m_characterHarness = harness;
 		m_characterRigidbody = rigidbody;
 		m_joint.connectedBody = rigidbody;
-		m_characterHarness = harness;
 
-		if (m_isPlaced) UpdateHoldLength();
+		if (m_isPlaced) UpdateHoldLength(); 
 
 		OnAttached?.Invoke();
 	}
@@ -343,8 +343,6 @@ public class Rope : Permanent
 	private void HandleJoint()
 	{
 		m_joint.transform.position = CurrentFold;
-		
-		m_linearLimit = new SoftJointLimit();
 		m_linearLimit.limit = m_holdLength;
 		m_joint.linearLimit = m_linearLimit;
 	}
