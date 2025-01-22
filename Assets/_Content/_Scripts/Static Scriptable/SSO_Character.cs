@@ -160,6 +160,11 @@ public class SSO_Character : ScriptableObject
 	[InfoBox("Modifier applied to the last direction on the rope when the character switches from the rope to jump of the rope.", InfoMessageType.None)]
 	public float JumpOffRopeModifier;
 
+	[FoldoutGroup("Rope")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("Duration during which the character isn't able to jump again.", InfoMessageType.None)]
+	public float JumpRopeDelay;
+
 
 	[Title("Drag")]
 	[FoldoutGroup("Rope")]

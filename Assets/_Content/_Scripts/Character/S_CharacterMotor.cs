@@ -377,15 +377,19 @@ public class CharacterMotor : MonoBehaviour
 
 	private void JumpRope(bool isPressed)
 	{
-		// Assertion
+		// Assertions
 		if (m_rsoInputsLocked.value) return;
 		if (!IsRopeValid) return;
 
 		UpdateHoldInput(isPressed);
 
-		float force = m_ssoCharacter.JumpOffRopeModifier * m_rigidbody.velocity.magnitude;
-		Vector3 direction = (m_rsoCameraRight.value * m_moveInput.x + m_rsoCameraForward.value * m_moveInput.y).normalized;
-		m_rigidbody.AddForce(direction * force, ForceMode.Impulse);
+		if (m_jumpRopeDelay < 0f)
+		{
+			m_jumpRopeDelay = m_ssoCharacter.JumpRopeDelay;
+			float force = m_ssoCharacter.JumpOffRopeModifier * m_rigidbody.velocity.magnitude;
+			Vector3 direction = (m_rsoCameraRight.value * m_moveInput.x + m_rsoCameraForward.value * m_moveInput.y).normalized;
+			m_rigidbody.AddForce(direction * force, ForceMode.Impulse);
+		}
 	}
 
 	#endregion
@@ -987,6 +991,7 @@ public class CharacterMotor : MonoBehaviour
 		}
 	}
 
+	private float m_jumpRopeDelay;
 	private void FixedUpdateRopeState()
 	{
 		if (m_rope.GetTotalLength() > m_ssoRope.MaxLength)
@@ -994,6 +999,8 @@ public class CharacterMotor : MonoBehaviour
 			DesequipRope();
 			return;
 		}
+
+		UpdateJumpRopeDelay();
 
 		if (IsFallingWithRope())
 		{
@@ -1122,6 +1129,11 @@ public class CharacterMotor : MonoBehaviour
 		m_isHolding = false;
 		m_withinRopeLimit = true;
 		m_rope.SetHoldLength(m_ssoRope.MaxLength - m_ssoRope.MaxLengthOffset - m_rope.GetFixedLength());
+	}
+
+	private void UpdateJumpRopeDelay()
+	{
+		if (m_jumpRopeDelay >= 0) m_jumpRopeDelay -= Time.fixedDeltaTime;
 	}
 
 	private bool IsFallingWithRope()
