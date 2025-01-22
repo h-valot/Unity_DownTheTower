@@ -28,7 +28,7 @@ public class AnimatorManager : MonoBehaviour
         m_animator.SetBool(m_isJumpingHash, m_characterMotor.m_hasJumped);
         m_animator.SetBool(m_isGroundedHash, m_characterMotor.m_isGrounded);
         m_animator.SetBool(m_startAimingHash, m_characterMotor.m_startAiming);
-        m_animator.SetBool(m_isThrowingHash, m_rseThrowRope.value);
+        //m_animator.SetBool(m_isThrowingHash, m_rseThrowRope.value);
     }
 
     private void DetermineState()
