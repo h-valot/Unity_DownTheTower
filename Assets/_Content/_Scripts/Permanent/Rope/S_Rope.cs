@@ -59,7 +59,7 @@ public class Rope : Permanent
 		get 
 		{
 			if (m_folds.Count >= 1) return m_folds[^1];
-			else return Vector3.zero;
+			else return m_ropeAttach.position;
 		}
 	}
 	public Vector3 LastFold 
@@ -150,7 +150,7 @@ public class Rope : Permanent
 	{
 		DisablePreview();
 
-        if (Physics.Raycast(
+		if (Physics.Raycast(
 			cameraTransform.position,
 			GetPositionRayDirection(cameraTransform, m_ssoRope.CameraOffsetAngle, m_ssoRope.MaxCameraDownwardClamp),
 			out var hitInfo,
@@ -343,6 +343,8 @@ public class Rope : Permanent
 	private void HandleJoint()
 	{
 		m_joint.transform.position = CurrentFold;
+		
+		m_linearLimit = new SoftJointLimit();
 		m_linearLimit.limit = m_holdLength;
 		m_joint.linearLimit = m_linearLimit;
 	}

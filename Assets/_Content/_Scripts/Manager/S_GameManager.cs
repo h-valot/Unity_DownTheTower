@@ -19,7 +19,6 @@ public class GameManager : MonoBehaviour
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_InputsLocked m_rsoInputsLocked;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_Pause m_rsoPause;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_Ropes m_rsoRopes;
-	public RSE_DebugLog m_rseDebugLog;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_ToggleCursor m_rseToggleCursor;
 
@@ -84,7 +83,6 @@ public class GameManager : MonoBehaviour
 
 	private void Pause()
 	{
-		m_rseDebugLog.Call($"m_rsoPause.value = {m_rsoPause.value}");
 		Time.timeScale = m_rsoPause.value ? 0f : 1f;
 		m_rsoInputsLocked.value = m_rsoPause.value;
 	}

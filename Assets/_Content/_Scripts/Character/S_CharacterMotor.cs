@@ -179,7 +179,8 @@ public class CharacterMotor : MonoBehaviour
         _movementDatas.dataToString.Add(m_desiredForce.ToString());
         _movementDatas.dataToString.Add(m_isGrounded.ToString());
         _movementDatas.dataToString.Add(m_rsoCharacterState.value.ToString());
-        m_rsoMovementDatas.value = _movementDatas;
+		_movementDatas.dataToString.Add(m_rigidbody.position.ToString());
+		m_rsoMovementDatas.value = _movementDatas;
 	}
 
 #if UNITY_EDITOR
@@ -506,11 +507,8 @@ public class CharacterMotor : MonoBehaviour
 
 	#region DEATH
 
-	public RSE_DebugLog m_rseDebugLog;
 	public void HandleDeath(DeathType type)
 	{
-		m_rseDebugLog.Call($"Character died from {type}");
-
 		// if (IsRopeValid) DesequipRope();
 
 		// switch (type)
@@ -1278,19 +1276,16 @@ public class CharacterMotor : MonoBehaviour
                 m_rope = itemToThrow as Rope;
                 if (m_rope != null) m_rope?.Attach(m_harness, m_rigidbody);
 
-                itemToThrow = null;
                 HandObject = null;
             }
 			// Torch handling
 			else
             {
-                itemToThrow = null;
                 RobotObject = null;
             }
 
 			AimingObject = null;
 			m_startAiming = false;
-
 		}
 	}
 
