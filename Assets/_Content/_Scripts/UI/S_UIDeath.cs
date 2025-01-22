@@ -40,12 +40,10 @@ public class UIDeath : UIWindow
 	private void FadeIn()
 	{
 		base.Show();
-
-		m_imgDeath.DOFade(0f, 0f);
-		// m_imgDeath
-		// 	.DOFade(1f, m_ssoCharacter.FallDeathDurationBeforeRespawn)
-		// 	.SetEase(Ease.InQuad)
-		// 	.OnComplete(ResetFadeIn);
+		m_imgDeath
+			.DOFade(1f, m_ssoCharacter.FallDeathDurationBeforeRespawn)
+			.SetEase(Ease.InQuad)
+			.OnComplete(ResetFadeIn);
 	}
 
 	private void ResetFadeIn()
