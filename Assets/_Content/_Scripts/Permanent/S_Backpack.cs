@@ -7,8 +7,10 @@ public class Backpack : Interactable
     [Title("Internal Variables")]
     [SerializeField] private SkinnedMeshRenderer m_mesh;
     [SerializeField] private SphereCollider m_sphereCollider;
+    [SerializeField] public Transform RobotSocket;
+    [SerializeField] public Transform CraftSocket;
 
-	[FoldoutGroup("Scriptable")][SerializeField] private RSE_BackpackCrafting m_rsoPackbackCrafting;
+    [FoldoutGroup("Scriptable")][SerializeField] private RSE_BackpackCrafting m_rsoPackbackCrafting;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterDeath m_rsoCharacterDeath;
 
