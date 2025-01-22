@@ -49,6 +49,9 @@ public class CharacterMotor : MonoBehaviour
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_HarnessPosition m_rsoHarnessPosition;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterPosition m_rsoCharacterPosition;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterLastPosition m_rsoCharacterLastPosition;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_Ropes m_rsoRopes;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_TorchManager m_rsoTorchManager;
+
 
 	#endregion
 
@@ -74,6 +77,7 @@ public class CharacterMotor : MonoBehaviour
 	private bool m_isSlowed;
 	private float m_slowTimer;
 	private bool m_isSlowedPostStun;
+	private bool m_isCharacterDead;
 
 	// - Movement -
 	private Vector2 m_planarVelocity;
@@ -128,6 +132,7 @@ public class CharacterMotor : MonoBehaviour
 		SetCharacterPosition(position, rotation);
 
 		m_isCrafting = false;
+		m_isCharacterDead = false;
 
 		m_isInitialize = true;
     }
@@ -509,7 +514,17 @@ public class CharacterMotor : MonoBehaviour
 
 	public void HandleDeath(DeathType type)
 	{
+		if (m_isCharacterDead) return;
+
+		m_isCharacterDead = true;
+
 		if (IsRopeValid) DesequipRope();
+
+		// Remove objects from lists before destroying the character
+		if (HandObject as Rope) m_rsoRopes.value.Remove(HandObject as Rope);
+		if (AimingObject as Rope) m_rsoRopes.value.Remove(AimingObject as Rope);
+		if (RobotObject as Torch) m_rsoTorchManager.value.Remove(RobotObject as Torch);
+		if (AimingObject as Torch) m_rsoTorchManager.value.Remove(AimingObject as Torch);
 
 		switch (type)
 		{
@@ -529,7 +544,7 @@ public class CharacterMotor : MonoBehaviour
 
 	public IEnumerator AnimateDefaultDeath()
 	{
-		m_characterGraphics.ToggleRagdoll(true);
+		m_characterGraphics.SpawnRagdoll(IsCarryingLight());
 		m_rseDisplayDeath.Call();
 
 		yield return new WaitForSeconds(m_ssoCharacter.FallDeathDurationBeforeRespawn);
@@ -556,7 +571,7 @@ public class CharacterMotor : MonoBehaviour
 
 		// TODO Slow character's speed down to zero
 
-		m_characterGraphics.ToggleRagdoll(true);
+		m_characterGraphics.SpawnRagdoll(IsCarryingLight());
 		m_rseDisplayDeath.Call();
 
 		yield return new WaitForSeconds(m_ssoCharacter.FallDeathDurationBeforeRespawn);
@@ -928,8 +943,6 @@ public class CharacterMotor : MonoBehaviour
 		m_rigidbody.velocity = transform.TransformDirection(velocity);
 	}
 
-	private bool m_isCharacterDead;
-
 	/// <summary>
 	/// Handle fall death animation when the distance the character travelled on the y-axis exceed the lethal height. 
 	/// </summary>
@@ -937,12 +950,10 @@ public class CharacterMotor : MonoBehaviour
 	{
 		// Assertions
 		if (m_rsoCharacterState.value != BehaviorState.FALL) return;
-		if (m_isCharacterDead) return;
 
 		m_fallHeight = Math.Abs(m_rigidbody.position.y - m_positionStartFall.y);
 		if (m_fallHeight >= m_ssoRope.MaxLength + m_ssoCharacter.LethalHeight * 2f)
 		{
-			m_isCharacterDead = true;
 			HandleDeath(DeathType.HEIGHT);
 		}
 	}

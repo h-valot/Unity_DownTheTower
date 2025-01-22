@@ -36,7 +36,7 @@ public class TorchManager : MonoBehaviour
         }
     }
 
-    public void Remove(Torch torch, bool deactivate)
+    public void Remove(Torch torch, bool deactivate = false)
 	{
 		if (deactivate) torch.Desactivate();
 		Torches.Remove(torch);

@@ -84,8 +84,8 @@ MonoBehaviour:
   m_rigidbody: {fileID: 5381602771882170276}
   m_collider: {fileID: 4489746191395963294}
   m_handSocket: {fileID: 1459560615646211390}
-  m_robotSocket: {fileID: 7429388239143159485}
-  m_bagSocket: {fileID: 4775160828863726844}
+  BagRobotSocket: {fileID: 0}
+  BagCraftSocket: {fileID: 0}
   m_aimingLookTo: {fileID: 5572654035266128898}
   m_cameraTarget: {fileID: 3133267520293983452}
   m_harness: {fileID: 1971519234518235863}
@@ -132,12 +132,13 @@ MonoBehaviour:
     type: 2}
   m_rsoCharacterLastPosition: {fileID: 11400000, guid: 5d67ce34b96eda4438fe23fe075a47f6,
     type: 2}
+  m_rsoRopes: {fileID: 11400000, guid: cfcda1b93f1aa6148bf1a6e42672dc2f, type: 2}
+  m_rsoTorchManager: {fileID: 11400000, guid: 013e0e8312f52a7408c42a7d0621de0c, type: 2}
   m_isGrounded: 0
   m_hasJumped: 0
   HandObject: {fileID: 0}
   RobotObject: {fileID: 0}
   IsAiming: 0
-  m_rseDebugLog: {fileID: 11400000, guid: 95a777ec5f449e04ba26b1e9fa6914d6, type: 2}
 --- !u!114 &4970598091221463380
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -375,12 +376,6 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 372077003015108822}
   m_PrefabAsset: {fileID: 0}
---- !u!4 &4775160828863726844 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 5146811083331664938, guid: 7544e1a2ef9f92846a2661054cf72879,
-    type: 3}
-  m_PrefabInstance: {fileID: 372077003015108822}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &6212862345763362409 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5985679123311144639, guid: 7544e1a2ef9f92846a2661054cf72879,
@@ -425,12 +420,6 @@ MonoBehaviour:
   m_characterMotor: {fileID: 1152081341770739563}
   m_rsoCharacterState: {fileID: 11400000, guid: 2f035642b557e7740b684a64f1d67a0a,
     type: 2}
---- !u!4 &7429388239143159485 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 7076174458194067051, guid: 7544e1a2ef9f92846a2661054cf72879,
-    type: 3}
-  m_PrefabInstance: {fileID: 372077003015108822}
-  m_PrefabAsset: {fileID: 0}
 --- !u!114 &8993823383417894658 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 8789223992376889300, guid: 7544e1a2ef9f92846a2661054cf72879,

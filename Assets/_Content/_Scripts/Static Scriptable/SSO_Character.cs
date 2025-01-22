@@ -179,6 +179,14 @@ public class SSO_Character : ScriptableObject
 
 	#endregion
 
+	#region DEATH
+
+	[FoldoutGroup("Death")]
+	[InfoBox("", InfoMessageType.None)]
+	public CharacterRagdoll PfCharacterRagdoll;
+
+	#endregion
+
 	#region GLOW
 
 	[FoldoutGroup("Glow")]

@@ -212,7 +212,6 @@ public class Rope : Permanent
 
 	private void OpenAnchor()
 	{
-		Debug.Log(m_detail2Transform.localEulerAngles.y);
         m_topTransform.DOLocalMoveY(0, m_ssoRope.DeployDuration);
         m_detail0Transform.DOLocalRotate(new Vector3(0, m_detail0Transform.localEulerAngles.y, 0), m_ssoRope.DeployDuration);
         m_detail1Transform.DOLocalRotate(new Vector3(0, m_detail1Transform.localEulerAngles.y, 0), m_ssoRope.DeployDuration);

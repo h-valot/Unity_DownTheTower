@@ -1,10 +1,11 @@
+using System;
+using System.Collections.Generic;
 using Sirenix.OdinInspector;
 using UnityEngine;
 
 public class CharacterGraphics : MonoBehaviour
 {
-	[FoldoutGroup("Internal references")][SerializeField] private Animator m_animator;
-	[FoldoutGroup("Internal references")][SerializeField] private Rigidbody[] m_ragdollRigidbodies;
+	[FoldoutGroup("Internal references")][SerializeField] private List<Transform> m_ragdollTransforms;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Character m_ssoCharacter;
 
@@ -15,11 +16,6 @@ public class CharacterGraphics : MonoBehaviour
 	private bool m_isInitialized;
 
 	private const float k_MinimumThreshold = 0.1f;
-
-	private void Awake()
-	{
-		ToggleRagdoll(false);
-	}
 
 	private void LateUpdate()
     {
@@ -57,12 +53,11 @@ public class CharacterGraphics : MonoBehaviour
 		transform.localRotation = startRotation;
 	}
 
-	public void ToggleRagdoll(bool isEnabled)
+	public void SpawnRagdoll(bool isCarryingLight)
 	{
-		m_animator.enabled = !isEnabled;
-		foreach (var rigidbody in m_ragdollRigidbodies)
-		{
-			rigidbody.isKinematic = !isEnabled;
-		}
+		gameObject.SetActive(false);
+
+		var ragdoll = Instantiate(m_ssoCharacter.PfCharacterRagdoll);
+		ragdoll.Initialize(m_ragdollTransforms, isCarryingLight);
 	}
 }
