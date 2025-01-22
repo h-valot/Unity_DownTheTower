@@ -509,22 +509,22 @@ public class CharacterMotor : MonoBehaviour
 
 	public void HandleDeath(DeathType type)
 	{
-		// if (IsRopeValid) DesequipRope();
+		if (IsRopeValid) DesequipRope();
 
-		// switch (type)
-		// {
-		// 	case DeathType.DEFAULT:
-		// 		StartCoroutine(AnimateDefaultDeath());
-		// 		break;
+		switch (type)
+		{
+			case DeathType.DEFAULT:
+				StartCoroutine(AnimateDefaultDeath());
+				break;
 
-		// 	case DeathType.HEIGHT:
-		// 		StartCoroutine(AnimateHeightDeath());
-		// 		break;
+			case DeathType.HEIGHT:
+				StartCoroutine(AnimateHeightDeath());
+				break;
 
-		// 	case DeathType.GAS:
-		// 		StartCoroutine(AnimateGasDeath());
-		// 		break;
-		// }
+			case DeathType.GAS:
+				StartCoroutine(AnimateGasDeath());
+				break;
+		}
 	}
 
 	public IEnumerator AnimateDefaultDeath()
