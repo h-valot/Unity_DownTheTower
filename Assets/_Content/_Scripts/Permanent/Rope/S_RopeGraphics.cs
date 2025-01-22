@@ -184,6 +184,7 @@ public class RopeGraphics : MonoBehaviour
 		// Determine how many physic segment needs to be instantiate
 		Vector3 lineDirection = (m_rope.CurrentFold - m_rope.LastFold).normalized;
 		float lineLength = (m_rope.CurrentFold - m_rope.LastFold).magnitude;
+		lineLength = Mathf.Clamp(lineLength, 1f, m_ssoRope.MaxLength);
 		int physicsAmount = Mathf.FloorToInt(lineLength / (m_colliderDiameter + m_ssoRope.PhysicJointOffset));
 		physicsAmount = Mathf.Clamp(physicsAmount, 1, physicsAmount);
 
