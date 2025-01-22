@@ -68,6 +68,11 @@ public class UIGame : MonoBehaviour
 		HideSubwindows();
 	}
 
+	public void Resume()
+	{
+		m_rsoPause.value = false;
+	}
+
 	private void HideSubwindows()
 	{
 		foreach (var subwindow in m_subwindows)
