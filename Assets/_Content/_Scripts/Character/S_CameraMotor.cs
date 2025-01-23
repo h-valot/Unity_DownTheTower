@@ -19,6 +19,7 @@ public class CameraMotor : MonoBehaviour
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CameraForward m_rsoCameraForward;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CameraRight m_rsoCameraRight;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CameraTransform m_rsoCameraTransform;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_InputsLocked m_rsoInputsLocked;
 
 	// - Private variables -
 	private Vector2 m_lookInput;
@@ -46,9 +47,11 @@ public class CameraMotor : MonoBehaviour
 
 	private void LateUpdate()
 	{
+		// Assertion
+		if (m_rsoInputsLocked.value) return;
+
 		HandleRotation();
 		CalculatePlanarVectors();
-
 		m_rsoCameraTransform.value = transform;
 	}
 
@@ -100,6 +103,9 @@ public class CameraMotor : MonoBehaviour
 
 	private void UpdateLookInput(Vector2 input)
 	{
+		// Assertion
+		if (m_rsoInputsLocked.value) return;
+		
 		m_lookInput = input;
 
 		// Multiplying by fixedDeltaTime. Otherwise, look sensibility is frame based.

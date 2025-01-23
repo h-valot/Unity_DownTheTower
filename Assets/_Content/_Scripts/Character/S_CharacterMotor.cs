@@ -158,11 +158,8 @@ public class CharacterMotor : MonoBehaviour
 	{
 		if (!m_isInitialize) return;
 
-        // Tkt fréro c'est pour pas soft lock le spherecast de detection du sol
-        if (m_rigidbody.position == Vector3.zero)
-        {
-            m_rigidbody.position = new Vector3(0.01f, 0f, 0f);
-        }
+        // DINGUERIE: Prevent the character to soft lock the ground detection
+        if (m_rigidbody.position == Vector3.zero) m_rigidbody.position = new Vector3(0.01f, 0f, 0f);
 
 		CheckGround();
 		UpdateStatus();
@@ -176,6 +173,7 @@ public class CharacterMotor : MonoBehaviour
 		m_rsoHarnessPosition.value = m_harness.position;
 		m_planarVelocity = new Vector2(m_rigidbody.velocity.x, m_rigidbody.velocity.z);
 		if (m_isGrounded && m_maxGroundedSpeed < m_planarVelocity.magnitude) m_maxGroundedSpeed = m_planarVelocity.magnitude;
+		if (m_rsoInputsLocked.value) m_moveInput = new Vector2(0f, 0f);
 	}
 
     private void LateUpdate()
