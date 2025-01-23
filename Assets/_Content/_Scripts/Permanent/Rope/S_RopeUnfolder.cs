@@ -30,7 +30,7 @@ public class RopeUnfolder : MonoBehaviour
 
 		float totalDistanceTravelled = (transform.position - m_startPosition).magnitude;
 
-		if (m_rope.GetTotalLength() + m_distanceLimit * m_physicInstantiatedAmount < m_ssoRope.MaxLength
+		if (m_rope.GetTotalLength() + m_distanceLimit * m_physicInstantiatedAmount < m_ssoRope.MaxLength - m_ssoRope.MaxLengthOffset
 		&& totalDistanceTravelled / m_physicInstantiatedAmount >= m_distanceLimit)
 		{
 			m_physicInstantiatedAmount++;
