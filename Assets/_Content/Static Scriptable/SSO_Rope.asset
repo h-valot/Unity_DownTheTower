@@ -19,7 +19,7 @@ MonoBehaviour:
     type: 3}
   PfRopeUnfolder: {fileID: 1243149839767473784, guid: 5b262542edad9014d98c2f06f98e3b82,
     type: 3}
-  MaxLength: 30
+  MaxLength: 32
   MaxLengthOffset: 1
   FoldLayerToInclude:
     serializedVersion: 2
@@ -27,7 +27,6 @@ MonoBehaviour:
   FoldingPrecision: 3
   FoldOffset: 0.2
   MinFoldDistance: 0.25
-  MinimumClimbLength: 2
   ropeGradient:
     serializedVersion: 2
     key0: {r: 0.5137255, g: 1, b: 0, a: 1}
@@ -66,6 +65,7 @@ MonoBehaviour:
   PhysicJointOffset: 0.25
   UnfolderTimeoutDelay: 5
   CraftingDuration: 0.25
+  DeployDuration: 0.25
   NoRaycastLayer:
     serializedVersion: 2
     m_Bits: 388
