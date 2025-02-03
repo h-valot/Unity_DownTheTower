@@ -24,6 +24,7 @@ MonoBehaviour:
   DormantColor: {r: 0, g: 0, b: 0, a: 1}
   DormantOpacity: 0
   DormantFocus: 0
+  ActivationRadius: 10
   LongRange: 8
   ClearRange: 4
   LethalRange: 2
@@ -39,6 +40,8 @@ MonoBehaviour:
   DelayKillCharacter: {x: 0, y: 1}
   DelayDestroyTorch: {x: 0, y: 1}
   DelayDestroyRope: {x: 0, y: 1}
+  AggroTimeout: 4
+  LockedThreshold: 1
   OmniscienceDuration: 1
   SeekingDuration: 2
   SeekTimeoutTimer: 8

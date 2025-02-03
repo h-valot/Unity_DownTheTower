@@ -68,11 +68,16 @@ public class SSO_Guardian : ScriptableObject
     [InfoBox("Size of the beam when in dormant state.", InfoMessageType.None)]
     public float DormantFocus;
 
-    #endregion
+	#endregion
 
-    #region SIGHT
+	#region SIGHT
 
-    [FoldoutGroup("Sight")]
+	[FoldoutGroup("Sight")]
+	[InfoBox("Radius of the guardian activation range. If a character, torch or rope enters this range, active guardian. Desactivate it, if character exit.", InfoMessageType.None)]
+	public float ActivationRadius;
+
+	[FoldoutGroup("Sight")]
+	[PropertySpace(SpaceAfter = 0, SpaceBefore = 15)]
 	[InfoBox("Radius of the guardian long sight range. If a light source enters the sphere of the given radius in front of the guardian (cf. DefaultAngleSight), it will become a target.", InfoMessageType.None)]
 	public float LongRange;
 
@@ -144,6 +149,16 @@ public class SSO_Guardian : ScriptableObject
 	[PropertySpace(SpaceAfter = 0, SpaceBefore = 15)]
 	[InfoBox("Duration during which the guardian stand still BEFORE and AFTER destroying a rope.", InfoMessageType.None)]
 	public Vector2 DelayDestroyRope;
+
+	[FoldoutGroup("Aggro")]
+	[PropertySpace(SpaceAfter = 0, SpaceBefore = 15)]
+	[InfoBox("Delay before exiting aggro state if the guardian isn't moving.", InfoMessageType.None)]
+	public float AggroTimeout;
+
+	[FoldoutGroup("Aggro")]
+	[PropertySpace(SpaceAfter = 0, SpaceBefore = 15)]
+	[InfoBox("Minimum distance travalled to be considered as moving while in aggro state.", InfoMessageType.None)]
+	public float LockedThreshold;
 
 	#endregion
 
