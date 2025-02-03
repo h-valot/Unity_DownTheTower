@@ -28,6 +28,7 @@ public class LightBasket : MonoBehaviour
 
         if (other.gameObject.TryGetComponent<Torch>(out Torch torch))
         {
+            if (torch.IsInHand) return;
             torches.Add(other.gameObject.GetComponent<Rigidbody>());
         }
     }
