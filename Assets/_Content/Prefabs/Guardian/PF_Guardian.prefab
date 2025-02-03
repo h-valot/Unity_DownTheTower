@@ -58,8 +58,6 @@ MonoBehaviour:
   m_beamMeshRenderer: {fileID: 3451982372365281956}
   m_beamLight: {fileID: 2873124091110877324}
   m_frontEye: {fileID: 646440082663341643}
-  m_tmpTarget: {fileID: 0}
-  m_tmpState: {fileID: 0}
   m_ssoGame: {fileID: 11400000, guid: c6ad5e1cd823f2647b0c8dc515fee2d5, type: 2}
   m_rsoGuardianState: {fileID: 11400000, guid: 0b2ae53bd79552f478ee46c906c3fe7c, type: 2}
   m_rsoCharacterPosition: {fileID: 11400000, guid: 7fc614512add369458f5a4d382225bfb,
@@ -175,6 +173,11 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 5039903922429803696}
     m_Modifications:
+    - target: {fileID: 2162806721486556562, guid: 07d5a293a9676274b84fb182a097a134,
+        type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
     - target: {fileID: 4938286580673567235, guid: 07d5a293a9676274b84fb182a097a134,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -225,10 +228,20 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6652524723092730881, guid: 07d5a293a9676274b84fb182a097a134,
+        type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
     - target: {fileID: 6793626838024876627, guid: 07d5a293a9676274b84fb182a097a134,
         type: 3}
       propertyPath: m_Name
       value: PF_BeamLight
+      objectReference: {fileID: 0}
+    - target: {fileID: 6793626838024876627, guid: 07d5a293a9676274b84fb182a097a134,
+        type: 3}
+      propertyPath: m_Layer
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 8348556462124529027, guid: 07d5a293a9676274b84fb182a097a134,
         type: 3}
@@ -254,6 +267,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8689650891508756281, guid: 07d5a293a9676274b84fb182a097a134,
+        type: 3}
+      propertyPath: m_Layer
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 8834733437181605373, guid: 07d5a293a9676274b84fb182a097a134,
         type: 3}
@@ -360,6 +378,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: MS_Proto_Guardian
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 56cf1cfca293a464bae228e39afa93e1,
+        type: 3}
+      propertyPath: m_Layer
+      value: 6
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

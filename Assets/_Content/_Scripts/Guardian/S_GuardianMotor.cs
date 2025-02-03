@@ -27,7 +27,6 @@ public class GuardianMotor : MonoBehaviour
     [FoldoutGroup("Internal References")][SerializeField] private Transform m_frontEye;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Game m_ssoGame;
-	[FoldoutGroup("Scriptable")][SerializeField] private RSO_GuardianState m_rsoGuardianState;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterPosition m_rsoCharacterPosition;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_TorchManager m_rsoTorchManager;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_Ropes m_rsoRopes;
@@ -37,6 +36,7 @@ public class GuardianMotor : MonoBehaviour
 	#region VARIABLES
 
 	private bool m_canSwitchState = true;
+	private GuardianBehaviorState m_currentState;
 
 	// Patrol
 	public bool IsPatrolPathValid => m_patrolPath && m_patrolPath.Waypoints.Count > 0;
@@ -50,6 +50,8 @@ public class GuardianMotor : MonoBehaviour
 	private float m_minTargetDistance;
 	private bool m_hasTargetInSight;
 	private bool m_characterAggroedLately;
+	private float m_aggroTimeoutTimer;
+	private Vector3 m_startAggroPosition;
 
 	// Seek
 	private float m_omniscienceTimer;
@@ -74,7 +76,7 @@ public class GuardianMotor : MonoBehaviour
 
     private void Start()
 	{
-		m_rsoGuardianState.value = GuardianBehaviorState.SEEK;
+		m_currentState = GuardianBehaviorState.SEEK;
 		ToggleAngleSightExtension(false);
 
 		SelectTarget();
@@ -184,8 +186,8 @@ public class GuardianMotor : MonoBehaviour
 		// Don't switch state while a coroutine is running
 		if (!m_canSwitchState) return;
 
-		if (m_rsoGuardianState.value != GuardianBehaviorState.PATROL
-		&& m_rsoGuardianState.value == GuardianBehaviorState.SEEK 
+		if (m_currentState != GuardianBehaviorState.PATROL
+		&& m_currentState == GuardianBehaviorState.SEEK 
 		&& m_targetNotFound
 		&& !m_characterAggroedLately)
 		{
@@ -194,15 +196,15 @@ public class GuardianMotor : MonoBehaviour
 			return;
 		}
 
-        if (m_rsoGuardianState.value != GuardianBehaviorState.AGGRO 
+        if (m_currentState != GuardianBehaviorState.AGGRO 
 		&& m_hasTargetInSight)
 		{
 			SwitchState(GuardianBehaviorState.AGGRO);
 			return;
 		}
 
-		if (m_rsoGuardianState.value != GuardianBehaviorState.SEEK
-		&& m_rsoGuardianState.value == GuardianBehaviorState.AGGRO
+		if (m_currentState != GuardianBehaviorState.SEEK
+		&& m_currentState == GuardianBehaviorState.AGGRO
 		&& !m_hasTargetInSight)
 		{
 			SwitchState(GuardianBehaviorState.SEEK);
@@ -218,7 +220,7 @@ public class GuardianMotor : MonoBehaviour
 
 	private void ExitState()
 	{
-		switch (m_rsoGuardianState.value)
+		switch (m_currentState)
 		{
 			case GuardianBehaviorState.PATROL:
 				ExitPatrolState();
@@ -239,9 +241,9 @@ public class GuardianMotor : MonoBehaviour
 		// Don't switch state while a coroutine is running
 		if (!m_canSwitchState) return;
 
-		m_rsoGuardianState.value = newState;
+		m_currentState = newState;
 
-        switch (m_rsoGuardianState.value)
+        switch (m_currentState)
         {
             case GuardianBehaviorState.PATROL:
                 EnterPatrolState();
@@ -259,7 +261,7 @@ public class GuardianMotor : MonoBehaviour
     
     private void UpdateState()
 	{
-		switch (m_rsoGuardianState.value)
+		switch (m_currentState)
         {
             case GuardianBehaviorState.PATROL:
                 UpdatePatrolState();
@@ -350,11 +352,14 @@ public class GuardianMotor : MonoBehaviour
     {
 		UpdateBeamGraphics(m_ssoGuardian.AggroColor, m_ssoGuardian.AggroFocus, m_ssoGuardian.AggroOpacity);
         m_agent.speed = m_ssoGuardian.AggroSpeed;
+		m_aggroTimeoutTimer = m_ssoGuardian.AggroTimeout;
+		m_startAggroPosition = transform.position;
 	}
 
     private void UpdateAggroState()
 	{
 		ChaseTarget();
+		HandleLockedByEnviro();
 
 		m_beamTransform.LookAt(m_currentTarget.Position);
     }
@@ -371,10 +376,25 @@ public class GuardianMotor : MonoBehaviour
 		if (!m_hasTargetInSight) return;
 
 		m_agent.destination = m_currentTarget.Position;
-
 		if (!m_characterAggroedLately && m_currentTarget.Id == 0)
 		{
 			m_characterAggroedLately = true;
+		}
+	}
+
+	private void HandleLockedByEnviro()
+	{
+		m_aggroTimeoutTimer -= Time.deltaTime;
+		if (m_aggroTimeoutTimer <= 0f)
+		{
+			if ((m_startAggroPosition - transform.position).magnitude <= m_ssoGuardian.LockedThreshold)
+			{
+				m_hasTargetInSight = false;
+			}
+			else
+			{
+				m_aggroTimeoutTimer = m_ssoGuardian.AggroTimeout;
+			}
 		}
 	}
 

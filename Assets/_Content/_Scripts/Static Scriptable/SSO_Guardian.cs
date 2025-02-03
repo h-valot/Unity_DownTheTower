@@ -145,6 +145,16 @@ public class SSO_Guardian : ScriptableObject
 	[InfoBox("Duration during which the guardian stand still BEFORE and AFTER destroying a rope.", InfoMessageType.None)]
 	public Vector2 DelayDestroyRope;
 
+	[FoldoutGroup("Aggro")]
+	[PropertySpace(SpaceAfter = 0, SpaceBefore = 15)]
+	[InfoBox("Delay before exiting aggro state if the guardian isn't moving.", InfoMessageType.None)]
+	public float AggroTimeout;
+
+	[FoldoutGroup("Aggro")]
+	[PropertySpace(SpaceAfter = 0, SpaceBefore = 15)]
+	[InfoBox("Minimum distance travalled to be considered as moving while in aggro state.", InfoMessageType.None)]
+	public float LockedThreshold;
+
 	#endregion
 
 	#region SEEK
