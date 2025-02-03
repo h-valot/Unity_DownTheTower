@@ -25,6 +25,7 @@ public class GuardianMotor : MonoBehaviour
     [FoldoutGroup("Internal References")][SerializeField] private MeshRenderer m_beamMeshRenderer;
     [FoldoutGroup("Internal References")][SerializeField] private Light m_beamLight;
     [FoldoutGroup("Internal References")][SerializeField] private Transform m_frontEye;
+	[FoldoutGroup("Internal References")][SerializeField] private GuardianActivator m_activator;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Game m_ssoGame;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterPosition m_rsoCharacterPosition;
@@ -85,6 +86,9 @@ public class GuardianMotor : MonoBehaviour
 
     private void Update()
     {
+		// Assertion
+		if (!m_activator.IsActive) return;
+
         SelectTarget();
         DetermineState();
         UpdateState();
