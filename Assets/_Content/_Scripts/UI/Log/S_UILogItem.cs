@@ -1,12 +1,14 @@
 using Sirenix.OdinInspector;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class UILogItem : MonoBehaviour
 {
 	[FoldoutGroup("Internal references")][SerializeField] private TextMeshProUGUI m_tmpTitle;
+    [FoldoutGroup("Internal references")][SerializeField] public Button TmpButton;
 
-	[FoldoutGroup("Scriptable")][SerializeField] private RSE_DisplayLog m_rseDisplayLog;
+    [FoldoutGroup("Scriptable")][SerializeField] private RSE_DisplayLog m_rseDisplayLog;
 	
 	private SSO_Log m_ssoLog;
 

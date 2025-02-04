@@ -1,6 +1,9 @@
 using System.Collections.Generic;
 using Sirenix.OdinInspector;
+using Unity.VisualScripting;
+using UnityEditorInternal.Profiling.Memory.Experimental;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class UILogCollection : UIWindow
 {
@@ -30,8 +33,10 @@ public class UILogCollection : UIWindow
 			var newItem = Instantiate(m_pfLogItem, m_container);
 			newItem.Initialize(m_ssoLogs.Logs[i]);
 			m_items.Add(newItem);
-		}
-	}
+        }
+		UpdateNavigation();
+
+    }
 
 	private void UpdateItems()
 	{
@@ -39,5 +44,42 @@ public class UILogCollection : UIWindow
 		{
 			m_items[i].Toggle(m_ssoLogs.Logs[i].IsDiscovered);
 		}
-	}
+		UpdateNavigation();
+
+    }
+
+	private void UpdateNavigation()
+    {
+        if (m_items.Count == 0) return;
+
+		// Set first item of list to be automatically selected
+		if (!m_items[0].TmpButton.TryGetComponent<UIFirstSelected>(out UIFirstSelected component)) 
+			m_items[0].TmpButton.AddComponent<UIFirstSelected>();
+
+        Navigation nav = new Navigation();
+
+		for (int i = 0; i < m_items.Count; i++)
+		{
+            nav = m_items[i].TmpButton.navigation;
+
+			if (i == 0) 
+			{
+                nav.selectOnUp = m_items[m_items.Count - 1].TmpButton;
+				// Applyable only if one item in list
+				if (i + 1 == m_items.Count) nav.selectOnDown = m_items[0].TmpButton;
+                else nav.selectOnDown = m_items[i + 1].TmpButton;
+            }
+			else if (i == m_items.Count - 1)
+			{
+                nav.selectOnUp = m_items[i - 1].TmpButton;
+                nav.selectOnDown = m_items[0].TmpButton;
+            }
+			else
+            {
+                nav.selectOnUp = m_items[i - 1].TmpButton;
+                nav.selectOnDown = m_items[i + 1].TmpButton;
+            }
+            m_items[i].TmpButton.navigation = nav;
+        }
+    }
 }
