@@ -12,16 +12,19 @@ public class UISettings : UIWindow
 
 	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Inputs m_ssoInputs;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_Pause m_rsoPause;
+    [FoldoutGroup("Scriptable")][SerializeField] private RSE_Cancel m_rseCancel;
 
-	private void OnEnable()
+    private void OnEnable()
 	{
 		m_rsoPause.OnChanged += OnPaused;
-	}
+        m_rseCancel.action += OnBack;
+    }
 
 	private void OnDisable()
 	{
 		m_rsoPause.OnChanged -= OnPaused;
-	}
+        m_rseCancel.action -= OnBack;
+    }
 
 	public override void Show()
 	{
@@ -36,6 +39,11 @@ public class UISettings : UIWindow
 		if (m_rsoPause.value) return;
 
 		Hide();
+	}
+
+	private void OnBack(bool isPressed)
+	{
+		if(isPressed) Return();
 	}
 
 	private void InitializeSettings()

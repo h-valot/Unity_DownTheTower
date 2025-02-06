@@ -11,8 +11,10 @@ public class UILogCollection : UIWindow
 	[FoldoutGroup("Internal references")][SerializeField] private Transform m_container;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Logs m_ssoLogs;
+    [FoldoutGroup("Scriptable")][SerializeField] private RSO_Pause m_rsoPause;
+    [FoldoutGroup("Scriptable")][SerializeField] private RSE_Cancel m_rseCancel;
 
-	private List<UILogItem> m_items = new List<UILogItem>();
+    private List<UILogItem> m_items = new List<UILogItem>();
 
 	public override void Start()
 	{
@@ -20,13 +22,28 @@ public class UILogCollection : UIWindow
 		base.Start();
 	}
 
-	public override void Show()
+    private void OnEnable()
+    {
+        m_rseCancel.action += OnBack;
+    }
+
+    private void OnDisable()
+    {
+        m_rseCancel.action -= OnBack;
+    }
+
+    public override void Show()
 	{
 		UpdateItems();
 		base.Show();
 	}
 
-	private void CreateItems()
+    private void OnBack(bool isPressed)
+    {
+        if (isPressed) Return();
+    }
+
+    private void CreateItems()
 	{
 		for (int i = 0; i < m_ssoLogs.Logs.Count; i++)
 		{

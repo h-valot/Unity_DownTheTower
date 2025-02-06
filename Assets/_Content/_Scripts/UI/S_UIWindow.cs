@@ -1,15 +1,17 @@
 using Sirenix.OdinInspector;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class UIWindow : MonoBehaviour
 {
 	[FoldoutGroup("Tweakable values")][SerializeField] protected bool m_toggleCursor = true;
 	
 	[FoldoutGroup("Internal references")][SerializeField] protected GameObject m_graphicsParent;
+    [FoldoutGroup("Internal references")][SerializeField] protected GameObject m_previousUISelect;
 
-	[FoldoutGroup("Scriptable")][SerializeField] private RSE_ToggleCursor m_rseToggleCursor;
+    [FoldoutGroup("Scriptable")][SerializeField] private RSE_ToggleCursor m_rseToggleCursor;
 
-	public bool IsActive => m_graphicsParent.activeInHierarchy;
+    public bool IsActive => m_graphicsParent.activeInHierarchy;
 
 	public virtual void Start()
 	{
@@ -38,5 +40,11 @@ public class UIWindow : MonoBehaviour
 	{
 		m_graphicsParent.SetActive(true);
 		if (m_toggleCursor) m_rseToggleCursor.Call(true);
+	}
+
+	public virtual void Return()
+	{
+		if (m_previousUISelect != null) EventSystem.current.SetSelectedGameObject(m_previousUISelect);
+		Hide();
 	}
 }

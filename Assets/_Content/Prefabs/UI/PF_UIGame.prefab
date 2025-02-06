@@ -552,6 +552,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_toggleCursor: 0
   m_graphicsParent: {fileID: 4766266616449188377}
+  m_previousUISelect: {fileID: 0}
   m_rseToggleCursor: {fileID: 11400000, guid: e3c127dc7da608c4f85fb9f1feb0c684, type: 2}
   m_imgDeath: {fileID: 4126926848219422897}
   m_rseDisplayDeath: {fileID: 11400000, guid: fdb42702e7be79145b80bec9015e7992, type: 2}
@@ -609,11 +610,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_toggleCursor: 0
   m_graphicsParent: {fileID: 3966108087381433221}
+  m_previousUISelect: {fileID: 8259184264710953035}
   m_rseToggleCursor: {fileID: 11400000, guid: e3c127dc7da608c4f85fb9f1feb0c684, type: 2}
   m_pfLogItem: {fileID: 5186049662981317373, guid: 6f46bf4e7da32b640a23da1ac0a5a936,
     type: 3}
   m_container: {fileID: 1841490727600011168}
   m_ssoLogs: {fileID: 11400000, guid: eed307042e3d17342af003252e8e501c, type: 2}
+  m_rsoPause: {fileID: 11400000, guid: a2ea92c3ee051664782983f5eda912ec, type: 2}
+  m_rseCancel: {fileID: 11400000, guid: f98da23f144768649811d562b2a9d4ad, type: 2}
 --- !u!1 &1407684268351288557
 GameObject:
   m_ObjectHideFlags: 0
@@ -976,6 +980,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_toggleCursor: 0
   m_graphicsParent: {fileID: 671452276669742891}
+  m_previousUISelect: {fileID: 8259184264710953035}
   m_rseToggleCursor: {fileID: 11400000, guid: e3c127dc7da608c4f85fb9f1feb0c684, type: 2}
   m_openingTab: {fileID: 8111835059520929207}
   m_valueMouseSensibilityX: {fileID: 8273059907110041285}
@@ -985,6 +990,7 @@ MonoBehaviour:
   m_toggleableInvertMouseY: {fileID: 2868016960555538837}
   m_ssoInputs: {fileID: 11400000, guid: a335bb6fe90ea314d90dd2eb5cd93325, type: 2}
   m_rsoPause: {fileID: 11400000, guid: a2ea92c3ee051664782983f5eda912ec, type: 2}
+  m_rseCancel: {fileID: 11400000, guid: f98da23f144768649811d562b2a9d4ad, type: 2}
 --- !u!1 &1935376554214759131
 GameObject:
   m_ObjectHideFlags: 0
@@ -1797,6 +1803,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_toggleCursor: 0
   m_graphicsParent: {fileID: 5614490955209264399}
+  m_previousUISelect: {fileID: 0}
   m_rseToggleCursor: {fileID: 11400000, guid: e3c127dc7da608c4f85fb9f1feb0c684, type: 2}
   m_tmpHeader: {fileID: 52706768025241059}
   m_tmpBody: {fileID: 1053535455289336154}
@@ -1931,7 +1938,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 7967286566250319619}
         m_TargetAssemblyTypeName: UIGame, Assembly-CSharp
-        m_MethodName: Resume
+        m_MethodName: Exit
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -2482,7 +2489,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_toggleCursor: 0
   m_graphicsParent: {fileID: 2357986364511537646}
+  m_previousUISelect: {fileID: 8259184264710953035}
   m_rseToggleCursor: {fileID: 11400000, guid: e3c127dc7da608c4f85fb9f1feb0c684, type: 2}
+  m_rseCancel: {fileID: 11400000, guid: f98da23f144768649811d562b2a9d4ad, type: 2}
 --- !u!1 &4217375704246351330
 GameObject:
   m_ObjectHideFlags: 0
