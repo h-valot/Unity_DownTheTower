@@ -8,13 +8,14 @@ public class CameraMotor : MonoBehaviour
 	[SerializeField] private CinemachineVirtualCamera m_aimingCamera;
 	[SerializeField] private CinemachineVirtualCamera m_thirdPersonCamera;
 
-	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Character m_ssoCharacter;
+	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Camera m_ssoCamera;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Look m_rseLook;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_InitializeCamera m_rseInitializeCamera;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_DisplayDeath m_rsePlayFallDeath;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterDeath m_rsoCharacterDeath;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterState m_rsoCharacterState;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CameraStyle m_rsoCameraStyle;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CameraForward m_rsoCameraForward;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CameraRight m_rsoCameraRight;
@@ -52,6 +53,7 @@ public class CameraMotor : MonoBehaviour
 
 		HandleRotation();
 		CalculatePlanarVectors();
+		HandleSuspended();
 		m_rsoCameraTransform.value = transform;
 	}
 
@@ -63,10 +65,13 @@ public class CameraMotor : MonoBehaviour
 		m_thirdPersonCamera.Follow = cameraTarget;
 		m_thirdPersonCamera.LookAt = cameraTarget;
 
+		m_targetDistance = m_ssoCamera.DefaultDistance;
+		m_3rdPersonFollow = m_thirdPersonCamera.GetCinemachineComponent(CinemachineCore.Stage.Body) as Cinemachine3rdPersonFollow;
+
 		m_rsoCameraForward.value = new Vector3(transform.forward.x, 0, transform.forward.z);
 		m_rsoCameraRight.value = new Vector3(transform.right.x, 0, transform.right.z);
 
-		m_rsoCameraStyle.value = m_ssoCharacter.StartingStyle;
+		m_rsoCameraStyle.value = m_ssoCamera.StartingStyle;
 		m_cinemachineTargetYaw = startRotation.eulerAngles.y;
 		HandleRotation();
 	}
@@ -75,13 +80,29 @@ public class CameraMotor : MonoBehaviour
 	{
 		// Clamp our rotations so our values are limited 360 degrees
 		m_cinemachineTargetYaw = Matha.ClampAngle(m_cinemachineTargetYaw, float.MinValue, float.MaxValue);
-		m_cinemachineTargetPitch = Matha.ClampAngle(m_cinemachineTargetPitch, m_ssoCharacter.BottomClamp, m_ssoCharacter.TopClamp);
+		m_cinemachineTargetPitch = Matha.ClampAngle(m_cinemachineTargetPitch, m_ssoCamera.BottomClamp, m_ssoCamera.TopClamp);
 
 		// Stops the camera if the character is dead
 		if (m_rsoCharacterDeath.value) return;
 
 		// Cinemachine will follow this target
 		m_cameraTarget.rotation = Quaternion.Euler(m_cinemachineTargetPitch, m_cinemachineTargetYaw, 0.0f);
+	}
+
+	private Cinemachine3rdPersonFollow m_3rdPersonFollow;
+	private float m_targetDistance;
+	private void HandleSuspended()
+	{
+		// Choose target distance 
+		if (m_rsoCameraStyle.value == CameraStyle.BASIC)
+		{
+			m_targetDistance = m_rsoCharacterState.value == BehaviorState.ROPE
+				? m_ssoCamera.SuspendedDistance
+				: m_ssoCamera.DefaultDistance;
+		}
+
+		// Lerp towards target distance
+		m_3rdPersonFollow.CameraDistance = Mathf.Lerp(m_3rdPersonFollow.CameraDistance, m_targetDistance, Time.deltaTime * m_ssoCamera.DistanceTransition);
 	}
 
 	public void SwitchStyle()
@@ -120,9 +141,6 @@ public class CameraMotor : MonoBehaviour
 		FreeCamera();
 	}
 
-	/// <summary>
-	/// Set parent as scene root.
-	/// </summary>
 	private void FreeCamera()
 	{
 		m_cameraTarget.transform.parent = null;

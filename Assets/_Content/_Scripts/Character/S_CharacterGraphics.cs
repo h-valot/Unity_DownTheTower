@@ -8,6 +8,7 @@ public class CharacterGraphics : MonoBehaviour
 	[FoldoutGroup("Internal references")][SerializeField] private List<Transform> m_ragdollTransforms;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Character m_ssoCharacter;
+	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Camera m_ssoCamera;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CameraStyle m_rsoCameraStyle;
 
@@ -29,7 +30,7 @@ public class CharacterGraphics : MonoBehaviour
 				transform.localRotation = Quaternion.Lerp(
 					transform.localRotation,
 					Quaternion.LookRotation(planarMovement, Vector3.up),
-					Time.deltaTime * m_ssoCharacter.RotationSpeed
+					Time.deltaTime * m_ssoCamera.RotationSpeed
 				);
 			}
 		}
