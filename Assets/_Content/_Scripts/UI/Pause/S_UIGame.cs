@@ -17,8 +17,9 @@ public class UIGame : MonoBehaviour
 	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Game m_ssoGame;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_ToggleCursor m_rseToggleCursor;
+    [FoldoutGroup("Scriptable")][SerializeField] private RSE_Cancel m_rseCancel;
 
-	[FoldoutGroup("Scriptable")][SerializeField] private RSO_Pause m_rsoPause;
+    [FoldoutGroup("Scriptable")][SerializeField] private RSO_Pause m_rsoPause;
 
 	private void Start()
 	{
@@ -28,11 +29,14 @@ public class UIGame : MonoBehaviour
     private void OnEnable()
     {
 		m_rsoPause.OnChanged += TogglePausePanel;
-	}
+		m_rseCancel.action += CheckResume;
+
+    }
 
     private void OnDisable()
     {
 		m_rsoPause.OnChanged -= TogglePausePanel;
+        m_rseCancel.action -= CheckResume;
     }
 
     private void TogglePausePanel()
@@ -72,6 +76,17 @@ public class UIGame : MonoBehaviour
 	{
 		m_rsoPause.value = false;
 	}
+
+	public void CheckResume(bool isPressed)
+	{
+		if (!isPressed) return;
+        foreach (var subwindow in m_subwindows)
+        {
+			if (subwindow.IsActive) return;
+        }
+
+		Resume();
+    }
 
 	private void HideSubwindows()
 	{

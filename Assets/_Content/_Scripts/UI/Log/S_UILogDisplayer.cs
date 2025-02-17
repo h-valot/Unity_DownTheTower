@@ -1,6 +1,7 @@
 using Sirenix.OdinInspector;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class UILogDisplayer : UIWindow
 {
@@ -18,6 +19,7 @@ public class UILogDisplayer : UIWindow
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_Pause m_rsoPause;
 
 	private bool m_logCollectionDisplayed;
+	private GameObject selectedLog;
 
 	private void OnEnable()
 	{
@@ -40,6 +42,7 @@ public class UILogDisplayer : UIWindow
 
 		if (m_uiLogCollection.IsActive)
 		{
+			selectedLog = EventSystem.current.currentSelectedGameObject;
 			m_logCollectionDisplayed = true;
 			m_uiGame.SetPausePanel(false);
 		}
@@ -51,17 +54,23 @@ public class UILogDisplayer : UIWindow
 
 	private void Hide(bool isHidden)
 	{
+		if (!m_graphicsParent.activeInHierarchy) return;
+
 		base.Hide();
 
 		if (m_logCollectionDisplayed)
-		{
-			m_uiGame.SetPausePanel(true);
-			m_uiLogCollection.Show();
+        {
+            m_uiGame.SetPausePanel(true);
+            m_uiLogCollection.Show();
+			print("showed");
+            EventSystem.current.SetSelectedGameObject(selectedLog);
 		}
 		else
 		{
 			m_rsoInputsLocked.value = false;
 			m_rsoInputAdviceDisplayed.value = true;
 		}
+
+		selectedLog = null;
 	}
 }
