@@ -10,7 +10,7 @@ public class Gate : Switchable
 
     protected override void ActivateMechanism()
     {
-        transform.DOScaleY(0.01f, 1);
+        transform.DOScaleY(0.01f, m_animLength);
     }
 
     protected override void DeactivateMechanism()
