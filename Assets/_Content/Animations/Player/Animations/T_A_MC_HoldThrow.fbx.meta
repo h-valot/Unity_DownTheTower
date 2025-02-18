@@ -1,11 +1,11 @@
 fileFormatVersion: 2
-guid: 64f92460d2f25c6419f501c3f8a310c0
+guid: abb9a9708db34de4788c9208412f6042
 ModelImporter:
   serializedVersion: 22200
   internalIDToNameTable: []
   externalObjects: {}
   materials:
-    materialImportMode: 2
+    materialImportMode: 0
     materialName: 0
     materialSearch: 1
     materialLocation: 1
@@ -17,7 +17,10 @@ ModelImporter:
     removeConstantScaleCurves: 0
     motionNodeName: 
     animationImportErrors: 
-    animationImportWarnings: 
+    animationImportWarnings: "\nClip 'T_A_MC_HoldThrow' has import animation warnings
+      that might lower retargeting quality:\nNote: Activate translation DOF on avatar
+      to improve retargeting quality.\n\t'TwistArm_L' is inbetween humanoid transforms
+      and has rotation animation that will be discarded.\n"
     animationRetargetingWarnings: 
     animationDoRetargetingWarnings: 0
     importAnimatedCustomProperties: 0
@@ -31,11 +34,11 @@ ModelImporter:
     extraUserProperties: []
     clipAnimations:
     - serializedVersion: 16
-      name: Take 001
-      takeName: Take 001
-      internalID: 1827226128182048838
-      firstFrame: 0
-      lastFrame: 19
+      name: T_A_MC_HoldThrow
+      takeName: T_A_MC_HoldThrow
+      internalID: -8621281052993770642
+      firstFrame: 30
+      lastFrame: 72
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
