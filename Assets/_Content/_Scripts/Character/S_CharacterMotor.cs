@@ -41,6 +41,7 @@ public class CharacterMotor : MonoBehaviour
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CameraStyle m_rsoCameraStyle;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CraftInputLocked m_rsoCraftInputLocked;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_RecycleInputLocked m_rsoRecycleInputLocked;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CancelPriority m_rsoCancelPriority;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterState m_rsoCharacterState;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterDeath m_rsoCharacterDeath;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CameraForward m_rsoCameraForward;
@@ -333,6 +334,7 @@ public class CharacterMotor : MonoBehaviour
 	private void CancelAction(bool isPressed)
 	{
 		if (m_rsoInputsLocked.value) return;
+		if (m_rsoCancelPriority.value != CancelState.IN_GAME) return;
 		if (!isPressed) return;
 
 		if (m_startAiming)
@@ -1276,8 +1278,8 @@ public class CharacterMotor : MonoBehaviour
 			}
 			itemToThrow.InitializePreview();
 			m_startAiming = true;
-            AimingObject = itemToThrow;
-        }
+			AimingObject = itemToThrow;
+		}
 
 		// Handle pernament throw on input released
 		else

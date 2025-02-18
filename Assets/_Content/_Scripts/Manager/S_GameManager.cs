@@ -18,6 +18,7 @@ public class GameManager : MonoBehaviour
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterDeath m_rsoCharacterDeath;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_InputsLocked m_rsoInputsLocked;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_Pause m_rsoPause;
+	[FoldoutGroup("Scriptable")] [SerializeField] private RSO_CancelPriority m_rsoCancelPriority;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_Ropes m_rsoRopes;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_ToggleCursor m_rseToggleCursor;
@@ -27,12 +28,14 @@ public class GameManager : MonoBehaviour
 	{
 		m_rsoCharacterDeath.OnChanged += HandleDeath;
 		m_rsoPause.OnChanged += Pause;
+		m_rsoCancelPriority.OnChanged += DebugPrint;
 	}
 
 	private void OnDisable()
 	{
 		m_rsoCharacterDeath.OnChanged -= HandleDeath;
 		m_rsoPause.OnChanged -= Pause;
+		m_rsoCancelPriority.OnChanged -= DebugPrint;
 	}
 
 	private void Awake()
@@ -95,6 +98,7 @@ public class GameManager : MonoBehaviour
 		// Input
 		m_rsoInputsLocked.value = false;
 		m_rsoPause.value = false;
+		m_rsoCancelPriority.value = CancelState.IN_GAME;
 
 		// Permanent
 		m_rsoRopes.value = new List<Rope>();
@@ -108,4 +112,9 @@ public class GameManager : MonoBehaviour
 			}
 		}
 	}
+
+	private void DebugPrint()
+    {
+		print(m_rsoCancelPriority.value.ToString());
+    }
 }

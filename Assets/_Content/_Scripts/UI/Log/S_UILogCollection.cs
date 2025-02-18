@@ -13,8 +13,9 @@ public class UILogCollection : UIWindow
 	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Logs m_ssoLogs;
     [FoldoutGroup("Scriptable")][SerializeField] private RSO_Pause m_rsoPause;
     [FoldoutGroup("Scriptable")][SerializeField] private RSE_Cancel m_rseCancel;
+	[FoldoutGroup("Scriptable")] [SerializeField] private RSO_CancelPriority m_rsoCancelPriority;
 
-    private List<UILogItem> m_items = new List<UILogItem>();
+	private List<UILogItem> m_items = new List<UILogItem>();
 
 	public override void Start()
 	{
@@ -36,12 +37,19 @@ public class UILogCollection : UIWindow
 	{
 		UpdateItems();
 		base.Show();
+		m_rsoCancelPriority.value = CancelState.UI_COLLECTION;
 	}
 
     private void OnBack(bool isPressed)
     {
-        if (isPressed) Return();
-    }
+		if (!m_graphicsParent.activeInHierarchy || m_rsoCancelPriority.value != CancelState.UI_COLLECTION) return;
+
+		if (isPressed)
+		{
+			Return();
+			m_rsoCancelPriority.value = CancelState.UI_PAUSE;
+		}
+	}
 
     private void CreateItems()
 	{

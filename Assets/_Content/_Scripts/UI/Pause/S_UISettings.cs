@@ -13,8 +13,9 @@ public class UISettings : UIWindow
 	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Inputs m_ssoInputs;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_Pause m_rsoPause;
     [FoldoutGroup("Scriptable")][SerializeField] private RSE_Cancel m_rseCancel;
+	[FoldoutGroup("Scriptable")] [SerializeField] private RSO_CancelPriority m_rsoCancelPriority;
 
-    private void OnEnable()
+	private void OnEnable()
 	{
 		m_rsoPause.OnChanged += OnPaused;
         m_rseCancel.action += OnBack;
@@ -29,6 +30,7 @@ public class UISettings : UIWindow
 	public override void Show()
 	{
 		base.Show();
+		m_rsoCancelPriority.value = CancelState.UI_SETTINGS;
 		m_openingTab.Highlight();
 		InitializeSettings();
 	}
@@ -43,7 +45,13 @@ public class UISettings : UIWindow
 
 	private void OnBack(bool isPressed)
 	{
-		if(isPressed) Return();
+		if (!m_graphicsParent.activeInHierarchy || m_rsoCancelPriority.value != CancelState.UI_SETTINGS) return;
+		
+		if (isPressed)
+		{
+			Return();
+			m_rsoCancelPriority.value = CancelState.UI_PAUSE;
+		}
 	}
 
 	private void InitializeSettings()
