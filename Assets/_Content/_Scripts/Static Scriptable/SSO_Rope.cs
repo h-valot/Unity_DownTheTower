@@ -46,12 +46,6 @@ public class SSO_Rope : ScriptableObject
 	public LayerMask FoldLayerToInclude;
 
 	[FoldoutGroup("Global settings")]
-	[PropertyRange(1, 5)]
-	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
-	[InfoBox("", InfoMessageType.None)]
-	public int FoldingPrecision;
-
-	[FoldoutGroup("Global settings")]
 	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
 	[InfoBox("The distance between the accurate fold hit point and the offsetted fold.", InfoMessageType.None)]
 	public float FoldOffset = 0.2f;
