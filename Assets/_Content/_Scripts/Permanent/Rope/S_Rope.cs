@@ -189,7 +189,7 @@ public class Rope : Permanent
     private void Deploy(Transform cameraTransform, Vector3 deployPoint)
 	{
 		// Disable hold length constraint to avoid the character to be snapped to the rope when placed
-		SetHoldLength(9999);
+		SetHoldLength(m_ssoRope.MaxLength - m_ssoRope.MaxLengthOffset - GetFixedLength());
 
 		transform.eulerAngles = new Vector3(0, cameraTransform.rotation.eulerAngles.y, 0);
 		transform.DOScale(1f, 0.3f);

@@ -1100,8 +1100,7 @@ public class CharacterMotor : MonoBehaviour
 		// Assertions
 		if (!IsRopeValid
 		|| !m_isClimbing
-		|| m_isHolding
-		|| m_rope.GetTotalLength() <= m_rope.GetHeight() + 0.25f)
+		|| m_isHolding)
 		{
 			m_currentClimbSpeed = m_ssoCharacter.ClimbAcceleration;
 			return;
@@ -1112,13 +1111,16 @@ public class CharacterMotor : MonoBehaviour
 		m_positionStartFall = m_rigidbody.position;
 		m_currentClimbSpeed += m_currentClimbSpeed * Time.fixedDeltaTime;
 		float clampedClimbSpeed = Mathf.Clamp(m_currentClimbSpeed, 0, m_ssoCharacter.MaxClimbSpeed);
-		m_rope.IncreaseHoldLength(-clampedClimbSpeed * Time.fixedDeltaTime); // Decreasing rope holding length
+
+		// Decreasing rope holding length
+		m_rope.IncreaseHoldLength(-clampedClimbSpeed * Time.fixedDeltaTime); 
 	}
 
 	private void HandleRopeLimit()
 	{
 		// Assertion
-		if (m_rope.GetTotalLength() < m_ssoRope.MaxLength - m_ssoRope.MaxLengthOffset)
+		if (m_rope.GetTotalLength() < m_ssoRope.MaxLength - m_ssoRope.MaxLengthOffset
+		|| m_isClimbing)
 		{
 			m_withinRopeLimit = false;
 			return;
