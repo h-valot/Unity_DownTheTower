@@ -15,6 +15,7 @@ public class Interactable : MonoBehaviour
 	[SerializeField] private GameObject m_objectToRecycle;
 
 	[SerializeField] private bool m_displayGizmos;
+	[SerializeField] private RSE_RopeAttached rse_ropeAttached;
 
 	public Action OnInteracted;
 	public Action<CharacterInteract> OnInteractedWithRef;
@@ -29,6 +30,11 @@ public class Interactable : MonoBehaviour
 	{
 		OnInteracted?.Invoke();
 		if (m_character) OnInteractedWithRef?.Invoke(m_character);
+		if (Type == InteractableType.ROPE)
+		{
+            rse_ropeAttached.Call();
+        }
+
 	}
 
 	/// <summary>
