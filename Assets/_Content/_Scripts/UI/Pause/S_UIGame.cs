@@ -20,6 +20,7 @@ public class UIGame : MonoBehaviour
     [FoldoutGroup("Scriptable")][SerializeField] private RSE_Cancel m_rseCancel;
 
 	[FoldoutGroup("Scriptable")] [SerializeField] private RSO_CancelPriority m_rsoCancelPriority;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CancelConsumable m_rsoCancelConsumable;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_Pause m_rsoPause;
 
 	private void Start()
@@ -83,9 +84,12 @@ public class UIGame : MonoBehaviour
 	public void CheckResume(bool isPressed)
 	{
 		if (m_rsoCancelPriority.value != CancelState.UI_PAUSE) return;
+		if (!m_rsoCancelConsumable.value) return;
 		if (!isPressed) return;
 
-        foreach (var subwindow in m_subwindows)
+		m_rsoCancelConsumable.value = false;
+
+		foreach (var subwindow in m_subwindows)
         {
 			if (subwindow.IsActive) return;
         }

@@ -28,14 +28,12 @@ public class GameManager : MonoBehaviour
 	{
 		m_rsoCharacterDeath.OnChanged += HandleDeath;
 		m_rsoPause.OnChanged += Pause;
-		m_rsoCancelPriority.OnChanged += DebugPrint;
 	}
 
 	private void OnDisable()
 	{
 		m_rsoCharacterDeath.OnChanged -= HandleDeath;
 		m_rsoPause.OnChanged -= Pause;
-		m_rsoCancelPriority.OnChanged -= DebugPrint;
 	}
 
 	private void Awake()
@@ -112,9 +110,4 @@ public class GameManager : MonoBehaviour
 			}
 		}
 	}
-
-	private void DebugPrint()
-    {
-		print(m_rsoCancelPriority.value.ToString());
-    }
 }

@@ -25,6 +25,7 @@ public class InputManager : MonoBehaviour
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Climb m_rseClimb;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_Pause m_rsoPause;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CancelConsumable m_rsoCancelConsumable;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CraftInputLocked m_rsoCraftInputLocked;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_RecycleInputLocked m_rsoRecycleInputLocked;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_InputAdviceDisplayed m_rsoInputAdviceDisplayed;
@@ -196,7 +197,11 @@ public class InputManager : MonoBehaviour
 
     public void OnCancel(InputValue value)
     {
-        m_rseCancel.Call(value.isPressed);
+		if (!value.isPressed) return;
+
+		// Consume cancel input
+		m_rsoCancelConsumable.value = true;
+		m_rseCancel.Call(value.isPressed);
     }
 
     public void OnCraftTorch(InputValue value)

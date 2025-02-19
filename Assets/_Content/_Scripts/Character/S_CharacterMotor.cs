@@ -17,41 +17,42 @@ public class CharacterMotor : MonoBehaviour
 	[FoldoutGroup("Internal references")][SerializeField] private Transform m_harness;
 	[FoldoutGroup("Internal references")][SerializeField] private CharacterGraphics m_characterGraphics;
 
-	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Character m_ssoCharacter;
-	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Torch m_ssoTorch;
-	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Rope m_ssoRope;
+	[FoldoutGroup("SSO")][SerializeField] private SSO_Character m_ssoCharacter;
+	[FoldoutGroup("SSO")][SerializeField] private SSO_Torch m_ssoTorch;
+	[FoldoutGroup("SSO")][SerializeField] private SSO_Rope m_ssoRope;
 
-	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Move m_rseMove;
-	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Jump m_rseJump;
-	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Craft m_rseCraft;
-	[FoldoutGroup("Scriptable")][SerializeField] private RSE_ThrowRope m_rseThrowRope;
-    [FoldoutGroup("Scriptable")][SerializeField] private RSE_ThrowTorch m_rseThrowTorch;
-    [FoldoutGroup("Scriptable")][SerializeField] private RSE_Run m_rseRun;
-	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Climb m_rseClimb;
-	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Cancel m_rseCancel;
-	[FoldoutGroup("Scriptable")][SerializeField] private RSE_ToggleHandObject m_rseToggleHandObject;
-	[FoldoutGroup("Scriptable")][SerializeField] private RSE_KillCharacter m_rseKillCharacter;
-	[FoldoutGroup("Scriptable")][SerializeField] private RSE_BackpackCrafting m_rseBackpackCrafting;
-	[FoldoutGroup("Scriptable")][SerializeField] private RSE_SetCharacterPosition m_rseSetCharacterPosition;
-	[FoldoutGroup("Scriptable")][SerializeField] private RSE_InitializeCamera m_rseInitializeCamera;
-	[FoldoutGroup("Scriptable")][SerializeField] private RSE_DisplayDeath m_rseDisplayDeath;
+	[FoldoutGroup("RSE")][SerializeField] private RSE_Move m_rseMove;
+	[FoldoutGroup("RSE")][SerializeField] private RSE_Jump m_rseJump;
+	[FoldoutGroup("RSE")][SerializeField] private RSE_Craft m_rseCraft;
+	[FoldoutGroup("RSE")][SerializeField] private RSE_ThrowRope m_rseThrowRope;
+    [FoldoutGroup("RSE")][SerializeField] private RSE_ThrowTorch m_rseThrowTorch;
+    [FoldoutGroup("RSE")][SerializeField] private RSE_Run m_rseRun;
+	[FoldoutGroup("RSE")][SerializeField] private RSE_Climb m_rseClimb;
+	[FoldoutGroup("RSE")][SerializeField] private RSE_Cancel m_rseCancel;
+	[FoldoutGroup("RSE")][SerializeField] private RSE_ToggleHandObject m_rseToggleHandObject;
+	[FoldoutGroup("RSE")][SerializeField] private RSE_KillCharacter m_rseKillCharacter;
+	[FoldoutGroup("RSE")][SerializeField] private RSE_BackpackCrafting m_rseBackpackCrafting;
+	[FoldoutGroup("RSE")][SerializeField] private RSE_SetCharacterPosition m_rseSetCharacterPosition;
+	[FoldoutGroup("RSE")][SerializeField] private RSE_InitializeCamera m_rseInitializeCamera;
+	[FoldoutGroup("RSE")][SerializeField] private RSE_DisplayDeath m_rseDisplayDeath;
 
-	[FoldoutGroup("Scriptable")][SerializeField] private RSO_InputsLocked m_rsoInputsLocked;
-	[FoldoutGroup("Scriptable")][SerializeField] private RSO_MovementDatas m_rsoMovementDatas;
-	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CameraStyle m_rsoCameraStyle;
-	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CraftInputLocked m_rsoCraftInputLocked;
-	[FoldoutGroup("Scriptable")][SerializeField] private RSO_RecycleInputLocked m_rsoRecycleInputLocked;
-	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CancelPriority m_rsoCancelPriority;
-	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterState m_rsoCharacterState;
-	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterDeath m_rsoCharacterDeath;
-	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CameraForward m_rsoCameraForward;
-	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CameraRight m_rsoCameraRight;
-	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CameraTransform m_rsoCameraTransform;
-	[FoldoutGroup("Scriptable")][SerializeField] private RSO_HarnessPosition m_rsoHarnessPosition;
-	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterPosition m_rsoCharacterPosition;
-	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterLastPosition m_rsoCharacterLastPosition;
-	[FoldoutGroup("Scriptable")][SerializeField] private RSO_Ropes m_rsoRopes;
-	[FoldoutGroup("Scriptable")][SerializeField] private RSO_TorchManager m_rsoTorchManager;
+	[FoldoutGroup("RSO")][SerializeField] private RSO_CancelConsumable m_rsoCancelConsumable;
+	[FoldoutGroup("RSO")][SerializeField] private RSO_InputsLocked m_rsoInputsLocked;
+	[FoldoutGroup("RSO")][SerializeField] private RSO_MovementDatas m_rsoMovementDatas;
+	[FoldoutGroup("RSO")][SerializeField] private RSO_CameraStyle m_rsoCameraStyle;
+	[FoldoutGroup("RSO")][SerializeField] private RSO_CraftInputLocked m_rsoCraftInputLocked;
+	[FoldoutGroup("RSO")][SerializeField] private RSO_RecycleInputLocked m_rsoRecycleInputLocked;
+	[FoldoutGroup("RSO")][SerializeField] private RSO_CancelPriority m_rsoCancelPriority;
+	[FoldoutGroup("RSO")][SerializeField] private RSO_CharacterState m_rsoCharacterState;
+	[FoldoutGroup("RSO")][SerializeField] private RSO_CharacterDeath m_rsoCharacterDeath;
+	[FoldoutGroup("RSO")][SerializeField] private RSO_CameraForward m_rsoCameraForward;
+	[FoldoutGroup("RSO")][SerializeField] private RSO_CameraRight m_rsoCameraRight;
+	[FoldoutGroup("RSO")][SerializeField] private RSO_CameraTransform m_rsoCameraTransform;
+	[FoldoutGroup("RSO")][SerializeField] private RSO_HarnessPosition m_rsoHarnessPosition;
+	[FoldoutGroup("RSO")][SerializeField] private RSO_CharacterPosition m_rsoCharacterPosition;
+	[FoldoutGroup("RSO")][SerializeField] private RSO_CharacterLastPosition m_rsoCharacterLastPosition;
+	[FoldoutGroup("RSO")][SerializeField] private RSO_Ropes m_rsoRopes;
+	[FoldoutGroup("RSO")][SerializeField] private RSO_TorchManager m_rsoTorchManager;
 
 
 	#endregion
@@ -335,7 +336,11 @@ public class CharacterMotor : MonoBehaviour
 	{
 		if (m_rsoInputsLocked.value) return;
 		if (m_rsoCancelPriority.value != CancelState.IN_GAME) return;
+		if (!m_rsoCancelConsumable.value) return;
 		if (!isPressed) return;
+
+		// Consume cancel input
+		m_rsoCancelConsumable.value = false;
 
 		if (m_startAiming)
 		{

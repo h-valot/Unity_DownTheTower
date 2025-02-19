@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using Sirenix.OdinInspector;
 using Unity.VisualScripting;
-using UnityEditorInternal.Profiling.Memory.Experimental;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -12,8 +11,6 @@ public class UILogCollection : UIWindow
 
 	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Logs m_ssoLogs;
     [FoldoutGroup("Scriptable")][SerializeField] private RSO_Pause m_rsoPause;
-    [FoldoutGroup("Scriptable")][SerializeField] private RSE_Cancel m_rseCancel;
-	[FoldoutGroup("Scriptable")] [SerializeField] private RSO_CancelPriority m_rsoCancelPriority;
 
 	private List<UILogItem> m_items = new List<UILogItem>();
 
@@ -23,35 +20,13 @@ public class UILogCollection : UIWindow
 		base.Start();
 	}
 
-    private void OnEnable()
-    {
-        m_rseCancel.action += OnBack;
-    }
-
-    private void OnDisable()
-    {
-        m_rseCancel.action -= OnBack;
-    }
-
     public override void Show()
 	{
 		UpdateItems();
 		base.Show();
-		m_rsoCancelPriority.value = CancelState.UI_COLLECTION;
 	}
 
-    private void OnBack(bool isPressed)
-    {
-		if (!m_graphicsParent.activeInHierarchy || m_rsoCancelPriority.value != CancelState.UI_COLLECTION) return;
-
-		if (isPressed)
-		{
-			Return();
-			m_rsoCancelPriority.value = CancelState.UI_PAUSE;
-		}
-	}
-
-    private void CreateItems()
+	private void CreateItems()
 	{
 		for (int i = 0; i < m_ssoLogs.Logs.Count; i++)
 		{
@@ -78,11 +53,12 @@ public class UILogCollection : UIWindow
         if (m_items.Count == 0) return;
 
 		// Set first item of list to be automatically selected
-		if (!m_items[0].TmpButton.TryGetComponent<UIFirstSelected>(out UIFirstSelected component)) 
+		if (!m_items[0].TmpButton.TryGetComponent<UIFirstSelected>(out var component))
+		{
 			m_items[0].TmpButton.AddComponent<UIFirstSelected>();
+		}
 
         Navigation nav = new Navigation();
-
 		for (int i = 0; i < m_items.Count; i++)
 		{
             nav = m_items[i].TmpButton.navigation;

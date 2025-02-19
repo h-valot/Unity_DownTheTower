@@ -11,10 +11,8 @@ public class UILogDisplayer : UIWindow
 	[FoldoutGroup("External references")][SerializeField] private UILogCollection m_uiLogCollection;
 	[FoldoutGroup("External references")][SerializeField] private UIGame m_uiGame;
 
-	[FoldoutGroup("Scriptable")] [SerializeField] private RSE_DisplayLog m_rseDisplayLog;
-	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Cancel m_rseCancel;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSE_DisplayLog m_rseDisplayLog;
 
-	[FoldoutGroup("Scriptable")] [SerializeField] private RSO_CancelPriority m_rsoCancelPriority;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_InputsLocked m_rsoInputsLocked;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_InputAdviceDisplayed m_rsoInputAdviceDisplayed;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_Pause m_rsoPause;
@@ -22,14 +20,14 @@ public class UILogDisplayer : UIWindow
 	private bool m_logCollectionDisplayed;
 	private GameObject selectedLog;
 
-	private void OnEnable()
+	protected override void OnEnable()
 	{
 		m_rseDisplayLog.action += Display;
 		m_rseCancel.action += Hide;
 		m_rsoPause.OnChanged += Hide;
 	}
 
-	private void OnDisable()
+	protected override void OnDisable()
 	{
 		m_rseDisplayLog.action -= Display;
 		m_rseCancel.action -= Hide;
@@ -56,15 +54,17 @@ public class UILogDisplayer : UIWindow
 
 	private void Hide(bool isHidden)
 	{
-		if (!m_graphicsParent.activeInHierarchy || m_rsoCancelPriority.value != CancelState.UI_LOG) return;
+		if (!IsActive) return;
+		if (m_rsoCancelPriority.value != CancelState.UI_LOG) return;
+		if (!m_rsoCancelConsumable.value) return;
 
+		m_rsoCancelConsumable.value = false;
 		base.Hide();
 
 		if (m_logCollectionDisplayed)
         {
             m_uiGame.SetPausePanel(true);
             m_uiLogCollection.Show();
-			m_rsoCancelPriority.value = CancelState.UI_COLLECTION;
 			EventSystem.current.SetSelectedGameObject(selectedLog);
 		}
 		else

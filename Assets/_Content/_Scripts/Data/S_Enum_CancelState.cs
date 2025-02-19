@@ -1,7 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
 public enum CancelState
 {
     IN_GAME,
@@ -9,4 +5,5 @@ public enum CancelState
     UI_PAUSE,
     UI_SETTINGS,
     UI_COLLECTION,
+	UI_CREDITS,
 }
