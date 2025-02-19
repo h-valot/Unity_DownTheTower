@@ -39,7 +39,7 @@ public class Rope : Permanent
 
 	private bool m_isPlaced;
 	private float m_holdLength;
-	private List<Vector3> m_folds = new List<Vector3>();
+	private List<Fold> m_folds = new List<Fold>();
 	private Rigidbody m_characterRigidbody;
 	private Transform m_characterHarness;
 	private SoftJointLimit m_linearLimit;
@@ -52,24 +52,24 @@ public class Rope : Permanent
 	public bool IsPlaced => m_isPlaced;
 	public float HoldLength => m_holdLength;
 	public Rigidbody CharacterRigidbody => m_characterRigidbody;
-	public List<Vector3> Folds => m_folds;
+	public List<Fold> Folds => m_folds;
 	public Vector3 HarnessPosition
 	{
 		get 
 		{
 			if (m_characterHarness) return m_characterHarness.position;
-			else return CurrentFold;
+			else return CurrentFold.Position;
 		}
 	}
-	public Vector3 CurrentFold 
+	public Fold CurrentFold 
 	{
 		get 
 		{
 			if (m_folds.Count >= 1) return m_folds[^1];
-			else return m_ropeAttach.position;
+			else return new Fold(m_ropeAttach.position);
 		}
 	}
-	public Vector3 LastFold 
+	public Fold LastFold 
 	{ 
 		get 
 		{ 
@@ -197,7 +197,7 @@ public class Rope : Permanent
 		{
 			// Rope custom initialization commands
 			m_boxCollider.enabled = true;
-			m_folds = new List<Vector3>() { m_ropeAttach.position.CutDigits(2) };
+			m_folds = new List<Fold>() { new Fold(m_ropeAttach.position.CutDigits(2)) };
 			m_isPlaced = true;
             m_topMeshRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
             m_baseMeshRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
@@ -246,7 +246,7 @@ public class Rope : Permanent
 		for (int i = m_folds.Count - 1; i >= 0; i--)
 		{
 			// Assert: an object is obstructing the way from the fold towards the character.
-			if (!Physics.Linecast(m_characterHarness.position, m_folds[i], out var hit, m_ssoRope.FoldLayerToInclude)) break;
+			if (!Physics.Linecast(m_characterHarness.position, m_folds[i].Position, out var hit, m_ssoRope.FoldLayerToInclude)) break;
 
 			m_folds.Remove(m_folds[i]);
 		}
@@ -259,7 +259,7 @@ public class Rope : Permanent
 		if (!IsConnected) return;
 
 		// Add a final fold to spawn an interactible on it.
-		m_folds.Add(m_characterHarness.position.CutDigits(2));
+		m_folds.Add(new Fold(m_characterHarness.position.CutDigits(2)));
 
 		m_joint.connectedBody = null;
 		m_characterRigidbody = null;
@@ -273,35 +273,69 @@ public class Rope : Permanent
 	/// </summary>
 	private void AddFolds()
 	{
-		Vector3 charaDir = (CurrentFold - m_characterHarness.position).normalized;
+		Vector3 charaDir = (CurrentFold.Position - m_characterHarness.position).normalized;
 		if (Physics.Raycast(m_characterHarness.position, charaDir, out var charaHit, m_ssoRope.MaxLength,  m_ssoRope.FoldLayerToInclude)
-		&& Physics.Raycast(CurrentFold, -charaDir, out var foldHit, m_ssoRope.MaxLength, m_ssoRope.FoldLayerToInclude))
+		&& Physics.Raycast(CurrentFold.Position, -charaDir, out var foldHit, m_ssoRope.MaxLength, m_ssoRope.FoldLayerToInclude))
 		{
 			// Get the plane around the fold and the vector from the character to intersect with that plane
 			Plane foldPlane = new Plane(foldHit.normal, foldHit.point);
-			Vector3 charaInner = Vector3.Cross(charaDir, charaHit.normal);
+			Vector3 charaInner = Vector3.Cross(charaDir, foldHit.normal);
 			Vector3 charaCross = Vector3.Cross(-charaInner, charaHit.normal);
 			Ray charaRay = new Ray(charaHit.point, charaCross);
 
-			// Get the offset direction applied to the intersection plane point
-			Vector3 foldInner = Vector3.Cross(-charaDir, foldHit.normal);
-			Vector3 foldCross = Vector3.Cross(-foldInner, foldHit.normal);
-			Vector3 offsetDir = foldCross + charaCross;
-
-			if (foldPlane.Raycast(charaRay, out float enter)) 
+			if (foldPlane.Raycast(charaRay, out var enter))
 			{
+				// Get the offset direction applied to the intersection plane point
+				Vector3 offsetDir = foldHit.normal + charaHit.normal;
+
 				// Get the next fold position out of the intersection plane point and the offset
-				Vector3 nextFold = charaRay.GetPoint(enter) + offsetDir * m_ssoRope.FoldOffset;
+				Fold nextFold =  new Fold(
+					newPosition: charaRay.GetPoint(enter) + offsetDir * m_ssoRope.FoldOffset, 
+					newNormal: offsetDir
+				);
 
 				// Assertion: the next fold is too close to the previous one
-				if ((nextFold - LastFold).magnitude <= m_ssoRope.MinFoldDistance) return;
+				if ((nextFold.Position - LastFold.Position).magnitude <= m_ssoRope.MinFoldDistance) return;
 
 				// Update the fold list and the rope length
 				m_folds.Add(nextFold);
-				IncreaseHoldLength(-(LastFold - CurrentFold).magnitude);
+				IncreaseHoldLength(-(LastFold.Position - CurrentFold.Position).magnitude);
 			}
 		}
 	}
+
+	public void DrawPlane(Vector3 position, Vector3 normal)
+	{
+		Vector3 v3 = normal.normalized != Vector3.forward
+			? Vector3.Cross(normal, Vector3.forward).normalized * normal.magnitude
+			: Vector3.Cross(normal, Vector3.up).normalized * normal.magnitude;
+
+		var corner0 = position + v3;
+		var corner2 = position - v3;
+		var q = Quaternion.AngleAxis(90.0f, normal);
+		v3 = q * v3;
+		var corner1 = position + v3;
+		var corner3 = position - v3;
+
+		Debug.DrawLine(corner0, corner2, Color.green);
+		Debug.DrawLine(corner1, corner3, Color.green);
+		Debug.DrawLine(corner0, corner1, Color.green);
+		Debug.DrawLine(corner1, corner2, Color.green);
+		Debug.DrawLine(corner2, corner3, Color.green);
+		Debug.DrawLine(corner3, corner0, Color.green);
+		Debug.DrawRay(position, normal, Color.red);
+	}
+
+	private void OnDrawGizmos()
+	{
+		Gizmos.color = Color.blue;
+		Gizmos.DrawRay(CurrentFold.Position, CurrentFold.Normal * 100);
+
+		if (planeNormal != Vector3.zero && planePosition != Vector3.zero) DrawPlane(planePosition, planeNormal);
+	}
+	private Vector3 planeNormal;
+	private Vector3 planePosition;
+
 
 	/// <summary>
 	/// Remove the last fold from the list if there is no collider 
@@ -309,10 +343,34 @@ public class Rope : Permanent
 	/// </summary>
 	private void RemoveFolds()
 	{
-		if (Folds.Count >= 2
-		&& !Physics.Linecast(m_characterHarness.position, LastFold, out var removeHit, m_ssoRope.FoldLayerToInclude))
+		// Assertion
+		if (Folds.Count < 2) return;
+
+		Vector3 foldDir = (CurrentFold.Position - LastFold.Position).normalized;
+		Vector3 edgeCross = Vector3.Cross(foldDir, CurrentFold.Normal);
+		Plane edgePlane = new Plane(edgeCross, CurrentFold.Position);
+		planePosition = CurrentFold.Position;
+		planeNormal = edgeCross;
+
+		Ray downCharaRay = new Ray(m_characterHarness.position, -edgeCross);
+		Ray upCharaRay = new Ray(m_characterHarness.position, edgeCross);
+
+		Debug.DrawRay(LastFold.Position, foldDir * 100);
+		Debug.DrawRay(CurrentFold.Normal, edgeCross * 100);
+
+		Vector3 planedPoint = Vector3.zero;
+		if (edgePlane.Raycast(downCharaRay, out var enter)) planedPoint = downCharaRay.GetPoint(enter);
+		if (edgePlane.Raycast(upCharaRay, out enter)) planedPoint = upCharaRay.GetPoint(enter);
+
+		if (planedPoint == Vector3.zero) return;
+
+		Vector3 charaPlanedDir = (CurrentFold.Position - planedPoint).normalized;
+		Debug.DrawRay(planedPoint, charaPlanedDir * 100);
+		Debug.DrawLine(planedPoint, m_characterHarness.position);
+
+		if (Vector3.SignedAngle(charaPlanedDir, foldDir, edgeCross) > 90)
 		{
-			IncreaseHoldLength((LastFold - CurrentFold).magnitude);
+			IncreaseHoldLength((LastFold.Position - CurrentFold.Position).magnitude);
 			m_folds.Remove(CurrentFold);
 		}
 	}
@@ -346,14 +404,14 @@ public class Rope : Permanent
 
 	private void HandleJoint()
 	{
-		m_joint.transform.position = CurrentFold;
+		m_joint.transform.position = CurrentFold.Position;
 		m_linearLimit.limit = m_holdLength;
 		m_joint.linearLimit = m_linearLimit;
 	}
 
 	public float GetTotalLength()
 	{
-		return GetFixedLength() + (IsConnected ? (CurrentFold - m_characterRigidbody.position).magnitude : 0);
+		return GetFixedLength() + (IsConnected ? (CurrentFold.Position - m_characterRigidbody.position).magnitude : 0);
 	}
 
 	public float GetFixedLength()
@@ -363,7 +421,7 @@ public class Rope : Permanent
 		{
 			if (i + 1 > m_folds.Count - 1) continue;
 
-			output += (m_folds[i + 1] - m_folds[i]).magnitude;
+			output += (m_folds[i + 1].Position - m_folds[i].Position).magnitude;
 		}
 		return output;
 	}
@@ -382,7 +440,7 @@ public class Rope : Permanent
 		// but the character's current position. This avoids re-centering
 		// issue if spamming holding rope key
 		// Only the graphics and folds raycasts are connected to harness.
-		return (CurrentFold - m_characterRigidbody.position).magnitude;
+		return (CurrentFold.Position - m_characterRigidbody.position).magnitude;
 	}
 
 	#endregion
