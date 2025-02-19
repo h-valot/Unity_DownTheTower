@@ -1,4 +1,5 @@
 using Sirenix.OdinInspector;
+using Unity.IO.LowLevel.Unsafe;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -6,28 +7,34 @@ public class UIWindow : MonoBehaviour
 {
 	[FoldoutGroup("Tweakable values")][SerializeField] protected bool m_toggleCursor = true;
 	[FoldoutGroup("Tweakable values")][SerializeField] protected bool m_toggleReturn;
-	[ShowIf("m_toggleReturn")][FoldoutGroup("Tweakable values")][SerializeField] protected CancelState m_requiredState;
+    [FoldoutGroup("Tweakable values")][SerializeField] protected bool m_toggleSelectable = false;
+    [ShowIf("m_toggleReturn")][FoldoutGroup("Tweakable values")][SerializeField] protected CancelState m_requiredState;
 	[ShowIf("m_toggleReturn")][FoldoutGroup("Tweakable values")][SerializeField] protected CancelState m_previousState;
-	[ShowIf("m_toggleReturn")][FoldoutGroup("Tweakable values")][SerializeField] protected GameObject m_previousUISelect;
+    [ShowIf("m_toggleReturn")][FoldoutGroup("Tweakable values")][SerializeField] protected GameObject m_defaultSelect;
+    [ShowIf("m_toggleReturn")][FoldoutGroup("Tweakable values")][SerializeField] protected GameObject m_previousUISelect;
 
 	[FoldoutGroup("Internal references")][SerializeField] protected GameObject m_graphicsParent;
 
 	[ShowIf("m_toggleCursor")][FoldoutGroup("Scriptable")][SerializeField] protected RSE_ToggleCursor m_rseToggleCursor;
 	[ShowIf("m_toggleReturn")][FoldoutGroup("Scriptable")][SerializeField] protected RSO_CancelConsumable m_rsoCancelConsumable;
 	[ShowIf("m_toggleReturn")][FoldoutGroup("Scriptable")][SerializeField] protected RSO_CancelPriority m_rsoCancelPriority;
-	[ShowIf("m_toggleReturn")][FoldoutGroup("Scriptable")][SerializeField] protected RSE_Cancel m_rseCancel;
+    [ShowIf("m_toggleReturn")][FoldoutGroup("Scriptable")][SerializeField] protected RSO_CurrentControls m_rsoCurrentControls;
+    [ShowIf("m_toggleReturn")][FoldoutGroup("Scriptable")][SerializeField] protected RSE_Cancel m_rseCancel;
 
 	public bool IsActive => m_graphicsParent.activeInHierarchy;
 
 	protected virtual void OnEnable()
 	{
 		if (m_toggleReturn) m_rseCancel.action += Return;
-	}
+		m_rsoCurrentControls.OnChanged += UpdateSelection;
+
+    }
 
 	protected virtual void OnDisable()
 	{
 		if (m_toggleReturn) m_rseCancel.action -= Return;
-	}
+        m_rsoCurrentControls.OnChanged -= UpdateSelection;
+    }
 
 	public virtual void Start()
 	{
@@ -55,7 +62,7 @@ public class UIWindow : MonoBehaviour
 	public virtual void Show()
 	{
 		m_graphicsParent.SetActive(true);
-		if (m_toggleCursor) m_rseToggleCursor.Call(true);
+		UpdateSelection();
 		if (m_toggleReturn) m_rsoCancelPriority.value = m_requiredState;
 	}
 
@@ -69,7 +76,28 @@ public class UIWindow : MonoBehaviour
 
 		m_rsoCancelConsumable.value = false;
 		Hide();
-		if (m_previousUISelect != null) EventSystem.current.SetSelectedGameObject(m_previousUISelect);
+		if (m_previousUISelect != null && m_rsoCurrentControls.value == ControlScheme.GAMEPAD) EventSystem.current.SetSelectedGameObject(m_previousUISelect);
 		m_rsoCancelPriority.value = m_previousState;
 	}
+
+	protected virtual void UpdateSelection()
+    {
+        if (!m_toggleSelectable) return;
+        if (m_rsoCancelPriority.value == CancelState.IN_GAME) return;
+        if (m_rsoCancelPriority.value != m_requiredState) return;
+
+		switch (m_rsoCurrentControls.value)
+		{
+			case ControlScheme.GAMEPAD:
+                m_rseToggleCursor.Call(false);
+				if (m_defaultSelect != null) EventSystem.current.SetSelectedGameObject(m_defaultSelect);
+				else EventSystem.current.SetSelectedGameObject(null);
+                break;
+			case ControlScheme.KEYBOARDMOUSE:
+                m_rseToggleCursor.Call(true);
+                EventSystem.current.SetSelectedGameObject(null);
+                break;
+		}
+	}
+
 }

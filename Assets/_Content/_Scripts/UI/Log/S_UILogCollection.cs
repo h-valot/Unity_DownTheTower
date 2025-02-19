@@ -53,10 +53,7 @@ public class UILogCollection : UIWindow
         if (m_items.Count == 0) return;
 
 		// Set first item of list to be automatically selected
-		if (!m_items[0].TmpButton.TryGetComponent<UIFirstSelected>(out var component))
-		{
-			m_items[0].TmpButton.AddComponent<UIFirstSelected>();
-		}
+		m_defaultSelect = m_items[0].gameObject;
 
         Navigation nav = new Navigation();
 		for (int i = 0; i < m_items.Count; i++)
