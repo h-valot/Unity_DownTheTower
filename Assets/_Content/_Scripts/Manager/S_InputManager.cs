@@ -258,8 +258,6 @@ public class InputManager : MonoBehaviour
 	{
 		if (newInput.currentControlScheme.Equals("Gamepad")) m_rsoCurrentControls.value = ControlScheme.GAMEPAD;
 		else if (newInput.currentControlScheme.Equals("KeyboardMouse")) m_rsoCurrentControls.value = ControlScheme.KEYBOARDMOUSE;
-
-        print(m_rsoCurrentControls.value);
 	}
 
 	#endregion

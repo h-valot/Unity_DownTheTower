@@ -123,8 +123,8 @@ public class UIGame : MonoBehaviour
         {
             case ControlScheme.GAMEPAD:
                 m_rseToggleCursor.Call(false);
-                if (m_defaultSelect != null) EventSystem.current.SetSelectedGameObject(m_defaultSelect);
-                else EventSystem.current.SetSelectedGameObject(null);
+				if (m_defaultSelect != null) EventSystem.current.SetSelectedGameObject(m_defaultSelect);
+				else EventSystem.current.SetSelectedGameObject(null);
                 break;
             case ControlScheme.KEYBOARDMOUSE:
                 m_rseToggleCursor.Call(true);

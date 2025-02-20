@@ -62,9 +62,9 @@ public class UIWindow : MonoBehaviour
 	public virtual void Show()
 	{
 		m_graphicsParent.SetActive(true);
-		UpdateSelection();
 		if (m_toggleReturn) m_rsoCancelPriority.value = m_requiredState;
-	}
+        UpdateSelection();
+    }
 
 	public virtual void Return(bool isPressed)
 	{
@@ -83,15 +83,14 @@ public class UIWindow : MonoBehaviour
 	protected virtual void UpdateSelection()
     {
         if (!m_toggleSelectable) return;
-        if (m_rsoCancelPriority.value == CancelState.IN_GAME) return;
         if (m_rsoCancelPriority.value != m_requiredState) return;
 
 		switch (m_rsoCurrentControls.value)
 		{
 			case ControlScheme.GAMEPAD:
                 m_rseToggleCursor.Call(false);
-				if (m_defaultSelect != null) EventSystem.current.SetSelectedGameObject(m_defaultSelect);
-				else EventSystem.current.SetSelectedGameObject(null);
+                if (m_defaultSelect != null) EventSystem.current.SetSelectedGameObject(m_defaultSelect);
+                else EventSystem.current.SetSelectedGameObject(null);
                 break;
 			case ControlScheme.KEYBOARDMOUSE:
                 m_rseToggleCursor.Call(true);
