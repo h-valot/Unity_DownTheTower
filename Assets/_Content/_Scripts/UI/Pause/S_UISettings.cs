@@ -13,15 +13,17 @@ public class UISettings : UIWindow
 	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Inputs m_ssoInputs;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_Pause m_rsoPause;
 
-	private void OnEnable()
+	protected override void OnEnable()
 	{
+		base.OnEnable();
 		m_rsoPause.OnChanged += OnPaused;
-	}
+    }
 
-	private void OnDisable()
+	protected override void OnDisable()
 	{
+		base.OnDisable();
 		m_rsoPause.OnChanged -= OnPaused;
-	}
+    }
 
 	public override void Show()
 	{

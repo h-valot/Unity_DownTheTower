@@ -18,6 +18,7 @@ public class GameManager : MonoBehaviour
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterDeath m_rsoCharacterDeath;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_InputsLocked m_rsoInputsLocked;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_Pause m_rsoPause;
+	[FoldoutGroup("Scriptable")] [SerializeField] private RSO_CancelPriority m_rsoCancelPriority;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_Ropes m_rsoRopes;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_ToggleCursor m_rseToggleCursor;
@@ -95,6 +96,7 @@ public class GameManager : MonoBehaviour
 		// Input
 		m_rsoInputsLocked.value = false;
 		m_rsoPause.value = false;
+		m_rsoCancelPriority.value = CancelState.IN_GAME;
 
 		// Permanent
 		m_rsoRopes.value = new List<Rope>();

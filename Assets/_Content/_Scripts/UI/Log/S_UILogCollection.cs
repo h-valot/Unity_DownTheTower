@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using Sirenix.OdinInspector;
 using Unity.VisualScripting;
-using UnityEditorInternal.Profiling.Memory.Experimental;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,6 +10,7 @@ public class UILogCollection : UIWindow
 	[FoldoutGroup("Internal references")][SerializeField] private Transform m_container;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Logs m_ssoLogs;
+    [FoldoutGroup("Scriptable")][SerializeField] private RSO_Pause m_rsoPause;
 
 	private List<UILogItem> m_items = new List<UILogItem>();
 
@@ -20,7 +20,7 @@ public class UILogCollection : UIWindow
 		base.Start();
 	}
 
-	public override void Show()
+    public override void Show()
 	{
 		UpdateItems();
 		base.Show();
@@ -53,11 +53,9 @@ public class UILogCollection : UIWindow
         if (m_items.Count == 0) return;
 
 		// Set first item of list to be automatically selected
-		if (!m_items[0].TmpButton.TryGetComponent<UIFirstSelected>(out UIFirstSelected component)) 
-			m_items[0].TmpButton.AddComponent<UIFirstSelected>();
+		m_defaultSelect = m_items[0].TmpButton.gameObject;
 
         Navigation nav = new Navigation();
-
 		for (int i = 0; i < m_items.Count; i++)
 		{
             nav = m_items[i].TmpButton.navigation;

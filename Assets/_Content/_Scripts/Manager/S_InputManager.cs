@@ -1,4 +1,5 @@
 using Sirenix.OdinInspector;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -25,15 +26,17 @@ public class InputManager : MonoBehaviour
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Climb m_rseClimb;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_Pause m_rsoPause;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CancelConsumable m_rsoCancelConsumable;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CraftInputLocked m_rsoCraftInputLocked;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_RecycleInputLocked m_rsoRecycleInputLocked;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_InputAdviceDisplayed m_rsoInputAdviceDisplayed;
+    [FoldoutGroup("Scriptable")][SerializeField] private RSO_CurrentControls m_rsoCurrentControls;
 
-	#endregion
+    #endregion
 
-	#region VARIABLES
+    #region VARIABLES
 
-	private Vector2 m_move;
+    private Vector2 m_move;
 	private Vector2 m_look;
 	private bool m_run;
 	private bool m_throwRope;
@@ -92,7 +95,8 @@ public class InputManager : MonoBehaviour
 	private void OnEnable()
 	{
 		m_rseToggleCursor.action += OnEnableCursor;
-	}
+		m_playerInput.onControlsChanged += OnControlsChanged;
+    }
 
 	private void OnDisable()
 	{
@@ -196,7 +200,11 @@ public class InputManager : MonoBehaviour
 
     public void OnCancel(InputValue value)
     {
-        m_rseCancel.Call(value.isPressed);
+		if (!value.isPressed) return;
+
+		// Consume cancel input
+		m_rsoCancelConsumable.value = true;
+		m_rseCancel.Call(value.isPressed);
     }
 
     public void OnCraftTorch(InputValue value)
@@ -244,6 +252,12 @@ public class InputManager : MonoBehaviour
 	public void OnPause()
 	{
 		m_rsoPause.value = !m_rsoPause.value;
+	}
+
+	public void OnControlsChanged(PlayerInput newInput)
+	{
+		if (newInput.currentControlScheme.Equals("Gamepad")) m_rsoCurrentControls.value = ControlScheme.GAMEPAD;
+		else if (newInput.currentControlScheme.Equals("KeyboardMouse")) m_rsoCurrentControls.value = ControlScheme.KEYBOARDMOUSE;
 	}
 
 	#endregion
