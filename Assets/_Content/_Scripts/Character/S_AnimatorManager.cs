@@ -14,7 +14,7 @@ public class AnimatorManager : MonoBehaviour
     private int m_moveSpeedHash = Animator.StringToHash("MoveSpeed");
     private int m_isGroundedHash = Animator.StringToHash("IsGrounded");
     private int m_isJumpingHash = Animator.StringToHash("IsJumping");
-    //private int m_startAimingHash = Animator.StringToHash("StartAiming");
+    private int m_startAimingHash = Animator.StringToHash("StartAiming");
     private int m_isThrowingHash = Animator.StringToHash("IsThrowing");
     private int m_locomotionState = Animator.StringToHash("IsLocomotion");
     private int m_FallState = Animator.StringToHash("IsFall");
@@ -22,6 +22,7 @@ public class AnimatorManager : MonoBehaviour
     private int m_RopeState = Animator.StringToHash("IsRope");
     private int m_isRopeAttachedHash = Animator.StringToHash("IsRopeAttached");
 
+    private bool m_ropeThrow;
     private bool m_ropeAttached;
     private bool m_ropeAttachedPlayed;
     private BehaviorState m_currentState;
@@ -33,8 +34,7 @@ public class AnimatorManager : MonoBehaviour
         m_animator.SetBool(m_isJumpingHash, m_characterMotor.m_hasJumped);
         m_animator.SetBool(m_isGroundedHash, m_characterMotor.m_isGrounded);
         m_animator.SetBool(m_isRopeAttachedHash, m_ropeAttached);
-        //m_animator.SetBool(m_startAimingHash, m_characterMotor.m_startAiming);
-        //m_animator.SetBool(m_isThrowingHash, m_rseThrowRope.value);
+        m_animator.SetBool(m_isThrowingHash, m_ropeThrow);
         if (m_characterMotor.IsRopeValid == false)
         {
             m_ropeAttached = false;
@@ -82,15 +82,22 @@ public class AnimatorManager : MonoBehaviour
     private void OnEnable()
     {
         m_rseRopeAttached.action += OnRopeAttached;
+        m_rseThrowRope.action += OnRopeThrow;
     }
 
     private void OnDisable()
     {
         m_rseRopeAttached.action -= OnRopeAttached;
+        m_rseThrowRope.action -= OnRopeThrow;
     }
     private void OnRopeAttached()
     {
         m_ropeAttached = true;
+    }
+
+    private void OnRopeThrow(bool isThrow)
+    {
+        m_ropeThrow = isThrow;
     }
     private void OnResetAttach()
     {
