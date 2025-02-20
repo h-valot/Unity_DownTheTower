@@ -23,6 +23,7 @@ public class AnimatorManager : MonoBehaviour
     private int m_isRopeAttachedHash = Animator.StringToHash("IsRopeAttached");
 
     private bool m_ropeAttached;
+    private bool m_ropeAttachedPlayed;
     private BehaviorState m_currentState;
 
     void LateUpdate()
@@ -37,6 +38,7 @@ public class AnimatorManager : MonoBehaviour
         if (m_characterMotor.IsRopeValid == false)
         {
             m_ropeAttached = false;
+
         }
 
     }
@@ -91,6 +93,11 @@ public class AnimatorManager : MonoBehaviour
         m_ropeAttached = true;
     }
     private void OnResetAttach()
+    {
+        m_ropeAttached = false;
+    }
+
+    public void OnEventRopeAttached()
     {
         m_ropeAttached = false;
     }
