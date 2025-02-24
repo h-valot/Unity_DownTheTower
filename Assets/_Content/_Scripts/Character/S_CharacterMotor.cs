@@ -204,7 +204,7 @@ public class CharacterMotor : MonoBehaviour
 		if (IsRopeValid)
 		{
 			Gizmos.color = Color.magenta;
-			Gizmos.DrawWireSphere(m_rope.CurrentFold, m_rope.HoldLength);
+			Gizmos.DrawWireSphere(m_rope.CurrentFold.Position, m_rope.HoldLength);
 		}
 	}
 
@@ -1035,7 +1035,7 @@ public class CharacterMotor : MonoBehaviour
 				angle: m_ssoCharacter.RopeOffsetAngle,
 				axis: m_cameraTarget.forward,
 				direction: m_cameraTarget.right,
-				origin: m_rope.CurrentFold,
+				origin: m_rope.CurrentFold.Position,
 				radius: m_rope.HoldLength,
 				starting: m_rigidbody.position
 			) - m_rigidbody.position).normalized * m_moveInput.x +
@@ -1043,7 +1043,7 @@ public class CharacterMotor : MonoBehaviour
 				angle: m_ssoCharacter.RopeOffsetAngle,
 				axis: m_cameraTarget.right,
 				direction: m_cameraTarget.forward,
-				origin: m_rope.CurrentFold,
+				origin: m_rope.CurrentFold.Position,
 				radius: m_rope.HoldLength,
 				starting: m_rigidbody.position
 			) - m_rigidbody.position).normalized * m_moveInput.y;
@@ -1156,7 +1156,7 @@ public class CharacterMotor : MonoBehaviour
 		else
 		{
 			// If the character IS NOT holding the rope, let it fall till it reaches the rope limit constraint
-			isFalling = (m_rope.CurrentFold - m_rigidbody.position).magnitude < m_rope.HoldLength - k_fallingForcesThreshold;
+			isFalling = (m_rope.CurrentFold.Position - m_rigidbody.position).magnitude < m_rope.HoldLength - k_fallingForcesThreshold;
 		}
 		return isFalling;
 	}

@@ -14,10 +14,15 @@ public class RopeGraphics : MonoBehaviour
 	[FoldoutGroup("Internal references")][SerializeField] private LineRenderer m_lineRenderer;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Rope m_ssoRope;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterPosition m_rsoCharacterPosition;
 
 	#endregion
 
 	#region VARIABLES
+
+	private bool m_isDormant;
+	private float m_dormantEnterTimer;
+	private float m_dormantExitTimer;
 
 	private List<Vector3> m_points = new List<Vector3>();
 	private List<RopePhysic> m_physics = new List<RopePhysic>();
@@ -57,17 +62,12 @@ public class RopeGraphics : MonoBehaviour
 
 	private void FixedUpdate()
 	{
-		// Assertion
-		if (!m_rope.IsPlaced) return;
-
 		HandlePoints();
+		HandleDormantState();
 	}
 
 	private void LateUpdate()
 	{
-		// Assertion
-		if (!m_rope.IsPlaced) return;
-
 		DrawRope();
 	}
 
@@ -85,17 +85,75 @@ public class RopeGraphics : MonoBehaviour
 
 	#endregion
 
+	#region DORMANT
+
+	private void HandleDormantState()
+	{
+		// Assertion
+		if (!m_rope.IsPlaced) return;
+		if (m_rope.IsConnected) return;
+
+		if (!m_isDormant)
+		{
+			m_dormantEnterTimer += Time.deltaTime;
+			if (m_dormantEnterTimer >= m_ssoRope.DormantEnterThreshold)
+			{
+				m_dormantEnterTimer = 0f;
+				if (!IsCharacterAround()) SetDormant(true);
+			}
+		}
+		else
+		{
+			m_dormantExitTimer += Time.deltaTime;
+			if (m_dormantExitTimer >= m_ssoRope.DormantExitThreshold)
+			{
+				m_dormantExitTimer = 0f;
+				if (IsCharacterAround()) SetDormant(false);
+			}
+		}
+	}
+
+	private void SetDormant(bool isDormant)
+	{
+		m_isDormant = isDormant;
+		foreach (var physic in Physics)
+		{
+			physic.SetDormant(isDormant);
+		}
+	}
+
+	/// <summary>
+	/// Returns true if the distance between one of the rope interactable and the character is less than the threshold. 
+	/// </summary>
+	private bool IsCharacterAround()
+	{
+		foreach (var physic in m_physics)
+		{
+			if (Vector3.Distance(m_rsoCharacterPosition.value, physic.transform.position) <= m_ssoRope.DormantExitDistance)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	#endregion
+
 	#region GRAPHICS
 
 	private void HandlePoints()
 	{
+		// Assertion
+		if (!m_rope.IsPlaced) return;
+		if (m_isDormant) return;
+
 		m_points = new List<Vector3>();
 
 		for (int i = 0; i < m_rope.Folds.Count; i++)
 		{
 			// Get start and end points
-			Vector3 start = m_rope.Folds[i];
-			Vector3 end = i == m_rope.Folds.Count - 1 ? m_rope.HarnessPosition : m_rope.Folds[i + 1];
+			Vector3 start = m_rope.Folds[i].Position;
+			Vector3 end = i == m_rope.Folds.Count - 1 ? m_rope.HarnessPosition : m_rope.Folds[i + 1].Position;
 
 			// Base calculation to get the best middle point
 			float distance = (end - start).magnitude;
@@ -117,6 +175,9 @@ public class RopeGraphics : MonoBehaviour
 
 	private void DrawRope()
 	{
+		// Assertion
+		if (!m_rope.IsPlaced) return;
+
 		// Generate smoothed points using a Bezier curve
 		var points = new List<Vector3>();
 
@@ -144,6 +205,15 @@ public class RopeGraphics : MonoBehaviour
 
 		// Assert: SmoothLine function can't take less than 3 points
 		if (points.Count < 3) return;
+
+		// Assert: The sum of the magnitude between all points can't exceed the max length of the rope.
+		float totalLength = 0;
+		for (int i = 0; i < points.Count - 2; i++)
+		{
+			totalLength += (points[i] - points[i + 1]).magnitude;
+		}
+		if (totalLength >= m_ssoRope.MaxLength * 2) return;
+
 
 		Vector3[] smoothedPoints = LineSmoother.SmoothLine(points.ToArray(), m_ssoRope.LineSegmentSize);
 
@@ -182,8 +252,8 @@ public class RopeGraphics : MonoBehaviour
 	private void SpawnPhysics()
 	{
 		// Determine how many physic segment needs to be instantiate
-		Vector3 lineDirection = (m_rope.CurrentFold - m_rope.LastFold).normalized;
-		float lineLength = (m_rope.CurrentFold - m_rope.LastFold).magnitude;
+		Vector3 lineDirection = (m_rope.CurrentFold.Position - m_rope.LastFold.Position).normalized;
+		float lineLength = (m_rope.CurrentFold.Position - m_rope.LastFold.Position).magnitude;
 		lineLength = Mathf.Clamp(lineLength, 1f, m_ssoRope.MaxLength);
 		int physicsAmount = Mathf.FloorToInt(lineLength / (m_colliderDiameter + m_ssoRope.PhysicJointOffset));
 		physicsAmount = Mathf.Clamp(physicsAmount, 1, physicsAmount);
@@ -193,7 +263,7 @@ public class RopeGraphics : MonoBehaviour
 		{
 			var newPhysic = Instantiate(m_ssoRope.PfRopePhysic, i == 0 ? m_basePhysic.transform : m_physics[^1].transform);
 			newPhysic.transform.rotation = Quaternion.LookRotation(lineDirection);
-			newPhysic.transform.position = m_rope.LastFold + lineDirection * (lineLength / physicsAmount) * i;
+			newPhysic.transform.position = m_rope.LastFold.Position + lineDirection * (lineLength / physicsAmount) * i;
 			newPhysic.OnInteractedWithRef += OnInteracted;
 
 			newPhysic.ToggleFree(i == physicsAmount - 1);
@@ -214,8 +284,8 @@ public class RopeGraphics : MonoBehaviour
 	{
 		for (int i = 0; i < m_rope.Folds.Count - 2; i++)
 		{
-			Vector3 lineDirection = (m_rope.Folds[i + 1] - m_rope.Folds[i]).normalized;
-			float lineLength = (m_rope.Folds[i + 1] - m_rope.Folds[i]).magnitude;
+			Vector3 lineDirection = (m_rope.Folds[i + 1].Position - m_rope.Folds[i].Position).normalized;
+			float lineLength = (m_rope.Folds[i + 1].Position - m_rope.Folds[i].Position).magnitude;
 			int interactableAmount = Mathf.FloorToInt(lineLength / m_triggerDiameter);
 			interactableAmount = Mathf.Clamp(interactableAmount, 1, interactableAmount);
 
@@ -226,7 +296,7 @@ public class RopeGraphics : MonoBehaviour
 
 				var newInteractable = Instantiate(m_ssoRope.PfRopeInteractable, j == 1 && i == 0 ? m_baseInteractable.transform : m_interactables[^1].transform);
 				newInteractable.transform.rotation = Quaternion.LookRotation(lineDirection);
-				newInteractable.transform.position = m_rope.Folds[i] + lineDirection * (lineLength / interactableAmount) * j;
+				newInteractable.transform.position = m_rope.Folds[i].Position + lineDirection * (lineLength / interactableAmount) * j;
 				newInteractable.OnInteractedWithRef += OnInteracted;
 				m_interactables.Add(newInteractable);
 			}
@@ -251,6 +321,7 @@ public class RopeGraphics : MonoBehaviour
 
 	private void OnAttached()
 	{
+		SetDormant(false);
 		m_basePhysic.gameObject.SetActive(false);
 		m_baseInteractable.gameObject.SetActive(false);
 
@@ -261,7 +332,7 @@ public class RopeGraphics : MonoBehaviour
 	{
 		m_basePhysic.gameObject.SetActive(true);
 		m_baseInteractable.gameObject.SetActive(true);
-		m_basePhysic.transform.position = m_rope.LastFold;
+		m_basePhysic.transform.position = m_rope.LastFold.Position;
 		m_basePhysic.SetLimit(m_colliderDiameter + 0.1f);
 
 		SpawnPhysics();
@@ -271,6 +342,7 @@ public class RopeGraphics : MonoBehaviour
 
 	public void OnInteracted(CharacterInteract characterInteract)
 	{
+		SetDormant(false);
 		m_rope.Reattach(characterInteract);
 
 		// Remove and destroy interactables  
