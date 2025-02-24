@@ -102,6 +102,24 @@ public class SSO_Rope : ScriptableObject
 
 	#endregion
 
+	#region DORMANT 
+
+	[FoldoutGroup("Dormant")]
+	[InfoBox("Distance threshold the character must stand in-between the itself and one of the rope interactable to exit the rope from the dormant state.", InfoMessageType.None)]
+	public float DormantExitDistance = 5f;
+
+	[FoldoutGroup("Dormant")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("Delay trottle to check the character distance to exit the dormant state.", InfoMessageType.None)]
+	public float DormantExitThreshold = 0.25f;
+
+	[FoldoutGroup("Dormant")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("Delay trottle to check if character has exited all the rope interactables to enter the dormant state.", InfoMessageType.None)]
+	public float DormantEnterThreshold = 10f;
+
+	#endregion
+
 	#region DEPLOYMENT
 
 	[FoldoutGroup("Deployment")]

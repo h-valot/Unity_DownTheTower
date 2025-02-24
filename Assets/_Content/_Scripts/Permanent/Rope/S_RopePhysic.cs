@@ -8,10 +8,12 @@ public class RopePhysic : RopeInteractable
 	[FoldoutGroup("Internal references")][SerializeField] public SphereCollider SphereCollider;
 
 	private SoftJointLimit m_softJointLimit;
+	private Rigidbody m_connectedRigidbody;
 
 	public void Connect(Rigidbody rigidbody)
 	{
 		Joint.connectedBody = rigidbody;
+		m_connectedRigidbody = rigidbody;
 	}
 
 	public void SetLimit(float limit)
@@ -27,5 +29,12 @@ public class RopePhysic : RopeInteractable
 		Joint.xMotion = newMotion;
 		Joint.yMotion = newMotion;
 		Joint.zMotion = newMotion;
+	}
+
+	public void SetDormant(bool isDormant)
+	{
+		Rigidbody.isKinematic = isDormant;
+		Joint.connectedBody = isDormant ? null : m_connectedRigidbody;
+		SphereCollider.enabled = !isDormant;
 	}
 }
