@@ -53,6 +53,7 @@ public class InputManager : MonoBehaviour
 		// Reset values
 		m_rsoCraftInputLocked.value = false;
 		m_rsoRecycleInputLocked.value = false;
+		m_rseLook.Call(Vector2.zero);
 	}
 
 	private void Start()
