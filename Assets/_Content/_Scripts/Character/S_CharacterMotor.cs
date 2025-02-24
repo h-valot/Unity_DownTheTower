@@ -568,6 +568,7 @@ public class CharacterMotor : MonoBehaviour
 
 		yield return new WaitForSeconds(m_ssoCharacter.FallDeathDurationBeforeRespawn);
 
+		m_characterGraphics.SpawnRagdoll(IsCarryingLight());
 		m_rsoCharacterDeath.value = true;
 		Destroy(gameObject);
 	}
