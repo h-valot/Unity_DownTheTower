@@ -8,7 +8,7 @@ public class Rope : Permanent
 {
 	#region REFERENCES
 
-	[FoldoutGroup("Internal references")][SerializeField] private BoxCollider m_boxCollider;
+	[FoldoutGroup("Internal references")][SerializeField] private Rigidbody m_rigidbody;
 	[FoldoutGroup("Internal references")][SerializeField] private Transform m_ropeAttach;
 	[FoldoutGroup("Internal references")][SerializeField] public Transform RaycastTarget;
     [FoldoutGroup("Internal references")][SerializeField] private MeshRenderer m_topMeshRenderer;
@@ -90,6 +90,7 @@ public class Rope : Permanent
     private void Awake()
     {
         m_materialPropertyBlock = new MaterialPropertyBlock();
+        m_rigidbody.excludeLayers = m_ssoRope.LayersToIgnoreBeforeDeploy;
     }
 
     private void Update()
@@ -140,8 +141,8 @@ public class Rope : Permanent
 
 			UpdateColor(isDeployable: 
 				IsGroundFlat(hitInfo, m_ssoRope.MaxGroundAngle) 
-				&& !IsSpaceAbove(hitInfo, m_ssoRope.HeightLimit, ~m_ssoRope.NoCollisionNoRaycastLayer) 
-				&& !IsSpaceAround(hitInfo, m_ssoRope.MinRadiusAround, ~m_ssoRope.NoCollisionNoRaycastLayer)
+				&& !IsSpaceAbove(hitInfo, m_ssoRope.HeightLimit, m_ssoRope.NoCollisionNoRaycastLayer) 
+				&& !IsSpaceAround(hitInfo, m_ssoRope.MinHalfExtendEmptySpace, m_ssoRope.NoCollisionNoRaycastLayer)
 				&& !IsSpaceBetween(hitInfo.point + (m_ropeAttach.position - transform.position).magnitude * Vector3.up, m_rsoHarnessPosition.value, m_ssoRope.FoldLayerToInclude)
 			);
 		}
@@ -175,8 +176,8 @@ public class Rope : Permanent
 			~m_ssoRope.NoRaycastLayer))
 		{
 			if (IsGroundFlat(hitInfo, m_ssoRope.MaxGroundAngle) 
-				&& !IsSpaceAbove(hitInfo, m_ssoRope.HeightLimit, ~m_ssoRope.NoCollisionNoRaycastLayer) 
-				&& !IsSpaceAround(hitInfo, m_ssoRope.MinRadiusAround, ~m_ssoRope.NoCollisionNoRaycastLayer)
+				&& !IsSpaceAbove(hitInfo, m_ssoRope.HeightLimit, m_ssoRope.NoCollisionNoRaycastLayer) 
+				&& !IsSpaceAround(hitInfo, m_ssoRope.MinHalfExtendEmptySpace, m_ssoRope.NoCollisionNoRaycastLayer)
 				&& !IsSpaceBetween(hitInfo.point + (m_ropeAttach.position - transform.position).magnitude * Vector3.up, m_rsoHarnessPosition.value, m_ssoRope.FoldLayerToInclude))
 			{
 				transform.SetParent(null, true);
@@ -198,7 +199,7 @@ public class Rope : Permanent
 		transform.DOJump(deployPoint, 1f, 0, 0.3f).OnComplete(() =>
 		{
 			// Rope custom initialization commands
-			m_boxCollider.enabled = true;
+			m_rigidbody.excludeLayers = m_ssoRope.LayersToIgnoreAfterDeploy;
 			m_folds = new List<Vector3>() { m_ropeAttach.position.CutDigits(2) };
 			m_isPlaced = true;
             m_topMeshRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;

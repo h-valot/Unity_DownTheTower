@@ -135,8 +135,8 @@ public class SSO_Rope : ScriptableObject
 
 	[FoldoutGroup("Deployment")]
 	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
-	[InfoBox("Minimum distance around the permanent to a potential collider in front of it. If a collider stands in-between, the deployment is invalid.", InfoMessageType.None)]
-	public float MinRadiusAround = 0.5f;
+	[InfoBox("Minimum half distance around the permanent to a potential collider in front of it. If a collider stands in-between, the deployment is invalid.", InfoMessageType.None)]
+	public Vector3 MinHalfExtendEmptySpace = new Vector3(0.5f, 0.2f, 0.5f);
 
 	[FoldoutGroup("Deployment")]
 	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
@@ -159,5 +159,15 @@ public class SSO_Rope : ScriptableObject
 	[InfoBox("Maximum angle the offset vector indicating the position of the permanent preview could be on the right axis.", InfoMessageType.None)]
 	public float MaxCameraDownwardClamp = 45f;
 
-	#endregion
+    [FoldoutGroup("Deployment")]
+    [PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+    [InfoBox("Layer masks the that the rigidbody will ignore before deploy.", InfoMessageType.None)]
+    public LayerMask LayersToIgnoreBeforeDeploy;
+
+    [FoldoutGroup("Deployment")]
+    [PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+    [InfoBox("Layer masks the that the rigidbody will ignore after deploy.", InfoMessageType.None)]
+    public LayerMask LayersToIgnoreAfterDeploy;
+
+    #endregion
 }
