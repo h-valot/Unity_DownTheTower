@@ -6,26 +6,32 @@ public class SSO_Inputs : ScriptableObject
 {
 	#region LOOK
 
-	[Title("Mouse")]
-	[InfoBox("Scalar for mouse sensibility on X.", InfoMessageType.None)]
-	public float MouseSensibilityX;
+	[Title("Camera")]
+    [InfoBox("Minimum value when setting sensitivity.", InfoMessageType.None)]
+    public float MinSensitivity;
 
-	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
-	[InfoBox("Scalar for mouse sensibility on Y.", InfoMessageType.None)]
-	public float MouseSensibilityY;
+    [PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+    [InfoBox("Maximum value when setting sensitivity.", InfoMessageType.None)]
+    public float MaxSensitivity;
 
-	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
-	[InfoBox("Is mouse Y inverted.", InfoMessageType.None)]
-	public bool InvertMouseY;
+    [PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+    [InfoBox("Default sensitivity value (between min and max pls).", InfoMessageType.None)]
+    public float SensitivityValue;
+
+    [PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+    [InfoBox("Multiplier to adapt Y sensibility value to X sensitivity.", InfoMessageType.None)]
+    public float SensitivityMultiplierY;
+
+    [PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+    [InfoBox("Multiplier to adapt to mouse sensitivity.", InfoMessageType.None)]
+    public float SensitivityMouseMultiplier;
+
+    [PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+    [InfoBox("Default value for Camera inversion.", InfoMessageType.None)]
+    public bool InvertAxisY;
 
 
-	[Title("Gamepad")]
-	[InfoBox("Scalar for gamepad sensibility on X.", InfoMessageType.None)]
-	public float GamepadSensibilityX;
 
-	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
-	[InfoBox("Scalar for gamepad sensibility on Y.", InfoMessageType.None)]
-	public float GamepadSensibilityY;
 
-	#endregion
+    #endregion
 }

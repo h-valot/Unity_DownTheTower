@@ -20,8 +20,11 @@ public class UIToggleable : MonoBehaviour
 
 	[FoldoutGroup("Internal references")][SerializeField] private Sprite m_spToggleEnabled;
 	[FoldoutGroup("Internal references")][SerializeField] private Sprite m_spToggleDisabled;
-	[FoldoutGroup("Internal references")][SerializeField] private Image m_imgToggle;
-	[FoldoutGroup("Internal references")][SerializeField] private TextMeshProUGUI m_tmpTitle;
+    [FoldoutGroup("Internal references")][SerializeField] private Sprite m_spToggleEnabledSelected;
+    [FoldoutGroup("Internal references")][SerializeField] private Sprite m_spToggleDisabledSelected;
+    [FoldoutGroup("Internal references")][SerializeField] private Image m_imgToggle;
+    [FoldoutGroup("Internal references")][SerializeField] private Button m_btnToggle;
+    [FoldoutGroup("Internal references")][SerializeField] private TextMeshProUGUI m_tmpTitle;
 	[FoldoutGroup("Internal references")][SerializeField] private TextMeshProUGUI m_tmpFlavor;
 
 	[Space(10)]
@@ -73,5 +76,10 @@ public class UIToggleable : MonoBehaviour
 	private void UpdateGraphics()
 	{
 		m_imgToggle.sprite = Value ? m_spToggleEnabled : m_spToggleDisabled;
-	}
+
+		SpriteState selectedSprite;
+		selectedSprite.selectedSprite = Value ? m_spToggleEnabledSelected : m_spToggleDisabledSelected;
+        selectedSprite.highlightedSprite = Value ? m_spToggleEnabledSelected : m_spToggleDisabledSelected;
+        m_btnToggle.spriteState = selectedSprite;
+    }
 }

@@ -106,12 +106,12 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 3424161138431970073}
+  m_Father: {fileID: 8941990516070657302}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 1, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -30, y: -2.5}
-  m_SizeDelta: {x: 171, y: -5}
+  m_AnchorMin: {x: 1, y: 0.5}
+  m_AnchorMax: {x: 1, y: 0.5}
+  m_AnchoredPosition: {x: -20, y: 0}
+  m_SizeDelta: {x: 171, y: 45}
   m_Pivot: {x: 1, y: 0.5}
 --- !u!222 &1156524920806509183
 CanvasRenderer:
@@ -164,13 +164,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Navigation:
-    m_Mode: 3
+    m_Mode: 4
     m_WrapAround: 0
     m_SelectOnUp: {fileID: 0}
     m_SelectOnDown: {fileID: 0}
     m_SelectOnLeft: {fileID: 0}
     m_SelectOnRight: {fileID: 0}
-  m_Transition: 0
+  m_Transition: 2
   m_Colors:
     m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
     m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
@@ -180,9 +180,10 @@ MonoBehaviour:
     m_ColorMultiplier: 1
     m_FadeDuration: 0.1
   m_SpriteState:
-    m_HighlightedSprite: {fileID: 0}
+    m_HighlightedSprite: {fileID: 21300000, guid: 4adb1ec08f8ed544aa701f73acdbea53,
+      type: 3}
     m_PressedSprite: {fileID: 0}
-    m_SelectedSprite: {fileID: 0}
+    m_SelectedSprite: {fileID: 21300000, guid: 4adb1ec08f8ed544aa701f73acdbea53, type: 3}
     m_DisabledSprite: {fileID: 0}
   m_AnimationTriggers:
     m_NormalTrigger: Normal
@@ -272,7 +273,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: This parameter do some stuff
+  m_text: 
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 6142341ac6070a541b47b2c1d05d6000, type: 2}
   m_sharedMaterial: {fileID: 7626667967505338739, guid: 6142341ac6070a541b47b2c1d05d6000,
@@ -342,43 +343,6 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
---- !u!1 &6442398538570525809
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 3424161138431970073}
-  m_Layer: 0
-  m_Name: PNL_Toggle
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!224 &3424161138431970073
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6442398538570525809}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 4084121992448305327}
-  - {fileID: 669625846230453014}
-  m_Father: {fileID: 8941990516070657302}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -5}
-  m_SizeDelta: {x: -10, y: 50}
-  m_Pivot: {x: 0.5, y: 1}
 --- !u!1 &8093891959085120168
 GameObject:
   m_ObjectHideFlags: 0
@@ -409,12 +373,12 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 3424161138431970073}
+  m_Father: {fileID: 8941990516070657302}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: -10, y: -10}
+  m_SizeDelta: {x: -40, y: -20}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &2960633380525325281
 CanvasRenderer:
@@ -545,7 +509,8 @@ RectTransform:
   m_Children:
   - {fileID: 3046828478430561943}
   - {fileID: 7889761648580888614}
-  - {fileID: 3424161138431970073}
+  - {fileID: 4084121992448305327}
+  - {fileID: 669625846230453014}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
@@ -569,7 +534,12 @@ MonoBehaviour:
   m_flavor: 
   m_spToggleEnabled: {fileID: 21300000, guid: ba27ee3861884564d97f59e0b5eb1c6b, type: 3}
   m_spToggleDisabled: {fileID: 21300000, guid: 112a4d080ff52f84b9063f46d270f8aa, type: 3}
+  m_spToggleEnabledSelected: {fileID: 21300000, guid: 9dc80db1d7de2a84084629a134d142c7,
+    type: 3}
+  m_spToggleDisabledSelected: {fileID: 21300000, guid: 4adb1ec08f8ed544aa701f73acdbea53,
+    type: 3}
   m_imgToggle: {fileID: 7556566155484672793}
+  m_btnToggle: {fileID: 4457327107813950363}
   m_tmpTitle: {fileID: 5300273662646766096}
   m_tmpFlavor: {fileID: 5605585955023638558}
   OnToggled:

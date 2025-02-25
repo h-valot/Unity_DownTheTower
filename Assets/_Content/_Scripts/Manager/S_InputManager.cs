@@ -117,22 +117,24 @@ public class InputManager : MonoBehaviour
 	{
 		Vector2 input = value.Get<Vector2>();
 
-		if (m_playerInput.currentControlScheme == "Gamepad")
+		switch (m_rsoCurrentControls.value)
 		{
-			m_look = new Vector2(
-				input.x * m_ssoInputs.GamepadSensibilityX,
-				input.y * m_ssoInputs.GamepadSensibilityY
-			);
-		}
-		else
-		{
-			m_look = new Vector2(
-				input.x * m_ssoInputs.MouseSensibilityX,
-				input.y * m_ssoInputs.MouseSensibilityY * (m_ssoInputs.InvertMouseY ? -1 : 1)
-			);
-		}
+			case ControlScheme.GAMEPAD:
+                m_look = new Vector2(
+                    input.x * m_ssoInputs.SensitivityValue,
+                    input.y * m_ssoInputs.SensitivityValue * m_ssoInputs.SensitivityMultiplierY * (m_ssoInputs.InvertAxisY ? 1 : -1)
+                    );
+				break;
+			case ControlScheme.KEYBOARDMOUSE:
+                m_look = new Vector2(
+                    input.x * m_ssoInputs.SensitivityValue * m_ssoInputs.SensitivityMouseMultiplier,
+                    input.y * m_ssoInputs.SensitivityValue * m_ssoInputs.SensitivityMultiplierY * m_ssoInputs.SensitivityMouseMultiplier * (m_ssoInputs.InvertAxisY ? 1 : -1)
+                    );
+                break;
+        }
 
-		if (m_rsoPause.value) m_look = Vector2.zero;
+
+        if (m_rsoPause.value) m_look = Vector2.zero;
     }
 
 	public void OnJump(InputValue value)

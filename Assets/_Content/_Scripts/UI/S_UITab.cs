@@ -12,18 +12,6 @@ public class UITab : MonoBehaviour, IPointerDownHandler
 	[FoldoutGroup("Internal references")][SerializeField] private GameObject m_linkedPanel;
 	[FoldoutGroup("Internal references")][SerializeField] private Image m_imgBackground;
 
-	[FoldoutGroup("Scriptables")][SerializeField] private RSE_WithdrawTabs m_rseWithdrawTabs;
-
-	private void OnEnable()
-	{
-		m_rseWithdrawTabs.action += Withdraw;
-	}
-
-	private void OnDisable()
-	{
-		m_rseWithdrawTabs.action -= Withdraw;
-	}
-
 	public void OnPointerDown(PointerEventData eventData)
 	{
 		Highlight();
@@ -31,7 +19,6 @@ public class UITab : MonoBehaviour, IPointerDownHandler
 
 	public void Highlight()
 	{
-		m_rseWithdrawTabs.Call();
 		m_imgBackground.color = m_colorHighlighted;
 		m_linkedPanel.SetActive(true);
 	}
