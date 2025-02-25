@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using Sirenix.OdinInspector;
 using UnityEngine;
+using DG.Tweening;
 
 public class CharacterMotor : MonoBehaviour
 {
@@ -59,7 +60,8 @@ public class CharacterMotor : MonoBehaviour
 
 	#region VARIABLES
 
-	private bool m_isInitialize = false;
+	private bool m_isInitialize;
+	private bool m_isFixedUpdateLocked;
 
 	// - Inputs -
 	private Vector2 m_moveInput = new Vector2();
@@ -159,6 +161,7 @@ public class CharacterMotor : MonoBehaviour
     private void FixedUpdate()
 	{
 		if (!m_isInitialize) return;
+		if (m_isFixedUpdateLocked) return;
 
         // DINGUERIE: Prevent the character to soft lock the ground detection
         if (m_rigidbody.position == Vector3.zero) m_rigidbody.position = new Vector3(0.01f, 0f, 0f);
@@ -283,6 +286,10 @@ public class CharacterMotor : MonoBehaviour
 		m_rigidbody.position = position;
 		m_characterGraphics.transform.rotation = rotation;
 		m_rsoCharacterPosition.value = m_rigidbody.position;
+
+		m_isJumping = false;
+		m_isClimbing = false;
+		m_isHolding = false;
 	}
 
 	private void UpdateMoveInput(Vector2 input)
@@ -897,7 +904,6 @@ public class CharacterMotor : MonoBehaviour
 		UpdateZeroDrag();
 		CheckFallHeight();
 		MoveFalling();
-		HandleEdgeCatching();
 	}
 
     private void ExitFallState()
@@ -1014,8 +1020,6 @@ public class CharacterMotor : MonoBehaviour
 			return;
 		}
 
-		HandleEdgeCatching();
-
 		HandleRopeMovement();
 		HandleRopeDrag();
 		HandleRopeClimb();
@@ -1051,42 +1055,6 @@ public class CharacterMotor : MonoBehaviour
 
 		m_rigidbody.AddForce(direction * m_ssoCharacter.ropeMovementForce, ForceMode.Acceleration);
 	}
-
-	private void HandleEdgeCatching()
-	{
-		// Assertions
-		if (m_raycastHits.Length <= 1 || !DoMoveInputs) return;
-
-		// - Get a highest position than the character's one -
-		Vector3 highestEdge = m_rigidbody.position;
-		Vector3 moveInput3d = (m_rsoCameraRight.value * m_moveInput.x + m_rsoCameraForward.value * m_moveInput.y).normalized;
-		
-		foreach (var hit in m_raycastHits)
-		{
-			Vector3 hitDirection = hit.point - m_rigidbody.position;
-			hitDirection = new Vector3(hitDirection.x, 0, hitDirection.z);
-
-			if (Vector3.Dot(moveInput3d, hitDirection) > 0.15f
-			&& hit.point.y > highestEdge.y)
-			{
-				highestEdge = hit.point;
-			}
-		}
-
-		// - Override the character's position -
-		if (highestEdge != m_rigidbody.position)
-		{
-			// Is ground at highest edge position flat ?
-			if (Physics.Raycast(
-				origin: highestEdge + (new Vector3(highestEdge.x, 0, highestEdge.z) - new Vector3(m_rigidbody.position.x, 0, m_rigidbody.position.z)).normalized * m_ssoCharacter.SkinWidth + new Vector3(0, m_ssoCharacter.SkinWidth, 0), 
-				direction: Vector3.down, 
-				maxDistance: m_ssoCharacter.SkinWidth * 2, 
-				layerMask: m_ssoCharacter.GroundLayerToInclude))
-			{
-				SetCharacterPosition(highestEdge, Quaternion.identity);
-			}
-		}
-	}
 	
 	private void HandleRopeDrag()
 	{
@@ -1103,14 +1071,22 @@ public class CharacterMotor : MonoBehaviour
 
 	}
 
+	private float k_climbingThreshold = 0.6f;
 	private void HandleRopeClimb()
 	{
 		// Assertions
 		if (!IsRopeValid
 		|| !m_isClimbing
-		|| m_isHolding)
+		|| m_isHolding
+		|| m_rope.HoldLength < k_climbingThreshold)
 		{
 			m_currentClimbSpeed = m_ssoCharacter.ClimbAcceleration;
+			if (m_rope.HoldLength < k_climbingThreshold)
+			{
+				m_isJumping = false;
+				m_isClimbing = false;
+				m_isHolding = false;
+			}
 			return;
 		}
 
@@ -1121,7 +1097,58 @@ public class CharacterMotor : MonoBehaviour
 		float clampedClimbSpeed = Mathf.Clamp(m_currentClimbSpeed, 0, m_ssoCharacter.MaxClimbSpeed);
 
 		// Decreasing rope holding length
-		m_rope.IncreaseHoldLength(-clampedClimbSpeed * Time.fixedDeltaTime); 
+		m_rope.IncreaseHoldLength(-clampedClimbSpeed * Time.fixedDeltaTime);
+		
+		HandleEdgeCatching();
+	}
+
+	private void HandleEdgeCatching()
+	{
+		// Assertions
+		if (m_raycastHits.Length <= 0) return;
+		if (m_coyoteTime > 0) return;
+
+		// - Get a highest position than the character's one -
+		Vector3 highestEdge = m_rigidbody.position;
+		foreach (var hit in m_raycastHits)
+		{
+			// Assert: The hit.point is lower than the cache position
+			if (hit.point.y < highestEdge.y) continue;
+
+			// Assert: The hit.point is too far from the character's position
+			if ((m_rigidbody.position - hit.point).magnitude > m_ssoCharacter.EdgeCatchingThreshold) continue;
+
+			// Assert: There is not enough space above the hit.point
+			if (Physics.Raycast(hit.point, Vector3.up, m_collider.height, m_ssoCharacter.GroundLayerToInclude)) continue;
+
+			// Assert: Is ground at highest edge position flat ?
+			if (Physics.Raycast(highestEdge + (new Vector3(highestEdge.x, 0, highestEdge.z) - new Vector3(m_rigidbody.position.x, 0, m_rigidbody.position.z)).normalized * m_ssoCharacter.SkinWidth + new Vector3(0, m_ssoCharacter.SkinWidth, 0), Vector3.down, m_ssoCharacter.SkinWidth * 2, m_ssoCharacter.GroundLayerToInclude)) continue;
+
+			highestEdge = hit.point;
+		}
+
+		// - Override the character's position -
+		if (highestEdge != m_rigidbody.position)
+		{
+			StartCoroutine(JumpToPosition(highestEdge));
+		}
+	}
+
+	private IEnumerator JumpToPosition(Vector3 position)
+	{
+		if (m_isFixedUpdateLocked) yield break;
+
+		m_isFixedUpdateLocked = true;
+
+		transform.DOMoveY(position.y, m_ssoCharacter.EdgeCatchingDuration).SetEase(Ease.OutCubic);
+		
+		Vector3 destinationDir = (position - m_rigidbody.position).normalized;
+		destinationDir = new Vector3(destinationDir.x, 0, destinationDir.z);
+		transform.DOMove(position + destinationDir * 0.5f, m_ssoCharacter.EdgeCatchingDuration).SetEase(Ease.InCubic);
+
+		yield return new WaitForSeconds(m_ssoCharacter.EdgeCatchingDuration);
+
+		m_isFixedUpdateLocked = false;
 	}
 
 	private void HandleRopeLimit()
