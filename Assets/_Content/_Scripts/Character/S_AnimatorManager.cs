@@ -12,25 +12,27 @@ public class AnimatorManager : MonoBehaviour
 
     // ---- PRIVATE VARIABLES ----
     private int m_moveSpeedHash = Animator.StringToHash("MoveSpeed");
+    private int m_verticalSpeed = Animator.StringToHash("VerticalSpeed");
+    private int m_horizontalSpeed = Animator.StringToHash("HorizontalSpeed");
     private int m_isGroundedHash = Animator.StringToHash("IsGrounded");
     private int m_isJumpingHash = Animator.StringToHash("IsJumping");
     private int m_startAimingHash = Animator.StringToHash("StartAiming");
     private int m_isThrowingHash = Animator.StringToHash("IsThrowing");
     private int m_locomotionState = Animator.StringToHash("IsLocomotion");
     private int m_FallState = Animator.StringToHash("IsFall");
-    //private int m_CraftState = Animator.StringToHash("IsCraft");
     private int m_RopeState = Animator.StringToHash("IsRope");
     private int m_isRopeAttachedHash = Animator.StringToHash("IsRopeAttached");
 
     private bool m_ropeThrow;
     private bool m_ropeAttached;
-    private bool m_ropeAttachedPlayed;
     private BehaviorState m_currentState;
 
     void LateUpdate()
     {
         DetermineState();
         m_animator.SetFloat(m_moveSpeedHash, Mathf.Abs(m_characterMotor.Rigidbody.velocity.magnitude));
+        m_animator.SetFloat(m_verticalSpeed, Mathf.Abs(m_characterMotor.Rigidbody.velocity.y));
+        m_animator.SetFloat(m_horizontalSpeed, Mathf.Abs(new Vector3(m_characterMotor.Rigidbody.velocity.x, 0, m_characterMotor.Rigidbody.velocity.z).magnitude));
         m_animator.SetBool(m_isJumpingHash, m_characterMotor.m_hasJumped);
         m_animator.SetBool(m_isGroundedHash, m_characterMotor.m_isGrounded);
         m_animator.SetBool(m_isRopeAttachedHash, m_ropeAttached);
@@ -40,7 +42,6 @@ public class AnimatorManager : MonoBehaviour
             m_ropeAttached = false;
 
         }
-
     }
 
     private void DetermineState()
