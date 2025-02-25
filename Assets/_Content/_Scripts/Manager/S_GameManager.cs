@@ -12,16 +12,17 @@ public class GameManager : MonoBehaviour
 	[Required("There is only one directional light per level, you can find it under --LEVEL DESIGN--")]
 	[SerializeField] private Light m_directionalLight;
 
-	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Game m_ssoGame;
-	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Logs m_ssoLogs;
+	[FoldoutGroup("SSO")][SerializeField] private SSO_Game m_ssoGame;
+	[FoldoutGroup("SSO")][SerializeField] private SSO_Logs m_ssoLogs;
 
-	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterDeath m_rsoCharacterDeath;
-	[FoldoutGroup("Scriptable")][SerializeField] private RSO_InputsLocked m_rsoInputsLocked;
-	[FoldoutGroup("Scriptable")][SerializeField] private RSO_Pause m_rsoPause;
-	[FoldoutGroup("Scriptable")] [SerializeField] private RSO_CancelPriority m_rsoCancelPriority;
-	[FoldoutGroup("Scriptable")][SerializeField] private RSO_Ropes m_rsoRopes;
+	[FoldoutGroup("RSO")][SerializeField] private RSO_CharacterDeath m_rsoCharacterDeath;
+	[FoldoutGroup("RSO")][SerializeField] private RSO_InputsLocked m_rsoInputsLocked;
+	[FoldoutGroup("RSO")][SerializeField] private RSO_Pause m_rsoPause;
+	[FoldoutGroup("RSO")] [SerializeField] private RSO_CancelPriority m_rsoCancelPriority;
+	[FoldoutGroup("RSO")][SerializeField] private RSO_Ropes m_rsoRopes;
+	[FoldoutGroup("RSO")][SerializeField] private RSO_LastCheckpointReached m_rsoLastCheckpointReached;
 
-	[FoldoutGroup("Scriptable")][SerializeField] private RSE_ToggleCursor m_rseToggleCursor;
+	[FoldoutGroup("RSE")][SerializeField] private RSE_ToggleCursor m_rseToggleCursor;
 
 
 	private void OnEnable()
@@ -63,7 +64,16 @@ public class GameManager : MonoBehaviour
 	/// </summary>
 	private void Restart()
 	{
-		m_gameStart.SpawnCharacter();
+		if (m_ssoGame.UseCheckpoints
+		&& m_rsoLastCheckpointReached.value)
+		{
+			m_rsoLastCheckpointReached.value.SpawnCharacter();
+		}
+		else
+		{
+			m_gameStart.SpawnCharacter();
+		}
+
 	}
 
 	/// <summary>
@@ -90,6 +100,9 @@ public class GameManager : MonoBehaviour
 
 	private void ResetRSO()
 	{
+		// World
+		m_rsoLastCheckpointReached.value = null;
+
 		// Character
 		m_rsoCharacterDeath.value = false;
 
