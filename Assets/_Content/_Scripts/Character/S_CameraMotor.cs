@@ -1,4 +1,5 @@
 using Cinemachine;
+using Mono.Cecil.Cil;
 using Sirenix.OdinInspector;
 using UnityEngine;
 
@@ -25,7 +26,7 @@ public class CameraMotor : MonoBehaviour
 	// - Private variables -
 	private Vector2 m_lookInput;
 	private float m_cinemachineTargetYaw;
-	private float m_cinemachineTargetPitch;
+	public float m_cinemachineTargetPitch;
 	private Transform m_cameraTarget;
 
 	private void OnEnable()
@@ -54,12 +55,14 @@ public class CameraMotor : MonoBehaviour
 		HandleRotation();
 		CalculatePlanarVectors();
 		HandleSuspended();
+		HandleLocomotion();
 		m_rsoCameraTransform.value = transform;
 	}
 
 	public void Initialize(Transform aimingLookAt, Transform cameraTarget, Quaternion startRotation)
 	{
 		m_cameraTarget = cameraTarget;
+		m_defaultTargetLocalPosition = cameraTarget.localPosition;
 		m_aimingCamera.Follow = cameraTarget;
 		m_aimingCamera.LookAt = aimingLookAt;
 		m_thirdPersonCamera.Follow = cameraTarget;
@@ -90,19 +93,94 @@ public class CameraMotor : MonoBehaviour
 	}
 
 	private Cinemachine3rdPersonFollow m_3rdPersonFollow;
+
 	private float m_targetDistance;
+	private Vector3 m_targetPosition;
+
+	private Vector3 m_cameraTargetSmoothVelocity;
+	private Vector3 m_defaultTargetLocalPosition;
+
 	private void HandleSuspended()
 	{
-		// Choose target distance 
+		// Choose targets 
 		if (m_rsoCameraStyle.value == CameraStyle.BASIC)
 		{
-			m_targetDistance = m_rsoCharacterState.value == BehaviorState.ROPE
-				? m_ssoCamera.SuspendedDistance
-				: m_ssoCamera.DefaultDistance;
+			if (m_rsoCharacterState.value == BehaviorState.ROPE)
+			{
+				m_targetDistance = m_ssoCamera.SuspendedDistance;
+				m_targetPosition = m_defaultTargetLocalPosition + Vector3.down * m_ssoCamera.SuspendedTargetLocalOffset;
+			}
+			else
+			{
+				m_targetDistance = m_ssoCamera.DefaultDistance;
+				m_targetPosition = m_defaultTargetLocalPosition;
+			}
 		}
 
 		// Lerp towards target distance
-		m_3rdPersonFollow.CameraDistance = Mathf.Lerp(m_3rdPersonFollow.CameraDistance, m_targetDistance, Time.deltaTime * m_ssoCamera.DistanceTransition);
+		m_3rdPersonFollow.CameraDistance = Mathf.Lerp(
+			m_3rdPersonFollow.CameraDistance, 
+			m_targetDistance, 
+			Time.deltaTime * m_ssoCamera.DistanceTransition
+		);
+
+		// Lerp the camera look at target towards target position
+		m_cameraTarget.localPosition = Vector3.SmoothDamp(
+			m_cameraTarget.localPosition,
+			m_targetPosition,
+			ref m_cameraTargetSmoothVelocity,
+			Time.deltaTime * m_ssoCamera.TargetTransition
+		);
+	}
+
+	private float m_defaultShoulderOffsetZ = 0.0f;
+	private float m_targetShoulderOffsetZ;
+	private float m_locomotionShoulderOffsetZ = 1f;
+	private float m_thresholdShouldOffsetZ = 55f;
+
+	private float m_defaultCameraSide = 0.5f;
+	private float m_targetCameraSide;
+	private float m_locomotionCameraSide = 0.5f;
+	private float m_thresholdCameraSide = -10f;
+
+	public void HandleLocomotion()
+	{
+		// Choose targets 
+		if (m_rsoCameraStyle.value == CameraStyle.BASIC)
+		{
+			m_targetShoulderOffsetZ = m_defaultShoulderOffsetZ;
+			m_targetCameraSide = m_defaultCameraSide;
+
+			// Override those targets
+			if (m_rsoCharacterState.value == BehaviorState.LOCOMOTION)
+			{
+				// Camera is looking downwards ---- 70 = down
+				if (m_cinemachineTargetPitch >= m_thresholdShouldOffsetZ)
+				{
+					m_targetShoulderOffsetZ = m_locomotionShoulderOffsetZ;
+				}
+
+				// Camera is looking upwards ---- -60 = up
+				if (m_cinemachineTargetPitch <= m_thresholdCameraSide)
+				{
+					m_targetCameraSide = m_defaultCameraSide + m_locomotionCameraSide * Matha.Remap(m_thresholdCameraSide, m_ssoCamera.BottomClamp, 0f, 1f, m_cinemachineTargetPitch);
+				}
+			}
+		}
+
+		// Lerp towards target shoulder offset z
+		m_3rdPersonFollow.ShoulderOffset.z = Mathf.Lerp(
+			m_3rdPersonFollow.ShoulderOffset.z,
+			m_targetShoulderOffsetZ,
+			Time.deltaTime * m_ssoCamera.DistanceTransition
+		);
+
+		// Lerp towards target camera side
+		m_3rdPersonFollow.CameraSide = Mathf.Lerp(
+			m_3rdPersonFollow.CameraSide,
+			m_targetCameraSide,
+			Time.deltaTime * 5
+		);
 	}
 
 	public void SwitchStyle()

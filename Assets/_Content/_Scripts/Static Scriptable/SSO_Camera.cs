@@ -28,6 +28,14 @@ public class SSO_Camera : ScriptableObject
 	public float SuspendedDistance;
 
 	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
-	[InfoBox("Duration of the lerp transition between default and suspended.", InfoMessageType.None)]
+	[InfoBox("Duration of the lerp transition between default and suspended camera distance.", InfoMessageType.None)]
 	public float DistanceTransition;
+
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("Duration of the lerp transition between default and suspended camera target local Y offset.", InfoMessageType.None)]
+	public float TargetTransition;
+
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("Offset applied to the camera target on the y-axis.", InfoMessageType.None)]
+	public float SuspendedTargetLocalOffset;
 }
