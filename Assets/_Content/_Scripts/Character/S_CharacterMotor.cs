@@ -1239,7 +1239,6 @@ public class CharacterMotor : MonoBehaviour
 			yield return null;
 		}
 
-		//yield return new WaitForSeconds(duration);
 		switch (craftType)
 		{
 			case CraftType.TORCH:
@@ -1287,6 +1286,7 @@ public class CharacterMotor : MonoBehaviour
 		if (m_startAiming && isInputPressed) return;
         if (m_startAiming && AimingObject != HandObject) return;
         if (m_rsoCharacterState.value == BehaviorState.ROPE) return;
+		if (m_rsoCharacterState.value == BehaviorState.FALL) return;
 
         ToggleAim(isInputPressed, HandObject);
 	}
@@ -1296,6 +1296,8 @@ public class CharacterMotor : MonoBehaviour
 		// Assertions
 		if (m_rsoInputsLocked.value) return;
 		if (itemToThrow == null) return;
+
+
 
 		IsAiming = isInputPressed;
 		m_rsoCameraStyle.value = IsAiming ? CameraStyle.AIMING : CameraStyle.BASIC;
