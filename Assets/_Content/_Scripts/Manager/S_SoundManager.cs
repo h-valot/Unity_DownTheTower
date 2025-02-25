@@ -34,8 +34,9 @@ public class SoundManager : MonoBehaviour
         m_audioSource_Once.Play();
     }
 
-    private void PlayAt(SSO_Sound sound, Vector3 place)
+    private void PlayAt(SSO_Sound sound, Vector3 position)
     {
-
+        m_audioSource_Once.clip = sound.Clip;
+        AudioSource.PlayClipAtPoint(m_audioSource_Once.clip, position);
     }
 }

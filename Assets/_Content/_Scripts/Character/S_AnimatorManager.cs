@@ -9,8 +9,13 @@ public class AnimatorManager : MonoBehaviour
     [SerializeField] private RSO_CharacterState m_rsoCharacterState;
     [SerializeField] private RSE_ThrowRope m_rseThrowRope;
     [SerializeField] private RSE_RopeAttached m_rseRopeAttached;
-    [SerializeField] private SSO_Sound m_sso_sound;
+    [SerializeField] private SSO_Sound m_ssoFootstepRun;
+    [SerializeField] private SSO_Sound m_ssoFootstepWalk;
     [SerializeField] private RSE_PlaySound m_rsePlaySound;
+    [SerializeField] private RSE_PlayAt m_rsePlayAt;
+    [SerializeField] private GameObject m_footLocation;
+
+
 
     // ---- PRIVATE VARIABLES ----
     private int m_moveSpeedHash = Animator.StringToHash("MoveSpeed");
@@ -96,7 +101,6 @@ public class AnimatorManager : MonoBehaviour
     private void OnRopeAttached()
     {
         m_ropeAttached = true;
-        m_rsePlaySound.Call(m_sso_sound);
 
     }
 
@@ -113,4 +117,18 @@ public class AnimatorManager : MonoBehaviour
     {
         m_ropeAttached = false;
     }
+
+    #region
+
+    private void OnAnimEventFootWalk()
+    {
+        m_rsePlaySound.Call(m_ssoFootstepWalk);
+    }
+
+    private void OnAnimEventFootRun()
+    {
+        m_rsePlayAt.Call(m_ssoFootstepRun, m_footLocation.transform.position);
+    }
+
+    #endregion
 }
