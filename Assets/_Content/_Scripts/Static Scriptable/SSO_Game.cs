@@ -25,6 +25,10 @@ public class SSO_Game : ScriptableObject
 	[InfoBox("Default light intensity of scene global point lights.", InfoMessageType.None)]
 	public float GlobalLightIntensity;
 
+	[FoldoutGroup("World")]
+	[InfoBox("If true, the checkpoint respawn system will take over the basic game start system.", InfoMessageType.None)]
+	public bool UseCheckpoints;
+
 	#endregion
 
 	#region RUNTIME VALUE MODIFIER

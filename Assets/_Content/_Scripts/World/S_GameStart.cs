@@ -6,7 +6,7 @@ public class GameStart : MonoBehaviour
 	[Title("Tweakable values")]
 	[SerializeField] private GameObject m_pfCharacter;
 
-	[FoldoutGroup("RSO")][SerializeField] private RSO_CharacterDeath m_rsoCharacterDeath;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterDeath m_rsoCharacterDeath;
 
 	private GameObject m_currentCharacter;
 
