@@ -1012,6 +1012,9 @@ public class CharacterMotor : MonoBehaviour
 			return;
 		}
 
+		// Prevent the character from dying while on the rope.
+		m_positionStartFall = m_rigidbody.position;
+
 		UpdateJumpRopeDelay();
 
 		if (IsFallingWithRope())
