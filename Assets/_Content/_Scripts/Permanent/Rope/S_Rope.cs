@@ -242,15 +242,12 @@ public class Rope : Permanent
 		Attach(characterMotor.Harness, characterMotor.Rigidbody);
 		characterMotor.Equip(this);
 
-		// Update folds
-		for (int i = m_folds.Count - 1; i >= 0; i--)
+		// Remove the current fold used to spawn interactables
+		if (!Physics.Linecast(m_characterHarness.position, CurrentFold.Position, out var hit, m_ssoRope.FoldLayerToInclude))
 		{
-			// Assert: an object is obstructing the way from the fold towards the character.
-			if (!Physics.Linecast(m_characterHarness.position, m_folds[i].Position, out var hit, m_ssoRope.FoldLayerToInclude)) break;
-
-			m_folds.Remove(m_folds[i]);
+			m_folds.Remove(CurrentFold);
+			UpdateHoldLength();
 		}
-		UpdateHoldLength();
 	}
 
 	public void Detach()
@@ -304,8 +301,7 @@ public class Rope : Permanent
 	}
 
 	/// <summary>
-	/// Remove the last fold from the list if there is no collider 
-	/// standing between the character and the previous last fold.
+	/// Remove the last fold from the list if there is no collider standing between the character and the previous last fold.
 	/// </summary>
 	private void RemoveFolds()
 	{

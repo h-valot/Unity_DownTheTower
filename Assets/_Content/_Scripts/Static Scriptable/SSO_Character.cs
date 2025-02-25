@@ -148,6 +148,16 @@ public class SSO_Character : ScriptableObject
 	[InfoBox("Maximum force the character can use to pull itself up the rope.", InfoMessageType.None)]
 	public float MaxClimbSpeed;
 
+	[FoldoutGroup("Rope")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("Minimum legal distance between the character's position and the candidate position to enable the DOTween animation.", InfoMessageType.None)]
+	public float EdgeCatchingThreshold;
+
+	[FoldoutGroup("Rope")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("Duration of the movement translation.", InfoMessageType.None)]
+	public float EdgeCatchingDuration;
+
 
 	[Title("Jumping")]
 	[FoldoutGroup("Rope")]
