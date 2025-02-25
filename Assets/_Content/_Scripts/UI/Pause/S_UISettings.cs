@@ -3,11 +3,11 @@ using UnityEngine;
 
 public class UISettings : UIWindow
 {
-	[FoldoutGroup("Internal references")][SerializeField] private UITab m_openingTab;
+	[FoldoutGroup("Internal references")][SerializeField] private UITabManager m_tabManager;
 	[FoldoutGroup("Internal references")][SerializeField] private UISlider m_valueSensitivity;
 	[FoldoutGroup("Internal references")][SerializeField] private UIToggleable m_toggleInvertCameraY;
 
-	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Inputs m_ssoInputs;
+    [FoldoutGroup("Scriptable")][SerializeField] private SSO_Inputs m_ssoInputs;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_Pause m_rsoPause;
 
 	protected override void OnEnable()
@@ -25,11 +25,17 @@ public class UISettings : UIWindow
 	public override void Show()
 	{
 		base.Show();
-		m_openingTab.Highlight();
+        m_tabManager.OpenCurrentTab();
 		InitializeSettings();
 	}
 
-	private void OnPaused()
+    public override void Hide()
+    {
+        m_tabManager.CloseCurrentTab();
+        base.Hide();
+    }
+
+    private void OnPaused()
 	{
 		// Assertion
 		if (m_rsoPause.value) return;

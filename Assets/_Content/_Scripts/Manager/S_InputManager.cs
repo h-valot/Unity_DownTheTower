@@ -24,8 +24,10 @@ public class InputManager : MonoBehaviour
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Recycle m_rseRecycle;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_ToggleCursor m_rseToggleCursor;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Climb m_rseClimb;
+    [FoldoutGroup("Scriptable")][SerializeField] private RSE_SwitchTabLeft m_rseSwitchTabLeft;
+    [FoldoutGroup("Scriptable")][SerializeField] private RSE_SwitchTabRight m_rseSwitchTabRight;
 
-	[FoldoutGroup("Scriptable")][SerializeField] private RSO_Pause m_rsoPause;
+    [FoldoutGroup("Scriptable")][SerializeField] private RSO_Pause m_rsoPause;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CancelConsumable m_rsoCancelConsumable;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CraftInputLocked m_rsoCraftInputLocked;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_RecycleInputLocked m_rsoRecycleInputLocked;
@@ -189,9 +191,11 @@ public class InputManager : MonoBehaviour
         }
     }
 
-    public void OnToggleHandObject()
+    public void OnToggleHandObject(InputValue value)
 	{
-		m_rseToggleHandObject.Call();
+        if (!value.isPressed) return;
+
+        m_rseToggleHandObject.Call(value.isPressed);
 	}
 
 	public void OnInteract(InputValue value)
@@ -251,7 +255,17 @@ public class InputManager : MonoBehaviour
 		m_rsoInputAdviceDisplayed.value = !m_rsoInputAdviceDisplayed.value;
 	}
 
-	public void OnPause()
+    public void OnSwitchTabLeft()
+    {
+        if(m_rsoPause.value) m_rseSwitchTabLeft.Call();
+    }
+
+    public void OnSwitchTabRight()
+    {
+        if (m_rsoPause.value) m_rseSwitchTabRight.Call();
+    }
+
+    public void OnPause()
 	{
 		m_rsoPause.value = !m_rsoPause.value;
 	}

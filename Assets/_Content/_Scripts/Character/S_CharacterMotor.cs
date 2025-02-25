@@ -313,13 +313,14 @@ public class CharacterMotor : MonoBehaviour
 		m_isHolding = isHolding;
 	}
 
-	private void ToggleTorch()
+	private void ToggleTorch(bool isPressed)
 	{
 		// Assertion
 		if (m_rsoInputsLocked.value) return;
 		if (!(RobotObject as Torch)) return;
+        if (!isPressed) return;
 
-		((Torch)RobotObject)?.ToggleHandEffect();
+        ((Torch)RobotObject)?.ToggleHandEffect();
 	}
 
 	private void UpdateClimbInput(bool isClimbing)
