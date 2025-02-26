@@ -93,7 +93,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 71.4
+  m_fontSize: 31.7
   m_fontSizeBase: 73.2
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -235,9 +235,9 @@ MonoBehaviour:
   m_Transition: 1
   m_Colors:
     m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
-    m_HighlightedColor: {r: 0.9647059, g: 0.69803923, b: 0.41960785, a: 1}
-    m_PressedColor: {r: 0.9647059, g: 0.69803923, b: 0.41960785, a: 1}
-    m_SelectedColor: {r: 0.9647059, g: 0.69803923, b: 0.41960785, a: 1}
+    m_HighlightedColor: {r: 0.8773585, g: 0.8773585, b: 0.8773585, a: 1}
+    m_PressedColor: {r: 1, g: 1, b: 1, a: 1}
+    m_SelectedColor: {r: 1, g: 1, b: 1, a: 1}
     m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
     m_ColorMultiplier: 1
     m_FadeDuration: 0.1
@@ -256,7 +256,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1519449539516664610}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 8073912826681076446}
+        m_TargetAssemblyTypeName: UITab, Assembly-CSharp
+        m_MethodName: SwitchTabByClick
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &8073912826681076446
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -271,5 +283,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_colorHighlighted: {r: 0.9647059, g: 0.69803923, b: 0.41960785, a: 1}
   m_colorWithdrawn: {r: 1, g: 1, b: 1, a: 1}
+  m_parentManager: {fileID: 0}
   m_linkedPanel: {fileID: 0}
+  m_defaultSelected: {fileID: 0}
   m_imgBackground: {fileID: 1519449539516664610}
+  m_rsoCurrentControls: {fileID: 11400000, guid: ee7837d85dfcc514591e6db53c523973,
+    type: 2}

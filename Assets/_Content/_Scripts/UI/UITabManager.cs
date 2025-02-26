@@ -2,6 +2,7 @@ using Sirenix.OdinInspector;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class UITabManager : MonoBehaviour
 {
@@ -31,18 +32,22 @@ public class UITabManager : MonoBehaviour
 
     private void SwitchTabLeft()
     {
+        if (m_tabList.Count <= 1) return;
+
         UITab nextTab;
         if (m_currentTabIndex == 0) nextTab = m_tabList[^1];
         else nextTab = m_tabList[m_currentTabIndex - 1];
-        GoToTab(m_tabList[m_currentTabIndex]);
+        GoToTab(nextTab);
     }
 
     private void SwitchTabRight()
     {
+        if (m_tabList.Count <= 1) return;
+
         UITab nextTab;
         if (m_currentTabIndex == m_tabList.Count - 1) nextTab = m_tabList[0];
         else nextTab = m_tabList[m_currentTabIndex + 1];
-        GoToTab(m_tabList[m_currentTabIndex]);
+        GoToTab(nextTab);
     }
 
     public void OpenCurrentTab()

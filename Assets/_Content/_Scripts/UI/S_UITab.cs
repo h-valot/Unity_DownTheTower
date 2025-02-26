@@ -13,11 +13,13 @@ public class UITab : MonoBehaviour
     [FoldoutGroup("Internal references")][SerializeField] private GameObject m_defaultSelected;
     [FoldoutGroup("Internal references")][SerializeField] private Image m_imgBackground;
 
+	[FoldoutGroup("Scriptables")][SerializeField] private RSO_CurrentControls m_rsoCurrentControls;
+
 	public void Highlight()
 	{
 		m_imgBackground.color = m_colorHighlighted;
-		m_linkedPanel.SetActive(true); 
-		EventSystem.current.SetSelectedGameObject(m_defaultSelected);
+		m_linkedPanel.SetActive(true);
+		if(m_rsoCurrentControls.value == ControlScheme.GAMEPAD) EventSystem.current.SetSelectedGameObject(m_defaultSelected);
 
     }
 
