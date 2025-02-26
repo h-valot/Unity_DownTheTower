@@ -1,19 +1,38 @@
 using Sirenix.OdinInspector;
+using System;
 using UnityEngine;
 
 public class FoliageInstance : MonoBehaviour
 {
+    [SerializeField, HideInInspector] public Vector3 position;
+
+    public FoliageType FoliageType;
+
     [Button]
     private void Delete()
     {
-        if (transform.parent.TryGetComponent<MushroomBatch>(out MushroomBatch batch))
-            //if (!batch.RemoveMushroomFromList(transform.position)) Debug.LogWarning("Could not find mushroom in list.");
+        if (transform.parent.TryGetComponent<FoliageBatch>(out FoliageBatch batch))
+            if (!batch.RemoveFoliageFromList(position, FoliageType)) Debug.LogWarning("Could not find foliage in list.");
         DestroyImmediate(gameObject);
     }
 
     [Button]
-    private void PrintMatrix()
+    private void UpdateMatrix()
     {
-        Debug.Log(PrintUtils.Matrix4x4(transform.localToWorldMatrix));
+        if (transform.parent.TryGetComponent<FoliageBatch>(out FoliageBatch batch))
+        {
+            if (!batch.UpdateFoliageFromList(position, FoliageType, transform.localToWorldMatrix)) Debug.LogWarning(position);
+            else position = transform.position;
+        }
     }
+}
+
+public enum FoliageType
+{
+    NONE,
+    ALL,
+    MOSS,
+    SARRACENIAL,
+    MONSTERA,
+    RAFFLESIE,
 }

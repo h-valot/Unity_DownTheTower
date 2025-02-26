@@ -2,6 +2,8 @@ using Sirenix.OdinInspector;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -9,35 +11,52 @@ public class FoliageBatch : MonoBehaviour
 {
     #region editor variables
 
+    [FoldoutGroup("Scriptables")][SerializeField] private SSO_Foliages m_ssoFoliages;
+
     [Header("Area Properties")]
     [FoldoutGroup("Spawning")][SerializeField] public float m_radius = 3;
-    [FoldoutGroup("Spawning")][SerializeField] private float m_density = 5;
-
 
     [Serializable]
     public class Foliage
     {
-        public Mesh m_mesh;
-        public Material m_material;
-        public GameObject m_foliagePrefab;
-        public float m__overlapModifier = 1f;
-        public float m_minSizeMultiplier = 1f;
-        public float m_maxSizeMultiplier = 1f;
+        public FoliageType type;
+        public Mesh Mesh;
+        public GameObject Prefab;
+        public float Density = 5f;
+        public LayerMask LayerToFindSurface;
+        public float OverlapModifier = 1f;
 
-        private MaterialPropertyBlock m_propertyBlock;
-        private List<MatrixList> m_positionLists = new List<MatrixList>();
+        public SpawnType spawnType;
+
+        public bool ForceOrientationUp = false;
+        public float RotationMin = -180f;
+        public float RotationMax = 180f;
+
+        public float NoiseScale = 0.5f;
+        public float NoiseStep = 0.6f;
+        public float NoiseStepMax = 0.8f;
+
+        public bool UniformScale = false;
+
+        public Vector3 MinScaleNoiseMultiplier = Vector3.one;
+        public Vector3 MaxScaleNoiseMultiplier = Vector3.one;
+
+        public Vector3 MinSizeMultiplier = Vector3.one;
+        public Vector3 MaxSizeMultiplier = Vector3.one;
+
+        public FoliageType[] CanSpawnInFoliage = new FoliageType[] { FoliageType.NONE};
+
+        public Texture2D ColorMap;
+
+        [HideInInspector] public MaterialPropertyBlock PropertyBlock;
+        [HideInInspector] public List<MatrixList> TransformLists = new List<MatrixList>();
     }
 
     [Header("Foliage Placement Properties")]
+    [FoldoutGroup("Spawning")][SerializeField] private Material m_masterMaterial;
     [FoldoutGroup("Spawning")][SerializeField] private Foliage[] m_foliages;
-
-    // DrawMeshInstanced can only draw up to 1023 meshes at a time, so we need a new list for every 1023 mushrooms
     
-
-
-    
-
-    [HideInInspector][SerializeField] private List<GameObject> m_spawnedGameObjects = new List<GameObject>();
+    [HideInInspector][SerializeField] private List<FoliageInstance> m_spawnedFoliages = new List<FoliageInstance>();
 
     #endregion
 
@@ -48,66 +67,57 @@ public class FoliageBatch : MonoBehaviour
     [Button]
     public void Draw()
     {
-        //ClearAll();
+        ClearAll();
 
-        //float phi = Mathf.PI * (Mathf.Sqrt(5f) - 1f);
-        //int samples = GetRaycastSamples();
+        float phi = Mathf.PI * (Mathf.Sqrt(5f) - 1f);
 
-        //LayerMask raycastLayerMask = new LayerMask();
-        //raycastLayerMask |= (1 << LayerMask.NameToLayer("NoCollision_NoRaycast"));
+        for (int i = 0; i< m_foliages.Length; i++)
+        {
+            int samples = GetRaycastSamples(ref m_foliages[i]);
 
-        //for (int i = 0; i < samples; i++)
-        //{
-        //    float y = 1f - ((float)i / ((float)samples - 1f)) * 2f;
-        //    float yRadius = Mathf.Sqrt(1 - y * y);
+            for (int j = 0; j < samples; j++)
+            {
+                float y = 1f - ((float)j / ((float)samples - 1f)) * 2f;
+                float yRadius = Mathf.Sqrt(1 - y * y);
 
-        //    float theta = phi * i;
+                float theta = phi * j;
 
-        //    float x = Mathf.Cos(theta) * yRadius;
-        //    float z = Mathf.Sin(theta) * yRadius;
+                float x = Mathf.Cos(theta) * yRadius;
+                float z = Mathf.Sin(theta) * yRadius;
 
-        //    Vector3 localDirection = new Vector3(x, y, z);
-        //    if (Physics.Raycast(transform.position, localDirection, out RaycastHit hitInfo, m_radius, ~raycastLayerMask)) SpawnMushroom(hitInfo);
-        //}
-
-        //if (m_foliageLists.Count > 0 && m_mushroomTriggerPrefab != null)
-        //{
-        //    // 1. Instantiate Death Sphere (collision)
-        //    MushroomTrigger = Instantiate(m_mushroomTriggerPrefab, transform.position, Quaternion.identity, transform);
-        //    MushroomTrigger.GetComponent<SphereCollider>().radius = m_furthestShroom;
-        //    MushroomTrigger.transform.SetSiblingIndex(0);
-
-        //    // 2. Instantiate Particles
-        //    ParticleSystem = Instantiate(m_particlePrefab, transform.position, Quaternion.identity, transform);
-        //    ParticleSystem.ShapeModule shape = ParticleSystem.GetComponent<ParticleSystem>().shape;
-        //    shape.radius = m_furthestShroom;
-        //    ParticleSystem.transform.SetSiblingIndex(1);
-        //}
+                Vector3 localDirection = new Vector3(x, y, z);
+                if (Physics.Raycast(transform.position, localDirection, out RaycastHit hitInfo, m_radius, m_foliages[i].LayerToFindSurface)) SpawnFoliage(hitInfo, ref m_foliages[i]);
+            }
+        }
     }
 
     [Button]
     public void ShowGameObjects()
     {
-        //ClearGameObjects();
-        //foreach (MatrixList list in m_foliageLists)
-        //{
-        //    foreach (Matrix4x4 mushroom in list.matrices)
-        //    {
-        //        GameObject newMushroom = Instantiate(m_mushroomPrefab, mushroom.GetPosition(), mushroom.rotation, transform);
-        //        m_spawnedGameObjects.Add(newMushroom);
-        //        newMushroom.transform.localScale = mushroom.lossyScale;
-        //        newMushroom.name = "List" + m_foliageLists.IndexOf(list) + "Mushroom" + list.matrices.IndexOf(mushroom);
-        //        newMushroom.GetComponent<MeshRenderer>().material = m_masterMaterial;
-        //    }
-        //}
+        ClearGameObjects();
+
+        foreach (Foliage foliage in m_foliages)
+        {
+            foreach (MatrixList list in foliage.TransformLists)
+            {
+                for(int i = 0; i < list.matrices.Count; i++)
+                {
+                    FoliageInstance newFoliage = Instantiate(foliage.Prefab, list.matrices[i].GetPosition(), list.matrices[i].rotation, transform).GetComponent<FoliageInstance>();
+                    m_spawnedFoliages.Add(newFoliage);
+                    newFoliage.transform.localScale = list.matrices[i].lossyScale;
+                    newFoliage.position = newFoliage.transform.position;
+                    newFoliage.name = newFoliage.FoliageType.ToString() + "_" + i.ToString();
+                }
+            }
+        }
     }
 
     [Button]
     public void ClearGameObjects()
     {
-        foreach (GameObject spawnedObject in m_spawnedGameObjects) 
-            if (spawnedObject != null) DestroyImmediate(spawnedObject);
-        m_spawnedGameObjects.Clear();
+        foreach (FoliageInstance spawnedFoliage in m_spawnedFoliages)
+            if (spawnedFoliage != null) DestroyImmediate(spawnedFoliage.gameObject);
+        m_spawnedFoliages.Clear();
     }
 
     [Button]
@@ -119,40 +129,116 @@ public class FoliageBatch : MonoBehaviour
         for (int i = 0; i < children; ++i)
             DestroyImmediate(transform.GetChild(0).gameObject);
 
-        m_foliageLists.Clear();
-        MushroomTrigger = null;
-        ParticleSystem = null;
+        foreach (Foliage foliage in m_foliages)
+        {
+            foliage.TransformLists.Clear();
+        }
     }
 
-    private int GetRaycastSamples()
+    private int GetRaycastSamples(ref Foliage foliage)
     {
         float area = 4 * Mathf.PI * Mathf.Pow(m_radius, 2);
-        return Mathf.RoundToInt(area * m_density);
+        return Mathf.RoundToInt(area * foliage.Density);
     }
 
-    private void SpawnMushroom(RaycastHit hitInfo)
+    private void SpawnFoliage(RaycastHit hitInfo, ref Foliage foliage)
     {
-        //if (SimplexNoise3D.SimplexNoise(hitInfo.point, 0.37f) < 0.5f) return;
-        //float scale = m_mushroomPrefab.transform.localScale.x * UnityEngine.Random.Range(m_minSizeMultiplier, m_maxSizeMultiplier);
+        //assertion based on surface orientation
+        if (foliage.spawnType == SpawnType.NOWHERE) return;
+        else if (foliage.spawnType == SpawnType.FLOOR)
+        {
+            if (Vector3.Dot(hitInfo.normal, Vector3.up) < m_ssoFoliages.DotProductFloor) return;
+        }
+        else if (foliage.spawnType == SpawnType.FLOOR_CEILLING)
+        {
+            if (Vector3.Dot(hitInfo.normal, Vector3.up) < m_ssoFoliages.DotProductFloor && Vector3.Dot(hitInfo.normal, Vector3.up) > m_ssoFoliages.DotProductCeilling) return;
+        }
+        else if (foliage.spawnType == SpawnType.WALL)
+        {
+            if (Vector3.Dot(hitInfo.normal, Vector3.up) > m_ssoFoliages.DotProductWall || Vector3.Dot(hitInfo.normal, Vector3.up) < -m_ssoFoliages.DotProductWall) return;
+        }
 
-        //if (!IsNormalFacingOrigin(hitInfo) || !HasEnoughRoom(hitInfo, scale * 0.5f * m_overlapModifier)) return;
+        float noise = SimplexNoise3D.SimplexNoise(hitInfo.point, foliage.NoiseScale);
 
-        //GameObject newMushroom = Instantiate(m_mushroomPrefab, hitInfo.point, Quaternion.FromToRotation(Vector3.up, hitInfo.normal), transform);
-        //m_spawnedGameObjects.Add(newMushroom);
-        //newMushroom.transform.localScale = new Vector3(scale, scale, scale);
-        //newMushroom.GetComponent<MeshRenderer>().material = m_masterMaterial;
-        //AddMatrixToList(newMushroom.transform.localToWorldMatrix);
-        //newMushroom.name = "List" + m_foliageLists.Count + "Mushroom" + m_foliageLists[m_foliageLists.Count - 1].matrices.Count;
-        //CheckFurthest(newMushroom);
+        if (noise > foliage.NoiseStep)
+        {
+            Vector3 scale;
+            //create the scale for the foliage using prefab base scale, scale coming from the noise and the random scale
+            if (foliage.UniformScale)
+            {
+                scale = Vector3.Scale(foliage.Prefab.transform.localScale, Vector3.Lerp(foliage.MinScaleNoiseMultiplier, foliage.MaxScaleNoiseMultiplier, Matha.RemapClamped(foliage.NoiseStep, foliage.NoiseStepMax, 0f, 1f, noise))) * UnityEngine.Random.Range(foliage.MinSizeMultiplier.x, foliage.MaxSizeMultiplier.x);
+            }
+            else
+            {
+                scale = Vector3.Scale(Vector3.Scale(foliage.Prefab.transform.localScale, Vector3.Lerp(foliage.MinScaleNoiseMultiplier, foliage.MaxScaleNoiseMultiplier, Matha.RemapClamped(foliage.NoiseStep, foliage.NoiseStepMax, 0f, 1f, noise))), Matha.RandomRangeVector3(foliage.MinSizeMultiplier, foliage.MaxSizeMultiplier));
+            }
+            
+            if (/*!IsNormalFacingOrigin(hitInfo) ||*/ !HasEnoughRoom(hitInfo, Mathf.Max(Mathf.Max(scale.x,scale.y),scale.z) * 0.5f * foliage.OverlapModifier, ref foliage)) return;
+
+            Quaternion rotation;
+            if (foliage.ForceOrientationUp)
+            {
+                rotation = Quaternion.AngleAxis(UnityEngine.Random.Range(foliage.RotationMin, foliage.RotationMax), hitInfo.normal) * Quaternion.LookRotation(-Vector3.up, hitInfo.normal);
+            }
+            else
+            {
+                rotation = Quaternion.AngleAxis(UnityEngine.Random.Range(foliage.RotationMin, foliage.RotationMax), hitInfo.normal) * Quaternion.FromToRotation(Vector3.up, hitInfo.normal);
+            }
+
+            FoliageInstance newFoliage = Instantiate(foliage.Prefab, hitInfo.point, rotation, transform).GetComponent<FoliageInstance>();
+            m_spawnedFoliages.Add(newFoliage);
+            newFoliage.transform.localScale = scale;
+            newFoliage.position = newFoliage.transform.position;
+
+            AddMatrixToList(newFoliage.transform.localToWorldMatrix, ref foliage);
+            newFoliage.name = newFoliage.FoliageType.ToString() + "_" + ((foliage.TransformLists.Count - 1) * 1023 + foliage.TransformLists[^1].matrices.Count).ToString();
+
+            Physics.SyncTransforms();
+        }
     }
 
-    private bool HasEnoughRoom(RaycastHit hitInfo, float radius)
+    private bool HasEnoughRoom(RaycastHit hitInfo, float radius, ref Foliage foliage)
     {
-        // Doesn't overlap with other mushrooms
-        LayerMask raycastLayerMask = new LayerMask();
-        raycastLayerMask |= (1 << LayerMask.NameToLayer("NoCollision_NoRaycast"));
-        Collider[] hitlist = Physics.OverlapSphere(hitInfo.point, radius, raycastLayerMask, QueryTriggerInteraction.Collide);
-        return hitlist.Length < 1;
+        Collider[] hitlist = Physics.OverlapSphere(hitInfo.point, radius);
+        bool isNotColliding = true;
+
+        foreach(Collider collider in hitlist) 
+        {
+            if (collider.TryGetComponent<FoliageInstance>(out FoliageInstance foliageInstance))
+            {
+                foreach(FoliageType foliageType in foliage.CanSpawnInFoliage)
+                {
+                    if (foliageType == FoliageType.NONE)
+                    {
+                        isNotColliding = false;
+                        break;
+                    }
+                    else if (foliageType == FoliageType.ALL)
+                    {
+                        isNotColliding = true;
+                        break;
+                    }
+                    else
+                    {
+                        if(foliageInstance.FoliageType != foliageType)
+                        {
+                            isNotColliding = false;
+                        }
+                        else
+                        {
+                            isNotColliding = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            if (!isNotColliding)
+            {
+                break;
+            }
+        }
+
+        return isNotColliding;
     }
 
     private bool IsNormalFacingOrigin(RaycastHit hitInfo)
@@ -161,30 +247,52 @@ public class FoliageBatch : MonoBehaviour
         return 0.2f <= Vector3.Dot(rayDirection.normalized, hitInfo.normal.normalized);
     }
 
-    private void CheckFurthest(GameObject mushroom)
+    public void AddMatrixToList(Matrix4x4 matrix, ref Foliage foliage)
     {
-        if (m_furthestShroom == -1f) m_furthestShroom = Vector3.Distance(transform.position, mushroom.transform.position);
-        else if (Vector3.Distance(transform.position, mushroom.transform.position) > m_furthestShroom) 
-            m_furthestShroom = Vector3.Distance(transform.position, mushroom.transform.position);
+        if (foliage.TransformLists.Count == 0) foliage.TransformLists.Add(new MatrixList());
+        else if (foliage.TransformLists[^1].matrices.Count == 1023) foliage.TransformLists.Add(new MatrixList());
+        foliage.TransformLists[^1].matrices.Add(matrix);
     }
 
-    public void AddMatrixToList(Matrix4x4 matrix)
+    public bool RemoveFoliageFromList(Vector3 position, FoliageType type)
     {
-        if (m_foliageLists.Count == 0) m_foliageLists.Add(new MatrixList());
-        if (m_foliageLists[m_foliageLists.Count - 1].matrices.Count == 1023) m_foliageLists.Add(new MatrixList());
-        m_foliageLists[m_foliageLists.Count - 1].matrices.Add(matrix);
-    }
-
-    public bool RemoveMushroomFromList(Vector3 position)
-    {
-        foreach (MatrixList list in m_foliageLists)
+        foreach (Foliage foliage in m_foliages)
         {
-            foreach (Matrix4x4 mushroom in list.matrices)
+            if (foliage.type == type)
             {
-                if (position.Equals(mushroom.GetPosition()))
+                foreach (MatrixList list in foliage.TransformLists)
                 {
-                    list.matrices.Remove(mushroom);
-                    return true;
+                    foreach (Matrix4x4 matrice in list.matrices)
+                    {
+                        if (position.Equals(matrice.GetPosition()))
+                        {
+                            list.matrices.Remove(matrice);
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        
+        return false;
+    }
+
+    public bool UpdateFoliageFromList(Vector3 position, FoliageType type, Matrix4x4 matrix)
+    {
+        foreach (Foliage foliage in m_foliages)
+        {
+            if (foliage.type == type)
+            {
+                foreach (MatrixList list in foliage.TransformLists)
+                {
+                    for (int i = 0; i < list.matrices.Count; i++)
+                    {
+                        if (position.Equals(list.matrices[i].GetPosition()))
+                        {
+                            list.matrices[i] = matrix;
+                            return true;
+                        }
+                    }
                 }
             }
         }
@@ -198,22 +306,22 @@ public class FoliageBatch : MonoBehaviour
 
     private void Start()
     {
-        //ClearGameObjects();
-        //if (m_foliageLists[0].matrices.Count == 0) return;
+        ClearGameObjects();
 
-        //m_propertyBlock = new MaterialPropertyBlock();
-        //m_propertyBlock.SetFloat("_deflateWaveSpeed", m_ssoMushrooms.DeflateWaveSpeed);
-        //m_propertyBlock.SetFloat("_deflateDuration", m_ssoMushrooms.DeflateDuration);
-        //m_propertyBlock.SetFloat("_isInflating", 1f);
-        //m_propertyBlock.SetFloat("_inflateDuration", m_ssoMushrooms.InflateDuration);
-
-        ////UpdateState(MushroomState.CHARGED);
+        foreach (Foliage foliage in m_foliages)
+        {
+            foliage.PropertyBlock ??= new MaterialPropertyBlock();
+            foliage.PropertyBlock.SetTexture("_ColorMap", foliage.ColorMap);
+        }
     }
 
     private void Update()
     {
-        //foreach (MatrixList list in m_foliageLists)
-        //    Graphics.DrawMeshInstanced(m_mushroomMesh, 0, m_masterMaterial, list.matrices, m_propertyBlock);
+        foreach (Foliage foliage in m_foliages)
+        {
+            foreach (MatrixList transformList in foliage.TransformLists)
+                Graphics.DrawMeshInstanced(foliage.Mesh, 0, m_masterMaterial, transformList.matrices, foliage.PropertyBlock);
+        }
     }
 
     private void OnDrawGizmosSelected()
@@ -223,5 +331,13 @@ public class FoliageBatch : MonoBehaviour
     }
 
     #endregion
+}
 
+public enum SpawnType
+{
+    EVERYWHERE,
+    NOWHERE,
+    FLOOR,
+    WALL,
+    FLOOR_CEILLING
 }

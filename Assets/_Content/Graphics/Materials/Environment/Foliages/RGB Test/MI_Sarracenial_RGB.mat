@@ -20,7 +20,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: MI_Coral
+  m_Name: MI_Sarracenial_RGB
   m_Shader: {fileID: -6465566751694194690, guid: 283216e159577954db010e982bf4104d,
     type: 3}
   m_Parent: {fileID: 2100000, guid: 8a8f70e6bf0ee964ca3e382e23ef0eaf, type: 2}
@@ -38,14 +38,15 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _ColorMap:
-        m_Texture: {fileID: 2800000, guid: d41e902bab60d3b45875b237ebb2ecf3, type: 3}
+        m_Texture: {fileID: 2800000, guid: 7aa47a41f366a5a45b24dfb3bb3658f0, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _RGBMap:
-        m_Texture: {fileID: 2800000, guid: d41e902bab60d3b45875b237ebb2ecf3, type: 3}
+        m_Texture: {fileID: 2800000, guid: 7aa47a41f366a5a45b24dfb3bb3658f0, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Ints: []
-    m_Floats: []
+    m_Floats:
+    - _AlphaThreshold: 0.4
     m_Colors: []
   m_BuildTextureStacks: []

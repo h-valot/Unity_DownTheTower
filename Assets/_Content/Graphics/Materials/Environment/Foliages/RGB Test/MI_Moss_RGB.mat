@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &-3206391941828463034
+--- !u!114 &-174857631531648866
 MonoBehaviour:
   m_ObjectHideFlags: 11
   m_CorrespondingSourceObject: {fileID: 0}
@@ -20,10 +20,10 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: MM_ColorMap Variant
-  m_Shader: {fileID: -6465566751694194690, guid: 55bdca73bfa7c6e4798a8e9a2a54bf4c,
+  m_Name: MI_Moss_RGB
+  m_Shader: {fileID: -6465566751694194690, guid: 283216e159577954db010e982bf4104d,
     type: 3}
-  m_Parent: {fileID: 2100000, guid: 2ac6468c699a7bf4aaf6ead7d80e54ee, type: 2}
+  m_Parent: {fileID: 2100000, guid: 8a8f70e6bf0ee964ca3e382e23ef0eaf, type: 2}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
   m_InvalidKeywords: []
@@ -38,10 +38,17 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _ColorMap:
-        m_Texture: {fileID: 2800000, guid: 7aa47a41f366a5a45b24dfb3bb3658f0, type: 3}
+        m_Texture: {fileID: 2800000, guid: e921365ef6854014e999bdd02c85335b, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _RGBMap:
+        m_Texture: {fileID: 2800000, guid: eea909527da08b7459b1998e99db3818, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats: []
-    m_Colors: []
+    m_Colors:
+    - _ColorBlue: {r: 0.865, g: 0.33356208, b: 0.4409803, a: 1}
+    - _ColorGreen: {r: 0.439, g: 0.025462013, b: 0.059923578, a: 1}
+    - _ColorRed: {r: 0.535, g: 0.11660255, b: 0.20028216, a: 1}
   m_BuildTextureStacks: []
