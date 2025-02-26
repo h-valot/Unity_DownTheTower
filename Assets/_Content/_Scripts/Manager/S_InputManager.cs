@@ -1,6 +1,7 @@
 using Sirenix.OdinInspector;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
 public class InputManager : MonoBehaviour
@@ -24,8 +25,10 @@ public class InputManager : MonoBehaviour
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Recycle m_rseRecycle;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_ToggleCursor m_rseToggleCursor;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Climb m_rseClimb;
+    [FoldoutGroup("Scriptable")][SerializeField] private RSE_SwitchTabLeft m_rseSwitchTabLeft;
+    [FoldoutGroup("Scriptable")][SerializeField] private RSE_SwitchTabRight m_rseSwitchTabRight;
 
-	[FoldoutGroup("Scriptable")][SerializeField] private RSO_Pause m_rsoPause;
+    [FoldoutGroup("Scriptable")][SerializeField] private RSO_Pause m_rsoPause;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CancelConsumable m_rsoCancelConsumable;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CraftInputLocked m_rsoCraftInputLocked;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_RecycleInputLocked m_rsoRecycleInputLocked;
@@ -118,22 +121,24 @@ public class InputManager : MonoBehaviour
 	{
 		Vector2 input = value.Get<Vector2>();
 
-		if (m_playerInput.currentControlScheme == "Gamepad")
+		switch (m_rsoCurrentControls.value)
 		{
-			m_look = new Vector2(
-				input.x * m_ssoInputs.GamepadSensibilityX,
-				input.y * m_ssoInputs.GamepadSensibilityY
-			);
-		}
-		else
-		{
-			m_look = new Vector2(
-				input.x * m_ssoInputs.MouseSensibilityX,
-				input.y * m_ssoInputs.MouseSensibilityY * (m_ssoInputs.InvertMouseY ? -1 : 1)
-			);
-		}
+			case ControlScheme.GAMEPAD:
+                m_look = new Vector2(
+                    input.x * m_ssoInputs.SensitivityValue,
+                    input.y * m_ssoInputs.SensitivityValue * m_ssoInputs.SensitivityMultiplierY * (m_ssoInputs.InvertAxisY ? 1 : -1)
+                    );
+				break;
+			case ControlScheme.KEYBOARDMOUSE:
+                m_look = new Vector2(
+                    input.x * m_ssoInputs.SensitivityValue * m_ssoInputs.SensitivityMouseMultiplier,
+                    input.y * m_ssoInputs.SensitivityValue * m_ssoInputs.SensitivityMultiplierY * m_ssoInputs.SensitivityMouseMultiplier * (m_ssoInputs.InvertAxisY ? 1 : -1)
+                    );
+                break;
+        }
 
-		if (m_rsoPause.value) m_look = Vector2.zero;
+
+        if (m_rsoPause.value) m_look = Vector2.zero;
     }
 
 	public void OnJump(InputValue value)
@@ -188,9 +193,11 @@ public class InputManager : MonoBehaviour
         }
     }
 
-    public void OnToggleHandObject()
+    public void OnToggleHandObject(InputValue value)
 	{
-		m_rseToggleHandObject.Call();
+        if (!value.isPressed) return;
+
+        m_rseToggleHandObject.Call(value.isPressed);
 	}
 
 	public void OnInteract(InputValue value)
@@ -250,7 +257,17 @@ public class InputManager : MonoBehaviour
 		m_rsoInputAdviceDisplayed.value = !m_rsoInputAdviceDisplayed.value;
 	}
 
-	public void OnPause()
+    public void OnSwitchTabLeft()
+    {
+        if(m_rsoPause.value) m_rseSwitchTabLeft.Call();
+    }
+
+    public void OnSwitchTabRight()
+    {
+        if (m_rsoPause.value) m_rseSwitchTabRight.Call();
+    }
+
+    public void OnPause()
 	{
 		m_rsoPause.value = !m_rsoPause.value;
 	}

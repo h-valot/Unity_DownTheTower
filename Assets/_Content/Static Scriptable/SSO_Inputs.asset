@@ -12,8 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 941f4418360620c4bbb689da015307d7, type: 3}
   m_Name: SSO_Inputs
   m_EditorClassIdentifier: 
-  MouseSensibilityX: 20
-  MouseSensibilityY: 7.5
-  InvertMouseY: 1
-  GamepadSensibilityX: 220
-  GamepadSensibilityY: 82.5
+  MinSensitivity: 50
+  MaxSensitivity: 300
+  SensitivityValue: 144
+  SensitivityMultiplierY: 0.6
+  SensitivityMouseMultiplier: 0.2
+  InvertAxisY: 0

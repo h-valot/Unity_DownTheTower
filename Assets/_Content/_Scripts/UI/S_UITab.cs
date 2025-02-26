@@ -3,42 +3,34 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class UITab : MonoBehaviour, IPointerDownHandler
+public class UITab : MonoBehaviour
 {
 	[FoldoutGroup("Tweakable values")][SerializeField] private Color m_colorHighlighted;
 	[FoldoutGroup("Tweakable values")][SerializeField] private Color m_colorWithdrawn;
 
-	[Required("When pressed, all ui tab linked panel will be withdrawn. Then, this one will be highlighted.")]
-	[FoldoutGroup("Internal references")][SerializeField] private GameObject m_linkedPanel;
-	[FoldoutGroup("Internal references")][SerializeField] private Image m_imgBackground;
+    [FoldoutGroup("Internal references")][SerializeField] private UITabManager m_parentManager;
+    [FoldoutGroup("Internal references")][SerializeField] private GameObject m_linkedPanel;
+    [FoldoutGroup("Internal references")][SerializeField] private GameObject m_defaultSelected;
+    [FoldoutGroup("Internal references")][SerializeField] private Image m_imgBackground;
 
-	[FoldoutGroup("Scriptables")][SerializeField] private RSE_WithdrawTabs m_rseWithdrawTabs;
-
-	private void OnEnable()
-	{
-		m_rseWithdrawTabs.action += Withdraw;
-	}
-
-	private void OnDisable()
-	{
-		m_rseWithdrawTabs.action -= Withdraw;
-	}
-
-	public void OnPointerDown(PointerEventData eventData)
-	{
-		Highlight();
-	}
+	[FoldoutGroup("Scriptables")][SerializeField] private RSO_CurrentControls m_rsoCurrentControls;
 
 	public void Highlight()
 	{
-		m_rseWithdrawTabs.Call();
 		m_imgBackground.color = m_colorHighlighted;
 		m_linkedPanel.SetActive(true);
-	}
+		if(m_rsoCurrentControls.value == ControlScheme.GAMEPAD) EventSystem.current.SetSelectedGameObject(m_defaultSelected);
+
+    }
 
 	public void Withdraw()
 	{
 		m_imgBackground.color = m_colorWithdrawn;
 		m_linkedPanel.SetActive(false);
-	}
+    }
+
+	public void SwitchTabByClick()
+	{
+		m_parentManager.GoToTab(this);
+    }
 }
