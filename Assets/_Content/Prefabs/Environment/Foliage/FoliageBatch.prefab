@@ -1,0 +1,166 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &758828155583398546
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6277631884088673720}
+  - component: {fileID: 6731282470808825122}
+  m_Layer: 0
+  m_Name: FoliageBatch
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6277631884088673720
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 758828155583398546}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6731282470808825122
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 758828155583398546}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 420dd6a0be21c834787b1b36123ed499, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_ssoFoliages: {fileID: 11400000, guid: 4e2b3a0255b235a45987472819484b2b, type: 2}
+  m_radius: 5
+  m_masterMaterial: {fileID: 2100000, guid: eff49b34abc7f1944a99592cf9402b76, type: 2}
+  m_foliages:
+  - type: 2
+    Mesh: {fileID: 5707580809022442556, guid: 5be3833e35393a74397466da48db51c7, type: 3}
+    Prefab: {fileID: 5968124563386870240, guid: 7c55b558a3cc2bd4dbf888122f8d6d7f,
+      type: 3}
+    Density: 5
+    LayerToFindSurface:
+      serializedVersion: 2
+      m_Bits: 1
+    OverlapModifier: 0.2
+    spawnType: 0
+    RotationMin: -180
+    RotationMax: 180
+    NoiseScale: 0.5
+    NoiseStep: 0.6
+    NoiseStepMax: 0.8
+    UniformScale: 0
+    MinScaleNoiseMultiplier: {x: 0.3, y: 0.5, z: 0.3}
+    MaxScaleNoiseMultiplier: {x: 1, y: 1, z: 1}
+    MinSizeMultiplier: {x: 0.9, y: 0.9, z: 0.9}
+    MaxSizeMultiplier: {x: 1.1, y: 1.1, z: 1.1}
+    CanSpawnInFoliage: 00000000
+    ColorMap: {fileID: 2800000, guid: e921365ef6854014e999bdd02c85335b, type: 3}
+    TransformLists: []
+  - type: 3
+    Mesh: {fileID: 8480644863569479221, guid: 306946c493f78fb43955e91b8efe2f7c, type: 3}
+    Prefab: {fileID: 1558398320570513612, guid: 69a0e12bbb9f39648a12538bff9466e8,
+      type: 3}
+    Density: 5
+    LayerToFindSurface:
+      serializedVersion: 2
+      m_Bits: 512
+    OverlapModifier: 0
+    spawnType: 4
+    RotationMin: -180
+    RotationMax: 180
+    NoiseScale: 0.5
+    NoiseStep: 0.6
+    NoiseStepMax: 0.8
+    UniformScale: 1
+    MinScaleNoiseMultiplier: {x: 1, y: 1, z: 1}
+    MaxScaleNoiseMultiplier: {x: 1, y: 1, z: 1}
+    MinSizeMultiplier: {x: 0.7, y: 0.7, z: 0.7}
+    MaxSizeMultiplier: {x: 1.3, y: 1.3, z: 1.3}
+    CanSpawnInFoliage: 02000000
+    ColorMap: {fileID: 2800000, guid: 7aa47a41f366a5a45b24dfb3bb3658f0, type: 3}
+    TransformLists: []
+  - type: 3
+    Mesh: {fileID: 1472420450617586764, guid: 57379aa19925847469f5b75cfeca3dc1, type: 3}
+    Prefab: {fileID: 1558398320570513612, guid: f6253f53e00f6d749b597b10e4490d8e,
+      type: 3}
+    Density: 5
+    LayerToFindSurface:
+      serializedVersion: 2
+      m_Bits: 512
+    OverlapModifier: 0
+    spawnType: 3
+    RotationMin: -10
+    RotationMax: 10
+    NoiseScale: 0.5
+    NoiseStep: 0
+    NoiseStepMax: 1
+    UniformScale: 1
+    MinScaleNoiseMultiplier: {x: 1, y: 1, z: 1}
+    MaxScaleNoiseMultiplier: {x: 1, y: 1, z: 1}
+    MinSizeMultiplier: {x: 0.7, y: 0.7, z: 0.7}
+    MaxSizeMultiplier: {x: 1.3, y: 1.3, z: 1.3}
+    CanSpawnInFoliage: 02000000
+    ColorMap: {fileID: 2800000, guid: 7aa47a41f366a5a45b24dfb3bb3658f0, type: 3}
+    TransformLists: []
+  - type: 5
+    Mesh: {fileID: -8355863557005652238, guid: 0776c6383e8fcb94b8afe0186629afd3, type: 3}
+    Prefab: {fileID: 4092522855923855563, guid: 563594aa566411045b0105e26945f6c2,
+      type: 3}
+    Density: 10
+    LayerToFindSurface:
+      serializedVersion: 2
+      m_Bits: 512
+    OverlapModifier: 0
+    spawnType: 0
+    RotationMin: -180
+    RotationMax: 180
+    NoiseScale: 0.5
+    NoiseStep: 0
+    NoiseStepMax: 1
+    UniformScale: 1
+    MinScaleNoiseMultiplier: {x: 1, y: 1, z: 1}
+    MaxScaleNoiseMultiplier: {x: 1, y: 1, z: 1}
+    MinSizeMultiplier: {x: 0.7, y: 0.7, z: 0.7}
+    MaxSizeMultiplier: {x: 1.3, y: 1.3, z: 1.3}
+    CanSpawnInFoliage: 02000000
+    ColorMap: {fileID: 2800000, guid: 401aa74b75658724fa8a132f1cd96b5e, type: 3}
+    TransformLists: []
+  - type: 4
+    Mesh: {fileID: 3540205340808380911, guid: 3397a3503d618fe448dc9d259936f4ff, type: 3}
+    Prefab: {fileID: 5002633511018146708, guid: eb26e7cd850f91446b09d13b9be0fc6c,
+      type: 3}
+    Density: 0
+    LayerToFindSurface:
+      serializedVersion: 2
+      m_Bits: 1
+    OverlapModifier: 1
+    spawnType: 2
+    RotationMin: -180
+    RotationMax: 180
+    NoiseScale: 0.5
+    NoiseStep: 0.7
+    NoiseStepMax: 0.9
+    UniformScale: 1
+    MinScaleNoiseMultiplier: {x: 1, y: 1, z: 1}
+    MaxScaleNoiseMultiplier: {x: 1, y: 1, z: 1}
+    MinSizeMultiplier: {x: 0.8, y: 0.8, z: 0.8}
+    MaxSizeMultiplier: {x: 1.2, y: 1.2, z: 1.2}
+    CanSpawnInFoliage: 020000000300000005000000
+    ColorMap: {fileID: 2800000, guid: 0c6a1961208c27849ad798fa5cdaa241, type: 3}
+    TransformLists: []
+  m_spawnedFoliages: []

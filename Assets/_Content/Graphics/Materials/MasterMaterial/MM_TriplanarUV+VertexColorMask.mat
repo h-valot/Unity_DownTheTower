@@ -24,6 +24,14 @@ Material:
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
+    - _FloorTextureAlpha:
+        m_Texture: {fileID: 2800000, guid: cb7bdf695bf18774f8a2aba64f04002f, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _FloorTextureBoseColor:
+        m_Texture: {fileID: 2800000, guid: cea1f2b52f42b9a438e827fc0d8d121e, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _SampleTexture2D_4549269783be43169d51a90ff0a810af_Texture_1_Texture2D:
         m_Texture: {fileID: 2800000, guid: b9a86281083655447a30e8f821920ccb, type: 3}
         m_Scale: {x: 1, y: 1}
@@ -34,6 +42,10 @@ Material:
         m_Offset: {x: 0, y: 0}
     - _SampleTexture2D_8ae69f4ac4c74cabbbfe3609edc670e3_Texture_1_Texture2D:
         m_Texture: {fileID: 2800000, guid: 0d4b0665df322c243baccdf383209c4c, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _WallTextureGrayscale:
+        m_Texture: {fileID: 2800000, guid: 43cadf83682a9c64f89c26c3c754091a, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _m_brickTexture:
@@ -62,16 +74,41 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
+    - _FloorPatternFadeScale: 0.11
+    - _FloorTextureScale: 0.25
     - _QueueControl: 0
     - _QueueOffset: 0
-    - _m_DarkenFactorBrick: 0.5
-    - _m_brickDeformScale: 0.05
+    - _UVRotation: 42.14
+    - _WallColorNoiseScale: 0.07
+    - _WallPatternFadeNoiseScale: 0.3
+    - _WallTextureScale: 0.25
+    - _m_BrickOpacityNoiseScale: 0.11
+    - _m_DarkenFactorBrick: 1.94
+    - _m_WallColorNoiseScale: 0.05
+    - _m_WallDeformNoiseScale: 0.12
+    - _m_WallNoiseScale: 0.06
+    - _m_WallPatternFadeNoiseScale: 0.3
+    - _m_brickDeformScale: 0.03
     - _m_brickDeformSize: 0.25
     - _m_brickSizeTache: 0.69
+    - _m_floorPatternFadeScale: 0.11
+    - _m_floorTextureScale: 4
     - _m_scale: 4
+    - _m_wallColorNoiseScale: 0.05
+    - _m_wallTextureScale: 4
+    - _wallPatternFadeNoiseScale: 0.3
     m_Colors:
-    - _ColorWall1: {r: 0.7254902, g: 0.25490195, b: 0.16078427, a: 1}
+    - _ColorWall1: {r: 0.254717, g: 0.18191731, b: 0.14297794, a: 1}
     - _ColorWall2: {r: 0.8301887, g: 0.5622785, b: 0.3720185, a: 1}
+    - _FloorDeformNoiseScaleMinMax: {r: 0.25, g: 0.69, b: 0.03, a: 0}
+    - _M_WallDeforlNoiseScaleMinMax: {r: 0.17, g: 0.39, b: 0.13, a: 0}
+    - _M_WallDeformNoiseScaleMinMax: {r: 0.17, g: 0.39, b: 0.13, a: 0}
+    - _WallColor1: {r: 0.3207547, g: 0.17286606, b: 0.11347455, a: 1}
+    - _WallColor2: {r: 0.8313726, g: 0.5607843, b: 0.37254897, a: 1}
+    - _WallDeformNoiseScaleMinMax: {r: 0.17, g: 0.39, b: 0.13, a: 0}
+    - _m_floorDeformNoiseScaleMinMax: {r: 0.25, g: 0.69, b: 0.03, a: 0}
+    - _m_wallColor1: {r: 0.25490198, g: 0.18039218, b: 0.14117646, a: 1}
+    - _m_wallColor2: {r: 0.8313726, g: 0.5607843, b: 0.37254897, a: 1}
   m_BuildTextureStacks: []
 --- !u!114 &9114919768248406303
 MonoBehaviour:

@@ -73,8 +73,14 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 260
   HeightLimit: 1
-  MinRadiusAround: 0.5
+  MinHalfExtendEmptySpace: {x: 0.5, y: 0.2, z: 0.5}
   MaxGroundAngle: 0.6
   MaxDistFromCamera: 8
   CameraOffsetAngle: 20
   MaxCameraDownwardClamp: 45
+  LayersToIgnoreBeforeDeploy:
+    serializedVersion: 2
+    m_Bits: 1023
+  LayersToIgnoreAfterDeploy:
+    serializedVersion: 2
+    m_Bits: 768

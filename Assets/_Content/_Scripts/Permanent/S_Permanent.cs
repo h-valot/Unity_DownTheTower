@@ -1,4 +1,5 @@
 using Sirenix.OdinInspector;
+using System.Linq;
 using UnityEngine;
 
 public class Permanent : MonoBehaviour
@@ -100,7 +101,7 @@ public class Permanent : MonoBehaviour
 	/// <returns>True if the raycast of a length equals to the given height do not touch a collider.</returns>
 	protected bool IsSpaceAbove(RaycastHit hit, float maxHeight, LayerMask maskToIgnore)
 	{
-		return Physics.Raycast(hit.point + GROUND_RAY_OFFSET, Vector3.up, maxHeight - GROUND_RAY_OFFSET.y, maskToIgnore);
+		return Physics.Raycast(hit.point + GROUND_RAY_OFFSET, Vector3.up, maxHeight - GROUND_RAY_OFFSET.y, ~maskToIgnore);
 	}
 
 	/// <summary>
@@ -109,16 +110,9 @@ public class Permanent : MonoBehaviour
 	/// <param name="hit">Raycast hit info</param>
 	/// <param name="radius">Minimum tolerated distance from the preview permanent and a collider around it</param>
 	/// <returns>True if the space does not contains any collider.</returns>
-	protected bool IsSpaceAround(RaycastHit hit, float radius, LayerMask maskToIgnore)
+	protected bool IsSpaceAround(RaycastHit hit, Vector3 halfBoxExtents, LayerMask maskToIgnore)
 	{
-		return Physics.SphereCast(
-			new Vector3(hit.point.x, hit.point.y + (radius / 2) + 0.1f, hit.point.z), 
-			radius, 
-			transform.forward, 
-			out var hitInfo, 
-			0, 
-			maskToIgnore
-		);
+		return (Physics.OverlapBox(hit.point + hit.normal * halfBoxExtents.y *1.1f, halfBoxExtents, Quaternion.FromToRotation(Vector3.up ,hit.normal), ~maskToIgnore).Count() > 0);
 	}
 
 	/// <summary>

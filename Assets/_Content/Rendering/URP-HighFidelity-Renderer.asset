@@ -137,3 +137,35 @@ MonoBehaviour:
   m_CopyDepthMode: 0
   m_AccurateGbufferNormals: 0
   m_IntermediateTextureMode: 1
+--- !u!114 &7593808161579165415
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b35919ca83ec2024aa4988d735710dfb, type: 3}
+  m_Name: OutlineRendererFeature
+  m_EditorClassIdentifier: 
+  m_Active: 0
+  GBufferExtractRequirements: -1
+  m_outlineSettings:
+    RenderPassEvent: 500
+    OutlineThickness: 2
+    OutlineColor:
+      r: 0.3490566
+      g: 0.1414187
+      b: 0.08067814
+      a: 1
+    ThresholdDepth: 2.82
+    ThresholdNormal: 2.85
+    ThresholdColor: 1.31
+    NoiseTexture: {fileID: 2800000, guid: 78265062788ec274aaa53f0e2d2c74f6, type: 3}
+    NoiseScale: 0.54
+    NoiseStrength: 0.002
+  OutlineRequirements: -1
+  GBufferClearRequirements: -1
+  m_outlineMaterial: {fileID: 0}
+  m_clearGBuffer0Material: {fileID: 0}

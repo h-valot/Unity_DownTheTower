@@ -12,7 +12,6 @@ GameObject:
   - component: {fileID: 2423774863846630498}
   - component: {fileID: 4416827783120197514}
   - component: {fileID: 4146427016307430021}
-  - component: {fileID: 9054298352359450135}
   - component: {fileID: 7904014741390690978}
   m_Layer: 7
   m_Name: PF_Rope
@@ -56,7 +55,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Type: 2
-  m_boxCollider: {fileID: 4146427016307430021}
+  m_rigidbody: {fileID: 7904014741390690978}
   m_ropeAttach: {fileID: 2568308412043996560}
   RaycastTarget: {fileID: 8523854646636271912}
   m_topMeshRenderer: {fileID: 3844872860432818986}
@@ -115,35 +114,14 @@ BoxCollider:
     m_Bits: 0
   m_ExcludeLayers:
     serializedVersion: 2
-    m_Bits: 8
+    m_Bits: 0
   m_LayerOverridePriority: 0
   m_IsTrigger: 0
   m_ProvidesContacts: 0
-  m_Enabled: 0
-  serializedVersion: 3
-  m_Size: {x: 0.08, y: 1.2, z: 0.18}
-  m_Center: {x: 0, y: 0.45, z: -0.03}
---- !u!65 &9054298352359450135
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1252463550714278668}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 8
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 1
-  m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.12, y: 1.24, z: 0.22}
-  m_Center: {x: 0, y: 0.45, z: -0.03}
+  m_Size: {x: 0.5, y: 1.2, z: 0.18}
+  m_Center: {x: 0, y: 0.55, z: 0}
 --- !u!54 &7904014741390690978
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -163,7 +141,7 @@ Rigidbody:
     m_Bits: 0
   m_ExcludeLayers:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 4294967295
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
   m_UseGravity: 0
@@ -671,7 +649,7 @@ PrefabInstance:
         type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: 76deaa736ba7e724dbdafa750d57fc0c, type: 2}
+      objectReference: {fileID: 2100000, guid: 7161a09b8cf420c4381de78446844952, type: 2}
     - target: {fileID: 919132149155446097, guid: f9e4b71b23782294f93f894d3f5bcf99,
         type: 3}
       propertyPath: m_Name
