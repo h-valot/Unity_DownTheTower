@@ -54,9 +54,12 @@ public class CharacterMotor : MonoBehaviour
 
     [FoldoutGroup("Sounds")][SerializeField] private RSE_PlaySound m_rsePlaySound;
     [FoldoutGroup("Sounds")][SerializeField] private RSE_PlayAt m_rsePlayAt;
+	[FoldoutGroup("Sounds")][SerializeField] private RSE_PlayRope m_rsePlayRope;	
     [FoldoutGroup("Sounds")][SerializeField] private SSO_Sound m_ssoDeathLanding;
     [FoldoutGroup("Sounds")][SerializeField] private SSO_Sound m_ssoDeathGuardian;
     [FoldoutGroup("Sounds")][SerializeField] private SSO_Sound m_ssoDeathMushroom;
+    [FoldoutGroup("Sounds")][SerializeField] private SSO_Sound m_ssoRopeBlocked;
+    [FoldoutGroup("Sounds")][SerializeField] private SSO_Sound m_ssoRopeFree;
 
 
     #endregion
@@ -315,7 +318,7 @@ public class CharacterMotor : MonoBehaviour
 
 		ToggleRopeConstraint(!isHolding);
 		m_isHolding = isHolding;
-	}
+    }
 
 	private void ToggleTorch()
 	{
@@ -1184,13 +1187,16 @@ public class CharacterMotor : MonoBehaviour
 			m_rope.IsConstrained = true;
 			m_positionStartFall = m_rigidbody.position;
 			m_rope.UpdateHoldLength();
-			if (m_rope.HoldLength == -1) DesequipRope(); // Handle error code 
-		}
+			if (m_rope.HoldLength == -1) DesequipRope(); // Handle error code
+            m_rsePlayRope.Call(m_ssoRopeBlocked);										 
+        }
 		else
 		{
 			m_rope.IsConstrained = false;
 			m_rope.SetHoldLength(m_ssoRope.MaxLength - m_ssoRope.MaxLengthOffset - m_rope.GetFixedLength());
-		}
+            if (!m_isGrounded) m_rsePlayRope.Call(m_ssoRopeFree);
+
+        }
 	}
 
 	#endregion
