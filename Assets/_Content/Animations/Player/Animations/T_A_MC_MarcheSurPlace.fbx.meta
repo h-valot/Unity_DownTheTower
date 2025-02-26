@@ -22,7 +22,7 @@ ModelImporter:
     animationDoRetargetingWarnings: 0
     importAnimatedCustomProperties: 0
     importConstraints: 0
-    animationCompression: 1
+    animationCompression: 3
     animationRotationError: 0.5
     animationPositionError: 0.5
     animationScaleError: 0.5
@@ -31,9 +31,9 @@ ModelImporter:
     extraUserProperties: []
     clipAnimations:
     - serializedVersion: 16
-      name: Take 001
-      takeName: Take 001
-      internalID: 1827226128182048838
+      name: T_A_MC_MarcheSurPlace
+      takeName: T_A_MC_MarcheSurPlace
+      internalID: 1822738418234606508
       firstFrame: 0
       lastFrame: 19
       wrapMode: 0
@@ -44,10 +44,10 @@ ModelImporter:
       hasAdditiveReferencePose: 0
       loopTime: 1
       loopBlend: 0
-      loopBlendOrientation: 0
-      loopBlendPositionY: 0
-      loopBlendPositionXZ: 0
-      keepOriginalOrientation: 0
+      loopBlendOrientation: 1
+      loopBlendPositionY: 1
+      loopBlendPositionXZ: 1
+      keepOriginalOrientation: 1
       keepOriginalPositionY: 1
       keepOriginalPositionXZ: 0
       heightFromFeet: 0
@@ -542,13 +542,13 @@ ModelImporter:
         length: 0
         modified: 0
     skeleton:
-    - name: R_Chara_01(Clone)
+    - name: R_Chara(Clone)
       parentName: 
       position: {x: -0, y: 0, z: 0}
       rotation: {x: 0, y: -0, z: -0, w: 1}
       scale: {x: 1, y: 1, z: 1}
     - name: MC_Skeleton_grp
-      parentName: R_Chara_01(Clone)
+      parentName: R_Chara(Clone)
       position: {x: -0, y: 0, z: 0}
       rotation: {x: 0, y: -0, z: -0, w: 1}
       scale: {x: 1, y: 1, z: 1}
@@ -1060,7 +1060,7 @@ ModelImporter:
       rotation: {x: 0.10800491, y: -0.11965984, z: -0.0107159745, w: 0.9868646}
       scale: {x: 1.0000004, y: 1.0000002, z: 1.0000002}
     - name: Chara_low
-      parentName: R_Chara_01(Clone)
+      parentName: R_Chara(Clone)
       position: {x: 0.012438332, y: 0.007175421, z: 0.00844611}
       rotation: {x: 0, y: -0, z: -0, w: 1}
       scale: {x: 1, y: 1, z: 1}
@@ -1151,7 +1151,7 @@ ModelImporter:
     hasTranslationDoF: 0
     hasExtraRoot: 0
     skeletonHasParents: 1
-  lastHumanDescriptionAvatarSource: {fileID: 9000000, guid: 30aff5dd707b61e4a9d1316e88752179,
+  lastHumanDescriptionAvatarSource: {fileID: 9000000, guid: 59d4026ad9f8de04a8ebbd6923e30d18,
     type: 3}
   autoGenerateAvatarMappingIfUnspecified: 1
   animationType: 3

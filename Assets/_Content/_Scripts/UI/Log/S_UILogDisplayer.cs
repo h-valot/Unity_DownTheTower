@@ -12,8 +12,11 @@ public class UILogDisplayer : UIWindow
 	[FoldoutGroup("External references")][SerializeField] private UIGame m_uiGame;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_DisplayLog m_rseDisplayLog;
+    [FoldoutGroup("Scriptable")][SerializeField] private RSE_PlaySound m_rsePlaySound;
+    [FoldoutGroup("Scriptable")][SerializeField] private SSO_Sound m_ssoSoundLogOpen;
+    [FoldoutGroup("Scriptable")][SerializeField] private SSO_Sound m_ssoSoundLogClose;
 
-	[FoldoutGroup("Scriptable")][SerializeField] private RSO_InputsLocked m_rsoInputsLocked;
+    [FoldoutGroup("Scriptable")][SerializeField] private RSO_InputsLocked m_rsoInputsLocked;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_InputAdviceDisplayed m_rsoInputAdviceDisplayed;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_Pause m_rsoPause;
 
@@ -50,7 +53,8 @@ public class UILogDisplayer : UIWindow
 		m_rsoInputAdviceDisplayed.value = false;
 		base.Show();
 		m_rsoCancelPriority.value = CancelState.UI_LOG;
-	}
+        m_rsePlaySound.Call(m_ssoSoundLogOpen);
+    }
 
 	private void Hide(bool isHidden)
 	{
@@ -60,6 +64,7 @@ public class UILogDisplayer : UIWindow
 
 		m_rsoCancelConsumable.value = false;
 		base.Hide();
+        m_rsePlaySound.Call(m_ssoSoundLogClose);
 
 		if (m_logCollectionDisplayed)
         {

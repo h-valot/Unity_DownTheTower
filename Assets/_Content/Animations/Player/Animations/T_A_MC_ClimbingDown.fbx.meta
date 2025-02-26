@@ -17,8 +17,8 @@ ModelImporter:
     removeConstantScaleCurves: 0
     motionNodeName: 
     animationImportErrors: 
-    animationImportWarnings: "\nClip 'Take 001' has import animation warnings that
-      might lower retargeting quality:\nNote: Activate translation DOF on avatar
+    animationImportWarnings: "\nClip 'T_A_MC_ClimbingDown' has import animation warnings
+      that might lower retargeting quality:\nNote: Activate translation DOF on avatar
       to improve retargeting quality.\n\t'Spine_01' has translation animation that
       will be discarded.\n\t'Clavicle_L' has translation animation that will be discarded.\n\t'TwistArm_L'
       is inbetween humanoid transforms and has rotation animation that will be discarded.\n\t'TwistArm_R'
@@ -29,7 +29,7 @@ ModelImporter:
     animationDoRetargetingWarnings: 0
     importAnimatedCustomProperties: 0
     importConstraints: 0
-    animationCompression: 1
+    animationCompression: 3
     animationRotationError: 0.5
     animationPositionError: 0.5
     animationScaleError: 0.5
@@ -38,9 +38,9 @@ ModelImporter:
     extraUserProperties: []
     clipAnimations:
     - serializedVersion: 16
-      name: Take 001
-      takeName: Take 001
-      internalID: 1827226128182048838
+      name: T_A_MC_ClimbingDown
+      takeName: T_A_MC_ClimbingDown
+      internalID: 9165458936680812904
       firstFrame: 0
       lastFrame: 39
       wrapMode: 0
@@ -51,12 +51,12 @@ ModelImporter:
       hasAdditiveReferencePose: 0
       loopTime: 1
       loopBlend: 0
-      loopBlendOrientation: 0
-      loopBlendPositionY: 0
-      loopBlendPositionXZ: 0
-      keepOriginalOrientation: 0
+      loopBlendOrientation: 1
+      loopBlendPositionY: 1
+      loopBlendPositionXZ: 1
+      keepOriginalOrientation: 1
       keepOriginalPositionY: 1
-      keepOriginalPositionXZ: 0
+      keepOriginalPositionXZ: 1
       heightFromFeet: 0
       mirror: 0
       bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
@@ -549,13 +549,13 @@ ModelImporter:
         length: 0
         modified: 0
     skeleton:
-    - name: R_Chara_01(Clone)
+    - name: R_Chara(Clone)
       parentName: 
       position: {x: -0, y: 0, z: 0}
       rotation: {x: 0, y: -0, z: -0, w: 1}
       scale: {x: 1, y: 1, z: 1}
     - name: MC_Skeleton_grp
-      parentName: R_Chara_01(Clone)
+      parentName: R_Chara(Clone)
       position: {x: -0, y: 0, z: 0}
       rotation: {x: 0, y: -0, z: -0, w: 1}
       scale: {x: 1, y: 1, z: 1}
@@ -1067,7 +1067,7 @@ ModelImporter:
       rotation: {x: 0.10800491, y: -0.11965984, z: -0.0107159745, w: 0.9868646}
       scale: {x: 1.0000004, y: 1.0000002, z: 1.0000002}
     - name: Chara_low
-      parentName: R_Chara_01(Clone)
+      parentName: R_Chara(Clone)
       position: {x: 0.012438332, y: 0.007175421, z: 0.00844611}
       rotation: {x: 0, y: -0, z: -0, w: 1}
       scale: {x: 1, y: 1, z: 1}
@@ -1158,7 +1158,7 @@ ModelImporter:
     hasTranslationDoF: 0
     hasExtraRoot: 0
     skeletonHasParents: 1
-  lastHumanDescriptionAvatarSource: {fileID: 9000000, guid: 30aff5dd707b61e4a9d1316e88752179,
+  lastHumanDescriptionAvatarSource: {fileID: 9000000, guid: 59d4026ad9f8de04a8ebbd6923e30d18,
     type: 3}
   autoGenerateAvatarMappingIfUnspecified: 1
   animationType: 3

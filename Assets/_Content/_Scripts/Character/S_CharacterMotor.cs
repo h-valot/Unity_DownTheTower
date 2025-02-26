@@ -55,12 +55,21 @@ public class CharacterMotor : MonoBehaviour
 	[FoldoutGroup("RSO")][SerializeField] private RSO_Ropes m_rsoRopes;
 	[FoldoutGroup("RSO")][SerializeField] private RSO_TorchManager m_rsoTorchManager;
 
+    [FoldoutGroup("Sounds")][SerializeField] private RSE_PlaySound m_rsePlaySound;
+    [FoldoutGroup("Sounds")][SerializeField] private RSE_PlayAt m_rsePlayAt;
+	[FoldoutGroup("Sounds")][SerializeField] private RSE_PlayRope m_rsePlayRope;	
+    [FoldoutGroup("Sounds")][SerializeField] private SSO_Sound m_ssoDeathLanding;
+    [FoldoutGroup("Sounds")][SerializeField] private SSO_Sound m_ssoDeathGuardian;
+    [FoldoutGroup("Sounds")][SerializeField] private SSO_Sound m_ssoDeathMushroom;
+    [FoldoutGroup("Sounds")][SerializeField] private SSO_Sound m_ssoRopeBlocked;
+    [FoldoutGroup("Sounds")][SerializeField] private SSO_Sound m_ssoRopeFree;
 
-	#endregion
 
-	#region VARIABLES
+    #endregion
 
-	private bool m_isInitialize;
+    #region VARIABLES
+
+    private bool m_isInitialize;
 	private bool m_isFixedUpdateLocked;
 
 	// - Inputs -
@@ -318,7 +327,7 @@ public class CharacterMotor : MonoBehaviour
 
 		ToggleRopeConstraint(!isHolding);
 		m_isHolding = isHolding;
-	}
+    }
 
 	private void ToggleTorch(bool isPressed)
 	{
@@ -547,15 +556,19 @@ public class CharacterMotor : MonoBehaviour
 		{
 			case DeathType.DEFAULT:
 				StartCoroutine(AnimateDefaultDeath());
-				break;
+                m_rsePlaySound.Call(m_ssoDeathGuardian);
+                break;
 
 			case DeathType.HEIGHT:
 				StartCoroutine(AnimateHeightDeath());
-				break;
+				m_rsePlaySound.Call(m_ssoDeathLanding);
+				print("fire");
+                break;
 
 			case DeathType.GAS:
 				StartCoroutine(AnimateGasDeath());
-				break;
+                m_rsePlaySound.Call(m_ssoDeathMushroom);
+                break;
 		}
 	}
 
@@ -638,7 +651,7 @@ public class CharacterMotor : MonoBehaviour
 		m_fallHeight = (m_rigidbody.position.y - m_positionStartFall.y) * -1f;
 		if (m_fallHeight >= m_ssoCharacter.LethalHeight)
 		{
-			HandleDeath(DeathType.DEFAULT);
+			HandleDeath(DeathType.HEIGHT);
 		}
 		else if (m_fallHeight >= m_ssoCharacter.StunHeight)
 		{
@@ -1215,13 +1228,16 @@ public class CharacterMotor : MonoBehaviour
 			m_rope.IsConstrained = true;
 			m_positionStartFall = m_rigidbody.position;
 			m_rope.UpdateHoldLength();
-			if (m_rope.HoldLength == -1) DesequipRope(); // Handle error code 
-		}
+			if (m_rope.HoldLength == -1) DesequipRope(); // Handle error code
+            m_rsePlayRope.Call(m_ssoRopeBlocked);										 
+        }
 		else
 		{
 			m_rope.IsConstrained = false;
 			m_rope.SetHoldLength(m_ssoRope.MaxLength - m_ssoRope.MaxLengthOffset - m_rope.GetFixedLength());
-		}
+            if (!m_isGrounded) m_rsePlayRope.Call(m_ssoRopeFree);
+
+        }
 	}
 
 	#endregion
