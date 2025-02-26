@@ -144,7 +144,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 21ca8723c11d2d34abf1e9e595b0942a, type: 2}
+  - {fileID: 2100000, guid: 530f2b10c51c2f142a44098b525de7d6, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -228,7 +228,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
+  - {fileID: 2100000, guid: 530f2b10c51c2f142a44098b525de7d6, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -283,7 +283,7 @@ GameObject:
   - component: {fileID: 6866309759088483333}
   - component: {fileID: 1353202996270687621}
   m_Layer: 0
-  m_Name: Point Light
+  m_Name: Spot Light
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -316,7 +316,7 @@ Light:
   m_Type: 0
   m_Shape: 0
   m_Color: {r: 0.8867924, g: 0.6727344, b: 0.17986828, a: 1}
-  m_Intensity: 14.67
+  m_Intensity: 15
   m_Range: 32.92
   m_SpotAngle: 116.88212
   m_InnerSpotAngle: 98.63573
@@ -399,6 +399,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4202565226827997355}
   - component: {fileID: 4990886471520384843}
+  - component: {fileID: 784202829807779700}
   m_Layer: 0
   m_Name: T_PF_Lamp
   m_TagString: Untagged
@@ -448,3 +449,20 @@ CapsuleCollider:
   m_Height: 7.89
   m_Direction: 1
   m_Center: {x: 0, y: -3.64, z: 0}
+--- !u!114 &784202829807779700
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8878767604715623935}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f141c362b0f0fd84ba701704ddbbea5c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_ssoGame: {fileID: 11400000, guid: c6ad5e1cd823f2647b0c8dc515fee2d5, type: 2}
+  m_rsoCharacterPosition: {fileID: 11400000, guid: 7fc614512add369458f5a4d382225bfb,
+    type: 2}
+  m_light: {fileID: 6866309759088483333}
+  m_LightIntensity: 15
