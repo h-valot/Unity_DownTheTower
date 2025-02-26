@@ -91,6 +91,15 @@ public class CameraMotor : MonoBehaviour
 
 	#region MOTOR
 
+	private Cinemachine3rdPersonFollow ThirdPersonFollow
+	{
+		get 
+		{
+			if (!m_3rdPersonFollow) m_3rdPersonFollow = m_3rdPersonCamera.GetCinemachineComponent(CinemachineCore.Stage.Body) as Cinemachine3rdPersonFollow;
+			return m_3rdPersonFollow;
+		}
+	}
+	
 
 	public void Initialize(Transform aimingLookAt, Transform cameraTarget, Quaternion startRotation)
 	{
@@ -234,9 +243,16 @@ public class CameraMotor : MonoBehaviour
 
 	private void HandleDeath()
 	{
-		if (!m_rsoCharacterDeath.value) return;
+		if (m_rsoCharacterDeath.value) 
+		{
+			FreeCamera();
+			ThirdPersonFollow.DampingFromCollision = 0;
+		}
+		else
+		{
+			ThirdPersonFollow.DampingFromCollision = m_ssoCamera.DampingFromCollision;
+		}
 
-		FreeCamera();
 	}
 
 	private void FreeCamera()
