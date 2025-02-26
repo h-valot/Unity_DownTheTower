@@ -25,7 +25,15 @@ public class SSO_Game : ScriptableObject
 	[InfoBox("Default light intensity of scene global point lights.", InfoMessageType.None)]
 	public float GlobalLightIntensity;
 
-	[FoldoutGroup("World")]
+    [FoldoutGroup("World")]
+    [InfoBox("Distance from player at which lights deactivate themselves.", InfoMessageType.None)]
+    public float DinstanceLightDeactivate;
+
+    [FoldoutGroup("World")]
+    [InfoBox("Percent of DistanceLightDeactivate use to fade the light intensity.", InfoMessageType.None)]
+    public float DistancePercentLightFade;
+
+    [FoldoutGroup("World")]
 	[InfoBox("If true, the checkpoint respawn system will take over the basic game start system.", InfoMessageType.None)]
 	public bool UseCheckpoints;
 

@@ -182,8 +182,8 @@ public class CharacterMotor : MonoBehaviour
 		RefillTools();
 
 		// Update useful variables
-		m_rsoCharacterLastPosition.value = m_rsoCharacterPosition.value;
-		m_rsoCharacterPosition.value = m_rigidbody.position;
+		if (m_rsoCharacterLastPosition.value != m_rsoCharacterPosition.value) m_rsoCharacterLastPosition.value = m_rsoCharacterPosition.value;
+		if (m_rsoCharacterPosition.value != m_rigidbody.position) m_rsoCharacterPosition.value = m_rigidbody.position;
 		m_rsoHarnessPosition.value = m_harness.position;
 		m_planarVelocity = new Vector2(m_rigidbody.velocity.x, m_rigidbody.velocity.z);
 		if (m_isGrounded && m_maxGroundedSpeed < m_planarVelocity.magnitude) m_maxGroundedSpeed = m_planarVelocity.magnitude;
