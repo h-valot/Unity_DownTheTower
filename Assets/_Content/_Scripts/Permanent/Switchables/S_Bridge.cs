@@ -6,6 +6,11 @@ using UnityEngine;
 
 public class Bridge : Switchable
 {
+    [Title("References")]
+    [SerializeField] private RSE_PlayAt m_rsePlayAt;
+    [SerializeField] private SSO_Sound m_ssoBridgeActivate;
+
+
     [Title("Tweakable values")]
     [SerializeField] private Vector3 m_maxRotation;
     [SerializeField] private Vector3 m_minRotation;
@@ -14,6 +19,7 @@ public class Bridge : Switchable
     protected override void ActivateMechanism()
     {
         transform.DOLocalRotate(m_maxRotation, m_animLength);
+        m_rsePlayAt.Call(m_ssoBridgeActivate, this.transform.position);
     }
 
     protected override void DeactivateMechanism()
