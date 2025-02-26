@@ -64,7 +64,7 @@ float DistanceAttenuation(float distanceSqr, half2 distanceAttenuation)
 {
     // We use a shared distance attenuation for additional directional and puctual lights
     // for directional lights attenuation will be 1
-    float lightAtten = rcp(distanceSqr);
+    float lightAtten = 1 / (2+distanceSqr);
     float2 distanceAttenuationFloat = float2(distanceAttenuation);
 
     // Use the smoothing factor also used in the Unity lightmapper.
@@ -180,8 +180,8 @@ Light GetAdditionalPerObjectLight(int perObjectLightIndex, float3 positionWS)
     //half attenuation = ease_out_quad(clamp(1.0f - (distanceSqr*0.25 / range), 0.0, 1.0)) * AngleAttenuation(spotDirection.xyz, lightDirection, distanceAndSpotAttenuation.zw);
     //half attenuation = clamp(1.0f - (distanceSqr / range), 0.0, 1.0) * AngleAttenuation(spotDirection.xyz, lightDirection, distanceAndSpotAttenuation.zw);
     //half attenuation = clamp(1.0f - (distanceSqr / range), 0.0, 1.0);
-    //float attenuation = DistanceAttenuation(distanceSqr, distanceAndSpotAttenuation.xy) * AngleAttenuation(spotDirection.xyz, lightDirection, distanceAndSpotAttenuation.zw);
-    half attenuation = ease_in_out_quad(clamp(1.0f - (distanceSqr*0.25 / range), 0.0, 1.0)) * AngleAttenuation(spotDirection.xyz, lightDirection, distanceAndSpotAttenuation.zw);
+    float attenuation = DistanceAttenuation(distanceSqr, distanceAndSpotAttenuation.xy) * AngleAttenuation(spotDirection.xyz, lightDirection, distanceAndSpotAttenuation.zw);
+    //half attenuation = ease_in_out_quad(clamp(1.0f - (distanceSqr*0.125 / range), 0.0, 1.0)) * AngleAttenuation(spotDirection.xyz, lightDirection, distanceAndSpotAttenuation.zw);
 
     //half attenuation = lerp(DistanceAttenuation(distanceSqr, distanceAndSpotAttenuation.xy) * AngleAttenuation(spotDirection.xyz, lightDirection, distanceAndSpotAttenuation.zw), ease_in_out_quad(clamp(1.0f - (distanceSqr / range), 0.0, 1.0)), step(0.99f, AngleAttenuation(spotDirection.xyz, lightDirection, distanceAndSpotAttenuation.zw)));
 
