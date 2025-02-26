@@ -16,8 +16,16 @@ MonoBehaviour:
   TopClamp: 70
   BottomClamp: -60
   RotationSpeed: 10
-  DefaultDistance: 5
-  SuspendedDistance: 8
-  DistanceTransition: 1
-  TargetTransition: 300
-  SuspendedTargetLocalOffset: 1
+  DampingFromCollision: 5
+  ShoulderOffsetY: 0.25
+  DefaultCameraDistance: 5
+  SuspendedCameraDistance: 8
+  TransitionCameraDistance: 1
+  SuspendedLookAtOffsetY: 1
+  TransitionLookAt: 300
+  LocomotionShoulderOffsetZ: 1
+  ThresholdShouldOffsetZ: 55
+  TransitionShoulderOffsetZ: 2
+  LocomotionCameraSide: 0.5
+  ThresholdCameraSide: -10
+  TransitionCameraSide: 50

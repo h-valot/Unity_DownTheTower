@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 2070925441746177912}
   - component: {fileID: 2070925441746177913}
   m_Layer: 0
-  m_Name: PF_CMThirdPerson
+  m_Name: PF_CM3rdPerson
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -130,7 +130,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Damping: {x: 0.1, y: 0.25, z: 0.3}
-  ShoulderOffset: {x: 1, y: 0, z: 0}
+  ShoulderOffset: {x: 1, y: 0.25, z: 0}
   VerticalArmLength: 0
   CameraSide: 0.5
   CameraDistance: 5
@@ -140,4 +140,4 @@ MonoBehaviour:
   IgnoreTag: Player
   CameraRadius: 0.15
   DampingIntoCollision: 0
-  DampingFromCollision: 0
+  DampingFromCollision: 5
