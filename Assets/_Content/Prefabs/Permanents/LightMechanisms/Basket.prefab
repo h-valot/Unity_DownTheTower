@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 7674676168310344538}
   - component: {fileID: 393379145113760048}
   - component: {fileID: 560289208897224114}
-  m_Layer: 8
+  m_Layer: 0
   m_Name: Basket
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -68,8 +68,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _parentDoor: {fileID: 0}
-  _permanentLight: {fileID: 6117186717847480535, guid: a88d55df1c4e354458ed71fa5aa65091,
-    type: 3}
   _maxVelocitySnap: 1
 --- !u!1001 &6337101848749169066
 PrefabInstance:
@@ -138,6 +136,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Basket_Mesh
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 474b5947812555a45b81772aaf76b670,
+        type: 3}
+      propertyPath: m_Layer
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

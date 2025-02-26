@@ -66,6 +66,7 @@ public class MushroomBatch : MonoBehaviour
 
         LayerMask raycastLayerMask = new LayerMask();
         raycastLayerMask |= (1 << LayerMask.NameToLayer("NoCollision_NoRaycast"));
+        raycastLayerMask |= (1 << LayerMask.NameToLayer("Collision_NoRaycast"));
 
         for (int i = 0; i < samples; i++)
         {
