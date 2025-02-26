@@ -4,9 +4,11 @@ using UnityEngine;
 
 public class CameraMotor : MonoBehaviour
 {
+	#region REFERENCES
+
 	[Title("External references")]
 	[SerializeField] private CinemachineVirtualCamera m_aimingCamera;
-	[SerializeField] private CinemachineVirtualCamera m_thirdPersonCamera;
+	[SerializeField] private CinemachineVirtualCamera m_3rdPersonCamera;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Camera m_ssoCamera;
 
@@ -22,11 +24,38 @@ public class CameraMotor : MonoBehaviour
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CameraTransform m_rsoCameraTransform;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_InputsLocked m_rsoInputsLocked;
 
-	// - Private variables -
+	#endregion
+
+	#region VARIABLES
+
+	// - Movement -
 	private Vector2 m_lookInput;
 	private float m_cinemachineTargetYaw;
-	private float m_cinemachineTargetPitch;
-	private Transform m_cameraTarget;
+	public float m_cinemachineTargetPitch;
+	private Transform m_lookAt;
+
+	// - Custom effect value targets - 
+	private Cinemachine3rdPersonFollow m_3rdPersonFollow;
+
+	// Look at 
+	private Vector3 m_targetLookAt;
+	private Vector3 m_LookAtSmoothVelocity;
+	private Vector3 m_defaultLookAtPosition;
+
+	// Camera Distance
+	private float m_targetCameraDistance;
+
+	// Shoulder Offset Z
+	private float m_targetShoulderOffsetZ;
+	private const float k_defaultShoulderOffsetZ = 0.0f;
+
+	// Camera Side
+	private float m_targetCameraSide;
+	private const float k_defaultCameraSide = 0.5f;
+
+	#endregion 
+	
+	#region MONOBEHAVIOR
 
 	private void OnEnable()
 	{
@@ -54,19 +83,28 @@ public class CameraMotor : MonoBehaviour
 		HandleRotation();
 		CalculatePlanarVectors();
 		HandleSuspended();
+		HandleLocomotion();
 		m_rsoCameraTransform.value = transform;
 	}
 
+	#endregion 
+
+	#region MOTOR
+
+
 	public void Initialize(Transform aimingLookAt, Transform cameraTarget, Quaternion startRotation)
 	{
-		m_cameraTarget = cameraTarget;
+		m_lookAt = cameraTarget;
+		m_defaultLookAtPosition = cameraTarget.localPosition;
 		m_aimingCamera.Follow = cameraTarget;
 		m_aimingCamera.LookAt = aimingLookAt;
-		m_thirdPersonCamera.Follow = cameraTarget;
-		m_thirdPersonCamera.LookAt = cameraTarget;
+		m_3rdPersonCamera.Follow = cameraTarget;
+		m_3rdPersonCamera.LookAt = cameraTarget;
 
-		m_targetDistance = m_ssoCamera.DefaultDistance;
-		m_3rdPersonFollow = m_thirdPersonCamera.GetCinemachineComponent(CinemachineCore.Stage.Body) as Cinemachine3rdPersonFollow;
+		m_targetCameraDistance = m_ssoCamera.DefaultCameraDistance;
+		m_3rdPersonFollow = m_3rdPersonCamera.GetCinemachineComponent(CinemachineCore.Stage.Body) as Cinemachine3rdPersonFollow;
+		m_3rdPersonFollow.DampingFromCollision = m_ssoCamera.DampingFromCollision;
+		m_3rdPersonFollow.ShoulderOffset.y = m_ssoCamera.ShoulderOffsetY;
 
 		m_rsoCameraForward.value = new Vector3(transform.forward.x, 0, transform.forward.z);
 		m_rsoCameraRight.value = new Vector3(transform.right.x, 0, transform.right.z);
@@ -86,31 +124,91 @@ public class CameraMotor : MonoBehaviour
 		if (m_rsoCharacterDeath.value) return;
 
 		// Cinemachine will follow this target
-		m_cameraTarget.rotation = Quaternion.Euler(m_cinemachineTargetPitch, m_cinemachineTargetYaw, 0.0f);
+		m_lookAt.rotation = Quaternion.Euler(m_cinemachineTargetPitch, m_cinemachineTargetYaw, 0.0f);
 	}
 
-	private Cinemachine3rdPersonFollow m_3rdPersonFollow;
-	private float m_targetDistance;
 	private void HandleSuspended()
 	{
-		// Choose target distance 
+		// Choose targets 
 		if (m_rsoCameraStyle.value == CameraStyle.BASIC)
 		{
-			m_targetDistance = m_rsoCharacterState.value == BehaviorState.ROPE
-				? m_ssoCamera.SuspendedDistance
-				: m_ssoCamera.DefaultDistance;
+			if (m_rsoCharacterState.value == BehaviorState.ROPE)
+			{
+				m_targetCameraDistance = m_ssoCamera.SuspendedCameraDistance;
+				m_targetLookAt = m_defaultLookAtPosition + Vector3.down * m_ssoCamera.SuspendedLookAtOffsetY;
+			}
+			else
+			{
+				m_targetCameraDistance = m_ssoCamera.DefaultCameraDistance;
+				m_targetLookAt = m_defaultLookAtPosition;
+			}
 		}
 
 		// Lerp towards target distance
-		m_3rdPersonFollow.CameraDistance = Mathf.Lerp(m_3rdPersonFollow.CameraDistance, m_targetDistance, Time.deltaTime * m_ssoCamera.DistanceTransition);
+		m_3rdPersonFollow.CameraDistance = Mathf.Lerp(
+			m_3rdPersonFollow.CameraDistance, 
+			m_targetCameraDistance, 
+			Time.deltaTime * m_ssoCamera.TransitionCameraDistance
+		);
+
+		// Lerp the camera look at target towards target position
+		m_lookAt.localPosition = Vector3.SmoothDamp(
+			m_lookAt.localPosition,
+			m_targetLookAt,
+			ref m_LookAtSmoothVelocity,
+			Time.deltaTime * m_ssoCamera.TransitionLookAt
+		);
+	}
+
+	public void HandleLocomotion()
+	{
+		// Choose targets 
+		if (m_rsoCameraStyle.value == CameraStyle.BASIC)
+		{
+			m_targetShoulderOffsetZ = k_defaultShoulderOffsetZ;
+			m_targetCameraSide = k_defaultCameraSide;
+
+			// Override those targets
+			if (m_rsoCharacterState.value == BehaviorState.LOCOMOTION)
+			{
+				// Camera is looking downwards ---- 70 = down
+				if (m_cinemachineTargetPitch >= m_ssoCamera.ThresholdShouldOffsetZ)
+				{
+					m_targetShoulderOffsetZ = m_ssoCamera.LocomotionShoulderOffsetZ;
+				}
+
+				// Camera is looking upwards ---- -60 = up
+				if (m_cinemachineTargetPitch <= m_ssoCamera.ThresholdCameraSide)
+				{
+					m_targetCameraSide = 
+						k_defaultCameraSide 
+						+ m_ssoCamera.LocomotionCameraSide 
+						* Matha.Remap(m_ssoCamera.ThresholdCameraSide, m_ssoCamera.BottomClamp, 0f, 1f, m_cinemachineTargetPitch);
+				}
+			}
+		}
+
+		// Lerp towards target shoulder offset z
+		m_3rdPersonFollow.ShoulderOffset.z = Mathf.Lerp(
+			m_3rdPersonFollow.ShoulderOffset.z,
+			m_targetShoulderOffsetZ,
+			Time.deltaTime * m_ssoCamera.TransitionShoulderOffsetZ
+		);
+
+		// Lerp towards target camera side
+		m_3rdPersonFollow.CameraSide = Mathf.Lerp(
+			m_3rdPersonFollow.CameraSide,
+			m_targetCameraSide,
+			Time.deltaTime * m_ssoCamera.TransitionCameraSide
+		);
 	}
 
 	public void SwitchStyle()
 	{
 		m_aimingCamera.gameObject.SetActive(false);
-		m_thirdPersonCamera.gameObject.SetActive(false);
+		m_3rdPersonCamera.gameObject.SetActive(false);
 
-		if (m_rsoCameraStyle.value == CameraStyle.BASIC) m_thirdPersonCamera.gameObject.SetActive(true);
+		if (m_rsoCameraStyle.value == CameraStyle.BASIC) m_3rdPersonCamera.gameObject.SetActive(true);
 		if (m_rsoCameraStyle.value == CameraStyle.AIMING) m_aimingCamera.gameObject.SetActive(true);
 	}
 
@@ -143,6 +241,8 @@ public class CameraMotor : MonoBehaviour
 
 	private void FreeCamera()
 	{
-		m_cameraTarget.transform.parent = null;
+		m_lookAt.transform.parent = null;
 	}
+
+	#endregion
 }
