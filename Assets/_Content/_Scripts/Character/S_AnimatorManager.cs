@@ -11,6 +11,7 @@ public class AnimatorManager : MonoBehaviour
     [SerializeField] private RSE_RopeAttached m_rseRopeAttached;
     [SerializeField] private SSO_Sound m_ssoFootstepRun;
     [SerializeField] private SSO_Sound m_ssoFootstepWalk;
+    [SerializeField] private SSO_Sound m_ssoLanding;
     [SerializeField] private RSE_PlaySound m_rsePlaySound;
     [SerializeField] private RSE_PlayAt m_rsePlayAt;
     [SerializeField] private GameObject m_footLocation;
@@ -120,11 +121,11 @@ public class AnimatorManager : MonoBehaviour
         m_ropeAttached = false;
     }
 
-    #region
+    #region Animations Events
 
     private void OnAnimEventFootWalk(float speed)
     {
-        if (m_moveSpeed < speed)
+        if (1.5 < m_moveSpeed && m_moveSpeed < speed)
         {
             m_rsePlaySound.Call(m_ssoFootstepWalk);
         }
@@ -139,6 +140,12 @@ public class AnimatorManager : MonoBehaviour
         }
 
     }
+
+    private void OnAnimEventLanding()
+    {
+        m_rsePlayAt.Call(m_ssoLanding, m_footLocation.transform.position);
+    }
+
 
     #endregion
 }

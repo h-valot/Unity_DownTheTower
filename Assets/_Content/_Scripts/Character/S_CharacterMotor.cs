@@ -52,12 +52,18 @@ public class CharacterMotor : MonoBehaviour
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_Ropes m_rsoRopes;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_TorchManager m_rsoTorchManager;
 
+    [FoldoutGroup("Sounds")][SerializeField] private RSE_PlaySound m_rsePlaySound;
+    [FoldoutGroup("Sounds")][SerializeField] private RSE_PlayAt m_rsePlayAt;
+    [FoldoutGroup("Sounds")][SerializeField] private SSO_Sound m_ssoDeathLanding;
+    [FoldoutGroup("Sounds")][SerializeField] private SSO_Sound m_ssoDeathGuardian;
+    [FoldoutGroup("Sounds")][SerializeField] private SSO_Sound m_ssoDeathMushroom;
 
-	#endregion
 
-	#region VARIABLES
+    #endregion
 
-	private bool m_isInitialize = false;
+    #region VARIABLES
+
+    private bool m_isInitialize = false;
 
 	// - Inputs -
 	private Vector2 m_moveInput = new Vector2();
@@ -532,15 +538,19 @@ public class CharacterMotor : MonoBehaviour
 		{
 			case DeathType.DEFAULT:
 				StartCoroutine(AnimateDefaultDeath());
-				break;
+                m_rsePlaySound.Call(m_ssoDeathGuardian);
+                break;
 
 			case DeathType.HEIGHT:
 				StartCoroutine(AnimateHeightDeath());
-				break;
+				m_rsePlaySound.Call(m_ssoDeathLanding);
+				print("fire");
+                break;
 
 			case DeathType.GAS:
 				StartCoroutine(AnimateGasDeath());
-				break;
+                m_rsePlaySound.Call(m_ssoDeathMushroom);
+                break;
 		}
 	}
 
@@ -622,7 +632,7 @@ public class CharacterMotor : MonoBehaviour
 		m_fallHeight = (m_rigidbody.position.y - m_positionStartFall.y) * -1f;
 		if (m_fallHeight >= m_ssoCharacter.LethalHeight)
 		{
-			HandleDeath(DeathType.DEFAULT);
+			HandleDeath(DeathType.HEIGHT);
 		}
 		else if (m_fallHeight >= m_ssoCharacter.StunHeight)
 		{
