@@ -30,14 +30,16 @@ public class AnimatorManager : MonoBehaviour
     private int m_RopeState = Animator.StringToHash("IsRope");
     private int m_isRopeAttachedHash = Animator.StringToHash("IsRopeAttached");
 
+    private float m_moveSpeed;
     private bool m_ropeThrow;
     private bool m_ropeAttached;
     private BehaviorState m_currentState;
 
     void LateUpdate()
     {
+        m_moveSpeed = Mathf.Abs(m_characterMotor.Rigidbody.velocity.magnitude);
         DetermineState();
-        m_animator.SetFloat(m_moveSpeedHash, Mathf.Abs(m_characterMotor.Rigidbody.velocity.magnitude));
+        m_animator.SetFloat(m_moveSpeedHash, m_moveSpeed);
         m_animator.SetFloat(m_verticalSpeed, Mathf.Abs(m_characterMotor.Rigidbody.velocity.y));
         m_animator.SetFloat(m_horizontalSpeed, Mathf.Abs(new Vector3(m_characterMotor.Rigidbody.velocity.x, 0, m_characterMotor.Rigidbody.velocity.z).magnitude));
         m_animator.SetBool(m_isJumpingHash, m_characterMotor.m_hasJumped);
@@ -120,14 +122,22 @@ public class AnimatorManager : MonoBehaviour
 
     #region
 
-    private void OnAnimEventFootWalk()
+    private void OnAnimEventFootWalk(float speed)
     {
-        m_rsePlaySound.Call(m_ssoFootstepWalk);
+        if (m_moveSpeed < speed)
+        {
+            m_rsePlaySound.Call(m_ssoFootstepWalk);
+        }
+
     }
 
-    private void OnAnimEventFootRun()
+    private void OnAnimEventFootRun(float speed)
     {
-        m_rsePlayAt.Call(m_ssoFootstepRun, m_footLocation.transform.position);
+        if (m_moveSpeed > speed)
+        {
+            m_rsePlayAt.Call(m_ssoFootstepRun, m_footLocation.transform.position);
+        }
+
     }
 
     #endregion
