@@ -57,7 +57,7 @@ public class SSO_Camera : ScriptableObject
 
 	[FoldoutGroup("Suspended behavior")]
 	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
-	[InfoBox("Duration of the lerp transition between default and suspended camera distance. (Mathf.Lerp() so the smaller, the quicker)", InfoMessageType.None)]
+	[InfoBox("Duration of the lerp transition between default and suspended camera distance. (Mathf.Lerp() so the smaller, the slower)", InfoMessageType.None)]
 	public float TransitionCameraDistance;
 
 
@@ -68,7 +68,7 @@ public class SSO_Camera : ScriptableObject
 
 	[FoldoutGroup("Suspended behavior")]
 	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
-	[InfoBox("Duration of the lerp transition between default and suspended camera target local Y offset. (Vector3.SmoothDamp() so the smaller, the slower)", InfoMessageType.None)]
+	[InfoBox("Duration of the lerp transition between default and suspended camera target local Y offset. (Mathf.Lerp() so the smaller, the slower)", InfoMessageType.None)]
 	public float TransitionLookAt;
 
 	#endregion
@@ -87,7 +87,7 @@ public class SSO_Camera : ScriptableObject
 
 	[FoldoutGroup("Locomotion behavior")]
 	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
-	[InfoBox("Durationg of the lerp transition between default and custom Shoulder Offset Z. (Mathf.Lerp() so the smaller, the quicker)", InfoMessageType.None)]
+	[InfoBox("Durationg of the lerp transition between default and custom Shoulder Offset Z. (Mathf.Lerp() so the smaller, the slower)", InfoMessageType.None)]
 	public float TransitionShoulderOffsetZ;
 
 
@@ -104,7 +104,7 @@ public class SSO_Camera : ScriptableObject
 
 	[FoldoutGroup("Locomotion behavior")]
 	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
-	[InfoBox("Duration of the lerp transition between default and custom Camera Side. (Mathf.Lerp() so the smaller, the quicker)", InfoMessageType.None)]
+	[InfoBox("Duration of the lerp transition between default and custom Camera Side. (Mathf.Lerp() so the smaller, the slower)", InfoMessageType.None)]
 	public float TransitionCameraSide;
 
 	#endregion

@@ -1,3 +1,4 @@
+using System.Collections;
 using Cinemachine;
 using Sirenix.OdinInspector;
 using UnityEngine;
@@ -14,7 +15,7 @@ public class CameraMotor : MonoBehaviour
 
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Look m_rseLook;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_InitializeCamera m_rseInitializeCamera;
-	[FoldoutGroup("Scriptable")][SerializeField] private RSE_DisplayDeath m_rsePlayFallDeath;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSE_DisplayDeath m_rseDisplayDeath;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterDeath m_rsoCharacterDeath;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterState m_rsoCharacterState;
@@ -23,24 +24,37 @@ public class CameraMotor : MonoBehaviour
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CameraRight m_rsoCameraRight;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CameraTransform m_rsoCameraTransform;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_InputsLocked m_rsoInputsLocked;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterPosition m_rsoCharacterPosition;
 
 	#endregion
 
 	#region VARIABLES
 
+	private bool m_isInitialized;
+	private bool m_isCameraFrozen;
+
 	// - Movement -
 	private Vector2 m_lookInput;
 	private float m_cinemachineTargetYaw;
-	public float m_cinemachineTargetPitch;
+	private float m_cinemachineTargetPitch;
 	private Transform m_lookAt;
 
 	// - Custom effect value targets - 
 	private Cinemachine3rdPersonFollow m_3rdPersonFollow;
+	private Cinemachine3rdPersonFollow ThirdPersonFollow
+	{
+		get 
+		{
+			if (!m_3rdPersonFollow) m_3rdPersonFollow = m_3rdPersonCamera.GetCinemachineComponent(CinemachineCore.Stage.Body) as Cinemachine3rdPersonFollow;
+			return m_3rdPersonFollow;
+		}
+	}
+
 
 	// Look at 
-	private Vector3 m_targetLookAt;
-	private Vector3 m_LookAtSmoothVelocity;
-	private Vector3 m_defaultLookAtPosition;
+	private float m_bufferLookAtLocalY;
+	private float m_targetLookAtLocalY;
+	private float m_defaultLookAtLocalY;
 
 	// Camera Distance
 	private float m_targetCameraDistance;
@@ -61,59 +75,51 @@ public class CameraMotor : MonoBehaviour
 	{
 		m_rseLook.action += UpdateLookInput;
 		m_rsoCameraStyle.OnChanged += SwitchStyle;
-		m_rsoCharacterDeath.OnChanged += HandleDeath;
 		m_rseInitializeCamera.action += Initialize;
-		m_rsePlayFallDeath.action += FreeCamera;
+
+		m_rsoCharacterDeath.OnChanged += OnCharacterSpawn;
+		m_rseDisplayDeath.action += OnCharacterDie;
 	}
 
 	private void OnDisable()
 	{
 		m_rseLook.action -= UpdateLookInput;
 		m_rsoCameraStyle.OnChanged -= SwitchStyle;
-		m_rsoCharacterDeath.OnChanged -= HandleDeath;
 		m_rseInitializeCamera.action -= Initialize;
-		m_rsePlayFallDeath.action -= FreeCamera;
+
+		m_rsoCharacterDeath.OnChanged -= OnCharacterSpawn;
+		m_rseDisplayDeath.action -= OnCharacterDie;
 	}
 
 	private void LateUpdate()
 	{
 		// Assertion
 		if (m_rsoInputsLocked.value) return;
+		if (m_isCameraFrozen) return;
 
 		HandleRotation();
 		CalculatePlanarVectors();
-		HandleSuspended();
-		HandleLocomotion();
+		// HandleSuspended();
+		// HandleLocomotion();
+
 		m_rsoCameraTransform.value = transform;
 	}
 
 	#endregion 
 
-	#region MOTOR
-
-	private Cinemachine3rdPersonFollow ThirdPersonFollow
-	{
-		get 
-		{
-			if (!m_3rdPersonFollow) m_3rdPersonFollow = m_3rdPersonCamera.GetCinemachineComponent(CinemachineCore.Stage.Body) as Cinemachine3rdPersonFollow;
-			return m_3rdPersonFollow;
-		}
-	}
-	
+	#region MOTOR	
 
 	public void Initialize(Transform aimingLookAt, Transform cameraTarget, Quaternion startRotation)
 	{
 		m_lookAt = cameraTarget;
-		m_defaultLookAtPosition = cameraTarget.localPosition;
+		m_defaultLookAtLocalY = cameraTarget.localPosition.y;
 		m_aimingCamera.Follow = cameraTarget;
 		m_aimingCamera.LookAt = aimingLookAt;
 		m_3rdPersonCamera.Follow = cameraTarget;
 		m_3rdPersonCamera.LookAt = cameraTarget;
 
 		m_targetCameraDistance = m_ssoCamera.DefaultCameraDistance;
-		m_3rdPersonFollow = m_3rdPersonCamera.GetCinemachineComponent(CinemachineCore.Stage.Body) as Cinemachine3rdPersonFollow;
-		m_3rdPersonFollow.DampingFromCollision = m_ssoCamera.DampingFromCollision;
-		m_3rdPersonFollow.ShoulderOffset.y = m_ssoCamera.ShoulderOffsetY;
+		ThirdPersonFollow.ShoulderOffset.y = m_ssoCamera.ShoulderOffsetY;
 
 		m_rsoCameraForward.value = new Vector3(transform.forward.x, 0, transform.forward.z);
 		m_rsoCameraRight.value = new Vector3(transform.right.x, 0, transform.right.z);
@@ -121,6 +127,8 @@ public class CameraMotor : MonoBehaviour
 		m_rsoCameraStyle.value = m_ssoCamera.StartingStyle;
 		m_cinemachineTargetYaw = startRotation.eulerAngles.y;
 		HandleRotation();
+
+		m_isInitialized = true;
 	}
 
 	private void HandleRotation()
@@ -141,32 +149,30 @@ public class CameraMotor : MonoBehaviour
 		// Choose targets 
 		if (m_rsoCameraStyle.value == CameraStyle.BASIC)
 		{
+			m_targetCameraDistance = m_ssoCamera.DefaultCameraDistance;
+			m_targetLookAtLocalY = m_defaultLookAtLocalY;
+
 			if (m_rsoCharacterState.value == BehaviorState.ROPE)
 			{
 				m_targetCameraDistance = m_ssoCamera.SuspendedCameraDistance;
-				m_targetLookAt = m_defaultLookAtPosition + Vector3.down * m_ssoCamera.SuspendedLookAtOffsetY;
-			}
-			else
-			{
-				m_targetCameraDistance = m_ssoCamera.DefaultCameraDistance;
-				m_targetLookAt = m_defaultLookAtPosition;
+				m_targetLookAtLocalY = m_defaultLookAtLocalY + m_ssoCamera.SuspendedLookAtOffsetY;
 			}
 		}
 
 		// Lerp towards target distance
-		m_3rdPersonFollow.CameraDistance = Mathf.Lerp(
-			m_3rdPersonFollow.CameraDistance, 
+		ThirdPersonFollow.CameraDistance = Mathf.Lerp(
+			ThirdPersonFollow.CameraDistance, 
 			m_targetCameraDistance, 
 			Time.deltaTime * m_ssoCamera.TransitionCameraDistance
 		);
 
 		// Lerp the camera look at target towards target position
-		m_lookAt.localPosition = Vector3.SmoothDamp(
-			m_lookAt.localPosition,
-			m_targetLookAt,
-			ref m_LookAtSmoothVelocity,
+		m_bufferLookAtLocalY = Mathf.Lerp(
+			m_bufferLookAtLocalY,
+			m_targetLookAtLocalY,
 			Time.deltaTime * m_ssoCamera.TransitionLookAt
 		);
+		m_lookAt.localPosition = new Vector3(m_lookAt.localPosition.x, m_bufferLookAtLocalY, m_lookAt.localPosition.z);
 	}
 
 	public void HandleLocomotion()
@@ -198,15 +204,15 @@ public class CameraMotor : MonoBehaviour
 		}
 
 		// Lerp towards target shoulder offset z
-		m_3rdPersonFollow.ShoulderOffset.z = Mathf.Lerp(
-			m_3rdPersonFollow.ShoulderOffset.z,
+		ThirdPersonFollow.ShoulderOffset.z = Mathf.Lerp(
+			ThirdPersonFollow.ShoulderOffset.z,
 			m_targetShoulderOffsetZ,
 			Time.deltaTime * m_ssoCamera.TransitionShoulderOffsetZ
 		);
 
 		// Lerp towards target camera side
-		m_3rdPersonFollow.CameraSide = Mathf.Lerp(
-			m_3rdPersonFollow.CameraSide,
+		ThirdPersonFollow.CameraSide = Mathf.Lerp(
+			ThirdPersonFollow.CameraSide,
 			m_targetCameraSide,
 			Time.deltaTime * m_ssoCamera.TransitionCameraSide
 		);
@@ -241,23 +247,27 @@ public class CameraMotor : MonoBehaviour
 		m_cinemachineTargetPitch += input.y * Time.fixedDeltaTime;
     }
 
-	private void HandleDeath()
-	{
-		if (m_rsoCharacterDeath.value) 
-		{
-			FreeCamera();
-			ThirdPersonFollow.DampingFromCollision = 0;
-		}
-		else
-		{
-			ThirdPersonFollow.DampingFromCollision = m_ssoCamera.DampingFromCollision;
-		}
-
-	}
-
-	private void FreeCamera()
+	private void OnCharacterDie()
 	{
 		m_lookAt.transform.parent = null;
+		m_isCameraFrozen = true;
+	}
+
+	private void OnCharacterSpawn()
+	{
+		// Assertions
+		if (m_rsoCharacterDeath.value) return;
+		if (!m_isInitialized) return;
+
+		m_isCameraFrozen = false;
+		StartCoroutine(SetZeroDampForSeconds(1f));
+	}
+
+	private IEnumerator SetZeroDampForSeconds(float duration)
+	{
+		m_3rdPersonFollow.DampingFromCollision = 0f;
+		yield return new WaitForSeconds(duration);
+		m_3rdPersonFollow.DampingFromCollision = m_ssoCamera.DampingFromCollision;
 	}
 
 	#endregion
