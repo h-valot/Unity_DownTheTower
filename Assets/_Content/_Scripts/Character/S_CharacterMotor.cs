@@ -236,7 +236,6 @@ public class CharacterMotor : MonoBehaviour
         m_rseThrowRope.action -= UpdateHoldInput;
 		m_rseJump.action -= JumpGround;
 		m_rseJump.action -= JumpRope;
-		m_rseCraft.action -= ToggleCraft;
 		m_rseThrowRope.action -= ToggleRopeAim;
         m_rseThrowTorch.action -= ToggleTorchAim;
         m_rseClimb.action -= UpdateClimbInput;
@@ -258,7 +257,6 @@ public class CharacterMotor : MonoBehaviour
                 m_rseThrowRope.action += UpdateHoldInput;
 				m_rseJump.action += JumpGround;
 				m_rseClimb.action += UpdateClimbInput;
-				m_rseCraft.action += ToggleCraft;
 				m_rseThrowRope.action += ToggleRopeAim;
                 m_rseThrowTorch.action += ToggleTorchAim;
                 m_rseCancel.action += CancelAction;
@@ -278,11 +276,6 @@ public class CharacterMotor : MonoBehaviour
                 m_rseMove.action += UpdateMoveInput;
 				m_rseThrowRope.action += ToggleRopeAim;
                 m_rseThrowTorch.action += ToggleTorchAim;
-                m_rseCancel.action += CancelAction;
-                break;
-
-            case BehaviorState.CRAFT:
-				m_rseCraft.action += ToggleCraft;
                 m_rseCancel.action += CancelAction;
                 break;
         }
@@ -347,6 +340,14 @@ public class CharacterMotor : MonoBehaviour
 
 		m_isClimbing = isClimbing;
 		if (m_isGrounded) m_rope.UpdateHoldLength(isClimbing);
+
+		// Prevent the rope constraint to still being applied if the character is in the LOCOMOTION state
+		if (!isClimbing
+		&& m_rsoCharacterState.value == BehaviorState.LOCOMOTION
+		&& m_rope.IsConstrained)
+		{
+			ToggleRopeConstraint(false);
+		}
 	}
 
 	private void CancelAction(bool isPressed)
@@ -435,10 +436,6 @@ public class CharacterMotor : MonoBehaviour
         {
             SwitchState(BehaviorState.ROPE);
         }
-        else if (m_rsoCharacterState.value != BehaviorState.CRAFT && m_rsoCharacterState.value == BehaviorState.LOCOMOTION && m_isCrafting)
-        {
-            SwitchState(BehaviorState.CRAFT);
-        }
     }
 
     /// <summary>
@@ -450,6 +447,9 @@ public class CharacterMotor : MonoBehaviour
 		m_previousState = m_rsoCharacterState.value;
 		ExitState();
         EnterState(newState);
+
+		// Exception: Prevent the character from switching to rope or fall state while aiming 
+		if (IsAiming) CancelAim();
     }
 
     /// <summary>
@@ -470,10 +470,6 @@ public class CharacterMotor : MonoBehaviour
 
             case BehaviorState.FALL:
                 EnterFallState();
-                break;
-
-            case BehaviorState.CRAFT:
-                EnterCraftState();
                 break;
 
             case BehaviorState.ROPE:
@@ -497,10 +493,6 @@ public class CharacterMotor : MonoBehaviour
                 FixedUpdateFallState();
                 break;
 
-            case BehaviorState.CRAFT:
-                FixedUpdateCraftState();
-                break;
-
             case BehaviorState.ROPE:
                 FixedUpdateRopeState();
                 break;
@@ -522,10 +514,6 @@ public class CharacterMotor : MonoBehaviour
 
             case BehaviorState.FALL:
                 ExitFallState();
-                break;
-
-            case BehaviorState.CRAFT:
-                ExitCraftState();
                 break;
 
             case BehaviorState.ROPE:
@@ -597,9 +585,7 @@ public class CharacterMotor : MonoBehaviour
 	public IEnumerator AnimateGasDeath()
 	{
 		// TODO Disable all inputs
-
-		// TODO Blur and fade camera to black
-
+		// TODO Blur and fade out
 		// TODO Slow character's speed down to zero
 
 		m_characterGraphics.SpawnRagdoll(IsCarryingLight());
@@ -1141,31 +1127,49 @@ public class CharacterMotor : MonoBehaviour
 			// Assert: Is ground at highest edge position flat ?
 			if (Physics.Raycast(highestEdge + (new Vector3(highestEdge.x, 0, highestEdge.z) - new Vector3(m_rigidbody.position.x, 0, m_rigidbody.position.z)).normalized * m_ssoCharacter.SkinWidth + new Vector3(0, m_ssoCharacter.SkinWidth, 0), Vector3.down, m_ssoCharacter.SkinWidth * 2, m_ssoCharacter.GroundLayerToInclude)) continue;
 
+			// Assert: There is not enough space around the hit.point
+			if (Physics.SphereCast(
+				hit.point + Vector3.up * m_collider.height, 
+				m_collider.radius, 
+				Vector3.down, 
+				out var sphereCastHit, 
+				m_collider.height * 0.75f, 
+				m_ssoCharacter.GroundLayerToInclude)) 
+			{
+				// Everything can block the character except the rope.
+				if (!sphereCastHit.collider.TryGetComponent<Rope>(out var rope)) continue;
+			}
+
 			highestEdge = hit.point;
 		}
 
 		// - Override the character's position -
 		if (highestEdge != m_rigidbody.position)
 		{
-			StartCoroutine(JumpToPosition(highestEdge));
+			StartCoroutine(MoveToPosition(highestEdge));
 		}
 	}
 
-	private IEnumerator JumpToPosition(Vector3 position)
+	private IEnumerator MoveToPosition(Vector3 position)
 	{
 		if (m_isFixedUpdateLocked) yield break;
 
 		m_isFixedUpdateLocked = true;
+		m_rope.IsFoldSystemDisabled = true;
 
 		transform.DOMoveY(position.y, m_ssoCharacter.EdgeCatchingDuration).SetEase(Ease.OutCubic);
 		
 		Vector3 destinationDir = (position - m_rigidbody.position).normalized;
 		destinationDir = new Vector3(destinationDir.x, 0, destinationDir.z);
-		transform.DOMove(position + destinationDir * 0.5f, m_ssoCharacter.EdgeCatchingDuration).SetEase(Ease.InCubic);
+		transform.DOMove(position + destinationDir * m_ssoCharacter.EdgeCatchingOffset, m_ssoCharacter.EdgeCatchingDuration).SetEase(Ease.InCubic);
 
 		yield return new WaitForSeconds(m_ssoCharacter.EdgeCatchingDuration);
 
+		Physics.SyncTransforms();
+		m_rope.RemoveInvalidFolds();
+
 		m_isFixedUpdateLocked = false;
+		m_rope.IsFoldSystemDisabled = false;
 	}
 
 	private void HandleRopeLimit()
@@ -1242,7 +1246,7 @@ public class CharacterMotor : MonoBehaviour
 
 	#endregion
 
-	#region CRAFT STATE
+	#region CRAFTING
 
 	/// <summary>
 	/// Instantiate the torch prefab after the fixed duration.
@@ -1317,8 +1321,6 @@ public class CharacterMotor : MonoBehaviour
 		if (m_rsoInputsLocked.value) return;
 		if (itemToThrow == null) return;
 
-
-
 		IsAiming = isInputPressed;
 		m_rsoCameraStyle.value = IsAiming ? CameraStyle.AIMING : CameraStyle.BASIC;
 
@@ -1377,7 +1379,6 @@ public class CharacterMotor : MonoBehaviour
 			AimingObject.transform.parent = BagCraftSocket.transform;
 			AimingObject.transform.rotation = BagCraftSocket.rotation;
 			AimingObject.transform.localPosition = Vector3.zero;
-			//AimingObject.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
 		}
 
 		AimingObject.DisablePreview();
@@ -1392,109 +1393,6 @@ public class CharacterMotor : MonoBehaviour
         return HandObject && (HandObject as Torch) && (HandObject as Torch).IsLit
         || RobotObject && (RobotObject as Torch) && (RobotObject as Torch).IsLit;
     }
-
-    #region DEPRECATED 
-
-    /// <summary>
-    /// 	Set the position of the "from" permanent at the position of the "to" permanent.
-    /// 	"to" being the one on the "socket" transform position.
-    /// </summary>
-    private void SwitchObjects(ref Permanent from, ref Permanent to, Transform socket)
-	{
-		// Assertion
-		if (from == null) return;
-
-		Permanent toCache = to;
-		from.transform.SetParent(socket, false);
-		to = from;
-		to.transform.rotation = socket.transform.rotation;
-		from = toCache;
-	}
-
-    private void EnterCraftState()
-    {
-        // Assertion
-        if (m_rsoInputsLocked.value) return;
-        if (m_craftType == HandObject?.Type) return;
-
-        if (m_craftType == CraftType.TORCH)
-        {
-            if (HandObject?.Type == CraftType.ROPE)
-            {
-                Destroy(HandObject.gameObject);
-                HandObject = null;
-            }
-
-            if (!HandObject)
-            {
-                m_craftCoroutine = StartCoroutine(Craft(CraftType.TORCH, m_ssoTorch.CraftingDuration));
-            }
-        }
-        else if (m_craftType == CraftType.ROPE)
-        {
-            // If a torch is already in hand and the robot arm is free.
-            if (HandObject?.Type == CraftType.TORCH
-            && !RobotObject)
-            {
-                SwitchObjects(ref HandObject, ref RobotObject, BagRobotSocket);
-            }
-
-            if (!HandObject)
-            {
-                m_craftCoroutine = StartCoroutine(Craft(CraftType.ROPE, m_ssoTorch.CraftingDuration));
-            }
-        }
-    }
-
-    private void FixedUpdateCraftState()
-    {
-
-    }
-
-    private void ExitCraftState()
-    {
-        // Assertion
-        if (m_rsoInputsLocked.value) return;
-
-        if (m_craftCoroutine != null)
-        {
-            m_rseBackpackCrafting.Call(false, m_ssoTorch.CraftingDuration - m_craftRemainingTime);
-
-            StopCoroutine(m_craftCoroutine);
-            m_craftCoroutine = null;
-        }
-
-        if (!HandObject && RobotObject)
-        {
-            SwitchObjects(ref RobotObject, ref HandObject, m_handSocket);
-        }
-
-        m_isCrafting = false;
-    }
-
-    private void ToggleCraft(CraftType craftType, bool isInputPressed)
-    {
-		if (m_rsoInputsLocked.value) return;
-
-		// Prevent switching to craft state if not in locomotion or crafting state or already crafting another item
-		if (m_rsoCharacterState.value != BehaviorState.LOCOMOTION
-        || m_rsoCharacterState.value != BehaviorState.CRAFT)
-        {
-            // If craft button is pressed
-            if (isInputPressed)
-            {
-                m_craftType = craftType;
-                m_isCrafting = true;
-            }
-            // If craft button is released
-            else
-            {
-                m_isCrafting = false;
-            }
-        }
-    }
-
-	#endregion
 
 	#endregion
 }

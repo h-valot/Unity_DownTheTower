@@ -158,6 +158,11 @@ public class SSO_Character : ScriptableObject
 	[InfoBox("Duration of the movement translation.", InfoMessageType.None)]
 	public float EdgeCatchingDuration;
 
+	[FoldoutGroup("Rope")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("Distance added towards the landing point.", InfoMessageType.None)]
+	public float EdgeCatchingOffset;
+
 
 	[Title("Jumping")]
 	[FoldoutGroup("Rope")]

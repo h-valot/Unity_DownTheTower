@@ -44,6 +44,7 @@ public class Rope : Permanent
 	private Transform m_characterHarness;
 	private SoftJointLimit m_linearLimit;
 
+	public bool IsFoldSystemDisabled;
 	public bool IsConstrained;
 	public Action OnAttached;
 	public Action OnDetached;
@@ -81,11 +82,11 @@ public class Rope : Permanent
 	// Graphics
 	private MaterialPropertyBlock m_materialPropertyBlock;
 
-    #endregion
+	#endregion
 
-    #region MONOBEHAVIOR
+	#region MONOBEHAVIOR
 
-    private void Awake()
+	private void Awake()
     {
         m_materialPropertyBlock = new MaterialPropertyBlock();
         m_rigidbody.excludeLayers = m_ssoRope.LayersToIgnoreBeforeDeploy;
@@ -96,7 +97,8 @@ public class Rope : Permanent
 		// Assertions
 		if (!IsConnected) return;
 		if (!m_isPlaced) return;
-
+		if (IsFoldSystemDisabled) return;
+		
 		AddFolds();
 		RemoveFolds();
 		HandleJoint();
@@ -243,12 +245,37 @@ public class Rope : Permanent
 		Attach(characterMotor.Harness, characterMotor.Rigidbody);
 		characterMotor.Equip(this);
 
-		// Remove the current fold used to spawn interactables
-		if (!Physics.Linecast(m_characterHarness.position, CurrentFold.Position, out var hit, m_ssoRope.FoldLayerToInclude))
+		// Update folds
+		RemoveInvalidFolds();
+	}
+
+	public void RemoveInvalidFolds()
+	{
+		int validFoldIndex = m_folds.Count - 1;
+		for (int i = m_folds.Count - 1; i >= 0; i--)
 		{
-			m_folds.Remove(CurrentFold);
-			UpdateHoldLength();
+			var vector = m_folds[i].Position - m_characterHarness.position;
+			if (!Physics.Raycast(m_characterHarness.position, vector.normalized, out var hit, vector.magnitude, m_ssoRope.FoldLayerToInclude))
+			{
+				validFoldIndex = i;
+				continue;
+			}
 		}
+
+		for (int i = m_folds.Count - 1; i >= validFoldIndex + 1; i--)
+		{
+			// Assert: Can't remove the rope attach fold
+			if (i == 0) continue;
+
+			m_folds.Remove(m_folds[i]);
+		}
+
+		UpdateHoldLength();
+	}
+
+	public void RemoveCurrentFold()
+	{
+		m_folds.Remove(CurrentFold);
 	}
 
 	public void Detach()
@@ -266,9 +293,6 @@ public class Rope : Permanent
 		OnDetached?.Invoke();
 	}
 
-	/// <summary>
-	/// Add fold if a collider stands between the character and the last fold.
-	/// </summary>
 	private void AddFolds()
 	{
 		Vector3 charaDir = (CurrentFold.Position - m_characterHarness.position).normalized;
@@ -287,8 +311,8 @@ public class Rope : Permanent
 
 			// Get the next fold position out of the intersection plane point and the offset
 			Fold nextFold =  new Fold(
-				newPosition: intersectionPoint + offsetDir * m_ssoRope.FoldOffset, 
-				newNormal: offsetDir
+				newPosition: (intersectionPoint + offsetDir * m_ssoRope.FoldOffset).CutDigits(2), 
+				newNormal: offsetDir.CutDigits(2)
 			);
 
 			// Assertion: the next fold is too close to the previous one
@@ -301,9 +325,6 @@ public class Rope : Permanent
 		}
 	}
 
-	/// <summary>
-	/// Remove the last fold from the list if there is no collider standing between the character and the previous last fold.
-	/// </summary>
 	private void RemoveFolds()
 	{
 		// Assertion

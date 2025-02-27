@@ -338,6 +338,9 @@ public class RopeGraphics : MonoBehaviour
 		SpawnPhysics();
 		SpawnInteractables();
 		SpawnUnfolder();
+
+		// Delete the current fold that has been created only for spawn rope graphics assets
+		m_rope.RemoveCurrentFold();
 	}
 
 	public void OnInteracted(CharacterInteract characterInteract)
