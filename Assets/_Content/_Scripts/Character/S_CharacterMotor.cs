@@ -331,6 +331,14 @@ public class CharacterMotor : MonoBehaviour
 
 		m_isClimbing = isClimbing;
 		if (m_isGrounded) m_rope.UpdateHoldLength(isClimbing);
+
+		// Prevent the rope constraint to still being applied if the character is in the LOCOMOTION state
+		if (!isClimbing
+		&& m_rsoCharacterState.value == BehaviorState.LOCOMOTION
+		&& m_rope.IsConstrained)
+		{
+			ToggleRopeConstraint(false);
+		}
 	}
 
 	private void CancelAction(bool isPressed)
