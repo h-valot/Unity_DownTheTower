@@ -1,0 +1,47 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ee0cd463a0c490b47bf508b517221eb7, type: 3}
+  m_Name: SSO_Guardian_Blind
+  m_EditorClassIdentifier: 
+  AggroColor: {r: 0.7490196, g: 0, b: 0, a: 1}
+  AggroOpacity: 1
+  AggroFocus: 1
+  PatrolColor: {r: 0, g: 1, b: 0.9843137, a: 1}
+  PatrolOpacity: 0.25
+  PatrolFocus: 0
+  SeekColor: {r: 1, g: 0.8246851, b: 0, a: 1}
+  SeekOpacity: 0.25
+  SeekFocus: -0.5
+  DormantColor: {r: 0, g: 0, b: 0, a: 1}
+  DormantOpacity: 0
+  DormantFocus: 0
+  ActivationRadius: 0
+  LongRange: 0
+  ClearRange: 0
+  LethalRange: 2
+  TargetLayerToIgnore:
+    serializedVersion: 2
+    m_Bits: 64
+  DefaultAngleSight: 0.5
+  ExtendedAngleSight: 0.1
+  PatrolSpeed: 3
+  WaypointDistanceTolerance: 0.25
+  WaitDurationOnWaypointReached: 1
+  AggroSpeed: 6
+  DelayKillCharacter: {x: 0, y: 1}
+  DelayDestroyTorch: {x: 0, y: 1}
+  DelayDestroyRope: {x: 0, y: 1}
+  AggroTimeout: 0
+  LockedThreshold: 0
+  OmniscienceDuration: 10
+  SeekingDuration: 2
+  SeekTimeoutTimer: 8
