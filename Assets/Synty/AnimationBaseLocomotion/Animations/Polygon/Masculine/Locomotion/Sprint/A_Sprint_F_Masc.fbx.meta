@@ -16,8 +16,6 @@ ModelImporter:
     optimizeGameObjects: 0
     removeConstantScaleCurves: 1
     motionNodeName: 
-    rigImportErrors: 
-    rigImportWarnings: 
     animationImportErrors: 
     animationImportWarnings: 
     animationRetargetingWarnings: 
@@ -56,7 +54,23 @@ ModelImporter:
       mirror: 0
       bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
       curves: []
-      events: []
+      events:
+      - time: 0.3556851
+        functionName: OnAnimEventFootRun
+        data: 
+        objectReferenceParameter: {fileID: 11500000, guid: 6baca9a0102013e45b55b455198fef7e,
+          type: 3}
+        floatParameter: 4.75
+        intParameter: 0
+        messageOptions: 0
+      - time: 0.909621
+        functionName: OnAnimEventFootRun
+        data: 
+        objectReferenceParameter: {fileID: 11500000, guid: 6baca9a0102013e45b55b455198fef7e,
+          type: 3}
+        floatParameter: 4.75
+        intParameter: 0
+        messageOptions: 0
       transformMask: []
       maskType: 3
       maskSource: {instanceID: 0}
@@ -712,7 +726,8 @@ ModelImporter:
     hasTranslationDoF: 0
     hasExtraRoot: 1
     skeletonHasParents: 1
-  lastHumanDescriptionAvatarSource: {fileID: 9000000, guid: bfa42ba6d484e4e448024c9acf736ce9, type: 3}
+  lastHumanDescriptionAvatarSource: {fileID: 9000000, guid: bfa42ba6d484e4e448024c9acf736ce9,
+    type: 3}
   autoGenerateAvatarMappingIfUnspecified: 1
   animationType: 3
   humanoidOversampling: 1
