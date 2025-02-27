@@ -1114,6 +1114,19 @@ public class CharacterMotor : MonoBehaviour
 			// Assert: Is ground at highest edge position flat ?
 			if (Physics.Raycast(highestEdge + (new Vector3(highestEdge.x, 0, highestEdge.z) - new Vector3(m_rigidbody.position.x, 0, m_rigidbody.position.z)).normalized * m_ssoCharacter.SkinWidth + new Vector3(0, m_ssoCharacter.SkinWidth, 0), Vector3.down, m_ssoCharacter.SkinWidth * 2, m_ssoCharacter.GroundLayerToInclude)) continue;
 
+			// Assert: There is not enough space around the hit.point
+			if (Physics.SphereCast(
+				hit.point + Vector3.up * m_collider.height, 
+				m_collider.radius, 
+				Vector3.down, 
+				out var sphereCastHit, 
+				m_collider.height * 0.75f, 
+				m_ssoCharacter.GroundLayerToInclude)) 
+			{
+				// Everything can block the character except the rope.
+				if (!sphereCastHit.collider.TryGetComponent<Rope>(out var rope)) continue;
+			}
+
 			highestEdge = hit.point;
 		}
 
