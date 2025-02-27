@@ -44,6 +44,7 @@ public class Rope : Permanent
 	private Transform m_characterHarness;
 	private SoftJointLimit m_linearLimit;
 
+	public bool IsFoldSystemDisabled;
 	public bool IsConstrained;
 	public Action OnAttached;
 	public Action OnDetached;
@@ -81,11 +82,11 @@ public class Rope : Permanent
 	// Graphics
 	private MaterialPropertyBlock m_materialPropertyBlock;
 
-    #endregion
+	#endregion
 
-    #region MONOBEHAVIOR
+	#region MONOBEHAVIOR
 
-    private void Awake()
+	private void Awake()
     {
         m_materialPropertyBlock = new MaterialPropertyBlock();
         m_rigidbody.excludeLayers = m_ssoRope.LayersToIgnoreBeforeDeploy;
@@ -96,7 +97,8 @@ public class Rope : Permanent
 		// Assertions
 		if (!IsConnected) return;
 		if (!m_isPlaced) return;
-
+		if (IsFoldSystemDisabled) return;
+		
 		AddFolds();
 		RemoveFolds();
 		HandleJoint();
@@ -244,11 +246,16 @@ public class Rope : Permanent
 		characterMotor.Equip(this);
 
 		// Update folds
+		RemoveInvalidFolds();
+	}
+
+	public void RemoveInvalidFolds()
+	{
 		int validFoldIndex = m_folds.Count - 1;
 		for (int i = m_folds.Count - 1; i >= 0; i--)
 		{
-			var vector = m_folds[i].Position - characterMotor.Harness.position;
-			if (!Physics.Raycast(characterMotor.Harness.position, vector.normalized, out var hit, vector.magnitude, m_ssoRope.FoldLayerToInclude))
+			var vector = m_folds[i].Position - m_characterHarness.position;
+			if (!Physics.Raycast(m_characterHarness.position, vector.normalized, out var hit, vector.magnitude, m_ssoRope.FoldLayerToInclude))
 			{
 				validFoldIndex = i;
 				continue;

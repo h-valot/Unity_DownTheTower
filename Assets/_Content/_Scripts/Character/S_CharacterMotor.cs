@@ -564,9 +564,7 @@ public class CharacterMotor : MonoBehaviour
 	public IEnumerator AnimateGasDeath()
 	{
 		// TODO Disable all inputs
-
-		// TODO Blur and fade camera to black
-
+		// TODO Blur and fade out
 		// TODO Slow character's speed down to zero
 
 		m_characterGraphics.SpawnRagdoll(IsCarryingLight());
@@ -1114,25 +1112,30 @@ public class CharacterMotor : MonoBehaviour
 		// - Override the character's position -
 		if (highestEdge != m_rigidbody.position)
 		{
-			StartCoroutine(JumpToPosition(highestEdge));
+			StartCoroutine(MoveToPosition(highestEdge));
 		}
 	}
 
-	private IEnumerator JumpToPosition(Vector3 position)
+	private IEnumerator MoveToPosition(Vector3 position)
 	{
 		if (m_isFixedUpdateLocked) yield break;
 
 		m_isFixedUpdateLocked = true;
+		m_rope.IsFoldSystemDisabled = true;
 
 		transform.DOMoveY(position.y, m_ssoCharacter.EdgeCatchingDuration).SetEase(Ease.OutCubic);
 		
 		Vector3 destinationDir = (position - m_rigidbody.position).normalized;
 		destinationDir = new Vector3(destinationDir.x, 0, destinationDir.z);
-		transform.DOMove(position + destinationDir * 0.5f, m_ssoCharacter.EdgeCatchingDuration).SetEase(Ease.InCubic);
+		transform.DOMove(position + destinationDir * m_ssoCharacter.EdgeCatchingOffset, m_ssoCharacter.EdgeCatchingDuration).SetEase(Ease.InCubic);
 
 		yield return new WaitForSeconds(m_ssoCharacter.EdgeCatchingDuration);
 
+		Physics.SyncTransforms();
+		m_rope.RemoveInvalidFolds();
+
 		m_isFixedUpdateLocked = false;
+		m_rope.IsFoldSystemDisabled = false;
 	}
 
 	private void HandleRopeLimit()
