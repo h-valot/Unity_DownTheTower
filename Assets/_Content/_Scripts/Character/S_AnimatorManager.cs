@@ -57,13 +57,5 @@ public class AnimatorManager : MonoBehaviour
             m_animator.SetBool(m_RopeState, true);
             m_currentState = m_rsoCharacterState.value;
         }
-        else if (m_rsoCharacterState.value == BehaviorState.CRAFT && m_rsoCharacterState.value != m_currentState)
-        {
-            m_animator.SetBool(m_locomotionState, false);
-            m_animator.SetBool(m_FallState, false);
-            //m_animator.SetBool(m_CraftState, true);
-            m_animator.SetBool(m_RopeState, false);
-            m_currentState = m_rsoCharacterState.value;
-        }
     }
 }
