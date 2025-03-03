@@ -112,7 +112,6 @@ public class CharacterMotor : MonoBehaviour
 	public bool IsRopeValid => m_rope && m_rope.IsPlaced;
 
 	// - Craft state -
-	private CraftType m_craftType;
 	private Coroutine m_craftCoroutine;
 	private float m_craftRemainingTime;
 	public bool m_startAiming;
@@ -540,44 +539,30 @@ public class CharacterMotor : MonoBehaviour
 		if (RobotObject as Torch) m_rsoTorchManager.value.Remove(RobotObject as Torch);
 		if (AimingObject as Torch) m_rsoTorchManager.value.Remove(AimingObject as Torch);
 
+		// Disable character motor
+		m_isFixedUpdateLocked = true;
+
+		m_rseDisplayDeath.Call();
+		m_characterGraphics.SpawnRagdoll(IsCarryingLight(), BagRobotSocket ? BagRobotSocket.transform.position : Vector3.zero);
+
 		switch (type)
 		{
-			case DeathType.DEFAULT:
-				StartCoroutine(AnimateDefaultDeath());
+			case DeathType.GUARDIAN | DeathType.HEIGHT:
                 m_rsePlaySound.Call(m_ssoDeathGuardian);
-                break;
-
-			case DeathType.HEIGHT:
-				StartCoroutine(AnimateHeightDeath());
-				m_rsePlaySound.Call(m_ssoDeathLanding);
-				print("fire");
+				StartCoroutine(AnimateDefaultDeath());
                 break;
 
 			case DeathType.GAS:
-				StartCoroutine(AnimateGasDeath());
                 m_rsePlaySound.Call(m_ssoDeathMushroom);
+				StartCoroutine(AnimateGasDeath());
                 break;
 		}
 	}
 
 	public IEnumerator AnimateDefaultDeath()
 	{
-		m_characterGraphics.SpawnRagdoll(IsCarryingLight());
-		m_rseDisplayDeath.Call();
-
 		yield return new WaitForSeconds(m_ssoCharacter.FallDeathDurationBeforeRespawn);
 
-		m_rsoCharacterDeath.value = true;
-		Destroy(gameObject);
-	}
-
-	public IEnumerator AnimateHeightDeath()
-	{
-		m_rseDisplayDeath.Call();
-
-		yield return new WaitForSeconds(m_ssoCharacter.FallDeathDurationBeforeRespawn);
-
-		m_characterGraphics.SpawnRagdoll(IsCarryingLight());
 		m_rsoCharacterDeath.value = true;
 		Destroy(gameObject);
 	}
@@ -587,9 +572,6 @@ public class CharacterMotor : MonoBehaviour
 		// TODO Disable all inputs
 		// TODO Blur and fade out
 		// TODO Slow character's speed down to zero
-
-		m_characterGraphics.SpawnRagdoll(IsCarryingLight());
-		m_rseDisplayDeath.Call();
 
 		yield return new WaitForSeconds(m_ssoCharacter.FallDeathDurationBeforeRespawn);
 

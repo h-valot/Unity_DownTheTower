@@ -8,9 +8,9 @@ using UnityEngine;
 public class Torch : Permanent
 {
     [Title("Internal references")]
-    [SerializeField] private Light m_light;
+    [SerializeField] public Light m_light;
     [SerializeField] private Rigidbody m_rigidbody;
-    [SerializeField] private MeshRenderer m_meshRenderer;
+    [SerializeField] public MeshRenderer m_meshRenderer;
     [SerializeField] private LineRenderer m_aimLineRenderer;
     [SerializeField] private Transform m_pointLightBase;
     [SerializeField] private SphereCollider m_lightCollider;

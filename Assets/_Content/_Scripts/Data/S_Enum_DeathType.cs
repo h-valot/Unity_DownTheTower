@@ -1,6 +1,6 @@
 public enum DeathType
 {
-	DEFAULT,
+	GUARDIAN,
 	HEIGHT,
 	GAS,
 }
