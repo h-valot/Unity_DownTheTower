@@ -12,6 +12,8 @@ public class GameManager : MonoBehaviour
 	[Required("There is only one directional light per level, you can find it under --LEVEL DESIGN--")]
 	[SerializeField] private Light m_directionalLight;
 
+	[FoldoutGroup("External references")][SerializeField] private CameraMotor m_cameraMotor;
+
 	[FoldoutGroup("SSO")][SerializeField] private SSO_Game m_ssoGame;
 	[FoldoutGroup("SSO")][SerializeField] private SSO_Logs m_ssoLogs;
 
@@ -56,6 +58,7 @@ public class GameManager : MonoBehaviour
 		Restart();
 		DOTween.SetTweensCapacity(400, 400);
 		m_rseToggleCursor.Call(false);
+		StartCoroutine(m_cameraMotor.SetZeroDampForSeconds(1f));
 	}
 
 	/// <summary>

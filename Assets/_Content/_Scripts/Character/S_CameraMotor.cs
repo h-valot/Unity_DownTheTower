@@ -263,7 +263,7 @@ public class CameraMotor : MonoBehaviour
 		StartCoroutine(SetZeroDampForSeconds(1f));
 	}
 
-	private IEnumerator SetZeroDampForSeconds(float duration)
+	public IEnumerator SetZeroDampForSeconds(float duration)
 	{
 		m_3rdPersonFollow.DampingFromCollision = 0f;
 		yield return new WaitForSeconds(duration);
