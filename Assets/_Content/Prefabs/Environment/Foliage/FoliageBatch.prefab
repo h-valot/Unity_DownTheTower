@@ -58,6 +58,7 @@ MonoBehaviour:
       m_Bits: 1
     OverlapModifier: 0.2
     spawnType: 0
+    ForceOrientationUp: 0
     RotationMin: -180
     RotationMax: 180
     NoiseScale: 0.5
@@ -81,6 +82,7 @@ MonoBehaviour:
       m_Bits: 512
     OverlapModifier: 0
     spawnType: 4
+    ForceOrientationUp: 0
     RotationMin: -180
     RotationMax: 180
     NoiseScale: 0.5
@@ -104,8 +106,9 @@ MonoBehaviour:
       m_Bits: 512
     OverlapModifier: 0
     spawnType: 3
-    RotationMin: -10
-    RotationMax: 10
+    ForceOrientationUp: 1
+    RotationMin: -15
+    RotationMax: 15
     NoiseScale: 0.5
     NoiseStep: 0
     NoiseStepMax: 1
@@ -125,8 +128,9 @@ MonoBehaviour:
     LayerToFindSurface:
       serializedVersion: 2
       m_Bits: 512
-    OverlapModifier: 0
+    OverlapModifier: 0.5
     spawnType: 0
+    ForceOrientationUp: 0
     RotationMin: -180
     RotationMax: 180
     NoiseScale: 0.5
@@ -144,12 +148,13 @@ MonoBehaviour:
     Mesh: {fileID: 3540205340808380911, guid: 3397a3503d618fe448dc9d259936f4ff, type: 3}
     Prefab: {fileID: 5002633511018146708, guid: eb26e7cd850f91446b09d13b9be0fc6c,
       type: 3}
-    Density: 0
+    Density: 10
     LayerToFindSurface:
       serializedVersion: 2
       m_Bits: 1
     OverlapModifier: 1
     spawnType: 2
+    ForceOrientationUp: 0
     RotationMin: -180
     RotationMax: 180
     NoiseScale: 0.5
