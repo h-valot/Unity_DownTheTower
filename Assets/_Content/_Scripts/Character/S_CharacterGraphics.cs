@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using Sirenix.OdinInspector;
 using UnityEngine;
@@ -54,11 +53,11 @@ public class CharacterGraphics : MonoBehaviour
 		transform.localRotation = startRotation;
 	}
 
-	public void SpawnRagdoll(bool isCarryingLight)
+	public void SpawnRagdoll(bool isCarryingLight, Vector3 torchAnchor)
 	{
 		gameObject.SetActive(false);
 
 		var ragdoll = Instantiate(m_ssoCharacter.PfCharacterRagdoll);
-		ragdoll.Initialize(m_ragdollTransforms, isCarryingLight);
+		ragdoll.Initialize(m_ragdollTransforms, isCarryingLight, torchAnchor);
 	}
 }
