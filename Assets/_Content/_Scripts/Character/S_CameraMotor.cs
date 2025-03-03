@@ -99,8 +99,8 @@ public class CameraMotor : MonoBehaviour
 
 		HandleRotation();
 		CalculatePlanarVectors();
-		// HandleSuspended();
-		// HandleLocomotion();
+		HandleSuspended();
+		HandleLocomotion();
 
 		m_rsoCameraTransform.value = transform;
 	}
