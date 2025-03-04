@@ -24,7 +24,6 @@ MonoBehaviour:
   FoldLayerToInclude:
     serializedVersion: 2
     m_Bits: 1
-  FoldingPrecision: 3
   FoldOffset: 0.2
   MinFoldDistance: 0.25
   ropeGradient:
@@ -58,12 +57,15 @@ MonoBehaviour:
     m_NumColorKeys: 3
     m_NumAlphaKeys: 2
   MiddlePointDownOffsetModifier: 0.1
-  LineSegmentSize: 0.1
+  LineSegmentSize: 0.2
   LineWidth: 0.05
   InteractableSphereRadius: 0.5
-  PhysicSphereRadius: 0.1
+  PhysicSphereRadius: 0.4
   PhysicJointOffset: 0.25
   UnfolderTimeoutDelay: 5
+  DormantExitDistance: 5
+  DormantExitThreshold: 0.1
+  DormantEnterThreshold: 10
   CraftingDuration: 0.25
   DeployDuration: 0.25
   NoRaycastLayer:

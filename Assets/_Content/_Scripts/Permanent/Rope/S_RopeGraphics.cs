@@ -173,49 +173,42 @@ public class RopeGraphics : MonoBehaviour
 		}
 	}
 
+	private List<Vector3> m_drawPoints;
 	private void DrawRope()
 	{
 		// Assertion
+		if (m_isDormant) return;
 		if (!m_rope.IsPlaced) return;
 
-		// Generate smoothed points using a Bezier curve
-		var points = new List<Vector3>();
+		// if (m_physics.Count > 0) print($"physics {m_physics.Count}");
 
+		// Generate smoothed points using a Bezier curve
 		if (m_rope.IsConnected)
 		{
-			points = m_points.Duplicate();
+			m_drawPoints = m_points;
 		}
 		else if (!m_rope.IsConnected && m_points.Count < 3)
 		{
-			points = m_physics.Select(s => s.transform.position).ToList();
+			m_drawPoints = m_physics.Select(s => s.transform.position).ToList();
 		}
 		else
 		{
-			points = m_points.Duplicate();
-			int reducedPointAmount = points.Count - 2;
-			for (int i = points.Count - 1; i >= reducedPointAmount; i--)
-			{
-				points.RemoveAt(i);
-			}
-			foreach (var segment in m_physics.Select(s => s.transform.position).ToList())
-			{
-				points.Add(segment);
-			}
+			m_drawPoints = m_points;
+			m_drawPoints.Append(m_physics.Select(s => s.transform.position));
 		}
 
 		// Assert: SmoothLine function can't take less than 3 points
-		if (points.Count < 3) return;
+		if (m_drawPoints.Count < 3) return;
 
 		// Assert: The sum of the magnitude between all points can't exceed the max length of the rope.
-		float totalLength = 0;
-		for (int i = 0; i < points.Count - 2; i++)
+		float totalLength = 0f;
+		for (int i = 0; i < m_drawPoints.Count - 2; i++) 
 		{
-			totalLength += (points[i] - points[i + 1]).magnitude;
+			totalLength += Vector3.Distance(m_drawPoints[i], m_drawPoints[i + 1]);
 		}
 		if (totalLength >= m_ssoRope.MaxLength * 2) return;
 
-
-		Vector3[] smoothedPoints = LineSmoother.SmoothLine(points.ToArray(), m_ssoRope.LineSegmentSize);
+		Vector3[] smoothedPoints = LineSmoother.SmoothLine(m_drawPoints, m_ssoRope.LineSegmentSize);
 
 		// Update line renderer settings
 		m_lineRenderer.positionCount = smoothedPoints.Length;
@@ -224,7 +217,7 @@ public class RopeGraphics : MonoBehaviour
 		m_lineRenderer.endWidth = m_ssoRope.LineWidth;
 
 		// Set colors
-		float lengthPercentage = Mathf.Clamp01((m_rope.IsConnected ? m_rope.GetTotalLength() : GetLength(points)) / m_ssoRope.MaxLength);
+		float lengthPercentage = Mathf.Clamp01((m_rope.IsConnected ? m_rope.GetTotalLength() : totalLength) / m_ssoRope.MaxLength);
 		float midColorKeyTime = m_ssoRope.ropeGradient.colorKeys[1].time;
 
 		if (lengthPercentage > midColorKeyTime)
@@ -307,16 +300,6 @@ public class RopeGraphics : MonoBehaviour
 	{
 		m_unfolder = Instantiate(m_ssoRope.PfRopeUnfolder, m_physics[^1].transform.position, Quaternion.identity, transform);
 		m_unfolder.Initialize(m_rope, this);
-	}
-
-	private float GetLength(List<Vector3> positions)
-	{
-		float output = 0;
-		for (int i = 0; i < positions.Count - 2; i++)
-		{
-			output += (positions[i] - positions[i + 1]).magnitude;
-		}
-		return output;
 	}
 
 	private void OnAttached()
