@@ -36,6 +36,24 @@ public static class ListExtensions
 	}
 
 	/// <summary>
+	/// Append all the elements of the given list into the other list.
+	/// </summary>
+	public static List<T> Append<T>(this List<T> list, List<T> listToAdd)
+	{
+		foreach (var item in listToAdd) list.Add(item);
+		return list;
+	}
+
+	/// <summary>
+	/// Append all the elements of the given list into the other list.
+	/// </summary>
+	public static List<T> Append<T>(this List<T> list, IEnumerable<T> listToAdd)
+	{
+		foreach (var item in listToAdd) list.Add(item);
+		return list;
+	}
+
+	/// <summary>
 	/// Add the given object to the list only if it does not already contain it.
 	/// </summary>
 	/// <param name="toAdd">Object that can be added to the list.</param>

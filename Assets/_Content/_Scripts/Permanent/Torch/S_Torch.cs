@@ -305,7 +305,7 @@ public class Torch : Permanent
             }
         }
 
-        Vector3[] smoothedPoints = LineSmoother.SmoothLine(trajectoryPoints.ToArray(), m_ssoTorch.LineSegmentSize);
+        Vector3[] smoothedPoints = LineSmoother.SmoothLine(trajectoryPoints, m_ssoTorch.LineSegmentSize);
 
         // set line settings
         m_aimLineRenderer.positionCount = smoothedPoints.Length;
