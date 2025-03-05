@@ -96,6 +96,11 @@ public class SSO_Character : ScriptableObject
 	[InfoBox("Scalar used to apply drag while falling of X and Z axis.", InfoMessageType.None)]
 	public float ZeroDragScalar;
 
+	[FoldoutGroup("Fall")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("Duration while in fall state and character stuck on the  y-axis before respawning character.", InfoMessageType.None)]
+	public float StuckYDuration;
+
 	#endregion
 
 	#region ROPE

@@ -247,7 +247,7 @@ public class CameraMotor : MonoBehaviour
 		m_cinemachineTargetPitch += input.y * Time.fixedDeltaTime;
     }
 
-	private void OnCharacterDie()
+	private void OnCharacterDie(bool isTextDisplayed)
 	{
 		m_lookAt.transform.parent = null;
 		m_isCameraFrozen = true;

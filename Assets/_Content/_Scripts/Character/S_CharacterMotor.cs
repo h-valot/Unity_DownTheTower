@@ -102,6 +102,9 @@ public class CharacterMotor : MonoBehaviour
 	private float m_airControlTimeScalar;
 	private float m_airControlDuration;
 
+	// - Fall state - 
+	private float m_stuckYTimer;
+
 	// - Rope state -
 	private Rope m_rope;
 	private bool m_isHolding;
@@ -166,7 +169,7 @@ public class CharacterMotor : MonoBehaviour
         Application.onBeforeRender -= UpdatePreview;
     }
 
-    private void FixedUpdate()
+	private void FixedUpdate()
 	{
 		if (!m_isInitialize) return;
 		if (m_isFixedUpdateLocked) return;
@@ -542,7 +545,7 @@ public class CharacterMotor : MonoBehaviour
 		// Disable character motor
 		m_isFixedUpdateLocked = true;
 
-		m_rseDisplayDeath.Call();
+		m_rseDisplayDeath.Call(true);
 		m_characterGraphics.SpawnRagdoll(IsCarryingLight(), BagRobotSocket ? BagRobotSocket.transform.position : Vector3.zero);
 
 		switch (type)
@@ -885,6 +888,7 @@ public class CharacterMotor : MonoBehaviour
 		UpdateAirControl();
 		UpdateZeroDrag();
 		CheckFallHeight();
+		CheckStuckY();
 		MoveFalling();
 	}
 
@@ -911,6 +915,24 @@ public class CharacterMotor : MonoBehaviour
 			(desiredDirection * desiredForce - m_rigidbody.velocity) * m_airControlTimeScalar,
 			ForceMode.Acceleration
 		);
+	}
+
+	private void CheckStuckY()
+	{
+		if (m_rsoCharacterLastPosition.value.CutDigits(2) != m_rsoCharacterPosition.value.CutDigits(2))
+		{
+			m_stuckYTimer = m_ssoCharacter.StuckYDuration;
+			return;
+		}
+
+		m_stuckYTimer -= Time.fixedDeltaTime;
+		if (m_stuckYTimer < 0)
+		{
+			// Respawn character
+			m_rseDisplayDeath.Call(false);
+			m_rsoCharacterDeath.value = true;
+			Destroy(gameObject);
+		}
 	}
 
 	private void StartAirControl()
