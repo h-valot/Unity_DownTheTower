@@ -147,7 +147,7 @@ public class MushroomBatch : MonoBehaviour
         if (SimplexNoise3D.SimplexNoise(hitInfo.point, 0.37f) < 0.5f) return;
         float scale = m_mushroomPrefab.transform.localScale.x * Random.Range(m_minSizeMultiplier, m_maxSizeMultiplier);
 
-        if (!IsNormalFacingOrigin(hitInfo) || !HasEnoughRoom(hitInfo, scale * 0.5f * m_overlapModifier)) return;
+        if (!IsNormalFacingOrigin(hitInfo) || !HasEnoughRoom(hitInfo, m_mushroomPrefab.GetComponent<SphereCollider>().radius * scale * 0.5f * m_overlapModifier)) return;
 
         GameObject newMushroom = Instantiate(m_mushroomPrefab, hitInfo.point, Quaternion.FromToRotation(Vector3.up, hitInfo.normal), transform);
         m_spawnedGameObjects.Add(newMushroom);
