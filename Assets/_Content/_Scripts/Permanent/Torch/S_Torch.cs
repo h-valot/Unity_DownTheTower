@@ -454,29 +454,29 @@ public class Torch : Permanent
 		m_isDeactivate = true;
 		m_rsoCharacterPosition.OnChanged -= UpdateTorchFeedback;
 
-		Sequence _deactivatingSequence = DOTween.Sequence().Pause();
-		_deactivatingSequence.AppendInterval(0.03f);
-		_deactivatingSequence.AppendCallback(() => { m_light.enabled = false; });
-		_deactivatingSequence.AppendInterval(0.08f);
-		_deactivatingSequence.AppendCallback(() => { m_light.enabled = true; });
-		_deactivatingSequence.AppendInterval(0.03f);
-		_deactivatingSequence.AppendCallback(() => { m_light.enabled = false; });
-		_deactivatingSequence.AppendInterval(0.03f);
-		_deactivatingSequence.AppendCallback(() => { m_light.enabled = true; });
-		_deactivatingSequence.AppendInterval(0.03f);
-		_deactivatingSequence.AppendCallback(() => { m_light.enabled = false; });
-		_deactivatingSequence.AppendInterval(0.03f);
-		_deactivatingSequence.AppendCallback(() => { m_light.enabled = true; });
-		_deactivatingSequence.Insert(0f, m_light.DOIntensity(0f, m_ssoTorch.DesactivatingTime).SetEase(Ease.Linear));
-		_deactivatingSequence.Insert(0f, DOTween.To(() => m_light.range, x => m_light.range = x, 0f, m_ssoTorch.DesactivatingTime).SetEase(Ease.Linear));
-		_deactivatingSequence.Insert(0f, DOTween.To(() => m_lightPercent, x => m_lightPercent = x, 0f, m_ssoTorch.DesactivatingTime).SetEase(Ease.Linear)
-														.OnUpdate(() => {
-															m_propertyBlock.SetFloat("_lightPercent", m_lightPercent);
-															m_meshRenderer.SetPropertyBlock(m_propertyBlock);
-														}));
-		_deactivatingSequence.SetId(gameObject.GetInstanceID());
+		Sequence flickeringSequence = DOTween.Sequence().Pause();
+		flickeringSequence.AppendInterval(0.03f);
+		flickeringSequence.AppendCallback(() => { m_light.enabled = false; });
+		flickeringSequence.AppendInterval(0.08f);
+		flickeringSequence.AppendCallback(() => { m_light.enabled = true; });
+		flickeringSequence.AppendInterval(0.03f);
+		flickeringSequence.AppendCallback(() => { m_light.enabled = false; });
+		flickeringSequence.AppendInterval(0.03f);
+		flickeringSequence.AppendCallback(() => { m_light.enabled = true; });
+		flickeringSequence.AppendInterval(0.03f);
+		flickeringSequence.AppendCallback(() => { m_light.enabled = false; });
+		flickeringSequence.AppendInterval(0.03f);
+		flickeringSequence.AppendCallback(() => { m_light.enabled = true; });
+		flickeringSequence.Insert(0f, m_light.DOIntensity(0f, m_ssoTorch.DesactivatingTime).SetEase(Ease.Linear));
+		flickeringSequence.Insert(0f, DOTween.To(() => m_light.range, x => m_light.range = x, 0f, m_ssoTorch.DesactivatingTime).SetEase(Ease.Linear));
+		flickeringSequence.Insert(0f, DOTween.To(() => m_lightPercent, x => m_lightPercent = x, 0f, m_ssoTorch.DesactivatingTime).SetEase(Ease.Linear)
+							.OnUpdate(() => {
+								m_propertyBlock.SetFloat("_lightPercent", m_lightPercent);
+								m_meshRenderer.SetPropertyBlock(m_propertyBlock);
+							}));
+		flickeringSequence.SetId(gameObject.GetHashCode()); // Unsafe version of GetInstanceID()
 
-		_deactivatingSequence.Play().OnComplete(() => { DestroyTorch(); });
+		flickeringSequence.Play().OnComplete(() => { DestroyTorch(); });
     }
 
     public void DestroyTorch()
