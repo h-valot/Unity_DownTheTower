@@ -79,6 +79,8 @@ MonoBehaviour:
   m_rsoCharacterLastPosition: {fileID: 11400000, guid: 5d67ce34b96eda4438fe23fe075a47f6,
     type: 2}
   m_rseDebugLog: {fileID: 11400000, guid: 95a777ec5f449e04ba26b1e9fa6914d6, type: 2}
+  m_folds: []
+  IsFoldSystemDisabled: 0
   IsConstrained: 0
 --- !u!114 &4416827783120197514
 MonoBehaviour:
@@ -99,8 +101,6 @@ MonoBehaviour:
   m_ssoRope: {fileID: 11400000, guid: ebd551676fad39148a6ccab29ef4ebce, type: 2}
   m_rsoCharacterPosition: {fileID: 11400000, guid: 7fc614512add369458f5a4d382225bfb,
     type: 2}
-  m_isDormant: 0
-  m_dormantTimer: 0
 --- !u!65 &4146427016307430021
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -202,7 +202,7 @@ LineRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10306, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: -876546973899608171, guid: e4e19d12297d7cd46828a5bbe967eb09, type: 3}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
