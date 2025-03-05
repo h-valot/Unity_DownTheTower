@@ -19,7 +19,7 @@ public class UITab : MonoBehaviour
 	{
 		m_imgBackground.color = m_colorHighlighted;
 		m_linkedPanel.SetActive(true);
-		if(m_rsoCurrentControls.value == ControlScheme.GAMEPAD) EventSystem.current.SetSelectedGameObject(m_defaultSelected);
+		if(m_rsoCurrentControls.value == ControlType.GAMEPAD) EventSystem.current.SetSelectedGameObject(m_defaultSelected);
 
     }
 

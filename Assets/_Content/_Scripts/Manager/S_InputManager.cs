@@ -27,13 +27,15 @@ public class InputManager : MonoBehaviour
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Climb m_rseClimb;
     [FoldoutGroup("Scriptable")][SerializeField] private RSE_SwitchTabLeft m_rseSwitchTabLeft;
     [FoldoutGroup("Scriptable")][SerializeField] private RSE_SwitchTabRight m_rseSwitchTabRight;
+    [FoldoutGroup("Scriptable")][SerializeField] private RSE_Start m_rseStart;
 
     [FoldoutGroup("Scriptable")][SerializeField] private RSO_Pause m_rsoPause;
-	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CancelConsumable m_rsoCancelConsumable;
+    [FoldoutGroup("Scriptable")][SerializeField] private RSO_CancelConsumable m_rsoCancelConsumable;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CraftInputLocked m_rsoCraftInputLocked;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_RecycleInputLocked m_rsoRecycleInputLocked;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_InputAdviceDisplayed m_rsoInputAdviceDisplayed;
     [FoldoutGroup("Scriptable")][SerializeField] private RSO_CurrentControls m_rsoCurrentControls;
+    [FoldoutGroup("Scriptable")][SerializeField] private RSO_CurrentScheme m_rsoCurrentScheme;
 
     #endregion
 
@@ -60,6 +62,7 @@ public class InputManager : MonoBehaviour
 		m_rsoCraftInputLocked.value = false;
 		m_rsoRecycleInputLocked.value = false;
 		m_rseLook.Call(Vector2.zero);
+		m_rsoCurrentScheme.value = InputScheme.MENU;
 
     }
 
@@ -101,16 +104,18 @@ public class InputManager : MonoBehaviour
 	{
 		m_rseToggleCursor.action += OnEnableCursor;
 		m_playerInput.onControlsChanged += OnControlsChanged;
+		m_rsoCurrentScheme.OnChanged += UpdateScheme;
     }
 
 	private void OnDisable()
 	{
 		m_rseToggleCursor.action -= OnEnableCursor;
-	}
+        m_rsoCurrentScheme.OnChanged -= UpdateScheme;
+    }
 
 	# endregion
 
-	#region ACTION LISTENER
+	#region ACTION LISTENER - PLAYER
 
 	public void OnMove(InputValue value)
 	{
@@ -124,13 +129,13 @@ public class InputManager : MonoBehaviour
 
 		switch (m_rsoCurrentControls.value)
 		{
-			case ControlScheme.GAMEPAD:
+			case ControlType.GAMEPAD:
                 m_look = new Vector2(
                     input.x * m_ssoInputs.SensitivityValue,
                     input.y * m_ssoInputs.SensitivityValue * m_ssoInputs.SensitivityMultiplierY * (m_ssoInputs.InvertAxisY ? 1 : -1)
                     );
 				break;
-			case ControlScheme.KEYBOARDMOUSE:
+			case ControlType.KEYBOARDMOUSE:
                 m_look = new Vector2(
                     input.x * m_ssoInputs.SensitivityValue * m_ssoInputs.SensitivityMouseMultiplier,
                     input.y * m_ssoInputs.SensitivityValue * m_ssoInputs.SensitivityMultiplierY * m_ssoInputs.SensitivityMouseMultiplier * (m_ssoInputs.InvertAxisY ? 1 : -1)
@@ -275,9 +280,34 @@ public class InputManager : MonoBehaviour
 
 	public void OnControlsChanged(PlayerInput newInput)
 	{
-		if (newInput.currentControlScheme.Equals("Gamepad")) m_rsoCurrentControls.value = ControlScheme.GAMEPAD;
-		else if (newInput.currentControlScheme.Equals("KeyboardMouse")) m_rsoCurrentControls.value = ControlScheme.KEYBOARDMOUSE;
+		if (newInput.currentControlScheme.Equals("Gamepad")) m_rsoCurrentControls.value = ControlType.GAMEPAD;
+		else if (newInput.currentControlScheme.Equals("KeyboardMouse")) m_rsoCurrentControls.value = ControlType.KEYBOARDMOUSE;
 	}
 
-	#endregion
+	public void UpdateScheme()
+	{
+		switch (m_rsoCurrentScheme.value)
+		{
+			case InputScheme.GAME:
+				m_playerInput.SwitchCurrentActionMap("Player");
+				break;
+			case InputScheme.PAUSE:
+                m_playerInput.SwitchCurrentActionMap("Pause");
+                break;
+			case InputScheme.MENU:
+                m_playerInput.SwitchCurrentActionMap("Title");
+                break;
+		}
+	}
+
+    #endregion
+
+    #region ACTION LISTENER - MENU AND PAUSE
+
+    public void OnStartGame()
+    {
+        m_rseStart.Call();
+    }
+
+    #endregion
 }

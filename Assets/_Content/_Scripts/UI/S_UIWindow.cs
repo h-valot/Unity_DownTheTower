@@ -76,7 +76,7 @@ public class UIWindow : MonoBehaviour
 
 		m_rsoCancelConsumable.value = false;
 		Hide();
-		if (m_previousUISelect != null && m_rsoCurrentControls.value == ControlScheme.GAMEPAD) EventSystem.current.SetSelectedGameObject(m_previousUISelect);
+		if (m_previousUISelect != null && m_rsoCurrentControls.value == ControlType.GAMEPAD) EventSystem.current.SetSelectedGameObject(m_previousUISelect);
 		m_rsoCancelPriority.value = m_previousState;
 	}
 
@@ -87,12 +87,12 @@ public class UIWindow : MonoBehaviour
 
 		switch (m_rsoCurrentControls.value)
 		{
-			case ControlScheme.GAMEPAD:
+			case ControlType.GAMEPAD:
                 m_rseToggleCursor.Call(false);
                 if (m_defaultSelect != null) EventSystem.current.SetSelectedGameObject(m_defaultSelect);
                 else EventSystem.current.SetSelectedGameObject(null);
                 break;
-			case ControlScheme.KEYBOARDMOUSE:
+			case ControlType.KEYBOARDMOUSE:
                 m_rseToggleCursor.Call(true);
                 EventSystem.current.SetSelectedGameObject(null);
                 break;

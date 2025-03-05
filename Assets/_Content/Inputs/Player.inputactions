@@ -662,31 +662,13 @@
             "id": "77fb9591-d494-4e0f-a20a-2f1ccc2ef7c3",
             "actions": [
                 {
-                    "name": "Enter",
+                    "name": "StartGame",
                     "type": "Button",
                     "id": "859662df-6a41-4d42-b75c-26a4fef91324",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
-                },
-                {
-                    "name": "OpenSettings",
-                    "type": "Button",
-                    "id": "00bf005d-963c-4a33-8049-3f8530422352",
-                    "expectedControlType": "Button",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
-                    "name": "Back",
-                    "type": "Value",
-                    "id": "ebb547ac-5dd6-47b2-980b-99d35d10460f",
-                    "expectedControlType": "Button",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": true
                 }
             ],
             "bindings": [
@@ -697,7 +679,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "Gamepad",
-                    "action": "Enter",
+                    "action": "StartGame",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -708,51 +690,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "KeyboardMouse",
-                    "action": "Enter",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "d9eb00c0-d6cd-44c9-9c61-c43b3091553f",
-                    "path": "<Gamepad>/select",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "Gamepad",
-                    "action": "OpenSettings",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "aeb40ac9-34f0-4ebe-96be-593c9f8a509b",
-                    "path": "<Keyboard>/tab",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "KeyboardMouse",
-                    "action": "OpenSettings",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "d7fc0776-41b5-4211-868e-a0db834da192",
-                    "path": "<Gamepad>/buttonEast",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "Gamepad",
-                    "action": "Back",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "40e4280f-d443-4f18-bdd2-98674249ca64",
-                    "path": "<Keyboard>/escape",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "KeyboardMouse",
-                    "action": "Back",
+                    "action": "StartGame",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
