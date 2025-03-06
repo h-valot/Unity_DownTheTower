@@ -308,6 +308,9 @@ public class CharacterMotor : MonoBehaviour
 		m_isHolding = false;
 	}
 
+	/// <summary>
+	/// Subscribe or unsubscribe inputs listener when the game paused. 
+	/// </summary>
 	private void OnPaused()
 	{
 		m_moveInput = Vector2.zero;
@@ -479,9 +482,6 @@ public class CharacterMotor : MonoBehaviour
 		m_previousState = m_rsoCharacterState.value;
 		ExitState();
         EnterState(newState);
-
-		// Exception: Prevent the character from switching to rope or fall state while aiming 
-		if (IsAiming) CancelAim();
     }
 
     /// <summary>
@@ -904,12 +904,14 @@ public class CharacterMotor : MonoBehaviour
 	#region FALL STATE
 
 	private void EnterFallState()
-    {
-        UpdateDrag();
+	{
+		// Exception: Prevent the character from switching to rope or fall state while aiming 
+		if (IsAiming) CancelAim();
+
+		UpdateDrag();
         UpdateFriction();
         StartCoyoteTime();
 		StartAirControl();
-
 	}
 
     private void FixedUpdateFallState()
@@ -1365,7 +1367,6 @@ public class CharacterMotor : MonoBehaviour
 			if (itemToThrow is Rope)
 			{
 				itemToThrow.transform.parent = m_handSocket.transform;
-				//itemToThrow.transform.localScale = Vector3.one;
 				itemToThrow.transform.localPosition = Vector3.zero;
 				itemToThrow.transform.rotation = m_handSocket.rotation;
 			}
