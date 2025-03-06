@@ -35,13 +35,13 @@ public class Lever : Interactable
     {
         if (m_isActivated)
         {
-            m_handleOrigin.transform.DOLocalRotate(new Vector3(0, 0, 30), 0.5f);
+            m_handleOrigin.transform.DOLocalRotate(new Vector3(90, 0, 0), 0.5f);
             m_gauge.transform.DOScaleY(0.8f, 0.5f);
             m_rsePlayAt.Call(m_ssoLeverActivate, this.transform.position);
         }
         else
         {
-            m_handleOrigin.transform.DOLocalRotate(new Vector3(0, 0, 150), 0.5f);
+            m_handleOrigin.transform.DOLocalRotate(new Vector3(0, 0, 0), 0.5f);
             m_gauge.transform.DOScaleY(0.1f, 0.5f);
             m_rsePlayAt.Call(m_ssoLeverDeactivate, this.transform.position);
         }
