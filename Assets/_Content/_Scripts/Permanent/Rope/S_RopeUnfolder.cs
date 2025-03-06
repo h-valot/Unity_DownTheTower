@@ -30,6 +30,13 @@ public class RopeUnfolder : MonoBehaviour
 
 		float totalDistanceTravelled = (transform.position - m_startPosition).magnitude;
 
+		// Avoid the unfold to pass through colliders
+		if (Physics.Raycast(transform.position, Vector3.down, out var hitInfo, m_distanceLimit, m_ssoRope.UnfolderLayerToInclude))
+		{
+			Destroy(gameObject);
+			return;
+		}
+
 		if (m_rope.GetTotalLength() + m_distanceLimit * m_physicInstantiatedAmount < m_ssoRope.MaxLength - m_ssoRope.MaxLengthOffset
 		&& totalDistanceTravelled / m_physicInstantiatedAmount >= m_distanceLimit)
 		{
