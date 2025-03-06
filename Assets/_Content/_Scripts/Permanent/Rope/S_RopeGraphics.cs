@@ -27,6 +27,7 @@ public class RopeGraphics : MonoBehaviour
 	private List<Vector3> m_points = new List<Vector3>();
 	private List<RopePhysic> m_physics = new List<RopePhysic>();
 	private List<RopeInteractable> m_interactables = new List<RopeInteractable>();
+	private List<Vector3> m_drawPoints = new List<Vector3>();
 	private RopeUnfolder m_unfolder;
 
 	private float m_colliderDiameter;
@@ -173,14 +174,11 @@ public class RopeGraphics : MonoBehaviour
 		}
 	}
 
-	private List<Vector3> m_drawPoints;
 	private void DrawRope()
 	{
 		// Assertion
 		if (m_isDormant) return;
 		if (!m_rope.IsPlaced) return;
-
-		// if (m_physics.Count > 0) print($"physics {m_physics.Count}");
 
 		// Generate smoothed points using a Bezier curve
 		if (m_rope.IsConnected)
@@ -189,11 +187,12 @@ public class RopeGraphics : MonoBehaviour
 		}
 		else if (!m_rope.IsConnected && m_points.Count < 3)
 		{
+			m_physics[0].Rigidbody.isKinematic = true;
 			m_drawPoints = m_physics.Select(s => s.transform.position).ToList();
 		}
 		else
 		{
-			m_drawPoints = m_points;
+			m_drawPoints = m_points.Take(m_points.Count - 2).ToList();
 			m_drawPoints.Append(m_physics.Select(s => s.transform.position));
 		}
 

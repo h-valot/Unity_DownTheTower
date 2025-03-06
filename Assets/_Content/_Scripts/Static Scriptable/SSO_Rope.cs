@@ -97,7 +97,12 @@ public class SSO_Rope : ScriptableObject
 
 	[FoldoutGroup("Graphics")]
 	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
-	[InfoBox("Duration before which the unfolder destroys itself.", InfoMessageType.None)]
+	[InfoBox("Layer to inlcude when firing the verification raycast avoiding unfolder to clip inside colliders.", InfoMessageType.None)]
+	public LayerMask UnfolderLayerToInclude;
+
+	[FoldoutGroup("Graphics")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("Duration during which at least one living unfolder verification must be false to be destroyed.", InfoMessageType.None)]
 	public float UnfolderTimeoutDelay;
 
 	#endregion

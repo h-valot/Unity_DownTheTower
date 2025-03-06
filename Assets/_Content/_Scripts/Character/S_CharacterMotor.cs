@@ -54,8 +54,9 @@ public class CharacterMotor : MonoBehaviour
 	[FoldoutGroup("RSO")][SerializeField] private RSO_CharacterLastPosition m_rsoCharacterLastPosition;
 	[FoldoutGroup("RSO")][SerializeField] private RSO_Ropes m_rsoRopes;
 	[FoldoutGroup("RSO")][SerializeField] private RSO_TorchManager m_rsoTorchManager;
+	[FoldoutGroup("RSO")][SerializeField] private RSO_Pause m_rsoPause;
 
-    [FoldoutGroup("Sounds")][SerializeField] private RSE_PlaySound m_rsePlaySound;
+	[FoldoutGroup("Sounds")][SerializeField] private RSE_PlaySound m_rsePlaySound;
     [FoldoutGroup("Sounds")][SerializeField] private RSE_PlayAt m_rsePlayAt;
 	[FoldoutGroup("Sounds")][SerializeField] private RSE_PlayRope m_rsePlayRope;	
     [FoldoutGroup("Sounds")][SerializeField] private SSO_Sound m_ssoDeathLanding;
@@ -70,7 +71,16 @@ public class CharacterMotor : MonoBehaviour
     #region VARIABLES
 
     private bool m_isInitialize;
-	private bool m_isFixedUpdateLocked;
+	private bool m_isMotorLocked;
+	private bool IsMotorLocked
+	{
+		get => m_isMotorLocked;
+		set
+		{
+			m_isMotorLocked = value;
+			OnMotorLockedChanged(value);
+		}
+	}
 
 	// - Inputs -
 	private Vector2 m_moveInput = new Vector2();
@@ -158,6 +168,7 @@ public class CharacterMotor : MonoBehaviour
         DetermineState();
 
 		Application.onBeforeRender += UpdatePreview;
+		m_rsoPause.OnChanged += OnPaused;
     }
 
     private void OnDisable()
@@ -167,12 +178,13 @@ public class CharacterMotor : MonoBehaviour
         m_rsoCharacterState.value = BehaviorState.NONE;
 
         Application.onBeforeRender -= UpdatePreview;
-    }
+		m_rsoPause.OnChanged -= OnPaused;
+	}
 
 	private void FixedUpdate()
 	{
 		if (!m_isInitialize) return;
-		if (m_isFixedUpdateLocked) return;
+		if (IsMotorLocked) return;
 
         // DINGUERIE: Prevent the character to soft lock the ground detection
         if (m_rigidbody.position == Vector3.zero) m_rigidbody.position = new Vector3(0.01f, 0f, 0f);
@@ -294,6 +306,27 @@ public class CharacterMotor : MonoBehaviour
 		m_isJumping = false;
 		m_isClimbing = false;
 		m_isHolding = false;
+	}
+
+	/// <summary>
+	/// Subscribe or unsubscribe inputs listener when the game paused. 
+	/// </summary>
+	private void OnPaused()
+	{
+		m_moveInput = Vector2.zero;
+		OnMotorLockedChanged(m_rsoPause.value);
+	}
+
+	private void OnMotorLockedChanged(bool isMotorLocked)
+	{
+		if (isMotorLocked)
+		{
+			UnsubscibeAllInputs();
+		}
+		else
+		{
+			SubscribeStateInputs();
+		}
 	}
 
 	private void UpdateMoveInput(Vector2 input)
@@ -449,9 +482,6 @@ public class CharacterMotor : MonoBehaviour
 		m_previousState = m_rsoCharacterState.value;
 		ExitState();
         EnterState(newState);
-
-		// Exception: Prevent the character from switching to rope or fall state while aiming 
-		if (IsAiming) CancelAim();
     }
 
     /// <summary>
@@ -543,7 +573,7 @@ public class CharacterMotor : MonoBehaviour
 		if (AimingObject as Torch) m_rsoTorchManager.value.Remove(AimingObject as Torch);
 
 		// Disable character motor
-		m_isFixedUpdateLocked = true;
+		IsMotorLocked = true;
 
 		m_rseDisplayDeath.Call(true);
 		m_characterGraphics.SpawnRagdoll(IsCarryingLight(), BagRobotSocket ? BagRobotSocket.transform.position : Vector3.zero);
@@ -874,12 +904,14 @@ public class CharacterMotor : MonoBehaviour
 	#region FALL STATE
 
 	private void EnterFallState()
-    {
-        UpdateDrag();
+	{
+		// Exception: Prevent the character from switching to rope or fall state while aiming 
+		if (IsAiming) CancelAim();
+
+		UpdateDrag();
         UpdateFriction();
         StartCoyoteTime();
 		StartAirControl();
-
 	}
 
     private void FixedUpdateFallState()
@@ -1156,9 +1188,9 @@ public class CharacterMotor : MonoBehaviour
 
 	private IEnumerator MoveToPosition(Vector3 position)
 	{
-		if (m_isFixedUpdateLocked) yield break;
+		if (IsMotorLocked) yield break;
 
-		m_isFixedUpdateLocked = true;
+		IsMotorLocked = true;
 		m_rope.IsFoldSystemDisabled = true;
 
 		transform.DOMoveY(position.y, m_ssoCharacter.EdgeCatchingDuration).SetEase(Ease.OutCubic);
@@ -1172,7 +1204,7 @@ public class CharacterMotor : MonoBehaviour
 		Physics.SyncTransforms();
 		m_rope.RemoveInvalidFolds();
 
-		m_isFixedUpdateLocked = false;
+		IsMotorLocked = false;
 		m_rope.IsFoldSystemDisabled = false;
 	}
 
@@ -1335,7 +1367,6 @@ public class CharacterMotor : MonoBehaviour
 			if (itemToThrow is Rope)
 			{
 				itemToThrow.transform.parent = m_handSocket.transform;
-				//itemToThrow.transform.localScale = Vector3.one;
 				itemToThrow.transform.localPosition = Vector3.zero;
 				itemToThrow.transform.rotation = m_handSocket.rotation;
 			}

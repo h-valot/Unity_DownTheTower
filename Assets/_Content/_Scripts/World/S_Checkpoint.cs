@@ -9,7 +9,11 @@ public class Checkpoint : GameStart
 
 	private void OnTriggerEnter(Collider other)
 	{
-		m_rsoLastCheckpointReached.value = this;
+		// Only the character can enable checkpoint, and not torches, guardians or ropes
+		if (other.TryGetComponent<CharacterMotor>(out var character))
+		{
+			m_rsoLastCheckpointReached.value = this;
+		}
 	}
 
 #if UNITY_EDITOR
