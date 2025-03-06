@@ -187,6 +187,7 @@ public class RopeGraphics : MonoBehaviour
 		}
 		else if (!m_rope.IsConnected && m_points.Count < 3)
 		{
+			m_physics[0].Rigidbody.isKinematic = true;
 			m_drawPoints = m_physics.Select(s => s.transform.position).ToList();
 		}
 		else
