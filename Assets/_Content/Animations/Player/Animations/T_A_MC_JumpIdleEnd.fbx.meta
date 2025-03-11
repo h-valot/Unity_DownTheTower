@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 4586ef37ead580545807a75e9b423e96
+guid: fab0c60374c4e3f4eb8475b7ed061bf1
 ModelImporter:
   serializedVersion: 22200
   internalIDToNameTable: []
@@ -18,13 +18,8 @@ ModelImporter:
     motionNodeName: 
     animationImportErrors: 
     animationImportWarnings: "\nClip 'T_A_MC_JumpIdleEnd' has import animation warnings
-      that might lower retargeting quality:\nNote: Activate translation DOF on avatar
-      to improve retargeting quality.\n\t'Spine_01' has translation animation that
-      will be discarded.\n\t'Clavicle_L' has translation animation that will be discarded.\n\t'Clavicle_R'
-      has translation animation that will be discarded.\n\t'TwistArm_R' is inbetween
-      humanoid transforms and has rotation animation that will be discarded.\n\t'UpperLeg_L'
-      has translation animation that will be discarded.\n\t'UpperLeg_R' has translation
-      animation that will be discarded.\n"
+      that might lower retargeting quality:\n\t'TwistArm_R' is inbetween humanoid
+      transforms and has rotation animation that will be discarded.\n"
     animationRetargetingWarnings: 
     animationDoRetargetingWarnings: 0
     importAnimatedCustomProperties: 0
@@ -42,7 +37,7 @@ ModelImporter:
       takeName: T_A_MC_JumpIdleEnd
       internalID: 6305738185521915446
       firstFrame: 1
-      lastFrame: 23
+      lastFrame: 20
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
@@ -54,14 +49,22 @@ ModelImporter:
       loopBlendOrientation: 1
       loopBlendPositionY: 1
       loopBlendPositionXZ: 1
-      keepOriginalOrientation: 1
+      keepOriginalOrientation: 0
       keepOriginalPositionY: 1
       keepOriginalPositionXZ: 0
       heightFromFeet: 0
       mirror: 0
       bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
       curves: []
-      events: []
+      events:
+      - time: 0.16738193
+        functionName: OnAnimEventLanding
+        data: 
+        objectReferenceParameter: {fileID: 11500000, guid: 6baca9a0102013e45b55b455198fef7e,
+          type: 3}
+        floatParameter: 0
+        intParameter: 0
+        messageOptions: 0
       transformMask: []
       maskType: 3
       maskSource: {instanceID: 0}
@@ -1155,7 +1158,7 @@ ModelImporter:
     feetSpacing: 0
     globalScale: 1
     rootMotionBoneName: 
-    hasTranslationDoF: 0
+    hasTranslationDoF: 1
     hasExtraRoot: 0
     skeletonHasParents: 1
   lastHumanDescriptionAvatarSource: {fileID: 9000000, guid: 59d4026ad9f8de04a8ebbd6923e30d18,

@@ -136,6 +136,7 @@ public class AnimatorManager : MonoBehaviour
     private void OnAnimEventLanding()
     {
         m_rsePlayAt.Call(m_ssoLanding, m_footLocation.transform.position);
+        print("fire");
     }
 
 

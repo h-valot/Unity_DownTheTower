@@ -580,12 +580,18 @@ public class CharacterMotor : MonoBehaviour
 
 		switch (type)
 		{
-			case DeathType.GUARDIAN | DeathType.HEIGHT:
+			case DeathType.GUARDIAN :
                 m_rsePlaySound.Call(m_ssoDeathGuardian);
 				StartCoroutine(AnimateDefaultDeath());
                 break;
 
-			case DeathType.GAS:
+			case DeathType.HEIGHT:
+                m_rsePlaySound.Call(m_ssoDeathLanding);
+                StartCoroutine(AnimateDefaultDeath());
+                break;
+
+
+            case DeathType.GAS:
                 m_rsePlaySound.Call(m_ssoDeathMushroom);
 				StartCoroutine(AnimateGasDeath());
                 break;

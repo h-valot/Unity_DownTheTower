@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: ecd75fce7efbf23408f5b49a22f31add
+guid: a7c3940231a2bb14ea2ccc44d7d2b73b
 ModelImporter:
   serializedVersion: 22200
   internalIDToNameTable: []
@@ -18,10 +18,9 @@ ModelImporter:
     motionNodeName: 
     animationImportErrors: 
     animationImportWarnings: "\nClip 'T_A_MC_Throw' has import animation warnings
-      that might lower retargeting quality:\nNote: Activate translation DOF on avatar
-      to improve retargeting quality.\n\t'TwistArm_L' is inbetween humanoid transforms
-      and has rotation animation that will be discarded.\n\t'TwistArm_R' is inbetween
-      humanoid transforms and has rotation animation that will be discarded.\n"
+      that might lower retargeting quality:\n\t'TwistArm_L' is inbetween humanoid
+      transforms and has rotation animation that will be discarded.\n\t'TwistArm_R'
+      is inbetween humanoid transforms and has rotation animation that will be discarded.\n"
     animationRetargetingWarnings: 
     animationDoRetargetingWarnings: 0
     importAnimatedCustomProperties: 0
@@ -38,7 +37,7 @@ ModelImporter:
       name: T_A_MC_Throw
       takeName: T_A_MC_Throw
       internalID: 1058778400318065739
-      firstFrame: 73
+      firstFrame: 89
       lastFrame: 120
       wrapMode: 0
       orientationOffsetY: 0
@@ -53,7 +52,7 @@ ModelImporter:
       loopBlendPositionXZ: 1
       keepOriginalOrientation: 0
       keepOriginalPositionY: 1
-      keepOriginalPositionXZ: 1
+      keepOriginalPositionXZ: 0
       heightFromFeet: 0
       mirror: 0
       bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
@@ -1152,7 +1151,7 @@ ModelImporter:
     feetSpacing: 0
     globalScale: 1
     rootMotionBoneName: 
-    hasTranslationDoF: 0
+    hasTranslationDoF: 1
     hasExtraRoot: 0
     skeletonHasParents: 1
   lastHumanDescriptionAvatarSource: {fileID: 9000000, guid: 59d4026ad9f8de04a8ebbd6923e30d18,
