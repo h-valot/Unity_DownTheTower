@@ -727,13 +727,13 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1196033791023634784}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 8089642602881866558}
-  m_Father: {fileID: 2752253921843224294}
+  m_Father: {fileID: 1791436893917464315}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -755,8 +755,8 @@ MonoBehaviour:
   m_toggleCursor: 0
   m_toggleReturn: 1
   m_toggleSelectable: 1
-  m_requiredState: 4
-  m_previousState: 2
+  m_requiredState: 5
+  m_previousState: 3
   m_defaultSelect: {fileID: 0}
   m_previousUISelect: {fileID: 6816315964376132039}
   m_graphicsParent: {fileID: 3966108087381433221}
@@ -1216,13 +1216,13 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1890395370596612278}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 8678338591403591314}
-  m_Father: {fileID: 2752253921843224294}
+  m_Father: {fileID: 1791436893917464315}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -1244,8 +1244,8 @@ MonoBehaviour:
   m_toggleCursor: 0
   m_toggleReturn: 1
   m_toggleSelectable: 1
-  m_requiredState: 3
-  m_previousState: 2
+  m_requiredState: 4
+  m_previousState: 3
   m_defaultSelect: {fileID: 3679855631030916357}
   m_previousUISelect: {fileID: 4657320107031657537}
   m_graphicsParent: {fileID: 671452276669742891}
@@ -1257,9 +1257,11 @@ MonoBehaviour:
   m_rsoCurrentControls: {fileID: 11400000, guid: ee7837d85dfcc514591e6db53c523973,
     type: 2}
   m_rseReturn: {fileID: 11400000, guid: b1589385223d0a24ca81ceaa854459ec, type: 2}
+  m_isMainMenu: 0
   m_tabManager: {fileID: 4438257352957341252}
   m_valueSensitivity: {fileID: 8600699808327031095}
   m_toggleInvertCameraY: {fileID: 4278273846927817964}
+  m_mainMenu: {fileID: 0}
   m_rsoGameStarted: {fileID: 11400000, guid: b5e7d2acc936fa64d8af133296c43995, type: 2}
   m_ssoInputs: {fileID: 11400000, guid: a335bb6fe90ea314d90dd2eb5cd93325, type: 2}
   m_rsoPause: {fileID: 11400000, guid: a2ea92c3ee051664782983f5eda912ec, type: 2}
@@ -1390,8 +1392,8 @@ MonoBehaviour:
   m_toggleCursor: 0
   m_toggleReturn: 1
   m_toggleSelectable: 1
-  m_requiredState: 5
-  m_previousState: 2
+  m_requiredState: 6
+  m_previousState: 0
   m_defaultSelect: {fileID: 0}
   m_previousUISelect: {fileID: 7446958115930663092}
   m_graphicsParent: {fileID: 3614111377533198602}
@@ -1403,6 +1405,8 @@ MonoBehaviour:
   m_rsoCurrentControls: {fileID: 11400000, guid: ee7837d85dfcc514591e6db53c523973,
     type: 2}
   m_rseReturn: {fileID: 11400000, guid: b1589385223d0a24ca81ceaa854459ec, type: 2}
+  m_isMainMenu: 0
+  m_mainMenu: {fileID: 4802085641536510707}
 --- !u!1 &2001533934218887837
 GameObject:
   m_ObjectHideFlags: 0
@@ -2599,8 +2603,8 @@ MonoBehaviour:
   m_toggleCursor: 0
   m_toggleReturn: 1
   m_toggleSelectable: 1
-  m_requiredState: 3
-  m_previousState: 2
+  m_requiredState: 4
+  m_previousState: 0
   m_defaultSelect: {fileID: 5197119762330259502}
   m_previousUISelect: {fileID: 7446958115930663092}
   m_graphicsParent: {fileID: 4210319417156062978}
@@ -2612,9 +2616,11 @@ MonoBehaviour:
   m_rsoCurrentControls: {fileID: 11400000, guid: ee7837d85dfcc514591e6db53c523973,
     type: 2}
   m_rseReturn: {fileID: 11400000, guid: b1589385223d0a24ca81ceaa854459ec, type: 2}
+  m_isMainMenu: 1
   m_tabManager: {fileID: 6296337444237890354}
   m_valueSensitivity: {fileID: 888699207371742236}
   m_toggleInvertCameraY: {fileID: 25321372892663072}
+  m_mainMenu: {fileID: 4802085641536510707}
   m_rsoGameStarted: {fileID: 11400000, guid: b5e7d2acc936fa64d8af133296c43995, type: 2}
   m_ssoInputs: {fileID: 11400000, guid: a335bb6fe90ea314d90dd2eb5cd93325, type: 2}
   m_rsoPause: {fileID: 11400000, guid: a2ea92c3ee051664782983f5eda912ec, type: 2}
@@ -3406,9 +3412,6 @@ RectTransform:
   m_Children:
   - {fileID: 1791436893917464315}
   - {fileID: 148422933189435957}
-  - {fileID: 2212400968599268031}
-  - {fileID: 7621404242588528521}
-  - {fileID: 7440344533554106850}
   - {fileID: 8152381630088077903}
   - {fileID: 1515439503355424619}
   m_Father: {fileID: 0}
@@ -3852,13 +3855,13 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4204611705099826204}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 4522164368636327368}
-  m_Father: {fileID: 2752253921843224294}
+  m_Father: {fileID: 1791436893917464315}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -3880,8 +3883,8 @@ MonoBehaviour:
   m_toggleCursor: 0
   m_toggleReturn: 1
   m_toggleSelectable: 1
-  m_requiredState: 5
-  m_previousState: 2
+  m_requiredState: 6
+  m_previousState: 3
   m_defaultSelect: {fileID: 0}
   m_previousUISelect: {fileID: 5706908223361787437}
   m_graphicsParent: {fileID: 2357986364511537646}
@@ -3893,6 +3896,8 @@ MonoBehaviour:
   m_rsoCurrentControls: {fileID: 11400000, guid: ee7837d85dfcc514591e6db53c523973,
     type: 2}
   m_rseReturn: {fileID: 11400000, guid: b1589385223d0a24ca81ceaa854459ec, type: 2}
+  m_isMainMenu: 0
+  m_mainMenu: {fileID: 0}
 --- !u!1 &4210319417156062978
 GameObject:
   m_ObjectHideFlags: 0
@@ -4038,6 +4043,9 @@ RectTransform:
   m_Children:
   - {fileID: 5825118074639916436}
   - {fileID: 4494807139496054460}
+  - {fileID: 2212400968599268031}
+  - {fileID: 7621404242588528521}
+  - {fileID: 7440344533554106850}
   m_Father: {fileID: 2752253921843224294}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -7707,6 +7715,8 @@ MonoBehaviour:
   m_rsoCurrentControls: {fileID: 11400000, guid: ee7837d85dfcc514591e6db53c523973,
     type: 2}
   m_rsoGameStarted: {fileID: 11400000, guid: b5e7d2acc936fa64d8af133296c43995, type: 2}
+  m_rsoCancelPriority: {fileID: 11400000, guid: 349eed709a6b798498f96c9556b6f2b7,
+    type: 2}
   m_menuStartDelay: 0.5
   m_menuTitleInterval: 0.2
   m_menuSlidePosX: -500

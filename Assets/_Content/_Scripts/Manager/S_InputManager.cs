@@ -294,7 +294,6 @@ public class InputManager : MonoBehaviour
 
     public void OnStartAction()
     {
-		print("called!");
         m_rseStartAction.Call();
     }
 
@@ -312,8 +311,10 @@ public class InputManager : MonoBehaviour
 	{
         if (!value.isPressed) return;
 
-		m_rseReturn.Call(value.isPressed);
-	}
+        // Consume cancel input
+        m_rsoCancelConsumable.value = true;
+        m_rseCancel.Call(value.isPressed);
+    }
 
     #endregion
 }

@@ -24,6 +24,7 @@ public class S_MenuManager : MonoBehaviour
     [FoldoutGroup("External references")][SerializeField] private RSO_CurrentScheme m_rsoCurrentScheme;
     [FoldoutGroup("External references")][SerializeField] private RSO_CurrentControls m_rsoCurrentControls;
     [FoldoutGroup("External references")][SerializeField] protected RSO_GameStarted m_rsoGameStarted;
+    [FoldoutGroup("External references")][SerializeField] private RSO_CancelPriority m_rsoCancelPriority;
 
     [FoldoutGroup("Menu animation")][SerializeField] private float m_menuStartDelay;
     [FoldoutGroup("Menu animation")][SerializeField] private float m_menuTitleInterval;
@@ -54,6 +55,8 @@ public class S_MenuManager : MonoBehaviour
         m_rsoCurrentControls.OnChanged -= ChangeControls;
     }
 
+
+
     public void StartGame()
     {
         if (!m_inMainMenu) return;
@@ -68,7 +71,7 @@ public class S_MenuManager : MonoBehaviour
 
         m_imgTitle.SetActive(false);
         m_pnlCredits.SetActive(true);
-        m_rsoCurrentScheme.value = InputScheme.PAUSE;
+        m_rsoCancelPriority.value = CancelState.UI_CREDITS;
     }
 
     public void OpenSettings()
@@ -76,8 +79,8 @@ public class S_MenuManager : MonoBehaviour
         if (!m_inMainMenu) return;
 
         m_imgTitle.SetActive(false);
+        m_rsoCancelPriority.value = CancelState.UI_SETTINGS;
         m_pnlSettings.Show();
-        m_rsoCurrentScheme.value = InputScheme.PAUSE;
     }
 
     public void QuitGame()
@@ -100,13 +103,21 @@ public class S_MenuManager : MonoBehaviour
 
     public void ShowMenu()
     {
-        if (m_inMainMenu) return;
+        if (!m_inMainMenu)
+        {
+            PrepareMenu();
 
-        PrepareMenu();
+            m_inMainMenu = true;
+            m_menuTitleParent.SetActive(true);
+            StartCoroutine(MenuAnimation());
+        }
+        else
+        {
+            m_menuTitleParent.SetActive(true);
+            ChangeControls();
+        }
 
-        m_inMainMenu = true;
-        StartCoroutine(MenuAnimation());
-
+        m_rsoCancelPriority.value = CancelState.NONE;
     }
 
     private IEnumerator MenuAnimation()

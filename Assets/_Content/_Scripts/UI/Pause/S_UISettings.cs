@@ -3,15 +3,20 @@ using UnityEngine;
 
 public class UISettings : UIWindow
 {
-	[FoldoutGroup("Internal references")][SerializeField] private UITabManager m_tabManager;
+    [FoldoutGroup("Tweakable values")][SerializeField] protected bool m_isMainMenu;
+
+    [FoldoutGroup("Internal references")][SerializeField] private UITabManager m_tabManager;
 	[FoldoutGroup("Internal references")][SerializeField] private UISlider m_valueSensitivity;
 	[FoldoutGroup("Internal references")][SerializeField] private UIToggleable m_toggleInvertCameraY;
+    [ShowIf("m_isMainMenu")][FoldoutGroup("Internal references")][SerializeField] private S_MenuManager m_mainMenu;
 
     [FoldoutGroup("Scriptable")][SerializeField] protected RSO_GameStarted m_rsoGameStarted;
     [FoldoutGroup("Scriptable")][SerializeField] private SSO_Inputs m_ssoInputs;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_Pause m_rsoPause;
 
-	protected override void OnEnable()
+
+
+    protected override void OnEnable()
 	{
 		base.OnEnable();
 		m_rsoPause.OnChanged += OnPaused;
@@ -34,6 +39,14 @@ public class UISettings : UIWindow
     {
         m_tabManager.CloseCurrentTab();
         base.Hide();
+
+    }
+
+    public override void Return(bool isPressed)
+    {
+        print("returned");
+        base.Return(isPressed);
+        if (m_isMainMenu) m_mainMenu.ShowMenu();
     }
 
     private void OnPaused()

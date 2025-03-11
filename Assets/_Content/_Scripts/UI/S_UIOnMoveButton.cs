@@ -29,7 +29,6 @@ public class UIOnMoveButton : MonoBehaviour, ISelectHandler, IDeselectHandler, I
 
     public void OnSelect(BaseEventData eventData)
     {
-        print("selected: " + this.gameObject.name);
         if (m_rsoCurrentControls.value != ControlType.GAMEPAD) return;
         ToggleMove(true);
     }
@@ -41,7 +40,6 @@ public class UIOnMoveButton : MonoBehaviour, ISelectHandler, IDeselectHandler, I
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        print("highlighted: " + eventData.pointerEnter.name);
         if (m_rsoCurrentControls.value != ControlType.KEYBOARDMOUSE) return;
         ToggleMove(true);
     }

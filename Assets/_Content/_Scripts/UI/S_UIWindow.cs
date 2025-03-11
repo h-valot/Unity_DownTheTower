@@ -71,6 +71,7 @@ public class UIWindow : MonoBehaviour
 		// Assertions
 		if (!m_toggleReturn) return;
 		if (!IsActive) return;
+		print("value: " + m_rsoCancelPriority.value.ToString() + " / state: " + m_requiredState + " / consumable: " + m_rsoCancelConsumable.value);
 		if (m_rsoCancelPriority.value != m_requiredState) return;
 		if (!m_rsoCancelConsumable.value) return;
 
