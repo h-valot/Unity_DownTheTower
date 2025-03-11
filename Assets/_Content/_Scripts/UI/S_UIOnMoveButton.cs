@@ -9,9 +9,8 @@ using static UnityEngine.Rendering.DebugUI;
 
 public class UIOnMoveButton : MonoBehaviour, ISelectHandler, IDeselectHandler, IPointerEnterHandler, IPointerExitHandler
 {
-    [FoldoutGroup("Tweakable values")]
-    [SerializeField] private bool moveToRight = false;
-    [SerializeField] private float moveAmount;
+    [FoldoutGroup("Tweakable values")][SerializeField] private bool moveToRight = false;
+    [FoldoutGroup("Tweakable values")][SerializeField] private float moveAmount;
 
     [FoldoutGroup("Internal references")]
     [InfoBox("It will be moved to the chosen direction slightly", InfoMessageType.None)]
@@ -23,7 +22,7 @@ public class UIOnMoveButton : MonoBehaviour, ISelectHandler, IDeselectHandler, I
 
     private float m_baseLocalPosX;
 
-    private void Start()
+    private void Awake()
     {
         m_baseLocalPosX = m_graphicsParent.transform.localPosition.x;
     }
@@ -42,13 +41,14 @@ public class UIOnMoveButton : MonoBehaviour, ISelectHandler, IDeselectHandler, I
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        print("highlighted: " + this.gameObject.name);
+        print("highlighted: " + eventData.pointerEnter.name);
         if (m_rsoCurrentControls.value != ControlType.KEYBOARDMOUSE) return;
         ToggleMove(true);
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
+        if (eventData.reentered) return;
         ToggleMove(false);
     }
 

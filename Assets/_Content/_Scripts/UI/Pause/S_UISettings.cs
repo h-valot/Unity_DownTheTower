@@ -7,6 +7,7 @@ public class UISettings : UIWindow
 	[FoldoutGroup("Internal references")][SerializeField] private UISlider m_valueSensitivity;
 	[FoldoutGroup("Internal references")][SerializeField] private UIToggleable m_toggleInvertCameraY;
 
+    [FoldoutGroup("Scriptable")][SerializeField] protected RSO_GameStarted m_rsoGameStarted;
     [FoldoutGroup("Scriptable")][SerializeField] private SSO_Inputs m_ssoInputs;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_Pause m_rsoPause;
 
@@ -37,8 +38,9 @@ public class UISettings : UIWindow
 
     private void OnPaused()
 	{
-		// Assertion
-		if (m_rsoPause.value) return;
+        // Assertion
+        if (!m_rsoGameStarted.value) return;
+        if (m_rsoPause.value) return;
 
 		Hide();
 	}

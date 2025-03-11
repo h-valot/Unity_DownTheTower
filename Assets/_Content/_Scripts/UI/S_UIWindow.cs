@@ -14,25 +14,25 @@ public class UIWindow : MonoBehaviour
     [ShowIf("m_toggleReturn")][FoldoutGroup("Tweakable values")][SerializeField] protected GameObject m_previousUISelect;
 
 	[FoldoutGroup("Internal references")][SerializeField] protected GameObject m_graphicsParent;
-
+	
 	[ShowIf("m_toggleCursor")][FoldoutGroup("Scriptable")][SerializeField] protected RSE_ToggleCursor m_rseToggleCursor;
 	[ShowIf("m_toggleReturn")][FoldoutGroup("Scriptable")][SerializeField] protected RSO_CancelConsumable m_rsoCancelConsumable;
 	[ShowIf("m_toggleReturn")][FoldoutGroup("Scriptable")][SerializeField] protected RSO_CancelPriority m_rsoCancelPriority;
     [ShowIf("m_toggleReturn")][FoldoutGroup("Scriptable")][SerializeField] protected RSO_CurrentControls m_rsoCurrentControls;
-    [ShowIf("m_toggleReturn")][FoldoutGroup("Scriptable")][SerializeField] protected RSE_Cancel m_rseCancel;
+    [ShowIf("m_toggleReturn")][FoldoutGroup("Scriptable")][SerializeField] protected RSE_Return m_rseReturn;
 
 	public bool IsActive => m_graphicsParent.activeInHierarchy;
 
 	protected virtual void OnEnable()
 	{
-		if (m_toggleReturn) m_rseCancel.action += Return;
+		if (m_toggleReturn) m_rseReturn.action += Return;
 		m_rsoCurrentControls.OnChanged += UpdateSelection;
 
     }
 
 	protected virtual void OnDisable()
 	{
-		if (m_toggleReturn) m_rseCancel.action -= Return;
+		if (m_toggleReturn) m_rseReturn.action -= Return;
         m_rsoCurrentControls.OnChanged -= UpdateSelection;
     }
 

@@ -19,21 +19,22 @@ public class UILogDisplayer : UIWindow
     [FoldoutGroup("Scriptable")][SerializeField] private RSO_InputsLocked m_rsoInputsLocked;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_InputAdviceDisplayed m_rsoInputAdviceDisplayed;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_Pause m_rsoPause;
+    [FoldoutGroup("Scriptable")][SerializeField] private RSO_CurrentScheme m_rsoCurrentScheme;
 
-	private bool m_logCollectionDisplayed;
+    private bool m_logCollectionDisplayed;
 	private GameObject selectedLog;
 
 	protected override void OnEnable()
 	{
 		m_rseDisplayLog.action += Display;
-		m_rseCancel.action += Hide;
+		m_rseReturn.action += Hide;
 		m_rsoPause.OnChanged += Hide;
 	}
 
 	protected override void OnDisable()
 	{
 		m_rseDisplayLog.action -= Display;
-		m_rseCancel.action -= Hide;
+		m_rseReturn.action -= Hide;
 		m_rsoPause.OnChanged -= Hide;
 	}
 
@@ -52,6 +53,7 @@ public class UILogDisplayer : UIWindow
 		m_rsoInputsLocked.value = true;
 		m_rsoInputAdviceDisplayed.value = false;
 		base.Show();
+		if(!m_rsoPause.value) m_rsoCurrentScheme.value = InputScheme.PAUSE;
 		m_rsoCancelPriority.value = CancelState.UI_LOG;
         m_rsePlaySound.Call(m_ssoSoundLogOpen);
     }
@@ -64,6 +66,7 @@ public class UILogDisplayer : UIWindow
 
 		m_rsoCancelConsumable.value = false;
 		base.Hide();
+        if (!m_rsoPause.value) m_rsoCurrentScheme.value = InputScheme.GAME;
         m_rsePlaySound.Call(m_ssoSoundLogClose);
 
 		if (m_logCollectionDisplayed)

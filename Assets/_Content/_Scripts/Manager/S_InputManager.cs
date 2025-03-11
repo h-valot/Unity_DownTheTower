@@ -27,7 +27,8 @@ public class InputManager : MonoBehaviour
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Climb m_rseClimb;
     [FoldoutGroup("Scriptable")][SerializeField] private RSE_SwitchTabLeft m_rseSwitchTabLeft;
     [FoldoutGroup("Scriptable")][SerializeField] private RSE_SwitchTabRight m_rseSwitchTabRight;
-    [FoldoutGroup("Scriptable")][SerializeField] private RSE_Start m_rseStart;
+    [FoldoutGroup("Scriptable")][SerializeField] private RSE_StartAction m_rseStartAction;
+    [FoldoutGroup("Scriptable")][SerializeField] private RSE_Return m_rseReturn;
 
     [FoldoutGroup("Scriptable")][SerializeField] private RSO_Pause m_rsoPause;
     [FoldoutGroup("Scriptable")][SerializeField] private RSO_CancelConsumable m_rsoCancelConsumable;
@@ -62,7 +63,7 @@ public class InputManager : MonoBehaviour
 		m_rsoCraftInputLocked.value = false;
 		m_rsoRecycleInputLocked.value = false;
 		m_rseLook.Call(Vector2.zero);
-		m_rsoCurrentScheme.value = InputScheme.MENU;
+		m_rsoCurrentScheme.value = InputScheme.PAUSE;
 
     }
 
@@ -263,16 +264,6 @@ public class InputManager : MonoBehaviour
 		m_rsoInputAdviceDisplayed.value = !m_rsoInputAdviceDisplayed.value;
 	}
 
-    public void OnSwitchTabLeft()
-    {
-        if(m_rsoPause.value) m_rseSwitchTabLeft.Call();
-    }
-
-    public void OnSwitchTabRight()
-    {
-        if (m_rsoPause.value) m_rseSwitchTabRight.Call();
-    }
-
     public void OnPause()
 	{
 		m_rsoPause.value = !m_rsoPause.value;
@@ -294,20 +285,35 @@ public class InputManager : MonoBehaviour
 			case InputScheme.PAUSE:
                 m_playerInput.SwitchCurrentActionMap("Pause");
                 break;
-			case InputScheme.MENU:
-                m_playerInput.SwitchCurrentActionMap("Title");
-                break;
 		}
 	}
 
     #endregion
 
-    #region ACTION LISTENER - MENU AND PAUSE
+    #region ACTION LISTENER - PAUSE
 
-    public void OnStartGame()
+    public void OnStartAction()
     {
-        m_rseStart.Call();
+		print("called!");
+        m_rseStartAction.Call();
     }
+
+    public void OnSwitchTabLeft()
+    {
+        m_rseSwitchTabLeft.Call();
+    }
+
+    public void OnSwitchTabRight()
+    {
+        m_rseSwitchTabRight.Call();
+    }
+
+	public void OnReturn(InputValue value)
+	{
+        if (!value.isPressed) return;
+
+		m_rseReturn.Call(value.isPressed);
+	}
 
     #endregion
 }

@@ -19,53 +19,70 @@ public class S_MenuManager : MonoBehaviour
     [FoldoutGroup("Internal references")][SerializeField] private UISettings m_pnlSettings;
     [FoldoutGroup("Internal references")][SerializeField] private GameObject m_pnlCredits;
 
-    [FoldoutGroup("External references")][SerializeField] private RSE_Start m_rseStart;
+    [FoldoutGroup("External references")][SerializeField] private RSE_StartAction m_rseStartAction;
     [FoldoutGroup("External references")][SerializeField] private RSE_ToggleCursor m_rseToggleCursor;
     [FoldoutGroup("External references")][SerializeField] private RSO_CurrentScheme m_rsoCurrentScheme;
     [FoldoutGroup("External references")][SerializeField] private RSO_CurrentControls m_rsoCurrentControls;
+    [FoldoutGroup("External references")][SerializeField] protected RSO_GameStarted m_rsoGameStarted;
 
     [FoldoutGroup("Menu animation")][SerializeField] private float m_menuStartDelay;
     [FoldoutGroup("Menu animation")][SerializeField] private float m_menuTitleInterval;
     [FoldoutGroup("Menu animation")][SerializeField] private float m_menuSlidePosX;
     [FoldoutGroup("Menu animation")][SerializeField] private float m_individualAnimLength;
 
-    private bool m_hasStarted;
+    private bool m_inMainMenu;
     private float m_originPosX;
 
     // Start is called before the first frame update
 
     private void Awake()
     {
-        m_hasStarted = false;
-        PrepareMenu();
+        m_menuTitleParent.SetActive(false);
+        m_rsoGameStarted.value = false;
+        m_inMainMenu = false;
     }
 
     private void OnEnable()
     {
-        m_rseStart.action += ShowMenu;
+        m_rseStartAction.action += ShowMenu;
         m_rsoCurrentControls.OnChanged += ChangeControls;
     }
 
     private void OnDisable()
     {
-        m_rseStart.action -= ShowMenu;
+        m_rseStartAction.action -= ShowMenu;
         m_rsoCurrentControls.OnChanged -= ChangeControls;
+    }
+
+    public void StartGame()
+    {
+        if (!m_inMainMenu) return;
+
+        m_imgTitle.SetActive(false);
+        m_rsoCurrentScheme.value = InputScheme.GAME;
     }
 
     public void OpenCredits()
     {
-        if (!m_hasStarted) return;
+        if (!m_inMainMenu) return;
 
         m_imgTitle.SetActive(false);
         m_pnlCredits.SetActive(true);
+        m_rsoCurrentScheme.value = InputScheme.PAUSE;
     }
 
     public void OpenSettings()
     {
-        if (!m_hasStarted) return;
+        if (!m_inMainMenu) return;
 
         m_imgTitle.SetActive(false);
         m_pnlSettings.Show();
+        m_rsoCurrentScheme.value = InputScheme.PAUSE;
+    }
+
+    public void QuitGame()
+    {
+        Application.Quit();
     }
 
     public void PrepareMenu()
@@ -75,18 +92,19 @@ public class S_MenuManager : MonoBehaviour
         foreach (TextMeshProUGUI menu in m_menuTitles)
         {
             // Setting up placement and alpha
-            menu.transform.localPosition = new Vector3(menu.transform.localPosition.x + m_menuSlidePosX, menu.transform.localPosition.y, menu.transform.localPosition.z);
+            menu.transform.DOLocalMoveX(m_originPosX + m_menuSlidePosX, 0);
             menu.DOFade(0, 0);
         }
 
-        m_menuTitleParent.SetActive(false);
     }
 
     public void ShowMenu()
     {
-        if (m_hasStarted) return;
+        if (m_inMainMenu) return;
 
-        m_hasStarted = true;
+        PrepareMenu();
+
+        m_inMainMenu = true;
         StartCoroutine(MenuAnimation());
 
     }

@@ -658,45 +658,6 @@
             ]
         },
         {
-            "name": "Title",
-            "id": "77fb9591-d494-4e0f-a20a-2f1ccc2ef7c3",
-            "actions": [
-                {
-                    "name": "StartGame",
-                    "type": "Button",
-                    "id": "859662df-6a41-4d42-b75c-26a4fef91324",
-                    "expectedControlType": "Button",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                }
-            ],
-            "bindings": [
-                {
-                    "name": "",
-                    "id": "41c3b13b-f0e0-4b45-b003-d57e3caa2814",
-                    "path": "<Gamepad>/buttonSouth",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "Gamepad",
-                    "action": "StartGame",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "aae7cb7b-7bbe-4c4a-b728-25187603fe87",
-                    "path": "<Keyboard>/space",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "KeyboardMouse",
-                    "action": "StartGame",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                }
-            ]
-        },
-        {
             "name": "Pause",
             "id": "60ab870e-8076-4b7f-87cc-27be494dbd34",
             "actions": [
@@ -720,8 +681,17 @@
                 },
                 {
                     "name": "Return",
-                    "type": "Button",
+                    "type": "Value",
                     "id": "19998a0d-e972-4167-99e1-19aeba427415",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "StartAction",
+                    "type": "Button",
+                    "id": "b2657d11-eb23-4b0c-a0b7-4898524eb677",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "",
@@ -776,11 +746,44 @@
                 {
                     "name": "",
                     "id": "703db2e5-c7ac-4a30-823b-31bc026075e4",
-                    "path": "",
+                    "path": "<Gamepad>/buttonEast",
                     "interactions": "",
                     "processors": "",
-                    "groups": "",
+                    "groups": "Gamepad",
                     "action": "Return",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "7b322f16-5f77-4730-bf71-10267d2be02b",
+                    "path": "<Keyboard>/c",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "KeyboardMouse",
+                    "action": "Return",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "19284afd-9105-4827-9153-be049e4e9f59",
+                    "path": "<Gamepad>/start",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "StartAction",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "74403dda-f516-4754-bb9c-ca871ade86a4",
+                    "path": "<Keyboard>/escape",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "KeyboardMouse",
+                    "action": "StartAction",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
