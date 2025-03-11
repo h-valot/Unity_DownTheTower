@@ -1,5 +1,4 @@
 using Sirenix.OdinInspector;
-using Unity.IO.LowLevel.Unsafe;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -25,15 +24,20 @@ public class UIWindow : MonoBehaviour
 
 	protected virtual void OnEnable()
 	{
-		if (m_toggleReturn) m_rseCancel.action += Return;
-		m_rsoCurrentControls.OnChanged += UpdateSelection;
-
-    }
+		if (m_toggleReturn)
+		{
+			m_rseCancel.action += Return;
+			m_rsoCurrentControls.OnChanged += UpdateSelection;
+		}
+	}
 
 	protected virtual void OnDisable()
 	{
-		if (m_toggleReturn) m_rseCancel.action -= Return;
-        m_rsoCurrentControls.OnChanged -= UpdateSelection;
+		if (m_toggleReturn) 
+		{
+			m_rseCancel.action -= Return;
+        	m_rsoCurrentControls.OnChanged -= UpdateSelection;
+		}
     }
 
 	public virtual void Start()

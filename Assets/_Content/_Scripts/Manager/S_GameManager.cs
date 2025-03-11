@@ -20,9 +20,10 @@ public class GameManager : MonoBehaviour
 	[FoldoutGroup("RSO")][SerializeField] private RSO_CharacterDeath m_rsoCharacterDeath;
 	[FoldoutGroup("RSO")][SerializeField] private RSO_InputsLocked m_rsoInputsLocked;
 	[FoldoutGroup("RSO")][SerializeField] private RSO_Pause m_rsoPause;
-	[FoldoutGroup("RSO")] [SerializeField] private RSO_CancelPriority m_rsoCancelPriority;
+	[FoldoutGroup("RSO")][SerializeField] private RSO_CancelPriority m_rsoCancelPriority;
 	[FoldoutGroup("RSO")][SerializeField] private RSO_Ropes m_rsoRopes;
 	[FoldoutGroup("RSO")][SerializeField] private RSO_LastCheckpointReached m_rsoLastCheckpointReached;
+	[FoldoutGroup("RSO")][SerializeField] private RSO_CurrentTutoIndex m_rsoCurrentTutoIndex;
 
 	[FoldoutGroup("RSE")][SerializeField] private RSE_ToggleCursor m_rseToggleCursor;
 
@@ -56,6 +57,7 @@ public class GameManager : MonoBehaviour
 		}
 
 		Restart();
+		m_rsoCurrentTutoIndex.value = -1;
 		DOTween.SetTweensCapacity(400, 400);
 		m_rseToggleCursor.Call(false);
 		StartCoroutine(m_cameraMotor.SetZeroDampForSeconds(1f));
