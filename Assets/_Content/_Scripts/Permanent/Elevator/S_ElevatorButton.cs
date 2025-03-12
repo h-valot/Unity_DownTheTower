@@ -9,9 +9,12 @@ public class ElevatorButton : Interactable
 
     [Title("External references")]
     [SerializeField] private Elevator m_elevator;
+    [SerializeField] private RSE_PlayAt m_rse_playAt;
+    [SerializeField] private SSO_Sound m_ButtonSound;
 
     [Title("Internal references")]
     [SerializeField] private GameObject m_button;
+    
 
     private void OnDisable()
     {
@@ -28,7 +31,7 @@ public class ElevatorButton : Interactable
         {
             m_elevator.Ascend(); 
         }
-
+        m_rse_playAt.Call(m_ButtonSound, this.transform.position);
         UpdateGraphics();
     }
 

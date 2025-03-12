@@ -12,6 +12,8 @@ public class AnimatorManager : MonoBehaviour
     [SerializeField] private SSO_Sound m_ssoFootstepRun;
     [SerializeField] private SSO_Sound m_ssoFootstepWalk;
     [SerializeField] private SSO_Sound m_ssoLanding;
+    [SerializeField] private SSO_Sound m_ssoJumping;
+    [SerializeField] private SSO_Sound m_ssoSwing;
     [SerializeField] private RSE_PlaySound m_rsePlaySound;
     [SerializeField] private RSE_PlayAt m_rsePlayAt;
     [SerializeField] private GameObject m_footLocation;
@@ -153,6 +155,14 @@ public class AnimatorManager : MonoBehaviour
         m_rsePlayAt.Call(m_ssoLanding, m_footLocation.transform.position);
     }
 
+    private void OnAnimEventJumping()
+    {
+        m_rsePlayAt.Call(m_ssoJumping, m_footLocation.transform.position);
+    }
 
+    private void OnAnimEventSwing()
+    {
+        m_rsePlaySound.Call(m_ssoSwing);
+    }
     #endregion
 }
