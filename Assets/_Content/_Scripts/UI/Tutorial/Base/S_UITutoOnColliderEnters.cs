@@ -5,7 +5,7 @@ public class UITutoOnColliderEnters : UITutoPanel
 {
 	[FoldoutGroup("Tweakable values")][SerializeField] private TutoColliderType m_type;
 
-	[FoldoutGroup("Scriptable")][SerializeField] private RSE_TutoColliderEnters m_rseTutoColliderEnters;
+	[FoldoutGroup("Scriptables")][SerializeField] private RSE_TutoColliderEnters m_rseTutoColliderEnters;
 
 	protected override void OnEnable()
 	{
@@ -21,9 +21,10 @@ public class UITutoOnColliderEnters : UITutoPanel
 
 	private void OnColliderEnters(TutoColliderType type)
 	{
-		if (m_type == type)
-		{
-			Show();
-		}
+		// Assertions
+		if (m_isDone) return;
+		if (m_type != type) return;
+
+		Show();
 	}
 }

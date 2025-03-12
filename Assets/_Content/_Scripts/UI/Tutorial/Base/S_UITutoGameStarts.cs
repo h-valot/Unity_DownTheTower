@@ -35,8 +35,6 @@ public class UITutoGameStarts : UITutoPanel
 	private IEnumerator OnStart()
 	{
 		yield return new WaitForSeconds(m_delayFromStart);
-
-
 		Show();
 	}
 
@@ -64,7 +62,6 @@ public class UITutoGameStarts : UITutoPanel
 		if (m_hasMoved && m_hasLooked) return;
 
 		base.Show();
-
 	}
 
 	protected override void Hide()
@@ -73,7 +70,7 @@ public class UITutoGameStarts : UITutoPanel
 		if (!m_hasMoved || !m_hasLooked) return;
 		if (m_rsoCurrentTutoIndex.value > m_index) return;
 
-		base.Hide();
+		Complete();
 	}
 
 }
