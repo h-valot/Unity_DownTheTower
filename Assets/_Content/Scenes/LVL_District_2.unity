@@ -57295,6 +57295,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: PF_Guardian
       objectReference: {fileID: 0}
+    - target: {fileID: 484332240391301456, guid: 0dfe6889adf481246afedc08a42cda52,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6412754733033068052, guid: 0dfe6889adf481246afedc08a42cda52,
         type: 3}
       propertyPath: m_patrolPath
@@ -95383,6 +95388,7 @@ Transform:
   m_Children:
   - {fileID: 827853166}
   - {fileID: 901808575}
+  - {fileID: 944122003}
   - {fileID: 595450661}
   - {fileID: 1689652122}
   - {fileID: 1319636461}
@@ -228289,6 +228295,54 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 943912414}
   m_Mesh: {fileID: 6596718003859446019, guid: ce5173e0a17ce824ea48086a94e44236, type: 3}
+--- !u!1 &944122002
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 944122003}
+  - component: {fileID: 944122004}
+  m_Layer: 0
+  m_Name: NavMesh Modifier Volume (2)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &944122003
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 944122002}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: 0.2588186, z: -0, w: 0.965926}
+  m_LocalPosition: {x: 26.21693, y: 59.202946, z: -32.045677}
+  m_LocalScale: {x: 1.3366, y: 1, z: 0.39051}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 648570010}
+  m_LocalEulerAnglesHint: {x: 0, y: 30, z: 0}
+--- !u!114 &944122004
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 944122002}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 35e95dc5ff2b64380880dd7ac5922847, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Size: {x: 4, y: 3, z: 4}
+  m_Center: {x: 0, y: 1, z: 0}
+  m_Area: 1
+  m_AffectedAgents: ffffffff
 --- !u!1 &945271052
 GameObject:
   m_ObjectHideFlags: 0
@@ -345699,6 +345753,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: PF_Guardian (2)
       objectReference: {fileID: 0}
+    - target: {fileID: 484332240391301456, guid: 0dfe6889adf481246afedc08a42cda52,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6412754733033068052, guid: 0dfe6889adf481246afedc08a42cda52,
         type: 3}
       propertyPath: m_patrolPath
@@ -427422,7 +427481,7 @@ Transform:
   m_GameObject: {fileID: 1907329851}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0.7071068, z: 0, w: -0.7071068}
-  m_LocalPosition: {x: -1.5721884, y: 10.414709, z: -2.3}
+  m_LocalPosition: {x: -1.5721884, y: 11.82, z: -2.3}
   m_LocalScale: {x: 0.3729832, y: 32.00547, z: 4.3501654}
   m_ConstrainProportionsScale: 0
   m_Children: []
