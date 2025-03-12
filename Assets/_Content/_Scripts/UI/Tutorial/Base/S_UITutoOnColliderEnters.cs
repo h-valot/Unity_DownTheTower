@@ -22,7 +22,7 @@ public class UITutoOnColliderEnters : UITutoPanel
 	private void OnColliderEnters(TutoColliderType type)
 	{
 		// Assertions
-		if (m_isDone) return;
+		if (m_isCompleted) return;
 		if (m_type != type) return;
 
 		Show();

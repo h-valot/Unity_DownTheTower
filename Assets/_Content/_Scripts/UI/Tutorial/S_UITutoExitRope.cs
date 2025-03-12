@@ -39,7 +39,7 @@ public class UITutoExitRope : UITutoPanel
 		
 		if (m_rsoCharacterState.value == BehaviorState.LOCOMOTION
 		&& m_wasOnRope
-		&& !m_isDone)
+		&& !m_isCompleted)
 		{
 			StartCoroutine(ShowAfterDelay(m_showDelay));
 		}

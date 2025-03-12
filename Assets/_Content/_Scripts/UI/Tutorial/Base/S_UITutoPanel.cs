@@ -9,7 +9,9 @@ public class UITutoPanel : MonoBehaviour
 
 	[FoldoutGroup("Scriptables")][SerializeField] protected RSO_CurrentTutoIndex m_rsoCurrentTutoIndex;
 
-	protected bool m_isDone;
+	protected bool m_isCompleted;
+
+	public bool IsActive => m_graphicsParent.activeInHierarchy;
 
 	protected virtual void OnEnable()
 	{
@@ -23,7 +25,7 @@ public class UITutoPanel : MonoBehaviour
 
 	protected virtual void Start()
 	{
-		m_isDone = false;
+		m_isCompleted = false;
 		Hide();
 	}
 
@@ -37,7 +39,7 @@ public class UITutoPanel : MonoBehaviour
 
 	protected virtual void Complete()
 	{
-		m_isDone = true;
+		m_isCompleted = true;
 		m_graphicsParent.SetActive(false);
 	}
 
