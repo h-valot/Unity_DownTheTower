@@ -1,20 +1,20 @@
 using Sirenix.OdinInspector;
 using UnityEngine;
 
-public class UITutoRopeBalancing : UITutoOnColliderEnters
+public class UITutoRopeJump : UITutoOnColliderEnters
 {
 	[FoldoutGroup("Tweakable values")][SerializeField] private float m_inputHeldDuration;
 
 	[FoldoutGroup("Scriptables")][SerializeField] private RSO_CharacterState m_rsoCharacterState;
-	[FoldoutGroup("Scriptables")][SerializeField] private RSE_Move m_rseMove;
+	[FoldoutGroup("Scriptables")][SerializeField] private RSE_Jump m_rseJump;
 
 	private float m_timer;
-	private bool m_isMoving;
+	private bool m_isJumping;
 
 	private void Update()
 	{
 		// Assertions
-		if (!m_isMoving) return;
+		if (!m_isJumping) return;
 		if (m_isCompleted) return;
 		if (m_rsoCharacterState.value != BehaviorState.ROPE) return;
 		if (!IsActive) return;
@@ -29,13 +29,13 @@ public class UITutoRopeBalancing : UITutoOnColliderEnters
 	protected override void OnEnable()
 	{
 		base.OnEnable();
-		m_rseMove.action += OnMove;
+		m_rseJump.action += OnJump;
 	}
 
 	protected override void OnDisable()
 	{
 		base.OnDisable();
-		m_rseMove.action -= OnMove;
+		m_rseJump.action -= OnJump;
 	}
 
 	protected override void Show()
@@ -44,8 +44,8 @@ public class UITutoRopeBalancing : UITutoOnColliderEnters
 		base.Show();
 	}
 
-	private void OnMove(Vector2 vector)
+	private void OnJump(bool isInputPressed)
 	{
-		m_isMoving = vector.magnitude > 0;
+		m_isJumping = isInputPressed;
 	}
 }
