@@ -58,7 +58,8 @@ public class CharacterMotor : MonoBehaviour
 
 	[FoldoutGroup("Sounds")][SerializeField] private RSE_PlaySound m_rsePlaySound;
     [FoldoutGroup("Sounds")][SerializeField] private RSE_PlayAt m_rsePlayAt;
-	[FoldoutGroup("Sounds")][SerializeField] private RSE_PlayRope m_rsePlayRope;	
+	[FoldoutGroup("Sounds")][SerializeField] private RSE_PlayRope m_rsePlayRope;
+    [FoldoutGroup("Sounds")][SerializeField] private RSE_PlayRopeStop m_rsePlayRopeStop;
     [FoldoutGroup("Sounds")][SerializeField] private SSO_Sound m_ssoDeathLanding;
     [FoldoutGroup("Sounds")][SerializeField] private SSO_Sound m_ssoDeathGuardian;
     [FoldoutGroup("Sounds")][SerializeField] private SSO_Sound m_ssoDeathMushroom;
@@ -118,10 +119,12 @@ public class CharacterMotor : MonoBehaviour
 	// - Rope state -
 	private Rope m_rope;
 	private bool m_isHolding;
+	public bool IsHolding => m_isHolding;
 	private float m_ropeDragTimer;
 	private bool m_withinRopeLimit;
 	private bool m_isClimbing;
-	private float m_currentClimbSpeed;
+    public bool IsClimbing=> m_isClimbing;
+    private float m_currentClimbSpeed;
 	public bool IsRopeValid => m_rope && m_rope.IsPlaced;
 
 	// - Craft state -
@@ -1243,7 +1246,8 @@ public class CharacterMotor : MonoBehaviour
 		if (m_isHolding)
 		{
 			isFalling = true;
-		}
+            if (!m_isGrounded) m_rsePlayRope.Call(m_ssoRopeFree);
+        }
 		else
 		{
 			// If the character IS NOT holding the rope, let it fall till it reaches the rope limit constraint
@@ -1262,6 +1266,7 @@ public class CharacterMotor : MonoBehaviour
 		m_rope.Detach();
 		m_rope = null;
 		m_isHolding = false;
+		m_rsePlayRopeStop.Call(m_ssoRopeFree);
 	}
 
 	private void ToggleRopeConstraint(bool isEnabled)
@@ -1281,7 +1286,6 @@ public class CharacterMotor : MonoBehaviour
 		{
 			m_rope.IsConstrained = false;
 			m_rope.SetHoldLength(m_ssoRope.MaxLength - m_ssoRope.MaxLengthOffset - m_rope.GetFixedLength());
-            if (!m_isGrounded) m_rsePlayRope.Call(m_ssoRopeFree);
 
         }
 	}

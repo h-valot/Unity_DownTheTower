@@ -12,6 +12,8 @@ public class AnimatorManager : MonoBehaviour
     [SerializeField] private SSO_Sound m_ssoFootstepRun;
     [SerializeField] private SSO_Sound m_ssoFootstepWalk;
     [SerializeField] private SSO_Sound m_ssoLanding;
+    [SerializeField] private SSO_Sound m_ssoJumping;
+    [SerializeField] private SSO_Sound m_ssoSwing;
     [SerializeField] private RSE_PlaySound m_rsePlaySound;
     [SerializeField] private RSE_PlayAt m_rsePlayAt;
     [SerializeField] private GameObject m_footLocation;
@@ -30,8 +32,14 @@ public class AnimatorManager : MonoBehaviour
     private int m_FallState = Animator.StringToHash("IsFall");
     private int m_RopeState = Animator.StringToHash("IsRope");
     private int m_isRopeAttachedHash = Animator.StringToHash("IsRopeAttached");
+    private int m_isSpeedSlower = Animator.StringToHash("IsSpeedSlower");
+    private int m_isClimbing = Animator.StringToHash("IsClimbing");
+    private int m_isHolding = Animator.StringToHash("IsDescending");
 
     private float m_moveSpeed;
+    private float m_horizontalSpeedFloat;
+    private float m_lastHorizontalSpeed;
+    private bool m_speedSlower;
     private bool m_ropeThrow;
     private bool m_ropeAttached;
     private BehaviorState m_currentState;
@@ -39,19 +47,32 @@ public class AnimatorManager : MonoBehaviour
     void LateUpdate()
     {
         m_moveSpeed = Mathf.Abs(m_characterMotor.Rigidbody.velocity.magnitude);
+        m_horizontalSpeedFloat = Mathf.Abs(new Vector3(m_characterMotor.Rigidbody.velocity.x, 0, m_characterMotor.Rigidbody.velocity.z).magnitude);
+        if(m_horizontalSpeedFloat < m_lastHorizontalSpeed)
+        {
+            m_speedSlower = true;
+        }
+        else
+        {
+            m_speedSlower = false;
+        }
         DetermineState();
         m_animator.SetFloat(m_moveSpeedHash, m_moveSpeed);
         m_animator.SetFloat(m_verticalSpeed, Mathf.Abs(m_characterMotor.Rigidbody.velocity.y));
-        m_animator.SetFloat(m_horizontalSpeed, Mathf.Abs(new Vector3(m_characterMotor.Rigidbody.velocity.x, 0, m_characterMotor.Rigidbody.velocity.z).magnitude));
+        m_animator.SetFloat(m_horizontalSpeed, m_horizontalSpeedFloat);
         m_animator.SetBool(m_isJumpingHash, m_characterMotor.m_hasJumped);
         m_animator.SetBool(m_isGroundedHash, m_characterMotor.m_isGrounded);
         m_animator.SetBool(m_isRopeAttachedHash, m_ropeAttached);
         m_animator.SetBool(m_isThrowingHash, m_ropeThrow);
+        m_animator.SetBool(m_isSpeedSlower, m_speedSlower);
+        m_animator.SetBool(m_isClimbing, m_characterMotor.IsClimbing);
+        m_animator.SetBool(m_isHolding, m_characterMotor.IsHolding);
         if (m_characterMotor.IsRopeValid == false)
         {
             m_ropeAttached = false;
 
         }
+        m_lastHorizontalSpeed = m_horizontalSpeedFloat;
     }
 
     private void DetermineState()
@@ -136,9 +157,16 @@ public class AnimatorManager : MonoBehaviour
     private void OnAnimEventLanding()
     {
         m_rsePlayAt.Call(m_ssoLanding, m_footLocation.transform.position);
-        print("fire");
     }
 
+    private void OnAnimEventJumping()
+    {
+        m_rsePlayAt.Call(m_ssoJumping, m_footLocation.transform.position);
+    }
 
+    private void OnAnimEventSwing()
+    {
+        m_rsePlaySound.Call(m_ssoSwing);
+    }
     #endregion
 }
