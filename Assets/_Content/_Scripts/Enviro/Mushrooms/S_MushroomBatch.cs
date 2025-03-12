@@ -379,7 +379,6 @@ public class MushroomBatch : MonoBehaviour
 
         VFXexplosion.SetFloat("DeflateDuration", m_ssoMushrooms.DeflateDuration);
         VFXexplosion.SetFloat("DeflateWaveSpeed", m_ssoMushrooms.DeflateWaveSpeed);
-        VFXexplosion.SetFloat("Lifetime", m_distanceFurtherestMushroom / m_ssoMushrooms.DeflateWaveSpeed + m_ssoMushrooms.DeflateIdleDuration);
         VFXexplosion.SetFloat("MaxRandomLifetimeAdded", m_ssoMushrooms.DeflateIdleDuration * 0.25f);
 
         UpdateState(MushroomState.CHARGED);
@@ -541,6 +540,7 @@ public class MushroomBatch : MonoBehaviour
                 m_propertyBlock.SetFloat("_startTime", Time.time);
 
                 VFXexplosion.SetFloat("StartTime", Time.time);
+                VFXexplosion.SetFloat("Lifetime", m_distanceFurtherestMushroom / m_ssoMushrooms.DeflateWaveSpeed + m_ssoMushrooms.DeflateIdleDuration);
 
                 VFXexplosion.SendEvent("OnPlay");
                 break;

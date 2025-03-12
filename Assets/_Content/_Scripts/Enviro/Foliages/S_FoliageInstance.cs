@@ -35,4 +35,5 @@ public enum FoliageType
     SARRACENIAL,
     MONSTERA,
     RAFFLESIE,
+    SPIDER_NEST
 }

@@ -8834,7 +8834,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_gameStart
       value: 
-      objectReference: {fileID: 1604122681}
+      objectReference: {fileID: 1184191600}
     - target: {fileID: 2689525137431596548, guid: 1271e0e9ae0948d4fbbf1c5ec03c46da,
         type: 3}
       propertyPath: m_directionalLight
@@ -9211,6 +9211,11 @@ PrefabInstance:
       value: "Petite fille: \u201COhalala j\u2019ai pas envie qu\u2019il finisse
         le dernier niveau, maman dit qu\u2019on vera bientot plus le soleil. Gribouille
         va pas aimer \xE7a\u2026\u201D"
+      objectReference: {fileID: 0}
+    - target: {fileID: 7825657577960891290, guid: 888ff82ccbb828942b5fe6cc9718388d,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7982071871248496947, guid: 888ff82ccbb828942b5fe6cc9718388d,
         type: 3}
@@ -16835,6 +16840,18 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 3925373052224556770}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1184191600 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5071725326251147000, guid: b9c11633fb8f74f45ae6426c189e0c00,
+    type: 3}
+  m_PrefabInstance: {fileID: 3925373052224556770}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a5d7c5227eb2a0f4d9d3068cba8f94c5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!4 &1215334305 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4994288649557540890, guid: 828a222276dd61a4b969ec446e556c7e,
@@ -23225,18 +23242,6 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 848214570}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1604122681 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 5071725326251147000, guid: b9c11633fb8f74f45ae6426c189e0c00,
-    type: 3}
-  m_PrefabInstance: {fileID: 848214570}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a5d7c5227eb2a0f4d9d3068cba8f94c5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1610523900
 GameObject:
   m_ObjectHideFlags: 0
