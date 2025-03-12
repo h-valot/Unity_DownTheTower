@@ -37,10 +37,14 @@ public class SoundManager : MonoBehaviour
 
     private void PlayMusic(SSO_Sound sound)
     {
-        m_musicSource_1.clip = sound.Clip;
-        m_musicSource_1.Play();
-        m_musicSource_2.clip = m_ambianceLoop.Clip;
-        m_musicSource_2.PlayDelayed(sound.Clip.length);
+        if (m_musicSource_1.clip != sound.Clip)
+        {
+            m_musicSource_1.clip = sound.Clip;
+            m_musicSource_1.Play();
+            m_musicSource_2.clip = m_ambianceLoop.Clip;
+            m_musicSource_2.PlayDelayed(sound.Clip.length);
+        }
+
     }
     private void PlaySound(SSO_Sound sound)
     {
