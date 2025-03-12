@@ -67,7 +67,6 @@ public class AnimatorManager : MonoBehaviour
 
         }
         m_lastHorizontalSpeed = m_horizontalSpeedFloat;
-        print(m_speedSlower);
     }
 
     private void DetermineState()
@@ -152,7 +151,6 @@ public class AnimatorManager : MonoBehaviour
     private void OnAnimEventLanding()
     {
         m_rsePlayAt.Call(m_ssoLanding, m_footLocation.transform.position);
-        print("fire");
     }
 
 
