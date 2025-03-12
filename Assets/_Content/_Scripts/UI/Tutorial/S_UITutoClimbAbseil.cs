@@ -12,6 +12,7 @@ public class UITutoClimbAbseil : UITutoPanel
 
 	private bool m_hasClimp;
 	private bool m_hasAbseil;
+	private bool m_noMoreOnRope;
 
 	protected override void OnEnable()
 	{
@@ -38,13 +39,26 @@ public class UITutoClimbAbseil : UITutoPanel
 		if (m_rsoCharacterState.value == BehaviorState.ROPE
 		&& !m_isDone)
 		{
+			m_noMoreOnRope = false;
 			StartCoroutine(ShowAfterDelay(m_showDelay));
+		}
+
+		if (m_rsoCharacterState.value != BehaviorState.ROPE)
+		{
+			m_noMoreOnRope = true;
+			Hide();
 		}
 	}
 
 	private IEnumerator ShowAfterDelay(float duration)
 	{
 		yield return new WaitForSeconds(duration);
+
+		if (m_noMoreOnRope) 
+		{
+			yield return null;
+		}
+		
 		Show();
 	}
 
