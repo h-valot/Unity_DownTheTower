@@ -43,7 +43,7 @@ public class UITutoGameStarts : UITutoPanel
 		if (vector.magnitude > 0f)
 		{
 			m_hasMoved = true;
-			Hide();
+			Complete();
 		}
 	}
 
@@ -52,7 +52,7 @@ public class UITutoGameStarts : UITutoPanel
 		if (vector.magnitude > 0f)
 		{
 			m_hasLooked = true;
-			Hide();
+			Complete();
 		}
 	}
 
@@ -64,13 +64,13 @@ public class UITutoGameStarts : UITutoPanel
 		base.Show();
 	}
 
-	protected override void Hide()
+	protected override void Complete()
 	{
 		// Assertion
 		if (!m_hasMoved || !m_hasLooked) return;
 		if (m_rsoCurrentTutoIndex.value > m_index) return;
 
-		Complete();
+		base.Complete();
 	}
 
 }
