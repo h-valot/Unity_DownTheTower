@@ -38,4 +38,9 @@ public class SSO_Mushrooms : ScriptableObject
     [PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
     [InfoBox("Duration of the growth state (overlap the end of the safe state).", InfoMessageType.None)]
     public float InflateDuration;
+
+    [FoldoutGroup("Visual")]
+    [PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+    [InfoBox("Distance to display particles.", InfoMessageType.None)]
+    public float distanceDisplay;
 }
