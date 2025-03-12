@@ -33,6 +33,8 @@ public class AnimatorManager : MonoBehaviour
     private int m_RopeState = Animator.StringToHash("IsRope");
     private int m_isRopeAttachedHash = Animator.StringToHash("IsRopeAttached");
     private int m_isSpeedSlower = Animator.StringToHash("IsSpeedSlower");
+    private int m_isClimbing = Animator.StringToHash("IsClimbing");
+    private int m_isHolding = Animator.StringToHash("IsDescending");
 
     private float m_moveSpeed;
     private float m_horizontalSpeedFloat;
@@ -63,6 +65,8 @@ public class AnimatorManager : MonoBehaviour
         m_animator.SetBool(m_isRopeAttachedHash, m_ropeAttached);
         m_animator.SetBool(m_isThrowingHash, m_ropeThrow);
         m_animator.SetBool(m_isSpeedSlower, m_speedSlower);
+        m_animator.SetBool(m_isClimbing, m_characterMotor.IsClimbing);
+        m_animator.SetBool(m_isHolding, m_characterMotor.IsHolding);
         if (m_characterMotor.IsRopeValid == false)
         {
             m_ropeAttached = false;

@@ -6,6 +6,7 @@ public class SoundManager : MonoBehaviour
     [FoldoutGroup("Scriptable")][SerializeField] private RSE_PlaySound m_rsePlaySound;
     [FoldoutGroup("Scriptable")][SerializeField] private RSE_PlayAt m_rsePlayAt;
     [FoldoutGroup("Scriptable")][SerializeField] private RSE_PlayRope m_rsePlayRope;
+    [FoldoutGroup("Scriptable")][SerializeField] private RSE_PlayRopeStop m_rsePlayRopeStop;
     [FoldoutGroup("Scriptable")][SerializeField] private RSE_PlayMusic m_rsePlayMusic;
 
     [FoldoutGroup("References")][SerializeField] private AudioSource m_musicSource_1;
@@ -22,6 +23,7 @@ public class SoundManager : MonoBehaviour
         m_rsePlaySound.action += PlaySound;
         m_rsePlayAt.action += PlayAt;
         m_rsePlayRope.action += PlayRope;
+        m_rsePlayRopeStop.action += StopPlayRope;
     }
 
     private void OnDisable()
@@ -30,6 +32,7 @@ public class SoundManager : MonoBehaviour
         m_rsePlaySound.action -= PlaySound;
         m_rsePlayAt.action -= PlayAt;
         m_rsePlayRope.action -= PlayRope;
+        m_rsePlayRopeStop.action -= StopPlayRope;
     }
 
     private void PlayMusic(SSO_Sound sound)
@@ -53,7 +56,24 @@ public class SoundManager : MonoBehaviour
 
     private void PlayRope(SSO_Sound sound)
     {
-        m_audioSource_Rope.clip = sound.Clip;
-        m_audioSource_Rope.Play();
+        if (m_audioSource_Rope.clip != sound.Clip)
+        {
+            m_audioSource_Rope.clip = sound.Clip;
+            m_audioSource_Rope.Play();
+        }
+
+        else if (m_audioSource_Rope.isPlaying == false)
+        {
+            m_audioSource_Rope.clip = sound.Clip;
+            m_audioSource_Rope.Play();
+        }
+    }
+
+    private void StopPlayRope(SSO_Sound sound)
+    {
+        if (m_audioSource_Rope.isPlaying == true)
+        {
+            m_audioSource_Rope.Stop();
+        }
     }
 }
