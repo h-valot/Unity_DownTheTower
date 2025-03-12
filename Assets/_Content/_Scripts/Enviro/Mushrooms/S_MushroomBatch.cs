@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
+using UnityEngine.VFX;
 
 public class MushroomBatch : MonoBehaviour
 {
@@ -17,13 +18,18 @@ public class MushroomBatch : MonoBehaviour
     [FoldoutGroup("Spawning")][SerializeField] private float m_minSizeMultiplier = 0.5f;
     [FoldoutGroup("Spawning")][SerializeField] private float m_maxSizeMultiplier = 1.5f;
 
+    [FoldoutGroup("Spawning")][SerializeField] private float m_thresholdCoplanarAngle = 0f;
+    [FoldoutGroup("Spawning")][SerializeField] private float m_thresholdCoplanarDistance = 0f;
+
     // DrawMeshInstanced can only draw up to 1023 meshes at a time, so we need a new list for every 1023 mushrooms
     [HideInInspector] public List<MatrixList> mushroomLists = new List<MatrixList>();
 
     [FoldoutGroup("External References")][SerializeField] public SSO_Mushrooms m_ssoMushrooms;
+    [FoldoutGroup("External References")][SerializeField] public RSO_CharacterPosition m_rsoCharPos;
     [FoldoutGroup("External References")][SerializeField] private GameObject m_mushroomTriggerPrefab;
     [FoldoutGroup("External References")][SerializeField] private GameObject m_mushroomPrefab;
-    [FoldoutGroup("External References")][SerializeField] private GameObject m_particlePrefab;
+    [FoldoutGroup("External References")][SerializeField] private GameObject m_VFXSporesPrefab;
+    [FoldoutGroup("External References")][SerializeField] private GameObject m_VFXExplosionPrefab;
     [FoldoutGroup("External References")][SerializeField] private Mesh m_mushroomMesh;
     [FoldoutGroup("External References")][SerializeField] private Material m_masterMaterial;
 
@@ -36,10 +42,13 @@ public class MushroomBatch : MonoBehaviour
 
     // --- INSTANCIATED VARIABLES ---
     [HideInInspector] public GameObject MushroomTrigger;
-    [HideInInspector] public GameObject ParticleSystem;
+    [HideInInspector] public VisualEffect VFXspores;
+    [HideInInspector] public VisualEffect VFXexplosion;
 
-    // --- PRIVATE VARIABLES ---
-    // not used during runtime
+    #endregion
+
+    #region PRIVATE VARIABLES
+
     private float m_furthestShroom = -1f;
 
     // used during runtime
@@ -49,6 +58,18 @@ public class MushroomBatch : MonoBehaviour
     private MaterialPropertyBlock m_propertyBlock;
 
     [HideInInspector][SerializeField] private List<GameObject> m_spawnedGameObjects = new List<GameObject>();
+    
+    [System.Serializable]
+    public class CoplanarMushroomsGroup
+    {
+        public Vector3 Center;
+        public Vector3 Normal;
+        public float Radius;
+
+        public List<GameObject> GameObjects = new List<GameObject>();
+    }
+
+    [HideInInspector][SerializeField] private List<CoplanarMushroomsGroup> m_mushroomGroups = new List<CoplanarMushroomsGroup>();
 
     #endregion
 
@@ -87,13 +108,16 @@ public class MushroomBatch : MonoBehaviour
             // 1. Instantiate Death Sphere (collision)
             MushroomTrigger = Instantiate(m_mushroomTriggerPrefab, transform.position, Quaternion.identity, transform);
             MushroomTrigger.GetComponent<SphereCollider>().radius = m_furthestShroom;
-            MushroomTrigger.transform.SetSiblingIndex(0);
+            MushroomTrigger.transform.SetSiblingIndex(0); // to make it a the top of the hierarchy
 
-            // 2. Instantiate Particles
-            ParticleSystem = Instantiate(m_particlePrefab, transform.position, Quaternion.identity, transform);
-            ParticleSystem.ShapeModule shape = ParticleSystem.GetComponent<ParticleSystem>().shape;
-            shape.radius = m_furthestShroom;
-            ParticleSystem.transform.SetSiblingIndex(1);
+            //2. Instantiate particle systems
+            VFXspores = Instantiate(m_VFXSporesPrefab, transform.position, Quaternion.identity, transform).GetComponent<VisualEffect>();
+            VFXspores.transform.SetSiblingIndex(1); // to make it second on the hierarchy
+            VFXexplosion = Instantiate(m_VFXExplosionPrefab, transform.position, Quaternion.identity, transform).GetComponent<VisualEffect>();
+            VFXexplosion.transform.SetSiblingIndex(2); // to make it third on the hierarchy
+
+            //3. Create Coplanar group of mushroom and setup VFX system
+            UpdateMushroomGroupsVFX();
         }
     }
 
@@ -117,6 +141,8 @@ public class MushroomBatch : MonoBehaviour
     [Button]
     public void ClearGameObjects()
     {
+        m_mushroomGroups.Clear();
+
         foreach (GameObject spawnedObject in m_spawnedGameObjects) 
             if (spawnedObject != null) DestroyImmediate(spawnedObject);
         m_spawnedGameObjects.Clear();
@@ -133,7 +159,7 @@ public class MushroomBatch : MonoBehaviour
 
         mushroomLists.Clear();
         MushroomTrigger = null;
-        ParticleSystem = null;
+        VFXspores = null;
     }
 
     private int GetRaycastSamples()
@@ -147,14 +173,18 @@ public class MushroomBatch : MonoBehaviour
         if (SimplexNoise3D.SimplexNoise(hitInfo.point, 0.37f) < 0.5f) return;
         float scale = m_mushroomPrefab.transform.localScale.x * Random.Range(m_minSizeMultiplier, m_maxSizeMultiplier);
 
-        if (!IsNormalFacingOrigin(hitInfo) || !HasEnoughRoom(hitInfo, scale * 0.5f * m_overlapModifier)) return;
+        if (!IsNormalFacingOrigin(hitInfo) || !HasEnoughRoom(hitInfo, m_mushroomPrefab.GetComponent<SphereCollider>().radius * scale * 0.5f * m_overlapModifier)) return;
 
-        GameObject newMushroom = Instantiate(m_mushroomPrefab, hitInfo.point, Quaternion.FromToRotation(Vector3.up, hitInfo.normal), transform);
+        Quaternion rotation;
+        rotation = Quaternion.AngleAxis(UnityEngine.Random.Range(-180f, 180f), hitInfo.normal) * Quaternion.FromToRotation(Vector3.up, hitInfo.normal);
+
+        GameObject newMushroom = Instantiate(m_mushroomPrefab, hitInfo.point, rotation, transform);
         m_spawnedGameObjects.Add(newMushroom);
         newMushroom.transform.localScale = new Vector3(scale, scale, scale);
-        newMushroom.GetComponent<MeshRenderer>().material = m_masterMaterial;
         AddMatrixToList(newMushroom.transform.localToWorldMatrix);
+        newMushroom.GetComponent<MeshRenderer>().material = m_masterMaterial;
         newMushroom.name = "List" + mushroomLists.Count + "Mushroom" + mushroomLists[mushroomLists.Count - 1].matrices.Count;
+        newMushroom.GetComponent<MushroomInstance>().Setup();
         CheckFurthest(newMushroom);
     }
 
@@ -204,6 +234,132 @@ public class MushroomBatch : MonoBehaviour
         return false;
     }
 
+    public bool UpdateMushroomFromList(Vector3 position, Matrix4x4 matrix)
+    {
+        foreach (MatrixList list in mushroomLists)
+        {
+            for (int i = 0; i < list.matrices.Count; i++)
+            {
+                if (position.Equals(list.matrices[i].GetPosition()))
+                {
+                    list.matrices[i] = matrix;
+                    UpdateMushroomGroupsVFX();
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    [Button]
+    private void UpdateMushroomGroupsVFX()
+    {
+        m_mushroomGroups.Clear();
+
+        foreach(GameObject go in m_spawnedGameObjects)
+        {
+            if (m_mushroomGroups.Count < 1)
+            {
+                m_mushroomGroups.Add(new CoplanarMushroomsGroup());
+                m_mushroomGroups[^1].Center = go.transform.position;
+                m_mushroomGroups[^1].Normal = go.transform.up;
+                m_mushroomGroups[^1].Radius = 0f;
+                m_mushroomGroups[^1].GameObjects.Add(go);
+            }
+            else
+            {
+                for(int i = 0; i < m_mushroomGroups.Count; i++)
+                {
+                    if (Vector3.Dot(go.transform.up, m_mushroomGroups[i].Normal) >= 1f - m_thresholdCoplanarAngle
+                        && (Vector3.Dot(go.transform.position, m_mushroomGroups[i].Normal) / Vector3.Dot(m_mushroomGroups[i].Normal, m_mushroomGroups[i].Normal) * m_mushroomGroups[i].Normal).magnitude >= (Vector3.Dot(m_mushroomGroups[i].Center, m_mushroomGroups[i].Normal) / Vector3.Dot(m_mushroomGroups[i].Normal, m_mushroomGroups[i].Normal) * m_mushroomGroups[i].Normal).magnitude - m_thresholdCoplanarDistance
+                        && (Vector3.Dot(go.transform.position, m_mushroomGroups[i].Normal) / Vector3.Dot(m_mushroomGroups[i].Normal, m_mushroomGroups[i].Normal) * m_mushroomGroups[i].Normal).magnitude <= (Vector3.Dot(m_mushroomGroups[i].Center, m_mushroomGroups[i].Normal) / Vector3.Dot(m_mushroomGroups[i].Normal, m_mushroomGroups[i].Normal) * m_mushroomGroups[i].Normal).magnitude + m_thresholdCoplanarDistance
+                        )
+                    {
+                        m_mushroomGroups[i].GameObjects.Add(go);
+                        break;
+                    }
+                    else if (i+1 == m_mushroomGroups.Count)
+                    {
+                        m_mushroomGroups.Add(new CoplanarMushroomsGroup());
+                        m_mushroomGroups[^1].Center = go.transform.position;
+                        m_mushroomGroups[^1].Normal = go.transform.up;
+                        m_mushroomGroups[^1].Radius = 0f;
+                        m_mushroomGroups[^1].GameObjects.Add(go);
+                        break;
+                    }
+                }
+            }
+        }
+
+        //Sort by number of mushroom in each group
+        m_mushroomGroups.Sort((s1, s2) => s2.GameObjects.Count.CompareTo(s1.GameObjects.Count));
+        //keep only the first 4 group, the bigger
+        while (m_mushroomGroups.Count > 4)
+        {
+            m_mushroomGroups.RemoveAt(4);
+        }
+
+        foreach (CoplanarMushroomsGroup group in m_mushroomGroups)
+        {
+            Vector3 minPos = group.GameObjects[0].transform.position;
+            Vector3 maxPos = group.GameObjects[0].transform.position;
+
+            foreach (GameObject go in group.GameObjects)
+            {
+                minPos = new Vector3(Mathf.Min(minPos.x, go.transform.position.x), Mathf.Min(minPos.y, go.transform.position.y), Mathf.Min(minPos.z, go.transform.position.z));
+                maxPos = new Vector3(Mathf.Max(maxPos.x, go.transform.position.x), Mathf.Max(maxPos.y, go.transform.position.y), Mathf.Max(maxPos.z, go.transform.position.z));
+            }
+
+            group.Center = (maxPos - minPos)/2 + minPos;
+
+            group.Radius = 0f;
+
+            foreach (GameObject go in group.GameObjects)
+            {
+                group.Radius = Mathf.Max(group.Radius, Vector3.Distance(group.Center, go.transform.position) + go.GetComponent<SphereCollider>().radius);
+            }
+        }
+
+        float area = 0f;
+        VFXspores.SetInt("NumberOfGroupsMinusOne", m_mushroomGroups.Count);
+        VFXexplosion.SetInt("NumberOfGroupsMinusOne", m_mushroomGroups.Count);
+
+        for (int i = 0; i < m_mushroomGroups.Count; i++)
+        {
+            float groupArea = m_mushroomGroups[i].Radius * m_mushroomGroups[i].Radius * Mathf.PI;
+            VFXspores.SetVector3("G" + i.ToString() + "_center", m_mushroomGroups[i].Center);
+            VFXspores.SetVector3("G" + i.ToString() + "_normal", m_mushroomGroups[i].Normal);
+            VFXspores.SetFloat("G" + i.ToString() + "_radius", m_mushroomGroups[i].Radius);
+            VFXspores.SetFloat("G" + i.ToString() + "_area", groupArea);
+            VFXexplosion.SetVector3("G" + i.ToString() + "_center", m_mushroomGroups[i].Center);
+            VFXexplosion.SetVector3("G" + i.ToString() + "_normal", m_mushroomGroups[i].Normal);
+            VFXexplosion.SetFloat("G" + i.ToString() + "_radius", m_mushroomGroups[i].Radius);
+            VFXexplosion.SetFloat("G" + i.ToString() + "_area", groupArea);
+            area += groupArea;
+        }
+
+        VFXspores.SetFloat("Area", area);
+        VFXexplosion.SetFloat("Area", area);
+        VFXexplosion.SetVector3("Center", transform.position);
+        VFXexplosion.SetFloat("Radius", m_radius*2f);
+    }
+
+    private void CheckCharacterDistance()
+    {
+        if(Vector3.Distance(m_rsoCharPos.value, transform.position) < m_ssoMushrooms.distanceDisplay)
+        {
+            if (m_currentState == MushroomState.CHARGED)
+            {
+                VFXspores.enabled = true;
+            }
+        }
+        else
+        {
+            VFXspores.enabled = false;
+        }
+    }
+
     #endregion spawning
 
     #region monobehavior functions
@@ -219,7 +375,24 @@ public class MushroomBatch : MonoBehaviour
         m_propertyBlock.SetFloat("_isInflating", 1f);
         m_propertyBlock.SetFloat("_inflateDuration", m_ssoMushrooms.InflateDuration);
 
+        VFXspores.enabled = false;
+
+        VFXexplosion.SetFloat("DeflateDuration", m_ssoMushrooms.DeflateDuration);
+        VFXexplosion.SetFloat("DeflateWaveSpeed", m_ssoMushrooms.DeflateWaveSpeed);
+        VFXexplosion.SetFloat("Lifetime", m_distanceFurtherestMushroom / m_ssoMushrooms.DeflateWaveSpeed + m_ssoMushrooms.DeflateIdleDuration);
+        VFXexplosion.SetFloat("MaxRandomLifetimeAdded", m_ssoMushrooms.DeflateIdleDuration * 0.25f);
+
         UpdateState(MushroomState.CHARGED);
+    }
+
+    private void OnEnable()
+    {
+        m_rsoCharPos.OnChanged += CheckCharacterDistance;
+    }
+
+    private void OnDisable()
+    {
+        m_rsoCharPos.OnChanged -= CheckCharacterDistance;
     }
 
     private void Update()
@@ -232,6 +405,19 @@ public class MushroomBatch : MonoBehaviour
     {
         Gizmos.color = Color.magenta;
         Gizmos.DrawWireSphere(transform.position, m_radius);
+
+
+        Gizmos.color = Color.green;
+        if (m_mushroomGroups.Count > 0)
+        {
+            foreach (CoplanarMushroomsGroup group in m_mushroomGroups)
+            {
+                if(group.GameObjects.Count > 0)
+                {
+                    Gizmos.DrawWireSphere(group.Center, group.Radius);
+                }
+            }
+        }
     }
 
     #endregion
@@ -314,6 +500,7 @@ public class MushroomBatch : MonoBehaviour
     public void Explode(Vector3 source ,float distanceFurtherestMushroom)
     {
         m_propertyBlock.SetVector("_source", source);
+        VFXexplosion.SetVector3("Source", source);
         m_distanceFurtherestMushroom = distanceFurtherestMushroom;
 
         IEnumerator coroutine = ExecuteEffect();
@@ -324,7 +511,11 @@ public class MushroomBatch : MonoBehaviour
     {
         UpdateState(MushroomState.DEFLATE);
 
-        yield return new WaitForSeconds(m_distanceFurtherestMushroom / m_ssoMushrooms.DeflateWaveSpeed + m_ssoMushrooms.DeflateIdleDuration);
+        yield return new WaitForSeconds(m_distanceFurtherestMushroom / m_ssoMushrooms.DeflateWaveSpeed);
+
+        VFXspores.enabled = false;
+
+        yield return new WaitForSeconds(m_ssoMushrooms.DeflateIdleDuration);
 
         UpdateState(MushroomState.SAFE);
 
@@ -342,17 +533,16 @@ public class MushroomBatch : MonoBehaviour
         switch (newState) 
         {
             case MushroomState.CHARGED:
+                VFXspores.enabled = true;
                 break;
 
             case MushroomState.DEFLATE:
                 m_propertyBlock.SetFloat("_isInflating", 0f);
                 m_propertyBlock.SetFloat("_startTime", Time.time);
 
-                ParticleSystem.MainModule main = ParticleSystem.GetComponent<ParticleSystem>().main;
-                main.duration = m_distanceFurtherestMushroom / m_ssoMushrooms.DeflateWaveSpeed;
-                main.startLifetime = m_distanceFurtherestMushroom / m_ssoMushrooms.DeflateWaveSpeed + m_ssoMushrooms.DeflateIdleDuration;
+                VFXexplosion.SetFloat("StartTime", Time.time);
 
-                ParticleSystem.GetComponent<ParticleSystem>().Play();
+                VFXexplosion.SendEvent("OnPlay");
                 break;
 
             case MushroomState.SAFE:

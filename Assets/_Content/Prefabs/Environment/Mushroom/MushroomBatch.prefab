@@ -49,23 +49,25 @@ MonoBehaviour:
   m_overlapModifier: 0.5
   m_minSizeMultiplier: 0.5
   m_maxSizeMultiplier: 1.5
+  m_thresholdCoplanarAngle: 0.05
+  m_thresholdCoplanarDistance: 0.1
   mushroomLists: []
   m_ssoMushrooms: {fileID: 11400000, guid: 28e7f28aefd52ff4eb6914fc908d9945, type: 2}
+  m_rsoCharPos: {fileID: 11400000, guid: 7fc614512add369458f5a4d382225bfb, type: 2}
   m_mushroomTriggerPrefab: {fileID: 338019743662669733, guid: c5a78aec403b0ef488528201cc573693,
     type: 3}
   m_mushroomPrefab: {fileID: 7762096543299851040, guid: d078e67249fe575408f240e5e29aacb1,
     type: 3}
-  m_particlePrefab: {fileID: 7809570971166029454, guid: 59b349a5f2ee39045a429baa950e731f,
+  m_VFXSporesPrefab: {fileID: 4374535898625714901, guid: 9bd9e061c9bd86a4a8c6cb52919d2cb1,
+    type: 3}
+  m_VFXExplosionPrefab: {fileID: 6316159576428554128, guid: e51c48474381b7e4ebec0a71b17291f0,
     type: 3}
   m_mushroomMesh: {fileID: 7682724294687611154, guid: 54c06de0e92953844b087f71303f5e4b,
     type: 3}
   m_masterMaterial: {fileID: 2100000, guid: 273a9825b095e834ab681253660889c3, type: 2}
-  m_deflateTime: 0.5
-  m_attackTime: 2
-  m_inactiveTime: 10
-  m_inflateTime: 1
-  m_propagationSpeed: 6
+  m_safeDuration: 10
   MushroomTrigger: {fileID: 0}
-  ParticleSystem: {fileID: 0}
-  MushroomMaterial: {fileID: 0}
+  VFXspores: {fileID: 0}
+  VFXexplosion: {fileID: 0}
   m_spawnedGameObjects: []
+  m_mushroomGroups: []
