@@ -25,7 +25,6 @@ public class SSO_Camera : ScriptableObject
 	[InfoBox("Speed value of the lerp function that orient the character graphics in the direction of the movement.", InfoMessageType.None)]
 	public float RotationSpeed;
 
-
 	#endregion
 
 	#region GLOBAL PARAMETERS
@@ -106,6 +105,19 @@ public class SSO_Camera : ScriptableObject
 	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
 	[InfoBox("Duration of the lerp transition between default and custom Camera Side. (Mathf.Lerp() so the smaller, the slower)", InfoMessageType.None)]
 	public float TransitionCameraSide;
+
+	#endregion
+
+	#region GUARDIAN
+
+	[FoldoutGroup("Guardian")]
+	[InfoBox("Amplitude of the cinemachine camera shake function when the guardian is walking around the character.", InfoMessageType.None)]
+	public float GuardienStepShakeAmplitude;
+
+	[FoldoutGroup("Guardian")]
+	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
+	[InfoBox("Duration of the cinemachine camera shake function when the guardian is walking aroung the character.", InfoMessageType.None)]
+	public float GuardienStepShakeDuration;
 
 	#endregion
 }

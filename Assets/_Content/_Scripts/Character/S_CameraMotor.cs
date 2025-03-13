@@ -40,6 +40,7 @@ public class CameraMotor : MonoBehaviour
 	private Transform m_lookAt;
 
 	// - Custom effect value targets - 
+	private CinemachineBasicMultiChannelPerlin m_3rdPersonPerlin;
 	private Cinemachine3rdPersonFollow m_3rdPersonFollow;
 	private Cinemachine3rdPersonFollow ThirdPersonFollow
 	{
@@ -97,6 +98,12 @@ public class CameraMotor : MonoBehaviour
 		if (m_rsoInputsLocked.value) return;
 		if (m_isCameraFrozen) return;
 
+		// Debug: Camera shake
+		// if (Input.GetKeyDown(KeyCode.R))
+		// {
+		// 	StartCoroutine(Shake(m_ssoCamera.GuardienStepShakeAmplitude, m_ssoCamera.GuardienStepShakeDuration));
+		// }
+
 		HandleRotation();
 		CalculatePlanarVectors();
 		HandleSuspended();
@@ -120,6 +127,8 @@ public class CameraMotor : MonoBehaviour
 
 		m_targetCameraDistance = m_ssoCamera.DefaultCameraDistance;
 		ThirdPersonFollow.ShoulderOffset.y = m_ssoCamera.ShoulderOffsetY;
+		m_3rdPersonPerlin = m_3rdPersonCamera.GetCinemachineComponent<CinemachineBasicMultiChannelPerlin>();
+
 
 		m_rsoCameraForward.value = new Vector3(transform.forward.x, 0, transform.forward.z);
 		m_rsoCameraRight.value = new Vector3(transform.right.x, 0, transform.right.z);
@@ -246,6 +255,16 @@ public class CameraMotor : MonoBehaviour
 		m_cinemachineTargetYaw += input.x * Time.fixedDeltaTime;
 		m_cinemachineTargetPitch += input.y * Time.fixedDeltaTime;
     }
+
+	private IEnumerator Shake(float amplitude, float delay)
+	{
+		// Assertion
+		if (!m_3rdPersonPerlin) yield return null;
+
+		m_3rdPersonPerlin.m_AmplitudeGain = amplitude;
+		yield return new WaitForSeconds(delay);
+		m_3rdPersonPerlin.m_AmplitudeGain = 0f;
+	}
 
 	private void OnCharacterDie(bool isTextDisplayed)
 	{

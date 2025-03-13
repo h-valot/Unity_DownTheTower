@@ -1,0 +1,9 @@
+public enum TutoColliderType
+{
+	PLACE_ROPE,
+	ROPE_BALANCING,
+	ROPE_JUMP,
+	TOGGLE_INPUTS,
+	TOGGLE_TORCH,
+	THROW_TORCH,
+}
