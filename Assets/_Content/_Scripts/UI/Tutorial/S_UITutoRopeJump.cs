@@ -17,12 +17,7 @@ public class UITutoRopeJump : UITutoOnColliderEnters
 		if (!m_isJumping) return;
 		if (m_isCompleted) return;
 		if (!IsActive) return;
-
-		if (m_rsoCharacterState.value != BehaviorState.ROPE) 
-		{
-			Complete();
-			return;
-		}
+		if (m_rsoCharacterState.value != BehaviorState.ROPE) return;
 
 		m_timer -= Time.deltaTime;
 		if (m_timer <= 0f)
@@ -34,13 +29,24 @@ public class UITutoRopeJump : UITutoOnColliderEnters
 	protected override void OnEnable()
 	{
 		base.OnEnable();
+		m_rsoCharacterState.OnChanged += OnStateChanged;
 		m_rseJump.action += OnJump;
 	}
 
 	protected override void OnDisable()
 	{
 		base.OnDisable();
+		m_rsoCharacterState.OnChanged -= OnStateChanged;
 		m_rseJump.action -= OnJump;
+	}
+
+	private void OnStateChanged()
+	{
+		if (IsActive
+		&& m_rsoCharacterState.value != BehaviorState.ROPE)
+		{
+			Complete();
+		}
 	}
 
 	protected override void Show()

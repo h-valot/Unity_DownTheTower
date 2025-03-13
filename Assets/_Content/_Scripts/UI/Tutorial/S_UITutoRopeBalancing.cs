@@ -29,13 +29,24 @@ public class UITutoRopeBalancing : UITutoOnColliderEnters
 	protected override void OnEnable()
 	{
 		base.OnEnable();
+		m_rsoCharacterState.OnChanged += OnStateChanged;
 		m_rseMove.action += OnMove;
 	}
 
 	protected override void OnDisable()
 	{
 		base.OnDisable();
+		m_rsoCharacterState.OnChanged -= OnStateChanged;
 		m_rseMove.action -= OnMove;
+	}
+
+	private void OnStateChanged()
+	{
+		if (IsActive
+		&& m_rsoCharacterState.value != BehaviorState.ROPE)
+		{
+			Complete();
+		}
 	}
 
 	protected override void Show()

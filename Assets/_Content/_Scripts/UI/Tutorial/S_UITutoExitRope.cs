@@ -48,6 +48,13 @@ public class UITutoExitRope : UITutoPanel
 	private IEnumerator ShowAfterDelay(float duration)
 	{
 		yield return new WaitForSeconds(duration);
+
+		// Exit if the rope has been detach during the delay.
+		if (m_hasCancelled) 
+		{
+			yield return null;
+		}
+
 		Show();
 	}
 

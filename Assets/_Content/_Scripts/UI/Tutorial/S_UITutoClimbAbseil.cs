@@ -41,7 +41,8 @@ public class UITutoClimbAbseil : UITutoPanel
 			StartCoroutine(ShowAfterDelay(m_showDelay));
 		}
 
-		if (m_rsoCharacterState.value != BehaviorState.ROPE)
+		if (IsActive
+		&& m_rsoCharacterState.value != BehaviorState.ROPE)
 		{
 			// Skip extra verifications
 			base.Complete();
