@@ -17,7 +17,7 @@ public class S_MenuManager : MonoBehaviour
     [FoldoutGroup("Internal references")][SerializeField] private GameObject m_defaultSelected;
     [FoldoutGroup("Internal references")][SerializeField] private GameObject m_imgController;
     [FoldoutGroup("Internal references")][SerializeField] private UISettings m_pnlSettings;
-    [FoldoutGroup("Internal references")][SerializeField] private GameObject m_pnlCredits;
+    [FoldoutGroup("Internal references")][SerializeField] private UICredits m_pnlCredits;
 
     [FoldoutGroup("External references")][SerializeField] private RSE_StartAction m_rseStartAction;
     [FoldoutGroup("External references")][SerializeField] private RSE_ToggleCursor m_rseToggleCursor;
@@ -63,6 +63,12 @@ public class S_MenuManager : MonoBehaviour
 
         m_imgTitle.SetActive(false);
         m_rsoCurrentScheme.value = InputScheme.GAME;
+        m_rsoCancelPriority.value = CancelState.IN_GAME;
+        m_rsoGameStarted.value = true;
+
+        // Disable all panels
+        m_pnlCredits.gameObject.SetActive(false);
+        m_pnlSettings.gameObject.SetActive(false);
     }
 
     public void OpenCredits()
@@ -70,8 +76,8 @@ public class S_MenuManager : MonoBehaviour
         if (!m_inMainMenu) return;
 
         m_imgTitle.SetActive(false);
-        m_pnlCredits.SetActive(true);
         m_rsoCancelPriority.value = CancelState.UI_CREDITS;
+        m_pnlCredits.Show();
     }
 
     public void OpenSettings()
@@ -103,6 +109,8 @@ public class S_MenuManager : MonoBehaviour
 
     public void ShowMenu()
     {
+        if (m_rsoGameStarted.value) return;
+
         if (!m_inMainMenu)
         {
             PrepareMenu();
@@ -113,11 +121,20 @@ public class S_MenuManager : MonoBehaviour
         }
         else
         {
-            m_menuTitleParent.SetActive(true);
+            ResetTitlePositions();
+            m_imgTitle.SetActive(true);
             ChangeControls();
         }
 
         m_rsoCancelPriority.value = CancelState.NONE;
+    }
+
+    public void ResetTitlePositions()
+    {
+        foreach (TextMeshProUGUI menu in m_menuTitles)
+        {
+            menu.transform.DOLocalMoveX(m_originPosX, 0);
+        }
     }
 
     private IEnumerator MenuAnimation()

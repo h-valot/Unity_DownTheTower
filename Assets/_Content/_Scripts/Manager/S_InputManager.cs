@@ -286,6 +286,8 @@ public class InputManager : MonoBehaviour
                 m_playerInput.SwitchCurrentActionMap("Pause");
                 break;
 		}
+
+		print("Current Scheme: " + m_playerInput.currentActionMap.ToString());
 	}
 
     #endregion
@@ -313,7 +315,7 @@ public class InputManager : MonoBehaviour
 
         // Consume cancel input
         m_rsoCancelConsumable.value = true;
-        m_rseCancel.Call(value.isPressed);
+        m_rseReturn.Call(value.isPressed);
     }
 
     #endregion

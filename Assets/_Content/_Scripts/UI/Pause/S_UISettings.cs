@@ -44,7 +44,6 @@ public class UISettings : UIWindow
 
     public override void Return(bool isPressed)
     {
-        print("returned");
         base.Return(isPressed);
         if (m_isMainMenu) m_mainMenu.ShowMenu();
     }
