@@ -16,8 +16,13 @@ public class UITutoRopeJump : UITutoOnColliderEnters
 		// Assertions
 		if (!m_isJumping) return;
 		if (m_isCompleted) return;
-		if (m_rsoCharacterState.value != BehaviorState.ROPE) return;
 		if (!IsActive) return;
+
+		if (m_rsoCharacterState.value != BehaviorState.ROPE) 
+		{
+			Complete();
+			return;
+		}
 
 		m_timer -= Time.deltaTime;
 		if (m_timer <= 0f)
