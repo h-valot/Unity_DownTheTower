@@ -37,6 +37,7 @@ public class InputManager : MonoBehaviour
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_InputAdviceDisplayed m_rsoInputAdviceDisplayed;
     [FoldoutGroup("Scriptable")][SerializeField] private RSO_CurrentControls m_rsoCurrentControls;
     [FoldoutGroup("Scriptable")][SerializeField] private RSO_CurrentScheme m_rsoCurrentScheme;
+    [FoldoutGroup("Scriptable")][SerializeField] private RSO_GameStarted m_rsoGameStarted;
 
     #endregion
 
@@ -53,11 +54,11 @@ public class InputManager : MonoBehaviour
 	private bool m_interact;
 	private bool m_pause;
 
-	#endregion
+    #endregion
 
-	#region MONOBEHAVIOR
+    #region MONOBEHAVIOR
 
-	private void Awake()
+    private void Awake()
 	{
 		// Reset values
 		m_rsoCraftInputLocked.value = false;
@@ -267,7 +268,8 @@ public class InputManager : MonoBehaviour
     public void OnPause()
 	{
 		m_rsoPause.value = !m_rsoPause.value;
-	}
+
+    }
 
 	public void OnControlsChanged(PlayerInput newInput)
 	{
@@ -297,6 +299,8 @@ public class InputManager : MonoBehaviour
     public void OnStartAction()
     {
         m_rseStartAction.Call();
+
+        if (m_rsoGameStarted.value) OnPause();
     }
 
     public void OnSwitchTabLeft()

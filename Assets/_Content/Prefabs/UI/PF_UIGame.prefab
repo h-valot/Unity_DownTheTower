@@ -3410,8 +3410,8 @@ RectTransform:
   m_LocalScale: {x: 0, y: 0, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 1791436893917464315}
   - {fileID: 148422933189435957}
+  - {fileID: 1791436893917464315}
   - {fileID: 8152381630088077903}
   - {fileID: 1515439503355424619}
   m_Father: {fileID: 0}
@@ -3447,7 +3447,6 @@ MonoBehaviour:
   m_ssoGame: {fileID: 11400000, guid: c6ad5e1cd823f2647b0c8dc515fee2d5, type: 2}
   m_rseToggleCursor: {fileID: 11400000, guid: e3c127dc7da608c4f85fb9f1feb0c684, type: 2}
   m_rseReturn: {fileID: 11400000, guid: b1589385223d0a24ca81ceaa854459ec, type: 2}
-  m_rseStartAction: {fileID: 11400000, guid: bfc57edb5ef61e147ae6fd952168194a, type: 2}
   m_rsoGameStarted: {fileID: 11400000, guid: b5e7d2acc936fa64d8af133296c43995, type: 2}
   m_rsoCancelPriority: {fileID: 11400000, guid: 349eed709a6b798498f96c9556b6f2b7,
     type: 2}
@@ -9971,6 +9970,11 @@ PrefabInstance:
       objectReference: {fileID: 4178734518746917337}
     - target: {fileID: 8073912826681076446, guid: cb0844a596808f64fa9a89bd840d99e9,
         type: 3}
+      propertyPath: m_parentManager
+      value: 
+      objectReference: {fileID: 3650772345195941219}
+    - target: {fileID: 8073912826681076446, guid: cb0844a596808f64fa9a89bd840d99e9,
+        type: 3}
       propertyPath: m_defaultSelected
       value: 
       objectReference: {fileID: 7154449740493229324}
@@ -10177,6 +10181,11 @@ PrefabInstance:
       propertyPath: m_linkedPanel
       value: 
       objectReference: {fileID: 1820779657363748430}
+    - target: {fileID: 8073912826681076446, guid: cb0844a596808f64fa9a89bd840d99e9,
+        type: 3}
+      propertyPath: m_parentManager
+      value: 
+      objectReference: {fileID: 3650772345195941219}
     - target: {fileID: 8073912826681076446, guid: cb0844a596808f64fa9a89bd840d99e9,
         type: 3}
       propertyPath: m_defaultSelected
@@ -11929,6 +11938,11 @@ PrefabInstance:
       propertyPath: m_linkedPanel
       value: 
       objectReference: {fileID: 1779917342729920883}
+    - target: {fileID: 8073912826681076446, guid: cb0844a596808f64fa9a89bd840d99e9,
+        type: 3}
+      propertyPath: m_parentManager
+      value: 
+      objectReference: {fileID: 3650772345195941219}
     - target: {fileID: 8073912826681076446, guid: cb0844a596808f64fa9a89bd840d99e9,
         type: 3}
       propertyPath: m_defaultSelected
