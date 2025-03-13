@@ -55,7 +55,6 @@ public class GameManager : MonoBehaviour
 
 		Restart();
 		DOTween.SetTweensCapacity(400, 400);
-		m_rseToggleCursor.Call(false);
 	}
 
 	/// <summary>

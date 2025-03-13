@@ -9,6 +9,7 @@ using UnityEngine.UI;
 
 public class S_MenuManager : MonoBehaviour
 {
+    #region REFERENCES AND VARIABLES
 
     [FoldoutGroup("Internal references")][SerializeField] private GameObject m_imgTitle;
     [FoldoutGroup("Internal references")][SerializeField] private GameObject m_menuTitleParent;
@@ -34,10 +35,13 @@ public class S_MenuManager : MonoBehaviour
     private bool m_inMainMenu;
     private float m_originPosX;
 
-    // Start is called before the first frame update
+    #endregion
+
+    #region MONOBEHAVIOR
 
     private void Awake()
     {
+        m_rseStartAction.action += ShowMenu;
         m_menuTitleParent.SetActive(false);
         m_rsoGameStarted.value = false;
         m_inMainMenu = false;
@@ -45,17 +49,17 @@ public class S_MenuManager : MonoBehaviour
 
     private void OnEnable()
     {
-        m_rseStartAction.action += ShowMenu;
         m_rsoCurrentControls.OnChanged += ChangeControls;
     }
 
     private void OnDisable()
     {
-        m_rseStartAction.action -= ShowMenu;
         m_rsoCurrentControls.OnChanged -= ChangeControls;
     }
 
+    #endregion
 
+    #region BUTTONS
 
     public void StartGame()
     {
@@ -69,6 +73,8 @@ public class S_MenuManager : MonoBehaviour
         // Disable all panels
         m_pnlCredits.gameObject.SetActive(false);
         m_pnlSettings.gameObject.SetActive(false);
+
+        if (m_rsoCurrentControls.value == ControlType.KEYBOARDMOUSE) m_rseToggleCursor.Call(false);
     }
 
     public void OpenCredits()
@@ -94,6 +100,10 @@ public class S_MenuManager : MonoBehaviour
         Application.Quit();
     }
 
+    #endregion
+
+    #region ANIMATIONS
+
     public void PrepareMenu()
     {
         m_originPosX = m_menuTitles[0].transform.localPosition.x;
@@ -113,6 +123,7 @@ public class S_MenuManager : MonoBehaviour
 
         if (!m_inMainMenu)
         {
+            m_rseStartAction.action -= ShowMenu;
             PrepareMenu();
 
             m_inMainMenu = true;
@@ -153,6 +164,10 @@ public class S_MenuManager : MonoBehaviour
         ChangeControls();
     }
 
+    #endregion
+
+    #region CONTROLS
+
     private void ChangeControls()
     {
         if (m_rsoCurrentControls.value == ControlType.GAMEPAD)
@@ -167,5 +182,7 @@ public class S_MenuManager : MonoBehaviour
         }
 
     }
+
+    #endregion
 
 }
