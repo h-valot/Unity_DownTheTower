@@ -65,7 +65,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Rope balancing
+  m_text: Balance yourself on the rope with L-Stick
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 6d1d053114ae87a47bfd421add2bed0e, type: 2}
   m_sharedMaterial: {fileID: 8006343329199462927, guid: 6d1d053114ae87a47bfd421add2bed0e,
@@ -186,8 +186,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_index: 4
   m_graphicsParent: {fileID: 8159114053105946390}
+  m_text: {fileID: 8690601277712452695}
   m_rsoCurrentTutoIndex: {fileID: 11400000, guid: 8eb9a815ab586f74f9ad6eb7dda9089a,
     type: 2}
+  m_ssoInterface: {fileID: 11400000, guid: 8ec8b92670e4e774993815a410cc1db3, type: 2}
   m_type: 1
   m_rseTutoColliderEnters: {fileID: 11400000, guid: fa1ee0c213bcc204fb8dd848b025d6aa,
     type: 2}
@@ -210,7 +212,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &974077123229419320
 RectTransform:
   m_ObjectHideFlags: 0
