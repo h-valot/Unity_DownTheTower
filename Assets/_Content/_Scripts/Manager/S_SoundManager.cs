@@ -1,4 +1,6 @@
 using Sirenix.OdinInspector;
+using System.Collections;
+using System.Threading;
 using UnityEngine;
 
 public class SoundManager : MonoBehaviour
@@ -14,8 +16,14 @@ public class SoundManager : MonoBehaviour
     [FoldoutGroup("References")][SerializeField] private AudioSource m_audioSource_Once;
     [FoldoutGroup("References")][SerializeField] private AudioSource m_audioSource_Rope;
 
+    [FoldoutGroup("Sounds")][SerializeField] private SSO_Sound m_ambianceStart;
     [FoldoutGroup("Sounds")][SerializeField] private SSO_Sound m_ambianceLoop;
     [FoldoutGroup("Sounds")][SerializeField] private SSO_Sound m_ambianceTail;
+
+    private void Start()
+    {
+        PlayMusic(m_ambianceStart);
+    }
 
     private void OnEnable()
     {
@@ -79,5 +87,23 @@ public class SoundManager : MonoBehaviour
         {
             m_audioSource_Rope.Stop();
         }
+    }
+
+    private void TuneVolume(float volume)
+    {
+        
+    }
+
+    private IEnumerator FadeIn(AudioSource audiosource,float volume)
+    {
+        float timer = 0;
+        float duration = 4;
+        float originalVolume = audiosource.volume;
+        while (timer< duration)
+        {
+            timer += Time.deltaTime;
+            //audiosource.volume = Mathf.Lerp();
+        }
+       yield return null;
     }
 }

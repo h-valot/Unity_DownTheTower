@@ -10,9 +10,6 @@ public class GameStart : MonoBehaviour
 
 	private GameObject m_currentCharacter;
 
-	[SerializeField] RSE_PlayMusic m_playMusic;
-    [SerializeField] SSO_Sound m_Music;
-
     /// <summary>
     /// Destroy the former character if exists.
     /// </summary>
@@ -33,8 +30,6 @@ public class GameStart : MonoBehaviour
 		// Instantiate the prefab of the player
 		m_currentCharacter = Instantiate(m_pfCharacter, null);
 		m_currentCharacter.GetComponent<CharacterMotor>().Initialize(transform.position, transform.rotation);
-
-		m_playMusic.Call(m_Music);
 
         Debug.Log($"GAME_START: Player instantiated.");
 	}
