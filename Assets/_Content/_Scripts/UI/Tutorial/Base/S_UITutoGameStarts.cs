@@ -8,8 +8,9 @@ public class UITutoGameStarts : UITutoPanel
 
 	[FoldoutGroup("Scriptables")][SerializeField] private RSE_Move m_rseMove;
 	[FoldoutGroup("Scriptables")][SerializeField] private RSE_Look m_rseLook;
+    [FoldoutGroup("Scriptables")][SerializeField] private RSO_GameStarted m_rsoGameStarted;
 
-	private bool m_hasMoved;
+    private bool m_hasMoved;
 	private bool m_hasLooked;
 
 	protected override void OnEnable()
@@ -17,20 +18,22 @@ public class UITutoGameStarts : UITutoPanel
 		base.OnEnable();
 		m_rseMove.action += OnMove;
 		m_rseLook.action += OnLook;
-	}
+		m_rsoGameStarted.OnChanged += StartTutorial;
+
+    }
 
 	protected override void OnDisable()
 	{
 		base.OnDisable();
 		m_rseMove.action -= OnMove;
 		m_rseLook.action -= OnLook;
-	}
+        m_rsoGameStarted.OnChanged -= StartTutorial;
+    }
 
-	protected override void Start()
-	{
-		base.Start();
-		StartCoroutine(OnStart());
-	}
+	private void StartTutorial()
+    {
+        if(m_rsoGameStarted.value) StartCoroutine(OnStart());
+    }
 
 	private IEnumerator OnStart()
 	{
