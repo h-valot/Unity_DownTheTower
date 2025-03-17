@@ -1,5 +1,6 @@
 public enum CancelState
 {
+    NONE,
     IN_GAME,
     UI_LOG,
     UI_PAUSE,

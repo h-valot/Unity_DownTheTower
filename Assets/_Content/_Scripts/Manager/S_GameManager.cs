@@ -59,7 +59,6 @@ public class GameManager : MonoBehaviour
 		Restart();
 		m_rsoCurrentTutoIndex.value = -1;
 		DOTween.SetTweensCapacity(400, 400);
-		m_rseToggleCursor.Call(false);
 		StartCoroutine(m_cameraMotor.SetZeroDampForSeconds(1f));
 	}
 

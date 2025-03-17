@@ -19,11 +19,13 @@ public class UIGame : MonoBehaviour
 	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Game m_ssoGame;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_ToggleCursor m_rseToggleCursor;
-    [FoldoutGroup("Scriptable")][SerializeField] private RSE_Cancel m_rseCancel;
+    [FoldoutGroup("Scriptable")][SerializeField] private RSE_Return m_rseReturn;
 
-	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CancelPriority m_rsoCancelPriority;
+    [FoldoutGroup("Scriptable")][SerializeField] protected RSO_GameStarted m_rsoGameStarted;
+    [FoldoutGroup("Scriptable")][SerializeField] private RSO_CancelPriority m_rsoCancelPriority;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CancelConsumable m_rsoCancelConsumable;
     [FoldoutGroup("Scriptable")][SerializeField] protected RSO_CurrentControls m_rsoCurrentControls;
+    [FoldoutGroup("Scriptable")][SerializeField] protected RSO_CurrentScheme m_rsoCurrentScheme;
     [FoldoutGroup("Scriptable")][SerializeField] private RSO_Pause m_rsoPause;
 
 	private void Start()
@@ -34,7 +36,7 @@ public class UIGame : MonoBehaviour
     private void OnEnable()
     {
 		m_rsoPause.OnChanged += TogglePausePanel;
-		m_rseCancel.action += CheckResume;
+		m_rseReturn.action += CheckResume;
         m_rsoCurrentControls.OnChanged += UpdateSelection;
 
     }
@@ -42,14 +44,16 @@ public class UIGame : MonoBehaviour
     private void OnDisable()
     {
 		m_rsoPause.OnChanged -= TogglePausePanel;
-        m_rseCancel.action -= CheckResume;
+        m_rseReturn.action -= CheckResume;
         m_rsoCurrentControls.OnChanged -= UpdateSelection;
     }
 
     private void TogglePausePanel()
 	{
-		SetPausePanel(m_rsoPause.value);
-	}
+		if (!m_rsoGameStarted.value) return;
+
+        SetPausePanel(m_rsoPause.value);
+    }
 
 	public void SetPausePanel(bool doEnabled)
 	{
@@ -57,12 +61,14 @@ public class UIGame : MonoBehaviour
 
 		if (doEnabled)
         {
+			m_rsoCurrentScheme.value = InputScheme.PAUSE ;
             m_rsoCancelPriority.value = CancelState.UI_PAUSE;
             Show();
 		}
 		else
-		{
-			Hide();
+        {
+            m_rsoCurrentScheme.value = InputScheme.GAME;
+            Hide();
 		}
 	}
 
@@ -88,6 +94,7 @@ public class UIGame : MonoBehaviour
 
 	public void CheckResume(bool isPressed)
 	{
+		if (!m_rsoGameStarted.value) return;
 		if (m_rsoCancelPriority.value != CancelState.UI_PAUSE) return;
 		if (!m_rsoCancelConsumable.value) return;
 		if (!isPressed) return;
@@ -121,12 +128,12 @@ public class UIGame : MonoBehaviour
 
         switch (m_rsoCurrentControls.value)
         {
-            case ControlScheme.GAMEPAD:
+            case ControlType.GAMEPAD:
                 m_rseToggleCursor.Call(false);
 				if (m_defaultSelect != null) EventSystem.current.SetSelectedGameObject(m_defaultSelect);
 				else EventSystem.current.SetSelectedGameObject(null);
                 break;
-            case ControlScheme.KEYBOARDMOUSE:
+            case ControlType.KEYBOARDMOUSE:
                 m_rseToggleCursor.Call(true);
                 EventSystem.current.SetSelectedGameObject(null);
                 break;

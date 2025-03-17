@@ -27,13 +27,17 @@ public class InputManager : MonoBehaviour
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Climb m_rseClimb;
     [FoldoutGroup("Scriptable")][SerializeField] private RSE_SwitchTabLeft m_rseSwitchTabLeft;
     [FoldoutGroup("Scriptable")][SerializeField] private RSE_SwitchTabRight m_rseSwitchTabRight;
+    [FoldoutGroup("Scriptable")][SerializeField] private RSE_StartAction m_rseStartAction;
+    [FoldoutGroup("Scriptable")][SerializeField] private RSE_Return m_rseReturn;
 
     [FoldoutGroup("Scriptable")][SerializeField] private RSO_Pause m_rsoPause;
-	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CancelConsumable m_rsoCancelConsumable;
+    [FoldoutGroup("Scriptable")][SerializeField] private RSO_CancelConsumable m_rsoCancelConsumable;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CraftInputLocked m_rsoCraftInputLocked;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_RecycleInputLocked m_rsoRecycleInputLocked;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_InputAdviceDisplayed m_rsoInputAdviceDisplayed;
     [FoldoutGroup("Scriptable")][SerializeField] private RSO_CurrentControls m_rsoCurrentControls;
+    [FoldoutGroup("Scriptable")][SerializeField] private RSO_CurrentScheme m_rsoCurrentScheme;
+    [FoldoutGroup("Scriptable")][SerializeField] private RSO_GameStarted m_rsoGameStarted;
 
     #endregion
 
@@ -50,17 +54,19 @@ public class InputManager : MonoBehaviour
 	private bool m_interact;
 	private bool m_pause;
 
-	#endregion
+    #endregion
 
-	#region MONOBEHAVIOR
+    #region MONOBEHAVIOR
 
-	private void Awake()
+    private void Awake()
 	{
 		// Reset values
 		m_rsoCraftInputLocked.value = false;
 		m_rsoRecycleInputLocked.value = false;
 		m_rseLook.Call(Vector2.zero);
-	}
+		m_rsoCurrentScheme.value = InputScheme.PAUSE;
+
+    }
 
 	private void Start()
 	{
@@ -100,16 +106,18 @@ public class InputManager : MonoBehaviour
 	{
 		m_rseToggleCursor.action += OnEnableCursor;
 		m_playerInput.onControlsChanged += OnControlsChanged;
+		m_rsoCurrentScheme.OnChanged += UpdateScheme;
     }
 
 	private void OnDisable()
 	{
 		m_rseToggleCursor.action -= OnEnableCursor;
-	}
+        m_rsoCurrentScheme.OnChanged -= UpdateScheme;
+    }
 
 	# endregion
 
-	#region ACTION LISTENER
+	#region ACTION LISTENER - PLAYER
 
 	public void OnMove(InputValue value)
 	{
@@ -123,13 +131,13 @@ public class InputManager : MonoBehaviour
 
 		switch (m_rsoCurrentControls.value)
 		{
-			case ControlScheme.GAMEPAD:
+			case ControlType.GAMEPAD:
                 m_look = new Vector2(
                     input.x * m_ssoInputs.SensitivityValue,
                     input.y * m_ssoInputs.SensitivityValue * m_ssoInputs.SensitivityMultiplierY * (m_ssoInputs.InvertAxisY ? 1 : -1)
                     );
 				break;
-			case ControlScheme.KEYBOARDMOUSE:
+			case ControlType.KEYBOARDMOUSE:
                 m_look = new Vector2(
                     input.x * m_ssoInputs.SensitivityValue * m_ssoInputs.SensitivityMouseMultiplier,
                     input.y * m_ssoInputs.SensitivityValue * m_ssoInputs.SensitivityMultiplierY * m_ssoInputs.SensitivityMouseMultiplier * (m_ssoInputs.InvertAxisY ? 1 : -1)
@@ -257,26 +265,62 @@ public class InputManager : MonoBehaviour
 		m_rsoInputAdviceDisplayed.value = !m_rsoInputAdviceDisplayed.value;
 	}
 
+    public void OnPause()
+	{
+		m_rsoPause.value = !m_rsoPause.value;
+
+    }
+
+	public void OnControlsChanged(PlayerInput newInput)
+	{
+		if (newInput.currentControlScheme.Equals("Gamepad")) m_rsoCurrentControls.value = ControlType.GAMEPAD;
+		else if (newInput.currentControlScheme.Equals("KeyboardMouse")) m_rsoCurrentControls.value = ControlType.KEYBOARDMOUSE;
+	}
+
+	public void UpdateScheme()
+	{
+		switch (m_rsoCurrentScheme.value)
+		{
+			case InputScheme.GAME:
+				m_playerInput.SwitchCurrentActionMap("Player");
+				break;
+			case InputScheme.PAUSE:
+                m_playerInput.SwitchCurrentActionMap("Pause");
+                break;
+		}
+
+		print("Current Scheme: " + m_playerInput.currentActionMap.ToString());
+	}
+
+    #endregion
+
+    #region ACTION LISTENER - PAUSE
+
+    public void OnStartAction()
+    {
+        m_rseStartAction.Call();
+
+        if (m_rsoGameStarted.value) OnPause();
+    }
+
     public void OnSwitchTabLeft()
     {
-        if(m_rsoPause.value) m_rseSwitchTabLeft.Call();
+        m_rseSwitchTabLeft.Call();
     }
 
     public void OnSwitchTabRight()
     {
-        if (m_rsoPause.value) m_rseSwitchTabRight.Call();
+        m_rseSwitchTabRight.Call();
     }
 
-    public void OnPause()
+	public void OnReturn(InputValue value)
 	{
-		m_rsoPause.value = !m_rsoPause.value;
-	}
+        if (!value.isPressed) return;
 
-	public void OnControlsChanged(PlayerInput newInput)
-	{
-		if (newInput.currentControlScheme.Equals("Gamepad")) m_rsoCurrentControls.value = ControlScheme.GAMEPAD;
-		else if (newInput.currentControlScheme.Equals("KeyboardMouse")) m_rsoCurrentControls.value = ControlScheme.KEYBOARDMOUSE;
-	}
+        // Consume cancel input
+        m_rsoCancelConsumable.value = true;
+        m_rseReturn.Call(value.isPressed);
+    }
 
-	#endregion
+    #endregion
 }

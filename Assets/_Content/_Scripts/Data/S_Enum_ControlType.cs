@@ -1,4 +1,4 @@
-public enum ControlScheme
+public enum ControlType
 {
     GAMEPAD,
     KEYBOARDMOUSE
