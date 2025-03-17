@@ -377,7 +377,7 @@ public class MushroomBatch : MonoBehaviour
 
         VFXspores.enabled = false;
 
-        VFXexplosion.SetFloat("DeflateDuration", m_ssoMushrooms.DeflateDuration);
+        VFXexplosion.SetFloat("DeflateSpeed", 1f/m_ssoMushrooms.DeflateDuration);
         VFXexplosion.SetFloat("DeflateWaveSpeed", m_ssoMushrooms.DeflateWaveSpeed);
         VFXexplosion.SetFloat("MaxRandomLifetimeAdded", m_ssoMushrooms.DeflateIdleDuration * 0.25f);
 
