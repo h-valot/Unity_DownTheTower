@@ -10,6 +10,7 @@ public class SoundManager : MonoBehaviour
     [FoldoutGroup("Scriptable")][SerializeField] private RSE_PlayRope m_rsePlayRope;
     [FoldoutGroup("Scriptable")][SerializeField] private RSE_PlayRopeStop m_rsePlayRopeStop;
     [FoldoutGroup("Scriptable")][SerializeField] private RSE_PlayMusic m_rsePlayMusic;
+    [FoldoutGroup("Scriptable")][SerializeField] private RSE_PlayMusicStop m_rsePlayMusicStop;
 
     [FoldoutGroup("References")][SerializeField] private AudioSource m_musicSource_1;
     [FoldoutGroup("References")][SerializeField] private AudioSource m_musicSource_2;
@@ -20,6 +21,7 @@ public class SoundManager : MonoBehaviour
     [FoldoutGroup("Sounds")][SerializeField] private SSO_Sound m_ambianceLoop;
     [FoldoutGroup("Sounds")][SerializeField] private SSO_Sound m_ambianceTail;
 
+    private bool m_coroutineActive;
     private void Start()
     {
         PlayMusic(m_ambianceStart);
@@ -32,6 +34,7 @@ public class SoundManager : MonoBehaviour
         m_rsePlayAt.action += PlayAt;
         m_rsePlayRope.action += PlayRope;
         m_rsePlayRopeStop.action += StopPlayRope;
+        m_rsePlayMusicStop.action += StopPlayMusic;
     }
 
     private void OnDisable()
@@ -53,7 +56,18 @@ public class SoundManager : MonoBehaviour
             m_musicSource_2.PlayDelayed(sound.Clip.length);
         }
 
+        if(m_coroutineActive == false)
+        {
+
+        }
+
     }
+
+    private void StopPlayMusic(SSO_Sound sound)
+    {
+
+    }
+
     private void PlaySound(SSO_Sound sound)
     {
         m_audioSource_Once.clip = sound.Clip;
@@ -102,7 +116,7 @@ public class SoundManager : MonoBehaviour
         while (timer< duration)
         {
             timer += Time.deltaTime;
-            //audiosource.volume = Mathf.Lerp();
+            audiosource.volume = Mathf.Lerp(originalVolume, volume, 5f);
         }
        yield return null;
     }
