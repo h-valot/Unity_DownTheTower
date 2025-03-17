@@ -38,8 +38,8 @@ public class Bridge : Switchable
         m_currentEmitStrength = m_gateOpenEmitStrentgh;
         m_propertyBlock.SetFloat("_EmitStrength", m_currentEmitStrength);
         m_bridgeGateRenderer.SetPropertyBlock(m_propertyBlock);
-        m_bridge0.rotation = Quaternion.Euler(m_bridge0CloseRotation, 0f, 0f);
-        m_bridge1.rotation = Quaternion.Euler(m_bridge1CloseRotation, 0f, 0f);
+        m_bridge0.localRotation = Quaternion.Euler(m_bridge0CloseRotation, 0f, 0f);
+        m_bridge1.localRotation = Quaternion.Euler(m_bridge1CloseRotation, 0f, 0f);
     }
 
     private void OnDisable()
@@ -49,6 +49,7 @@ public class Bridge : Switchable
 
     protected override void ActivateMechanism()
     {
+        DOTween.Kill(this);
         m_bridge0.DOLocalRotate(new Vector3(m_bridge0OpenRotation, 0f, 0f), m_bridgeOpenningDuration).SetTarget(this);
         m_bridge1.DOLocalRotate(new Vector3(m_bridge1OpenRotation, 0f, 0f), m_bridgeOpenningDuration).SetTarget(this).OnComplete(() =>
         {
@@ -66,7 +67,7 @@ public class Bridge : Switchable
 
     protected override void DeactivateMechanism()
     {
-        Debug.Log("Reactivated");
+        DOTween.Kill(this);
         DOTween.To(() => m_currentEmitStrength, x => m_currentEmitStrength = x, m_gateOpenEmitStrentgh, m_gateClosingDuration).SetTarget(this).SetEase(Ease.Linear)
                             .OnUpdate(() => {
                                 m_propertyBlock.SetFloat("_EmitStrength", m_currentEmitStrength);
