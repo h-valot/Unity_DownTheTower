@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
 using Sirenix.OdinInspector;
@@ -81,6 +82,7 @@ public class Rope : Permanent
 
 	// Graphics
 	private MaterialPropertyBlock m_materialPropertyBlock;
+	private float m_previewRotationAngle = 0f;
 
 	#endregion
 
@@ -112,6 +114,7 @@ public class Rope : Permanent
 	private void OnDisable()
 	{
 		m_rsoRopes.value.Remove(this);
+		DOTween.Kill(m_previewGameObject);
 	}
 
 	#endregion
@@ -122,6 +125,8 @@ public class Rope : Permanent
 	{
 		m_previewGameObject.SetActive(true);
 		m_previewGameObject.transform.rotation = Quaternion.identity;
+		PreviewRotation();
+		m_previewGameObject.transform.parent = null;
 	}
 
 	public override void PreviewThrow(Transform cameraTransform)
@@ -137,7 +142,7 @@ public class Rope : Permanent
 
 			// Update preview position
 			m_previewGameObject.transform.position = new Vector3(hitInfo.point.x, hitInfo.point.y, hitInfo.point.z);
-			m_previewGameObject.transform.rotation = Quaternion.Euler(0, m_previewGameObject.transform.eulerAngles.y, 0);
+			m_previewGameObject.transform.rotation = Quaternion.Euler(0, m_previewRotationAngle, 0);
 
 			UpdateColor(isDeployable: 
 				IsGroundFlat(hitInfo, m_ssoRope.MaxGroundAngle) 
@@ -156,6 +161,8 @@ public class Rope : Permanent
 
 	public override void DisablePreview()
     {
+        m_previewGameObject.transform.parent = transform;
+        DOTween.Kill(m_previewGameObject);
         m_previewGameObject.SetActive(false);
     }
 
@@ -223,11 +230,17 @@ public class Rope : Permanent
         m_baseMeshRenderer.SetPropertyBlock(m_materialPropertyBlock);
     }
 
-	#endregion
+    private void PreviewRotation()
+	{
+		m_previewRotationAngle = 0f;
+        DOTween.To(() => m_previewRotationAngle, x => m_previewRotationAngle = x, 360f, 10f).SetEase(Ease.Linear).SetTarget(m_previewGameObject).OnComplete(PreviewRotation);
+    }
 
-	#region ROPE
+    #endregion
 
-	public void Attach(Transform harness, Rigidbody rigidbody)
+    #region ROPE
+
+    public void Attach(Transform harness, Rigidbody rigidbody)
 	{
 		m_characterHarness = harness;
 		m_characterRigidbody = rigidbody;
