@@ -61,16 +61,22 @@ public class UIGame : MonoBehaviour
 
 		if (doEnabled)
         {
-			m_rsoCurrentScheme.value = InputScheme.PAUSE ;
+			if(m_rsoPause.value) m_rsoCurrentScheme.value = InputScheme.PAUSE ;
             m_rsoCancelPriority.value = CancelState.UI_PAUSE;
             Show();
 		}
 		else
         {
-            m_rsoCurrentScheme.value = InputScheme.GAME;
+            if (!m_rsoPause.value) m_rsoCurrentScheme.value = InputScheme.GAME;
             Hide();
 		}
 	}
+
+	public void ShowPausePanelFromLogs()
+    {
+        m_rsoCancelPriority.value = CancelState.UI_PAUSE;
+        Show();
+    }
 
 	private void Show()
 	{

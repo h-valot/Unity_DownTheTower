@@ -288,8 +288,6 @@ public class InputManager : MonoBehaviour
                 m_playerInput.SwitchCurrentActionMap("Pause");
                 break;
 		}
-
-		print("Current Scheme: " + m_playerInput.currentActionMap.ToString());
 	}
 
     #endregion

@@ -49,11 +49,15 @@ public class UILogDisplayer : UIWindow
 			m_logCollectionDisplayed = true;
 			m_uiGame.SetPausePanel(false);
 		}
+        else
+        {
+            m_logCollectionDisplayed = false;
+        }
 
-		m_rsoInputsLocked.value = true;
+        m_rsoInputsLocked.value = true;
 		m_rsoInputAdviceDisplayed.value = false;
 		base.Show();
-		if(!m_rsoPause.value) m_rsoCurrentScheme.value = InputScheme.PAUSE;
+        if (!m_rsoPause.value) m_rsoCurrentScheme.value = InputScheme.PAUSE;
 		m_rsoCancelPriority.value = CancelState.UI_LOG;
         m_rsePlaySound.Call(m_ssoSoundLogOpen);
     }
@@ -71,9 +75,9 @@ public class UILogDisplayer : UIWindow
 
 		if (m_logCollectionDisplayed)
         {
-            m_uiGame.SetPausePanel(true);
+            m_uiGame.ShowPausePanelFromLogs();
             m_uiLogCollection.Show();
-			EventSystem.current.SetSelectedGameObject(selectedLog);
+			if(m_rsoCurrentControls.value == ControlType.GAMEPAD) EventSystem.current.SetSelectedGameObject(selectedLog);
 		}
 		else
 		{
