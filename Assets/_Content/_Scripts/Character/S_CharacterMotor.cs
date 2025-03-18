@@ -449,6 +449,7 @@ public class CharacterMotor : MonoBehaviour
 			m_jumpRopeDelay = m_ssoCharacter.JumpRopeDelay;
 			float force = m_ssoCharacter.JumpOffRopeModifier * m_rigidbody.velocity.magnitude;
 			Vector3 direction = (m_rsoCameraRight.value * m_moveInput.x + m_rsoCameraForward.value * m_moveInput.y).normalized;
+			direction = new Vector3(direction.x, 0, direction.z);
 			m_rigidbody.AddForce(direction * force, ForceMode.Impulse);
 		}
 	}
@@ -1169,7 +1170,7 @@ public class CharacterMotor : MonoBehaviour
 			// Assert: There is not enough space above the hit.point
 			if (Physics.Raycast(hit.point, Vector3.up, m_collider.height, m_ssoCharacter.GroundLayerToInclude)) continue;
 
-			// Assert: Is ground at highest edge position flat ?
+			// Assert: The ground at highest edge position isn't flat
 			if (Physics.Raycast(highestEdge + (new Vector3(highestEdge.x, 0, highestEdge.z) - new Vector3(m_rigidbody.position.x, 0, m_rigidbody.position.z)).normalized * m_ssoCharacter.SkinWidth + new Vector3(0, m_ssoCharacter.SkinWidth, 0), Vector3.down, m_ssoCharacter.SkinWidth * 2, m_ssoCharacter.GroundLayerToInclude)) continue;
 
 			// Assert: There is not enough space around the hit.point
@@ -1191,19 +1192,21 @@ public class CharacterMotor : MonoBehaviour
 		// - Override the character's position -
 		if (highestEdge != m_rigidbody.position)
 		{
-			StartCoroutine(MoveToPosition(highestEdge));
+			StartCoroutine(HaulToPosition(highestEdge));
 		}
 	}
 
-	private IEnumerator MoveToPosition(Vector3 position)
+	private IEnumerator HaulToPosition(Vector3 position)
 	{
 		if (IsMotorLocked) yield break;
 
 		IsMotorLocked = true;
 		m_rope.IsFoldSystemDisabled = true;
 
+		// Move the character up towards a y-axis alignment
 		transform.DOMoveY(position.y, m_ssoCharacter.EdgeCatchingDuration).SetEase(Ease.OutCubic);
 		
+		// Move the character forwards the accurate planar (x, z) position
 		Vector3 destinationDir = (position - m_rigidbody.position).normalized;
 		destinationDir = new Vector3(destinationDir.x, 0, destinationDir.z);
 		transform.DOMove(position + destinationDir * m_ssoCharacter.EdgeCatchingOffset, m_ssoCharacter.EdgeCatchingDuration).SetEase(Ease.InCubic);
@@ -1234,7 +1237,10 @@ public class CharacterMotor : MonoBehaviour
 
 	private void UpdateJumpRopeDelay()
 	{
-		if (m_jumpRopeDelay >= 0) m_jumpRopeDelay -= Time.fixedDeltaTime;
+		if (m_jumpRopeDelay >= 0) 
+		{
+			m_jumpRopeDelay -= Time.fixedDeltaTime;
+		}
 	}
 
 	private bool IsFallingWithRope()
