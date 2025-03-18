@@ -308,10 +308,7 @@ public class CharacterMotor : MonoBehaviour
 		m_rigidbody.position = position;
 		m_characterGraphics.transform.rotation = rotation;
 		m_rsoCharacterPosition.value = m_rigidbody.position;
-
-		m_isJumping = false;
-		m_isClimbing = false;
-		m_isHolding = false;
+		ResetInputValues();
 	}
 
 	/// <summary>
@@ -328,11 +325,20 @@ public class CharacterMotor : MonoBehaviour
 		if (isMotorLocked)
 		{
 			UnsubscibeAllInputs();
+			ResetInputValues();
 		}
 		else
 		{
+
 			SubscribeStateInputs();
 		}
+	}
+
+	private void ResetInputValues()
+	{
+		m_isHolding = false;
+		m_isClimbing = false;
+		m_isJumping = false;
 	}
 
 	private void UpdateMoveInput(Vector2 input)
@@ -407,7 +413,10 @@ public class CharacterMotor : MonoBehaviour
 			return;
 		}
 
-        if (IsRopeValid) DesequipRope();
+        if (IsRopeValid) 
+		{
+			DesequipRope();
+		}
     }
 
 	private void UpdateJumpInput(bool isPressed)
@@ -1147,11 +1156,11 @@ public class CharacterMotor : MonoBehaviour
 		if (m_coyoteTime > 0) return;
 
 		// - Get a highest position than the character's one -
-		Vector3 highestEdge = m_rigidbody.position;
+		Vector3 candidatePos = m_rigidbody.position;
 		foreach (var hit in m_raycastHits)
 		{
-			// Assert: The hit.point is lower than the cache position
-			if (hit.point.y < highestEdge.y) continue;
+			// Assert: The hit.point is lower than the candidate position
+			if (hit.point.y < candidatePos.y) continue;
 
 			// Assert: The hit.point is too far from the character's position
 			if ((m_rigidbody.position - hit.point).magnitude > m_ssoCharacter.EdgeCatchingThreshold) continue;
@@ -1159,29 +1168,25 @@ public class CharacterMotor : MonoBehaviour
 			// Assert: There is not enough space above the hit.point
 			if (Physics.Raycast(hit.point, Vector3.up, m_collider.height, m_ssoCharacter.GroundLayerToInclude)) continue;
 
-			// Assert: The ground at highest edge position isn't flat
-			if (Physics.Raycast(highestEdge + (new Vector3(highestEdge.x, 0, highestEdge.z) - new Vector3(m_rigidbody.position.x, 0, m_rigidbody.position.z)).normalized * m_ssoCharacter.SkinWidth + new Vector3(0, m_ssoCharacter.SkinWidth, 0), Vector3.down, m_ssoCharacter.SkinWidth * 2, m_ssoCharacter.GroundLayerToInclude)) continue;
-
 			// Assert: There is not enough space around the hit.point
-			if (Physics.SphereCast(
-				hit.point + Vector3.up * m_collider.height, 
-				m_collider.radius, 
-				Vector3.down, 
-				out var sphereCastHit, 
-				m_collider.height * 0.75f, 
-				m_ssoCharacter.GroundLayerToInclude)) 
+			if (Physics.SphereCast(hit.point + Vector3.up * m_collider.height, m_collider.radius, Vector3.down, out var sphereCastHit, m_collider.height * 0.75f, m_ssoCharacter.GroundLayerToInclude)) 
 			{
-				// Everything can block the character except the rope.
-				if (!sphereCastHit.collider.TryGetComponent<Rope>(out var rope)) continue;
+				// Everything can block the character except the rope and itself
+				if (!sphereCastHit.collider.TryGetComponent<Rope>(out var rope)
+				&& sphereCastHit.collider.TryGetComponent<CharacterMotor>(out var character))
+				{
+					continue;
+				}
 			}
 
-			highestEdge = hit.point;
+			candidatePos = hit.point;
 		}
 
 		// - Override the character's position -
-		if (highestEdge != m_rigidbody.position)
+		if (candidatePos != m_rigidbody.position)
 		{
-			StartCoroutine(HaulToPosition(highestEdge));
+			print($"{candidatePos}: SUCCESSFUL");
+			StartCoroutine(HaulToPosition(candidatePos));
 		}
 	}
 
