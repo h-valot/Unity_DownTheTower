@@ -9,7 +9,9 @@ public class Gate : Switchable
     [SerializeField] private SSO_Sound m_ssoDoorOpen;
     [SerializeField] private SSO_Sound m_ssoDoorClose;
 
+    [SerializeField] private MeshRenderer m_meshRendererDoorDoor;
     [SerializeField] private MeshRenderer m_meshRendererDoorBorder;
+    [SerializeField] private Transform m_alphaDoor;
 
     [Title("Tweakable values")]
     [SerializeField] private float m_openHeight = 4.8f;
@@ -19,15 +21,20 @@ public class Gate : Switchable
     [SerializeField] private float m_closeDuration = 0.5f;
     [SerializeField] private float m_closeEmitStrength = 1f;
 
-    private MaterialPropertyBlock m_propertyBlock;
+    private MaterialPropertyBlock m_propertyBlockDoorDoor;
+    private MaterialPropertyBlock m_propertyBlockDoorBorder;
     private float m_currentEmitStrength;
 
     private void Awake()
     {
-        m_propertyBlock = new MaterialPropertyBlock();
+        m_propertyBlockDoorDoor = new MaterialPropertyBlock();
+        m_propertyBlockDoorDoor.SetFloat("_WorldZAlpha", m_alphaDoor.position.y);
+        m_meshRendererDoorDoor.SetPropertyBlock(m_propertyBlockDoorDoor);
+
+        m_propertyBlockDoorBorder = new MaterialPropertyBlock();
         m_currentEmitStrength = m_closeEmitStrength;
-        m_propertyBlock.SetFloat("_EmitStrength", m_currentEmitStrength);
-        m_meshRendererDoorBorder.SetPropertyBlock(m_propertyBlock);
+        m_propertyBlockDoorBorder.SetFloat("_EmitStrength", m_currentEmitStrength);
+        m_meshRendererDoorBorder.SetPropertyBlock(m_propertyBlockDoorBorder);
     }
 
     private void OnDisable()
@@ -40,8 +47,8 @@ public class Gate : Switchable
         transform.DOLocalMoveY(m_openHeight, m_openDuration).SetTarget(this);
         DOTween.To(() => m_currentEmitStrength, x => m_currentEmitStrength = x, m_openEmitStrength, 0.5f).SetTarget(this).SetEase(Ease.Linear)
                             .OnUpdate(() => {
-                                m_propertyBlock.SetFloat("_EmitStrength", m_currentEmitStrength);
-                                m_meshRendererDoorBorder.SetPropertyBlock(m_propertyBlock);
+                                m_propertyBlockDoorBorder.SetFloat("_EmitStrength", m_currentEmitStrength);
+                                m_meshRendererDoorBorder.SetPropertyBlock(m_propertyBlockDoorBorder);
                             });
         m_rsePlayAt.Call(m_ssoDoorOpen, this.transform.position);
     }
@@ -51,8 +58,8 @@ public class Gate : Switchable
         transform.DOLocalMoveY(m_closeHeight, m_closeDuration).SetTarget(this);
         DOTween.To(() => m_currentEmitStrength, x => m_currentEmitStrength = x, m_closeEmitStrength, 0.5f).SetTarget(this).SetEase(Ease.Linear)
                             .OnUpdate(() => {
-                                m_propertyBlock.SetFloat("_EmitStrength", m_currentEmitStrength);
-                                m_meshRendererDoorBorder.SetPropertyBlock(m_propertyBlock);
+                                m_propertyBlockDoorBorder.SetFloat("_EmitStrength", m_currentEmitStrength);
+                                m_meshRendererDoorBorder.SetPropertyBlock(m_propertyBlockDoorBorder);
                             });
         m_rsePlayAt.Call(m_ssoDoorClose, this.transform.position);
     }
