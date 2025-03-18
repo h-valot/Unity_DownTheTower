@@ -1,6 +1,4 @@
 using Sirenix.OdinInspector;
-using Sirenix.Utilities;
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -416,6 +414,7 @@ public class GuardianMotor : MonoBehaviour
 	{
 		ChaseTarget();
 		HandleLockedByEnviro();
+		HandleStuckTimeout();
 
 		m_beamTransform.LookAt(m_currentTarget.Position);
     }
@@ -492,7 +491,6 @@ public class GuardianMotor : MonoBehaviour
 		m_omniscienceTimer = m_ssoGuardian.OmniscienceDuration;
 		m_seekingTimer = m_ssoGuardian.SeekingDuration;
 		m_seekTimeoutTimer = m_ssoGuardian.SeekTimeoutTimer;
-		m_stuckTimeoutTimer = m_ssoGuardian.StuckTimeoutTimer;
 
 		m_seekTargetId = m_currentTarget.Id;
 		m_omniscienceTarget = GetCandidateById(m_seekTargetId);
@@ -539,7 +537,7 @@ public class GuardianMotor : MonoBehaviour
 		if (m_seekingTimer < 0f)
 		{
 			// Seek back to the last character position is chased lately
-			if (GetCandidateById(0) != null			// The character candidate is valid
+			if (GetCandidateById(0).Id != -1		// The character candidate is valid
 			&& GetCandidateById(0).IsAggroedLately	// AND The character has been chased at least once since the last time the guardian was patrolling
 			&& m_omniscienceTarget.Id != 0)         // AND The current target the guardian is seeking isn't the character
 			{
@@ -568,7 +566,19 @@ public class GuardianMotor : MonoBehaviour
 		if (m_stuckTimeoutTimer <= 0f)
 		{
 			m_targetNotFound = true;
-			if (m_omniscienceTarget != null) m_omniscienceTarget.IsBan = true;
+			if (CurrentTarget != null) 
+			{
+				if (CurrentTarget.Id != 0)
+				{
+					// Ban unreachable targets
+					CurrentTarget.IsBan = true;
+				}
+				else
+				{
+					// Unaggro the character instead of banning it
+					CurrentTarget.IsAggroedLately = false;
+				}
+			}
 		}
 	}
 
@@ -588,11 +598,24 @@ public class GuardianMotor : MonoBehaviour
 	}
 
 	/// <summary>
+	/// Returns the current target chased or seeked based on the current guardian state.
+	/// </summary>
+	private Candidate CurrentTarget => m_currentState == GuardianBehaviorState.SEEK ? m_omniscienceTarget : m_currentTarget;
+
+	/// <summary>
 	/// Return the candidate filter by id using FirstOrDefault function. Note: 0 is the character.
 	/// </summary>
 	private Candidate GetCandidateById(int id)
 	{
-		return m_candidates.FirstOrDefault(c => c.Id == id);
+		var candidate = m_candidates.FirstOrDefault(c => c.Id == id);
+		if (candidate == null)
+		{
+			return new Candidate(-1, Vector3.zero);
+		}
+		else
+		{
+			return candidate;
+		}
 	}
 
 	#endregion

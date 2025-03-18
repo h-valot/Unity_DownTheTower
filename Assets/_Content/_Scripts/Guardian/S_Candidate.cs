@@ -4,7 +4,7 @@ using UnityEngine;
 [Serializable]
 public class Candidate
 {
-	public int Id;
+	public int Id = -1;
 	public Vector3 Position;
 
 	public bool IsUpdated;
