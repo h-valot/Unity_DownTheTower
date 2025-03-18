@@ -21,9 +21,9 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: MI_Log
-  m_Shader: {fileID: -6465566751694194690, guid: 55bdca73bfa7c6e4798a8e9a2a54bf4c,
+  m_Shader: {fileID: -6465566751694194690, guid: ddadb8d71fcd2fc4fb9c911ac6e6fd65,
     type: 3}
-  m_Parent: {fileID: 2100000, guid: 2ac6468c699a7bf4aaf6ead7d80e54ee, type: 2}
+  m_Parent: {fileID: 2100000, guid: 7edfc1c6790da3e46b162ea5d7a222fd, type: 2}
   m_ModifiedSerializedProperties: 4
   m_ValidKeywords: []
   m_InvalidKeywords: []
@@ -42,7 +42,9 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Ints: []
-    m_Floats: []
+    m_Floats:
+    - _Active: 1
+    - _SpeedHighlight: -1.5
     m_Colors:
     - _Color: {r: 0.8018868, g: 0.32467794, b: 0.13995194, a: 0}
   m_BuildTextureStacks: []
