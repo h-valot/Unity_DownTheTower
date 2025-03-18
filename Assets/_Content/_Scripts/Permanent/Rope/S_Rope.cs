@@ -84,6 +84,7 @@ public class Rope : Permanent
 	// Graphics
 	private MaterialPropertyBlock m_materialPropertyBlock;
 	private float m_previewRotationAngle = 0f;
+	private float m_activeFactor = 0f;
 
 	#endregion
 
@@ -124,11 +125,16 @@ public class Rope : Permanent
 
 	public override void InitializePreview()
 	{
+		DOTween.Kill(m_previewGameObject);
 		m_previewGameObject.SetActive(true);
 		m_previewGameObject.transform.rotation = Quaternion.identity;
 		PreviewRotation();
 		m_previewGameObject.transform.parent = null;
-	}
+        DOTween.To(() => m_activeFactor, x => m_activeFactor = x, 1f, 0.5f).SetTarget(m_previewGameObject).SetEase(Ease.InQuart)
+                            .OnUpdate(() => {
+								m_previewMeshRendered.material.SetFloat("_Active", m_activeFactor);
+                            });
+    }
 
 	public override void PreviewThrow(Transform cameraTransform)
 	{
@@ -162,9 +168,15 @@ public class Rope : Permanent
 
 	public override void DisablePreview()
     {
-        m_previewGameObject.transform.parent = transform;
         DOTween.Kill(m_previewGameObject);
-        m_previewGameObject.SetActive(false);
+        DOTween.To(() => m_activeFactor, x => m_activeFactor = x, 0f, 0.5f).SetTarget(m_previewGameObject).SetEase(Ease.Linear)
+                            .OnUpdate(() => {
+                                m_previewMeshRendered.material.SetFloat("_Active", m_activeFactor);
+                            }).OnComplete(() =>
+							{
+                                m_previewGameObject.transform.parent = transform;
+                                m_previewGameObject.SetActive(false);
+                            });
     }
 
     private void UpdateColor(bool isDeployable)
@@ -188,7 +200,6 @@ public class Rope : Permanent
 				&& !IsSpaceAround(hitInfo, m_ssoRope.MinHalfExtendEmptySpace, m_ssoRope.NoCollisionNoRaycastLayer)
 				&& !IsSpaceBetween(hitInfo.point + (m_ropeAttach.position - transform.position).magnitude * Vector3.up, m_rsoHarnessPosition.value, m_ssoRope.FoldLayerToInclude))
 			{
-				transform.SetParent(null, true);
 				Deploy(cameraTransform, hitInfo.point);
 				return true;
 			}
@@ -202,21 +213,29 @@ public class Rope : Permanent
 		// Disable hold length constraint to avoid the character to be snapped to the rope when placed
 		SetHoldLength(m_ssoRope.MaxLength - m_ssoRope.MaxLengthOffset - GetFixedLength());
 
-		transform.eulerAngles = new Vector3(0, cameraTransform.rotation.eulerAngles.y, 0);
-		transform.DOScale(1f, 0.3f);
-		transform.DOJump(deployPoint, 1f, 0, 0.3f).OnComplete(() =>
-		{
-			// Rope custom initialization commands
-			m_rigidbody.excludeLayers = m_ssoRope.LayersToIgnoreAfterDeploy;
-			m_folds = new List<Fold>() { new Fold(m_ropeAttach.position.CutDigits(2), Vector3.zero) };
-			m_isPlaced = true;
+		float jumpDuration = Vector3.Distance(transform.position, deployPoint) / m_ssoRope.DeploySpeed;
+
+        Sequence deploySequence = DOTween.Sequence().Pause();
+        deploySequence.Insert(m_ssoRope.DeployDelay, transform.DORotate(new Vector3(0, cameraTransform.rotation.eulerAngles.y, 0), jumpDuration));
+        deploySequence.Insert(m_ssoRope.DeployDelay, transform.DOScale(1f, jumpDuration));
+        deploySequence.Insert(m_ssoRope.DeployDelay, transform.DOJump(deployPoint, 1f, 0, jumpDuration).SetEase(Ease.Linear));
+		deploySequence.InsertCallback(m_ssoRope.DeployDelay, () =>
+			{
+				transform.SetParent(null, true);
+			});
+        deploySequence.Play().OnComplete(() =>
+        {
+            // Rope custom initialization commands
+            m_rigidbody.excludeLayers = m_ssoRope.LayersToIgnoreAfterDeploy;
+            m_folds = new List<Fold>() { new Fold(m_ropeAttach.position.CutDigits(2), Vector3.zero) };
+            m_isPlaced = true;
             m_topMeshRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
             m_baseMeshRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
             m_detail0MeshRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
             m_detail1MeshRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
             m_detail2MeshRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
-			OpenAnchor();
-        });
+            OpenAnchor();
+        }); ;
 	}
 
 	private void OpenAnchor()

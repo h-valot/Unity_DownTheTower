@@ -136,6 +136,14 @@ public class SSO_Rope : ScriptableObject
     public float DeployDuration = 0.25f;
 
     [FoldoutGroup("Deployment")]
+    [InfoBox("Delay of the jump to deploy the rope, to let the anim play.", InfoMessageType.None)]
+    public float DeployDelay = 1f;
+
+    [FoldoutGroup("Deployment")]
+    [InfoBox("Speed of the jump to deploy the rope.", InfoMessageType.None)]
+    public float DeploySpeed = 1f;
+
+    [FoldoutGroup("Deployment")]
 	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
 	[InfoBox("Layer masks the deployment system will ignore for its physics calculations (raycasts).", InfoMessageType.None)]
 	public LayerMask NoRaycastLayer;
