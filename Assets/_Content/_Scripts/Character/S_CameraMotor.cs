@@ -17,6 +17,7 @@ public class CameraMotor : MonoBehaviour
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Look m_rseLook;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_InitializeCamera m_rseInitializeCamera;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_DisplayDeath m_rseDisplayDeath;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSE_GuardianFootstep m_rseGuardianFootstep;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterDeath m_rsoCharacterDeath;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterState m_rsoCharacterState;
@@ -77,6 +78,7 @@ public class CameraMotor : MonoBehaviour
 		m_rseLook.action += UpdateLookInput;
 		m_rsoCameraStyle.OnChanged += SwitchStyle;
 		m_rseInitializeCamera.action += Initialize;
+		m_rseGuardianFootstep.action += Shake;
 
 		m_rsoCharacterDeath.OnChanged += OnCharacterSpawn;
 		m_rseDisplayDeath.action += OnCharacterDie;
@@ -87,6 +89,7 @@ public class CameraMotor : MonoBehaviour
 		m_rseLook.action -= UpdateLookInput;
 		m_rsoCameraStyle.OnChanged -= SwitchStyle;
 		m_rseInitializeCamera.action -= Initialize;
+		m_rseGuardianFootstep.action -= Shake;
 
 		m_rsoCharacterDeath.OnChanged -= OnCharacterSpawn;
 		m_rseDisplayDeath.action -= OnCharacterDie;
@@ -97,12 +100,6 @@ public class CameraMotor : MonoBehaviour
 		// Assertion
 		if (m_rsoInputsLocked.value) return;
 		if (m_isCameraFrozen) return;
-
-		// Debug: Camera shake
-		// if (Input.GetKeyDown(KeyCode.R))
-		// {
-		// 	StartCoroutine(Shake(m_ssoCamera.GuardienStepShakeAmplitude, m_ssoCamera.GuardienStepShakeDuration));
-		// }
 
 		HandleRotation();
 		CalculatePlanarVectors();
@@ -257,7 +254,12 @@ public class CameraMotor : MonoBehaviour
 		// Multiplying by fixedDeltaTime. Otherwise, look sensibility is frame based.
 		m_cinemachineTargetYaw += input.x * Time.fixedDeltaTime;
 		m_cinemachineTargetPitch += input.y * Time.fixedDeltaTime;
-    }
+	}
+	
+	private void Shake(float strength)
+	{
+		StartCoroutine(Shake(m_ssoCamera.GuardienStepShakeAmplitude * strength, m_ssoCamera.GuardienStepShakeDuration));
+	}
 
 	private IEnumerator Shake(float amplitude, float delay)
 	{

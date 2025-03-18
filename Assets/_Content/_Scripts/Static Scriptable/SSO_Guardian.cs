@@ -68,6 +68,12 @@ public class SSO_Guardian : ScriptableObject
     [InfoBox("Size of the beam when in dormant state.", InfoMessageType.None)]
     public float DormantFocus;
 
+
+	[FoldoutGroup("Feedbacks")]
+	[PropertySpace(SpaceAfter = 0, SpaceBefore = 15)]
+	[InfoBox("Scalar to the amplitude of the camera shake when the guardian is moving near the character.", InfoMessageType.None)]
+	public AnimationCurve FootstepCurve;
+
 	#endregion
 
 	#region SIGHT

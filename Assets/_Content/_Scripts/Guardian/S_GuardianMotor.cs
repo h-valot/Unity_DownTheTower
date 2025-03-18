@@ -28,6 +28,7 @@ public class GuardianMotor : MonoBehaviour
 	[FoldoutGroup("Internal References")][SerializeField] private GuardianActivator m_activator;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Game m_ssoGame;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSE_GuardianFootstep m_rseGuardianFootstep;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterPosition m_rsoCharacterPosition;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_TorchManager m_rsoTorchManager;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_Ropes m_rsoRopes;
@@ -95,6 +96,7 @@ public class GuardianMotor : MonoBehaviour
 		SelectTarget();
         DetermineState();
         UpdateState();
+		HandleSteps();
 
 		m_lastPosition = transform.position;
 	}
@@ -621,6 +623,30 @@ public class GuardianMotor : MonoBehaviour
 	#endregion
 
 	#region GRAPHICS
+
+	// - TEMPORARY -
+	// This function simulate the walking animation of the guardian to call periodically the OnFootstep() function
+	private float m_stepTimer;
+	private void HandleSteps()
+	{
+		// Assert: The guardian isn't moving
+		if (transform.position.CutDigits(3) == m_lastPosition.CutDigits(3)) return;
+
+		m_stepTimer -= Time.deltaTime;
+		if (m_stepTimer <= 0)
+		{
+			m_stepTimer = m_agent.speed / 3f;
+			OnFootstep();
+		}
+	}
+	// - END -
+
+	private void OnFootstep()
+	{
+		float distanceCharacter = Vector3.Distance(m_rsoCharacterPosition.value, transform.position);
+		float stepStrengthPercent = m_ssoGuardian.FootstepCurve.Evaluate(1 - Mathf.Clamp01(distanceCharacter / m_ssoGuardian.LongRange));
+		m_rseGuardianFootstep.Call(stepStrengthPercent);
+	}
 
 	private void UpdateBeamGraphics(Color newColor, float focusPercent, float opacity)
 	{
