@@ -33,7 +33,7 @@ public class CharacterGraphics : MonoBehaviour
 				);
 			}
 		}
-		else if (m_rsoCameraStyle.value == CameraStyle.AIMING)
+		else
 		{
 			transform.forward = m_aimingLookAt.position - new Vector3(
 				transform.position.x, 

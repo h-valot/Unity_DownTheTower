@@ -68,6 +68,12 @@ public class SSO_Guardian : ScriptableObject
     [InfoBox("Size of the beam when in dormant state.", InfoMessageType.None)]
     public float DormantFocus;
 
+
+	[FoldoutGroup("Feedbacks")]
+	[PropertySpace(SpaceAfter = 0, SpaceBefore = 15)]
+	[InfoBox("Scalar to the amplitude of the camera shake when the guardian is moving near the character.", InfoMessageType.None)]
+	public AnimationCurve FootstepCurve;
+
 	#endregion
 
 	#region SIGHT
@@ -177,6 +183,11 @@ public class SSO_Guardian : ScriptableObject
 	[PropertySpace(SpaceAfter = 0, SpaceBefore = 15)]
 	[InfoBox("Duration of the timeout delay. At the end of this duration, the seek state is forced quit.", InfoMessageType.None)]
 	public float SeekTimeoutTimer;
+
+	[FoldoutGroup("Seek")]
+	[PropertySpace(SpaceAfter = 0, SpaceBefore = 15)]
+	[InfoBox("Duration of the timeout delay. When the guardian isn't moving, a delay starts. At the end of it, the target is banned and the seek state is forced quit.", InfoMessageType.None)]
+	public float StuckTimeoutTimer;
 
 	#endregion
 }

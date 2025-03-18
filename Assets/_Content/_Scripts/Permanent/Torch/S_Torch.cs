@@ -435,7 +435,7 @@ public class Torch : Permanent
 
 	private void OnInteracted()
 	{
-		DestroyTorch();
+		m_rsoTorchManager.value.Remove(this, true);
 	}
 
 	/// <summary>
@@ -474,9 +474,16 @@ public class Torch : Permanent
 								m_propertyBlock.SetFloat("_lightPercent", m_lightPercent);
 								m_meshRenderer.SetPropertyBlock(m_propertyBlock);
 							}));
-		flickeringSequence.SetId(gameObject.GetHashCode()); // Unsafe version of GetInstanceID()
 
-		flickeringSequence.Play().OnComplete(() => { DestroyTorch(); });
+		if (gameObject != null) 
+		{
+			flickeringSequence.SetId(gameObject.GetHashCode()); // Unsafe version of GetInstanceID()
+			flickeringSequence.Play().OnComplete(() => { DestroyTorch(); });
+		}
+		else 
+		{
+			DestroyTorch();
+		}
     }
 
     public void DestroyTorch()

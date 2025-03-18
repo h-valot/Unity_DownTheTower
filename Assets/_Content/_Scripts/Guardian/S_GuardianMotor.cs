@@ -28,6 +28,7 @@ public class GuardianMotor : MonoBehaviour
 	[FoldoutGroup("Internal References")][SerializeField] private GuardianActivator m_activator;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Game m_ssoGame;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSE_GuardianFootstep m_rseGuardianFootstep;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterPosition m_rsoCharacterPosition;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_TorchManager m_rsoTorchManager;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_Ropes m_rsoRopes;
@@ -40,17 +41,16 @@ public class GuardianMotor : MonoBehaviour
 	private GuardianBehaviorState m_currentState;
 
 	// Patrol
-	public bool IsPatrolPathValid => m_patrolPath && m_patrolPath.Waypoints.Count > 0;
+	[SerializeField] private bool IsPatrolPathValid => m_patrolPath && m_patrolPath.Waypoints.Count > 0;
 	private int m_currentWaypoint;
 	private float m_updateWaypointTimer;
 	private float m_currentAngleSight;
 
 	// Aggro
-	private List<Candidate> m_candidates = new List<Candidate>();
+	public List<Candidate> m_candidates = new List<Candidate>();
 	private Candidate m_currentTarget;
 	private float m_minTargetDistance;
 	private bool m_hasTargetInSight;
-	private bool m_characterAggroedLately;
 	private float m_aggroTimeoutTimer;
 	private Vector3 m_startAggroPosition;
 
@@ -61,9 +61,11 @@ public class GuardianMotor : MonoBehaviour
 	private bool m_targetNotFound;
 	private int m_seekTargetId;
 	private float m_seekTimeoutTimer;
+	private float m_stuckTimeoutTimer;
+	private Vector3 m_lastPosition;
 
-    // Graphics
-    private MaterialPropertyBlock m_guardianPropertyBlock;
+	// Graphics
+	private MaterialPropertyBlock m_guardianPropertyBlock;
     private MaterialPropertyBlock m_beamPropertyBlock;
 
     #endregion
@@ -80,6 +82,7 @@ public class GuardianMotor : MonoBehaviour
 		m_currentState = GuardianBehaviorState.SEEK;
 		ToggleAngleSightExtension(false);
 
+		UpdateCandidates();
 		SelectTarget();
 		DetermineState();
     }
@@ -89,9 +92,13 @@ public class GuardianMotor : MonoBehaviour
 		// Assertion
 		if (!m_activator.IsActive) return;
 
-        SelectTarget();
+		UpdateCandidates();
+		SelectTarget();
         DetermineState();
         UpdateState();
+		HandleSteps();
+
+		m_lastPosition = transform.position;
 	}
 
 	private void OnTriggerEnter(Collider collider)
@@ -116,33 +123,78 @@ public class GuardianMotor : MonoBehaviour
 
 	#region STATE MACHINE
 
-	private void SelectTarget()
+	private void UpdateCandidates()
 	{
 		// Assertions
-		if (m_rsoCharacterPosition.value == Vector3.zero) return;
 		if (m_rsoTorchManager.value == null) return;
 		if (m_rsoRopes.value == null) return;
 
-		// Fill candidates
+		m_candidates.ForEach(c => c.IsUpdated = false);
+
+		// Update character's candidate
 		int id = 0;
-		m_candidates = new List<Candidate> { new Candidate(id, m_rsoCharacterPosition.value + Vector3.up * 0.8f) };
-		foreach (var torch in m_rsoTorchManager.value.Torches)
+		if (m_candidates.Any(c => c.Id == id))
 		{
-			id++;
-			m_candidates.Add(new Candidate(id, torch.RaycastTarget.position));
+			m_candidates.First(c => c.Id == id).Update(m_rsoCharacterPosition.value + Vector3.up * 1f);
 		}
-		foreach (var rope in m_rsoRopes.value)
+		else
 		{
-			id++;
-			m_candidates.Add(new Candidate(id, rope.RaycastTarget.position));
+			m_candidates.Add(new Candidate(id, m_rsoCharacterPosition.value + Vector3.up * 1f));
 		}
 
+		// Update torch candidates
+		foreach (var torch in m_rsoTorchManager.value.Torches)
+		{
+			if (torch.IsInHand) continue;	// Assert: The guardian sees the character not the torch they hold
+
+			id = torch.GetHashCode();
+			if (m_candidates.Any(c => c.Id == id))
+			{
+				m_candidates.First(c => c.Id == id).Update(torch.RaycastTarget.position);
+			}
+			else
+			{
+				m_candidates.Add(new Candidate(id, torch.RaycastTarget.position));
+			}
+		}
+
+		// Update rope candidates
+		foreach (var rope in m_rsoRopes.value)
+		{
+			if (rope.IsOnBackpack) continue;	// Assert: The guardian sees the character not the rope in the backpack
+
+			id = rope.GetHashCode();
+			if (m_candidates.Any(c => c.Id == id))
+			{
+				m_candidates.First(c => c.Id == id).Update(rope.RaycastTarget.position);
+			}
+			else
+			{
+				m_candidates.Add(new Candidate(id, rope.RaycastTarget.position));
+			}
+		}
+
+		// Remove unused candidates
+		for (int i = m_candidates.Count - 1; i >= 0; i--)
+		{
+			// Assert: Don't remove updated candidate
+			if (m_candidates[i].IsUpdated) continue;
+
+			m_candidates.Remove(m_candidates[i]);
+		}
+	}
+
+	private void SelectTarget()
+	{
 		// Select a candidate
 		m_minTargetDistance = m_ssoGuardian.LongRange;
 		Candidate bestTarget = m_currentTarget;
 		m_hasTargetInSight = false;
 		foreach (var candidate in m_candidates)
 		{
+			// Assert: ban candidates are ignored
+			if (candidate.IsBan) continue;
+
 			// Assert: there is a better target near to the guardian
 			float distance = Vector3.Distance(transform.position, candidate.Position);
 			if (distance > m_minTargetDistance) continue;
@@ -193,7 +245,7 @@ public class GuardianMotor : MonoBehaviour
 		if (m_currentState != GuardianBehaviorState.PATROL
 		&& m_currentState == GuardianBehaviorState.SEEK 
 		&& m_targetNotFound
-		&& !m_characterAggroedLately)
+		&& !GetCandidateById(0).IsAggroedLately)
 		{
 			m_targetNotFound = false;
             SwitchState(GuardianBehaviorState.PATROL);
@@ -310,7 +362,7 @@ public class GuardianMotor : MonoBehaviour
 
     private void ExitPatrolState()
     {
-
+		// Do nothing
 	}
 
 	private void Reorientate()
@@ -364,15 +416,15 @@ public class GuardianMotor : MonoBehaviour
 	{
 		ChaseTarget();
 		HandleLockedByEnviro();
+		HandleStuckTimeout();
 
 		m_beamTransform.LookAt(m_currentTarget.Position);
     }
 
     private void ExitAggroState()
     {
-
+		// Do nothing
 	}
-
 
 	private void ChaseTarget()
 	{
@@ -380,10 +432,7 @@ public class GuardianMotor : MonoBehaviour
 		if (!m_hasTargetInSight) return;
 
 		m_agent.destination = m_currentTarget.Position;
-		if (!m_characterAggroedLately && m_currentTarget.Id == 0)
-		{
-			m_characterAggroedLately = true;
-		}
+		m_currentTarget.IsAggroedLately = true;
 	}
 
 	private void HandleLockedByEnviro()
@@ -456,7 +505,8 @@ public class GuardianMotor : MonoBehaviour
 	{
 		HandleOmniscience();
 		HandleSeek();
-		HandleTimeout();
+		HandleStuckTimeout();
+		HandleSeekTimeout();
 	}
 
 	private void ExitSeekState()
@@ -466,19 +516,17 @@ public class GuardianMotor : MonoBehaviour
 
 	private void HandleOmniscience()
 	{
-		m_omniscienceTimer -= Time.fixedDeltaTime;
 		m_omniscienceTarget = GetCandidateById(m_seekTargetId);
 
-		// Assert: Timer elapsed
-		if (m_omniscienceTimer <= 0) return;
+		m_omniscienceTimer -= Time.fixedDeltaTime;
+		if (m_omniscienceTimer <= 0) 
+		{
+			if (m_omniscienceTarget == null) return;    		// Assert: Target at id doesn't exist
+			if (!m_omniscienceTarget.IsAggroedLately) return;   // Assert: Target hasn't been chased lately
+			if (m_omniscienceTarget.IsBan) return;				// Assert: Target is ban - it can't be seek anymore
 
-		// Assert: Invalid target
-		if (m_omniscienceTarget.Id == -1) return;
-
-		// Assert: Target is the character but it hasn't been chased since the last time the guardian was patrolling
-		if (m_omniscienceTarget.Id != 0 && m_characterAggroedLately) return;
-
-		m_agent.destination = m_omniscienceTarget.Position;
+			m_agent.destination = m_omniscienceTarget.Position;
+		}
 	}
 
 	private void HandleSeek()
@@ -488,30 +536,61 @@ public class GuardianMotor : MonoBehaviour
 		ToggleAngleSightExtension(true);
 
 		m_seekingTimer -= Time.fixedDeltaTime;
-		if (m_seekingTimer >= 0f) return;
-
-		// Seek back to the last character position is chased lately
-		if (m_characterAggroedLately 	// The character has been chased at least once since the last time the guardian was patrolling
-		&& m_seekTargetId != 0)			// AND The current target the guardian is seeking isn't the character
+		if (m_seekingTimer < 0f)
 		{
-			m_characterAggroedLately = false;
-			m_omniscienceTimer = m_ssoGuardian.OmniscienceDuration;
-			m_seekingTimer = m_ssoGuardian.SeekingDuration;
-			m_seekTimeoutTimer = m_ssoGuardian.SeekTimeoutTimer;
-			m_seekTargetId = 0;
+			// Seek back to the last character position is chased lately
+			if (GetCandidateById(0).Id != -1		// The character candidate is valid
+			&& GetCandidateById(0).IsAggroedLately	// AND The character has been chased at least once since the last time the guardian was patrolling
+			&& m_omniscienceTarget.Id != 0)         // AND The current target the guardian is seeking isn't the character
+			{
+				m_omniscienceTimer = m_ssoGuardian.OmniscienceDuration;
+				m_seekingTimer = m_ssoGuardian.SeekingDuration;
+				m_seekTimeoutTimer = m_ssoGuardian.SeekTimeoutTimer;
+
+				m_seekTargetId = 0;
+				return;
+			}
+
+			m_targetNotFound = true;
+		}
+	}
+
+	private void HandleStuckTimeout()
+	{
+		// Assert: the position of the guardian is actually changing
+		if (transform.position.CutDigits(1) != m_lastPosition.CutDigits(1)) 
+		{
+			m_stuckTimeoutTimer = m_ssoGuardian.StuckTimeoutTimer;
 			return;
 		}
 
-		m_targetNotFound = true;
+		m_stuckTimeoutTimer -= Time.fixedDeltaTime;
+		if (m_stuckTimeoutTimer <= 0f)
+		{
+			m_targetNotFound = true;
+			if (CurrentTarget != null) 
+			{
+				if (CurrentTarget.Id != 0)
+				{
+					// Ban unreachable targets
+					CurrentTarget.IsBan = true;
+				}
+				else
+				{
+					// Unaggro the character instead of banning it
+					CurrentTarget.IsAggroedLately = false;
+				}
+			}
+		}
 	}
 
-	private void HandleTimeout()
+	private void HandleSeekTimeout()
 	{
 		m_seekTimeoutTimer -= Time.fixedDeltaTime;
 		if (m_seekTimeoutTimer <= 0f)
 		{
 			m_targetNotFound = true;
-			m_characterAggroedLately = false;
+			if (m_omniscienceTarget != null) m_omniscienceTarget.IsAggroedLately = false;
 		}
 	}
 
@@ -520,18 +599,54 @@ public class GuardianMotor : MonoBehaviour
 		m_currentAngleSight = isEnabled ? m_ssoGuardian.ExtendedAngleSight : m_ssoGuardian.DefaultAngleSight;
 	}
 
+	/// <summary>
+	/// Returns the current target chased or seeked based on the current guardian state.
+	/// </summary>
+	private Candidate CurrentTarget => m_currentState == GuardianBehaviorState.SEEK ? m_omniscienceTarget : m_currentTarget;
+
+	/// <summary>
+	/// Return the candidate filter by id using FirstOrDefault function. Note: 0 is the character.
+	/// </summary>
 	private Candidate GetCandidateById(int id)
 	{
-		foreach (var candidate in m_candidates.Where(c => c.Id == id))
+		var candidate = m_candidates.FirstOrDefault(c => c.Id == id);
+		if (candidate == null)
+		{
+			return new Candidate(-1, Vector3.zero);
+		}
+		else
 		{
 			return candidate;
 		}
-		return new Candidate(-1, Vector3.zero);
 	}
 
 	#endregion
 
 	#region GRAPHICS
+
+	// - TEMPORARY -
+	// This function simulate the walking animation of the guardian to call periodically the OnFootstep() function
+	private float m_stepTimer;
+	private void HandleSteps()
+	{
+		// Assert: The guardian isn't moving
+		if (transform.position.CutDigits(3) == m_lastPosition.CutDigits(3)) return;
+
+		m_stepTimer -= Time.deltaTime;
+		if (m_stepTimer <= 0)
+		{
+			m_stepTimer = m_agent.speed / 3f;
+			OnFootstep();
+		}
+	}
+	// - END -
+
+	private void OnFootstep()
+	{
+		float distanceCharacter = Vector3.Distance(m_rsoCharacterPosition.value, transform.position);
+		float stepStrengthPercent = m_ssoGuardian.FootstepCurve.Evaluate(1 - Mathf.Clamp01(distanceCharacter / m_ssoGuardian.LongRange));
+		m_rseGuardianFootstep.Call(stepStrengthPercent);
+	}
 
 	private void UpdateBeamGraphics(Color newColor, float focusPercent, float opacity)
 	{

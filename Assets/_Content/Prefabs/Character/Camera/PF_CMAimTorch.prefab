@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 5996087260538922100}
   - component: {fileID: 5996087260538922101}
   m_Layer: 0
-  m_Name: PF_CMAiming
+  m_Name: PF_CMAimTorch
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -54,7 +54,7 @@ MonoBehaviour:
   m_LookAt: {fileID: 0}
   m_Follow: {fileID: 0}
   m_Lens:
-    FieldOfView: 45
+    FieldOfView: 50
     OrthographicSize: 10
     NearClipPlane: 0.2
     FarClipPlane: 500
@@ -130,9 +130,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Damping: {x: 0.1, y: 0.25, z: 0.3}
-  ShoulderOffset: {x: 5, y: 0, z: 0}
+  ShoulderOffset: {x: 1, y: 1, z: 0}
   VerticalArmLength: 0
-  CameraSide: 0.6
+  CameraSide: 0.5
   CameraDistance: 5
   CameraCollisionFilter:
     serializedVersion: 2

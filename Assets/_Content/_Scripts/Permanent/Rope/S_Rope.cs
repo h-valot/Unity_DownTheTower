@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
 using Sirenix.OdinInspector;
@@ -40,13 +39,15 @@ public class Rope : Permanent
 
 	private bool m_isPlaced;
 	private float m_holdLength;
-	public List<Fold> m_folds = new List<Fold>();
+	private List<Fold> m_folds = new List<Fold>();
 	private Rigidbody m_characterRigidbody;
 	private Transform m_characterHarness;
 	private SoftJointLimit m_linearLimit;
 
-	public bool IsFoldSystemDisabled;
-	public bool IsConstrained;
+	[HideInInspector] public bool IsOnBackpack;
+	[HideInInspector] public bool IsFoldSystemDisabled;
+	[HideInInspector] public bool IsConstrained;
+	
 	public Action OnAttached;
 	public Action OnDetached;
 	public Action OnLimitReached;

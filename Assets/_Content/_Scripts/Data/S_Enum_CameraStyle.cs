@@ -1,5 +1,6 @@
 public enum CameraStyle
 {
 	BASIC,
-	AIMING
+	ROPE,
+	TORCH
 }
