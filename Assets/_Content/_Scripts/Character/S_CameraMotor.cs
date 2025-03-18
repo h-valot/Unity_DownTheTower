@@ -10,8 +10,9 @@ public class CameraMotor : MonoBehaviour
 	[Title("External references")]
 	[SerializeField] private CinemachineVirtualCamera m_aimingCamera;
 	[SerializeField] private CinemachineVirtualCamera m_3rdPersonCamera;
+    [SerializeField] private CinemachineVirtualCamera m_mainMenuCamera;
 
-	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Camera m_ssoCamera;
+    [FoldoutGroup("Scriptable")][SerializeField] private SSO_Camera m_ssoCamera;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Look m_rseLook;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_InitializeCamera m_rseInitializeCamera;
@@ -231,10 +232,12 @@ public class CameraMotor : MonoBehaviour
 	{
 		m_aimingCamera.gameObject.SetActive(false);
 		m_3rdPersonCamera.gameObject.SetActive(false);
+		m_mainMenuCamera.gameObject.SetActive(false);
 
 		if (m_rsoCameraStyle.value == CameraStyle.BASIC) m_3rdPersonCamera.gameObject.SetActive(true);
 		if (m_rsoCameraStyle.value == CameraStyle.AIMING) m_aimingCamera.gameObject.SetActive(true);
-	}
+        if (m_rsoCameraStyle.value == CameraStyle.MENU) m_mainMenuCamera.gameObject.SetActive(true);
+    }
 
 	public void CalculatePlanarVectors()
 	{

@@ -24,8 +24,9 @@ public class GameManager : MonoBehaviour
 	[FoldoutGroup("RSO")][SerializeField] private RSO_Ropes m_rsoRopes;
 	[FoldoutGroup("RSO")][SerializeField] private RSO_LastCheckpointReached m_rsoLastCheckpointReached;
 	[FoldoutGroup("RSO")][SerializeField] private RSO_CurrentTutoIndex m_rsoCurrentTutoIndex;
+    [FoldoutGroup("RSO")][SerializeField] private RSO_CameraStyle m_rsoCameraStyle;
 
-	[FoldoutGroup("RSE")][SerializeField] private RSE_ToggleCursor m_rseToggleCursor;
+    [FoldoutGroup("RSE")][SerializeField] private RSE_ToggleCursor m_rseToggleCursor;
 
 
 	private void OnEnable()
@@ -57,9 +58,9 @@ public class GameManager : MonoBehaviour
 		}
 
 		Restart();
-		m_rsoCurrentTutoIndex.value = -1;
+        m_rsoCameraStyle.value = CameraStyle.MENU;
+        m_rsoCurrentTutoIndex.value = -1;
 		DOTween.SetTweensCapacity(400, 400);
-		StartCoroutine(m_cameraMotor.SetZeroDampForSeconds(1f));
 	}
 
 	/// <summary>
@@ -110,8 +111,8 @@ public class GameManager : MonoBehaviour
 		// Character
 		m_rsoCharacterDeath.value = false;
 
-		// Input
-		m_rsoInputsLocked.value = false;
+        // Input
+        m_rsoInputsLocked.value = false;
 		m_rsoPause.value = false;
 		m_rsoCancelPriority.value = CancelState.IN_GAME;
 
