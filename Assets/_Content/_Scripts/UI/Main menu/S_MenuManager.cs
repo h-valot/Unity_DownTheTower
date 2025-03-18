@@ -29,6 +29,8 @@ public class S_MenuManager : MonoBehaviour
     [FoldoutGroup("External references")][SerializeField] protected RSO_GameStarted m_rsoGameStarted;
     [FoldoutGroup("External references")][SerializeField] private RSO_CancelPriority m_rsoCancelPriority;
     [FoldoutGroup("External references")][SerializeField] private RSO_CameraStyle m_rsoCameraStyle;
+    [FoldoutGroup("External references")][SerializeField] private SSO_Game m_ssoGame;
+
 
     [FoldoutGroup("Menu animation")][SerializeField] private float m_fadeLength;
     [FoldoutGroup("Menu animation")][SerializeField] private float m_menuStartDelay;
@@ -48,7 +50,12 @@ public class S_MenuManager : MonoBehaviour
         m_menuTitleParent.SetActive(false);
         m_rsoGameStarted.value = false;
         m_inMainMenu = false;
-        ControllerSequence();
+    }
+
+    private void Start()
+    {
+        if (m_ssoGame.EnableMainMenu) ControllerSequence();
+        else StartCoroutine(StartImmediately());
     }
 
     private void OnEnable()
@@ -106,7 +113,7 @@ public class S_MenuManager : MonoBehaviour
         Sequence introSequence = DOTween.Sequence();
         introSequence.Pause();
         introSequence.Append(m_pnlFade.DOFade(0, m_fadeLength).SetEase(Ease.InCubic));
-        introSequence.AppendInterval(1);
+        introSequence.AppendInterval(2);
         introSequence.Append(m_pnlFade.DOFade(1, m_fadeLength).SetEase(Ease.OutCubic));
         introSequence.Play().OnComplete(PrepareStartScreen);
     }
@@ -229,6 +236,32 @@ public class S_MenuManager : MonoBehaviour
             m_rseToggleCursor.Call(true);
         }
 
+    }
+
+    #endregion
+
+    #region DEBUG
+
+    private IEnumerator StartImmediately()
+    {
+        // Disable all main menu panels
+        m_imgController.gameObject.SetActive(false);
+        m_pnlCredits.gameObject.SetActive(false);
+        m_pnlSettings.gameObject.SetActive(false);
+        m_imgTitle.SetActive(false);
+
+        // Hide Mouse Cursor
+        if (m_rsoCurrentControls.value == ControlType.KEYBOARDMOUSE) m_rseToggleCursor.Call(false);
+
+        // Reset Camera to player
+        yield return new WaitForSeconds(0.25f);
+        StartCoroutine(m_cameraMotor.SetZeroDampForSeconds(1f));
+        m_rsoCameraStyle.value = CameraStyle.BASIC;
+
+        m_pnlFade.gameObject.SetActive(false);
+        m_rsoCurrentScheme.value = InputScheme.GAME;
+        m_rsoCancelPriority.value = CancelState.IN_GAME;
+        m_rsoGameStarted.value = true;
     }
 
     #endregion
