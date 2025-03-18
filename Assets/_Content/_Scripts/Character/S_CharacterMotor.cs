@@ -1369,7 +1369,9 @@ public class CharacterMotor : MonoBehaviour
 		if (itemToThrow == null) return;
 
 		IsAiming = isInputPressed;
-		m_rsoCameraStyle.value = IsAiming ? CameraStyle.AIMING : CameraStyle.BASIC;
+		m_rsoCameraStyle.value = IsAiming 
+			? (itemToThrow is Rope) ? CameraStyle.ROPE : CameraStyle.TORCH 
+			: CameraStyle.BASIC;
 
 		// Handle preview on input pressed
 		if (IsAiming)

@@ -8,8 +8,9 @@ public class CameraMotor : MonoBehaviour
 	#region REFERENCES
 
 	[Title("External references")]
-	[SerializeField] private CinemachineVirtualCamera m_aimingCamera;
 	[SerializeField] private CinemachineVirtualCamera m_3rdPersonCamera;
+	[SerializeField] private CinemachineVirtualCamera m_aimRopeCamera;
+	[SerializeField] private CinemachineVirtualCamera m_aimTorchCamera;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Camera m_ssoCamera;
 
@@ -50,7 +51,6 @@ public class CameraMotor : MonoBehaviour
 			return m_3rdPersonFollow;
 		}
 	}
-
 
 	// Look at 
 	private float m_bufferLookAtLocalY;
@@ -120,15 +120,16 @@ public class CameraMotor : MonoBehaviour
 	{
 		m_lookAt = cameraTarget;
 		m_defaultLookAtLocalY = cameraTarget.localPosition.y;
-		m_aimingCamera.Follow = cameraTarget;
-		m_aimingCamera.LookAt = aimingLookAt;
 		m_3rdPersonCamera.Follow = cameraTarget;
 		m_3rdPersonCamera.LookAt = cameraTarget;
+		m_aimRopeCamera.Follow = cameraTarget;
+		m_aimRopeCamera.LookAt = aimingLookAt;
+		m_aimTorchCamera.Follow = cameraTarget;
+		m_aimTorchCamera.LookAt = aimingLookAt;
 
 		m_targetCameraDistance = m_ssoCamera.DefaultCameraDistance;
 		ThirdPersonFollow.ShoulderOffset.y = m_ssoCamera.ShoulderOffsetY;
 		m_3rdPersonPerlin = m_3rdPersonCamera.GetCinemachineComponent<CinemachineBasicMultiChannelPerlin>();
-
 
 		m_rsoCameraForward.value = new Vector3(transform.forward.x, 0, transform.forward.z);
 		m_rsoCameraRight.value = new Vector3(transform.right.x, 0, transform.right.z);
@@ -229,11 +230,13 @@ public class CameraMotor : MonoBehaviour
 
 	public void SwitchStyle()
 	{
-		m_aimingCamera.gameObject.SetActive(false);
 		m_3rdPersonCamera.gameObject.SetActive(false);
+		m_aimRopeCamera.gameObject.SetActive(false);
+		m_aimTorchCamera.gameObject.SetActive(false);
 
 		if (m_rsoCameraStyle.value == CameraStyle.BASIC) m_3rdPersonCamera.gameObject.SetActive(true);
-		if (m_rsoCameraStyle.value == CameraStyle.AIMING) m_aimingCamera.gameObject.SetActive(true);
+		if (m_rsoCameraStyle.value == CameraStyle.ROPE) m_aimRopeCamera.gameObject.SetActive(true);
+		if (m_rsoCameraStyle.value == CameraStyle.TORCH) m_aimTorchCamera.gameObject.SetActive(true);
 	}
 
 	public void CalculatePlanarVectors()

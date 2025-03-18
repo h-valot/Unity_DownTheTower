@@ -30,7 +30,7 @@ Transform:
   m_GameObject: {fileID: 8944336655422409498}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.4000001, y: 1.6, z: -4}
+  m_LocalPosition: {x: 0.5, y: 1.375, z: -4}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -48,8 +48,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8a925e1d5ebbfcf418332905bd39ea08, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_aimingCamera: {fileID: 0}
   m_3rdPersonCamera: {fileID: 0}
+  m_aimRopeCamera: {fileID: 0}
+  m_aimTorchCamera: {fileID: 0}
   m_ssoCamera: {fileID: 11400000, guid: 8ead595f5221216448783aa095fc4aae, type: 2}
   m_rseLook: {fileID: 11400000, guid: 96e37ccd82d6cfd43bade6f66c27a479, type: 2}
   m_rseInitializeCamera: {fileID: 11400000, guid: 00ec736148c957745977176cbb622156,
@@ -87,7 +88,7 @@ MonoBehaviour:
   m_BlendUpdateMethod: 1
   m_DefaultBlend:
     m_Style: 1
-    m_Time: 0.5
+    m_Time: 0.35
     m_CustomCurve:
       serializedVersion: 2
       m_Curve: []
@@ -133,7 +134,7 @@ Camera:
     width: 1
     height: 1
   near clip plane: 0.2
-  far clip plane: 500
+  far clip plane: 700
   field of view: 50
   orthographic: 0
   orthographic size: 10
