@@ -13,15 +13,24 @@ public class SSO_Game : ScriptableObject
 	[InfoBox("The type of build the game will be. DEBUG: Activate all debug fonctionalities. RELEASE: Disable all debug fonctionalities.", InfoMessageType.None)]
 	public BuildType BuildType;
 
-	[PropertySpace(SpaceBefore = 15, SpaceAfter = 15)]
-	[InfoBox("Enable the chrono debugging  system.", InfoMessageType.None)]
-	public bool EnableChrono;
 
-	#endregion
+    #endregion
 
-	#region WORLD
+    #region DEBUG
 
-	[FoldoutGroup("World")]
+    [FoldoutGroup("Debug")]
+    [InfoBox("Enable the chrono debugging  system.", InfoMessageType.None)]
+    public bool EnableChrono;
+
+    [FoldoutGroup("Debug")]
+    [InfoBox("Enable the main menu. (Should only be disabled for debug purposes)", InfoMessageType.None)]
+    public bool EnableMainMenu;
+
+    #endregion
+
+    #region WORLD
+
+    [FoldoutGroup("World")]
 	[InfoBox("Default light intensity of scene global point lights.", InfoMessageType.None)]
 	public float GlobalLightIntensity;
 
