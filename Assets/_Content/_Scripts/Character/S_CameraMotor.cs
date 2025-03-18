@@ -9,10 +9,11 @@ public class CameraMotor : MonoBehaviour
 
 	[Title("External references")]
 	[SerializeField] private CinemachineVirtualCamera m_3rdPersonCamera;
+    [SerializeField] private CinemachineVirtualCamera m_mainMenuCamera;
 	[SerializeField] private CinemachineVirtualCamera m_aimRopeCamera;
 	[SerializeField] private CinemachineVirtualCamera m_aimTorchCamera;
 
-	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Camera m_ssoCamera;
+    [FoldoutGroup("Scriptable")][SerializeField] private SSO_Camera m_ssoCamera;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Look m_rseLook;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_InitializeCamera m_rseInitializeCamera;
@@ -228,10 +229,12 @@ public class CameraMotor : MonoBehaviour
 	public void SwitchStyle()
 	{
 		m_3rdPersonCamera.gameObject.SetActive(false);
+		m_mainMenuCamera.gameObject.SetActive(false);
 		m_aimRopeCamera.gameObject.SetActive(false);
 		m_aimTorchCamera.gameObject.SetActive(false);
 
 		if (m_rsoCameraStyle.value == CameraStyle.BASIC) m_3rdPersonCamera.gameObject.SetActive(true);
+        if (m_rsoCameraStyle.value == CameraStyle.MENU) m_mainMenuCamera.gameObject.SetActive(true);
 		if (m_rsoCameraStyle.value == CameraStyle.ROPE) m_aimRopeCamera.gameObject.SetActive(true);
 		if (m_rsoCameraStyle.value == CameraStyle.TORCH) m_aimTorchCamera.gameObject.SetActive(true);
 	}
