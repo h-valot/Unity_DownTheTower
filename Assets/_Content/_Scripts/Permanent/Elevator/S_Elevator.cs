@@ -22,7 +22,7 @@ public class Elevator : MonoBehaviour
 
     public CharacterMotor m_characterMotor;
     private float m_characterOffset;
-    public List<GameObject> m_pillars;
+    private List<GameObject> m_pillars;
 
     private void Awake()
     {

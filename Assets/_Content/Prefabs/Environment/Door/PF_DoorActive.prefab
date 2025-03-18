@@ -53,6 +53,37 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1.178225, y: 4.5813437, z: 1.3002052}
   m_Center: {x: 0.00908564, y: 2.4628835, z: -0.0019924939}
+--- !u!1 &2268072007368301849
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7438567904421376904}
+  m_Layer: 0
+  m_Name: DoorAlphaHeight
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7438567904421376904
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2268072007368301849}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 5.003, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 42634939013407936}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2537957808569389775
 GameObject:
   m_ObjectHideFlags: 0
@@ -85,6 +116,7 @@ Transform:
   - {fileID: 2113441311711554029}
   - {fileID: 3833757139469971407}
   - {fileID: 3145595140961854635}
+  - {fileID: 7438567904421376904}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &8927678122269645283
@@ -226,6 +258,12 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 300843759378340306}
   m_SourcePrefab: {fileID: 100100000, guid: 766bf104e1463cf479291d7a17f4c84e, type: 3}
+--- !u!23 &1557275078040629504 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 4157194154925535808, guid: 766bf104e1463cf479291d7a17f4c84e,
+    type: 3}
+  m_PrefabInstance: {fileID: 3183446115676881728}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &3145595140961854635 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 766bf104e1463cf479291d7a17f4c84e,
@@ -281,7 +319,9 @@ MonoBehaviour:
   m_rsePlayAt: {fileID: 11400000, guid: 7bf426822f136dc4a9779469894c6ae2, type: 2}
   m_ssoDoorOpen: {fileID: 11400000, guid: 70430684fad533e4aad97299d7c78d25, type: 2}
   m_ssoDoorClose: {fileID: 11400000, guid: 04002998e1aaeba4195ac781ed359184, type: 2}
+  m_meshRendererDoorDoor: {fileID: 1557275078040629504}
   m_meshRendererDoorBorder: {fileID: 5253676480069826968}
+  m_alphaDoor: {fileID: 7438567904421376904}
   m_openHeight: 4.8
   m_openDuration: 1.25
   m_openEmitStrength: 7
