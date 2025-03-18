@@ -68,11 +68,12 @@ public class CharacterMotor : MonoBehaviour
     [FoldoutGroup("Sounds")][SerializeField] private SSO_Sound m_ssoRopeFree;
 
 
-    #endregion
+	#endregion
 
-    #region VARIABLES
+	#region VARIABLES
 
-    private bool m_isInitialize;
+	private BehaviorState m_previousState;
+	private bool m_isInitialize;
 	private bool m_isMotorLocked;
 	private bool IsMotorLocked
 	{
@@ -97,11 +98,6 @@ public class CharacterMotor : MonoBehaviour
     private float m_coyoteTime;
 	private Vector3 m_positionStartFall;
 	private float m_fallHeight;
-	private bool m_isStunned;
-	private float m_stunTimer;
-	private bool m_isSlowed;
-	private float m_slowTimer;
-	private bool m_isSlowedPostStun;
 	private bool m_isCharacterDead;
 
 	// - Movement -
@@ -120,28 +116,25 @@ public class CharacterMotor : MonoBehaviour
 	// - Rope state -
 	private Rope m_rope;
 	private bool m_isHolding;
+	public Rigidbody Rigidbody => m_rigidbody;
+	public Transform Harness => m_harness;
 	public bool IsHolding => m_isHolding;
 	private float m_ropeDragTimer;
 	private bool m_withinRopeLimit;
 	private bool m_isClimbing;
-    public bool IsClimbing=> m_isClimbing;
+    public bool IsClimbing => m_isClimbing;
     private float m_currentClimbSpeed;
 	public bool IsRopeValid => m_rope && m_rope.IsPlaced;
+	private const float k_fallingForcesThreshold = 0.2f;
 
 	// - Craft state -
 	private Coroutine m_craftCoroutine;
-	private float m_craftRemainingTime;
+	private float m_craftTimer;
 	public bool m_startAiming;
 	[HideInInspector] public Permanent HandObject;
 	[HideInInspector] public Permanent RobotObject;
 	[HideInInspector] public bool IsAiming;
 	private Permanent AimingObject;
-
-	// Misc
-	private const float k_fallingForcesThreshold = 0.2f;
-	private BehaviorState m_previousState;
-	public Rigidbody Rigidbody => m_rigidbody;
-	public Transform Harness => m_harness;
 
 	#endregion
 
@@ -196,7 +189,6 @@ public class CharacterMotor : MonoBehaviour
         if (m_rigidbody.position == Vector3.zero) m_rigidbody.position = new Vector3(0.01f, 0f, 0f);
 
 		CheckGround();
-		UpdateStatus();
 		DetermineState();
         FixedUpdateState();
 		RefillTools();
@@ -308,10 +300,7 @@ public class CharacterMotor : MonoBehaviour
 		m_rigidbody.position = position;
 		m_characterGraphics.transform.rotation = rotation;
 		m_rsoCharacterPosition.value = m_rigidbody.position;
-
-		m_isJumping = false;
-		m_isClimbing = false;
-		m_isHolding = false;
+		ResetInputValues();
 	}
 
 	/// <summary>
@@ -328,11 +317,20 @@ public class CharacterMotor : MonoBehaviour
 		if (isMotorLocked)
 		{
 			UnsubscibeAllInputs();
+			ResetInputValues();
 		}
 		else
 		{
+
 			SubscribeStateInputs();
 		}
+	}
+
+	private void ResetInputValues()
+	{
+		m_isHolding = false;
+		m_isClimbing = false;
+		m_isJumping = false;
 	}
 
 	private void UpdateMoveInput(Vector2 input)
@@ -407,7 +405,10 @@ public class CharacterMotor : MonoBehaviour
 			return;
 		}
 
-        if (IsRopeValid) DesequipRope();
+        if (IsRopeValid) 
+		{
+			DesequipRope();
+		}
     }
 
 	private void UpdateJumpInput(bool isPressed)
@@ -424,7 +425,6 @@ public class CharacterMotor : MonoBehaviour
 		// Assertions
 		if (m_rsoInputsLocked.value) return;
 		if (!isPressed) return;
-		if (m_isStunned) return;
 		if (m_hasJumped) return;
 		if (m_rsoInputsLocked.value) return;
 
@@ -672,33 +672,6 @@ public class CharacterMotor : MonoBehaviour
 		}
 	}
 
-	private void UpdateStatus()
-	{
-		if (m_isStunned)
-		{
-			m_stunTimer -= Time.deltaTime;
-
-			if (m_stunTimer <= 0)
-			{
-				m_isStunned = false;
-				m_isSlowed = true;
-				m_isSlowedPostStun = true;
-				m_slowTimer = m_ssoCharacter.PostStunSlowDuration;
-			}
-		}
-
-		if (m_isSlowed)
-		{
-			m_slowTimer -= Time.deltaTime;
-
-			if (m_slowTimer <= 0)
-			{
-				m_isSlowed = false;
-				m_isSlowedPostStun = false;
-			}
-		}
-	}
-
 	private void StartCoyoteTime()
     {
         if (!m_hasJumped)
@@ -784,23 +757,6 @@ public class CharacterMotor : MonoBehaviour
         desiredForcev2 = Mathf.Clamp(desiredForcev2.magnitude, 0, 1) * desiredForcev2.normalized;
         float desiredForce = desiredForcev2.magnitude * m_ssoCharacter.MaxMoveForce;
         m_desiredForce = desiredForce;
-
-        // Apply speed modifiers
-        if (m_isStunned)
-		{
-			desiredForce = 0f;
-		}
-		else if (m_isSlowed)
-		{
-			if (!m_isSlowedPostStun)
-			{
-				desiredForce *= m_ssoCharacter.SlowPercentage.Evaluate((m_ssoCharacter.MaxSlowDuration - m_slowTimer) / m_ssoCharacter.MaxSlowDuration);
-			}
-			else
-			{
-				desiredForce *= m_ssoCharacter.SlowPercentage.Evaluate((m_ssoCharacter.PostStunSlowDuration - m_slowTimer) / m_ssoCharacter.PostStunSlowDuration);
-			}
-		}
 
 		// Apply final force to move character, auto clamp the speed by substractiong actual speed to desired speed
 		m_rigidbody.AddForce(desiredDirection * desiredForce - m_rigidbody.velocity, ForceMode.Acceleration);
@@ -1147,11 +1103,11 @@ public class CharacterMotor : MonoBehaviour
 		if (m_coyoteTime > 0) return;
 
 		// - Get a highest position than the character's one -
-		Vector3 highestEdge = m_rigidbody.position;
+		Vector3 candidatePos = m_rigidbody.position;
 		foreach (var hit in m_raycastHits)
 		{
-			// Assert: The hit.point is lower than the cache position
-			if (hit.point.y < highestEdge.y) continue;
+			// Assert: The hit.point is lower than the candidate position
+			if (hit.point.y < candidatePos.y) continue;
 
 			// Assert: The hit.point is too far from the character's position
 			if ((m_rigidbody.position - hit.point).magnitude > m_ssoCharacter.EdgeCatchingThreshold) continue;
@@ -1159,29 +1115,25 @@ public class CharacterMotor : MonoBehaviour
 			// Assert: There is not enough space above the hit.point
 			if (Physics.Raycast(hit.point, Vector3.up, m_collider.height, m_ssoCharacter.GroundLayerToInclude)) continue;
 
-			// Assert: The ground at highest edge position isn't flat
-			if (Physics.Raycast(highestEdge + (new Vector3(highestEdge.x, 0, highestEdge.z) - new Vector3(m_rigidbody.position.x, 0, m_rigidbody.position.z)).normalized * m_ssoCharacter.SkinWidth + new Vector3(0, m_ssoCharacter.SkinWidth, 0), Vector3.down, m_ssoCharacter.SkinWidth * 2, m_ssoCharacter.GroundLayerToInclude)) continue;
-
 			// Assert: There is not enough space around the hit.point
-			if (Physics.SphereCast(
-				hit.point + Vector3.up * m_collider.height, 
-				m_collider.radius, 
-				Vector3.down, 
-				out var sphereCastHit, 
-				m_collider.height * 0.75f, 
-				m_ssoCharacter.GroundLayerToInclude)) 
+			if (Physics.SphereCast(hit.point + Vector3.up * m_collider.height, m_collider.radius, Vector3.down, out var sphereCastHit, m_collider.height * 0.75f, m_ssoCharacter.GroundLayerToInclude)) 
 			{
-				// Everything can block the character except the rope.
-				if (!sphereCastHit.collider.TryGetComponent<Rope>(out var rope)) continue;
+				// Everything can block the character except the rope and itself
+				if (!sphereCastHit.collider.TryGetComponent<Rope>(out var rope)
+				&& sphereCastHit.collider.TryGetComponent<CharacterMotor>(out var character))
+				{
+					continue;
+				}
 			}
 
-			highestEdge = hit.point;
+			candidatePos = hit.point;
 		}
 
 		// - Override the character's position -
-		if (highestEdge != m_rigidbody.position)
+		if (candidatePos != m_rigidbody.position)
 		{
-			StartCoroutine(HaulToPosition(highestEdge));
+			print($"{candidatePos}: SUCCESSFUL");
+			StartCoroutine(HaulToPosition(candidatePos));
 		}
 	}
 
@@ -1296,11 +1248,11 @@ public class CharacterMotor : MonoBehaviour
     {
         m_rseBackpackCrafting.Call(true, duration);
 
-        m_craftRemainingTime = duration;
+        m_craftTimer = duration;
 
-		while(m_craftRemainingTime> 0)
+		while(m_craftTimer> 0)
 		{
-			m_craftRemainingTime -= Time.deltaTime;
+			m_craftTimer -= Time.deltaTime;
 			yield return null;
 		}
 

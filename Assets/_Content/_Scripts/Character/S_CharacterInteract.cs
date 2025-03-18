@@ -20,6 +20,7 @@ public class CharacterInteract : MonoBehaviour
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterState m_rsoCharacterState;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_InteractableValid m_rsoInteractableValid;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_InteractableRecyclable m_rsoInteractableRecyclable;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterDeath m_rsoCharacterDeath;
 
 	private List<Interactable> m_interactables = new List<Interactable>();
 	private Backpack m_backpack;
@@ -51,7 +52,8 @@ public class CharacterInteract : MonoBehaviour
 	private void Interact(bool isPressed)
 	{
 		// Assertions
-		if (m_rsoInputsLocked.value
+		if (m_rsoCharacterDeath.value
+		|| m_rsoInputsLocked.value
 		|| !isPressed
 		|| m_interactables.Count <= 0 
 		|| (m_rsoCharacterState.value != BehaviorState.LOCOMOTION 

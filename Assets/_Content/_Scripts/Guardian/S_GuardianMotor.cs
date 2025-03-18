@@ -624,8 +624,9 @@ public class GuardianMotor : MonoBehaviour
 
 	#region GRAPHICS
 
-	// - TEMPORARY -
+	// - TEMPORARY REGION BEGINS -
 	// This function simulate the walking animation of the guardian to call periodically the OnFootstep() function
+	// TODO - Connect the guardian walk and run animation to the OnFootstep() function, then delete this temporary segment
 	private float m_stepTimer;
 	private void HandleSteps()
 	{
@@ -639,7 +640,7 @@ public class GuardianMotor : MonoBehaviour
 			OnFootstep();
 		}
 	}
-	// - END -
+	// - TEMPORARY REGION ENDS -
 
 	private void OnFootstep()
 	{

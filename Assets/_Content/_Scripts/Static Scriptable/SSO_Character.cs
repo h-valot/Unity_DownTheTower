@@ -127,22 +127,6 @@ public class SSO_Character : ScriptableObject
 	public float ropeMovementForce;
 
 
-	[Title("Partial")]
-	[FoldoutGroup("Rope")]
-	[InfoBox("Length of raycasts used to check if the character stands against a wall.", InfoMessageType.None)]
-	public float AgainstWallRaycastLength;
-
-	[FoldoutGroup("Rope")]
-	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
-	[InfoBox("Layers included in raycasts used to check if the character stands against a wall.", InfoMessageType.None)]
-	public LayerMask AgainstWallLayerToInclude;
-
-	[FoldoutGroup("Rope")]
-	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
-	[InfoBox("Force of the vector normal to the wall when jumping while suspended with a rope.", InfoMessageType.None)]
-	public float JumpOffWallForce;
-
-
 	[Title("Climbing")]
 	[FoldoutGroup("Rope")]
 	[InfoBox("Acceleration value used to determine the force to pull the character up the rope.", InfoMessageType.None)]
@@ -170,11 +154,6 @@ public class SSO_Character : ScriptableObject
 
 
 	[Title("Jumping")]
-	[FoldoutGroup("Rope")]
-	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
-	[InfoBox("Modifier applied to the last direction on the rope when the character switches from the rope to free fall.", InfoMessageType.None)]
-	public float FreeFallFromRopeModifier;
-
 	[FoldoutGroup("Rope")]
 	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
 	[InfoBox("Modifier applied to the last direction on the rope when the character switches from the rope to jump of the rope.", InfoMessageType.None)]
@@ -207,76 +186,12 @@ public class SSO_Character : ScriptableObject
 	#region DEATH
 
 	[FoldoutGroup("Death")]
-	[InfoBox("", InfoMessageType.None)]
+	[InfoBox("Prefab of the character model spawn when the character dies.", InfoMessageType.None)]
 	public CharacterRagdoll PfCharacterRagdoll;
 
-	#endregion
-
-	#region GLOW
-
-	[FoldoutGroup("Glow")]
-	[InfoBox("Up offset from the character position where the glow starts to be emitted.", InfoMessageType.None)]
-	public float GlowHeight;
-
-	[FoldoutGroup("Glow")]
-	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
-	[InfoBox("Radius of the shader glow effect.", InfoMessageType.None)]
-	public float GlowRadius;
-
-	[FoldoutGroup("Glow")]
-	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
-	[InfoBox("Intensity of the shader glow effect.", InfoMessageType.None)]
-	public float GlowStrength;
-
-	[FoldoutGroup("Glow")]
-	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
-	[InfoBox("Color of the shader glow effect.", InfoMessageType.None)]
-	public Color GlowColor;
-
-	#endregion
-
-	#region STATUS
-
-	[FoldoutGroup("Status")]
+	[FoldoutGroup("Death")]
 	[InfoBox("Maximum distance the character can travel on the y-axis between two grounded position without dying.", InfoMessageType.None)]
 	public float LethalHeight;
-
-
-	[Title("Stun")]
-	[FoldoutGroup("Status")]
-	[InfoBox("Maximum distance the character can travel on the y-axis between two grounded position without being stunned.", InfoMessageType.None)]
-	public float StunHeight;
-
-	[FoldoutGroup("Status")]
-	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
-	[InfoBox("Duration of the stun status based on the distance travelled on the y-axis.", InfoMessageType.None)]
-	public AnimationCurve StunDuration;
-
-	[FoldoutGroup("Status")]
-	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
-	[InfoBox("Duration of the slow status applied after the stun status vanquishes.", InfoMessageType.None)]
-	public float PostStunSlowDuration;
-
-
-	[Title("Slow")]
-	[FoldoutGroup("Status")]
-	[InfoBox("Maximum distance the character can travel on the y-axis between two grounded position without being slowed.", InfoMessageType.None)]
-	public float SlowHeight;
-
-	[FoldoutGroup("Status")]
-	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
-	[InfoBox("Duration of the slow status based on the distance travelled on the y-axis.", InfoMessageType.None)]
-	public AnimationCurve SlowDuration;
-
-	[FoldoutGroup("Status")]
-	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
-	[InfoBox("Percentage of the character speed reduction while under the slow status based on the distance travelled on the y-axis.", InfoMessageType.None)]
-	public AnimationCurve SlowPercentage;
-
-	[FoldoutGroup("Status")]
-	[PropertySpace(SpaceBefore = 15, SpaceAfter = 0)]
-	[InfoBox("Maximum duration of the slow status.", InfoMessageType.None)]
-	public float MaxSlowDuration;
 
 	#endregion
 
