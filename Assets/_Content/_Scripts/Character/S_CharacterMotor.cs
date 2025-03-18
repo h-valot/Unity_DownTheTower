@@ -1326,6 +1326,7 @@ public class CharacterMotor : MonoBehaviour
                     BagCraftSocket.rotation,
 					BagCraftSocket.transform
                 );
+				((Rope)HandObject).IsOnBackpack = true;
 				HandObject.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
                 break;
 		}
