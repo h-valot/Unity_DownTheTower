@@ -55,8 +55,9 @@ public class CharacterMotor : MonoBehaviour
 	[FoldoutGroup("RSO")][SerializeField] private RSO_Ropes m_rsoRopes;
 	[FoldoutGroup("RSO")][SerializeField] private RSO_TorchManager m_rsoTorchManager;
 	[FoldoutGroup("RSO")][SerializeField] private RSO_Pause m_rsoPause;
+    [FoldoutGroup("RSO")][SerializeField] private RSO_CharacterElevator m_rsoCharacterElevator;
 
-	[FoldoutGroup("Sounds")][SerializeField] private RSE_PlaySound m_rsePlaySound;
+    [FoldoutGroup("Sounds")][SerializeField] private RSE_PlaySound m_rsePlaySound;
     [FoldoutGroup("Sounds")][SerializeField] private RSE_PlayAt m_rsePlayAt;
 	[FoldoutGroup("Sounds")][SerializeField] private RSE_PlayRope m_rsePlayRope;
     [FoldoutGroup("Sounds")][SerializeField] private RSE_PlayRopeStop m_rsePlayRopeStop;
@@ -172,6 +173,8 @@ public class CharacterMotor : MonoBehaviour
 
 		Application.onBeforeRender += UpdatePreview;
 		m_rsoPause.OnChanged += OnPaused;
+
+        m_rsoCharacterElevator.value = false;
     }
 
     private void OnDisable()
@@ -658,28 +661,13 @@ public class CharacterMotor : MonoBehaviour
 	
 	private void ApplyFallHeight()
 	{
-		m_fallHeight = (m_rigidbody.position.y - m_positionStartFall.y) * -1f;
+		//assertion
+        if (m_rsoCharacterElevator.value == true) return;
+
+        m_fallHeight = (m_rigidbody.position.y - m_positionStartFall.y) * -1f;
 		if (m_fallHeight >= m_ssoCharacter.LethalHeight)
 		{
 			HandleDeath(DeathType.HEIGHT);
-		}
-		else if (m_fallHeight >= m_ssoCharacter.StunHeight)
-		{
-			// Stun the character for x secondes
-			m_isStunned = true;
-
-			// Cross product to get the stun mitiged value on a 0-1 scale
-			float stunMitigedValue = (m_fallHeight - m_ssoCharacter.StunHeight) / (m_ssoCharacter.LethalHeight - m_ssoCharacter.StunHeight);
-			m_stunTimer = m_ssoCharacter.StunDuration.Evaluate(stunMitigedValue);
-		}
-		else if (m_fallHeight >= m_ssoCharacter.SlowHeight)
-		{
-			// Slow the character for x secondes by y percent
-			m_isSlowed = true;
-
-			// Cross product to get the slow mitiged value on a 0-1 scale
-			float slowMitigedValue = (m_fallHeight - m_ssoCharacter.SlowHeight) / (m_ssoCharacter.StunHeight - m_ssoCharacter.SlowHeight);
-			m_slowTimer = m_ssoCharacter.SlowDuration.Evaluate(slowMitigedValue);
 		}
 	}
 
@@ -1011,6 +999,7 @@ public class CharacterMotor : MonoBehaviour
 	{
 		// Assertions
 		if (m_rsoCharacterState.value != BehaviorState.FALL) return;
+		if (m_rsoCharacterElevator.value == true) return;
 
 		m_fallHeight = Math.Abs(m_rigidbody.position.y - m_positionStartFall.y);
 		if (m_fallHeight >= m_ssoRope.MaxLength + m_ssoCharacter.LethalHeight * 2f)
