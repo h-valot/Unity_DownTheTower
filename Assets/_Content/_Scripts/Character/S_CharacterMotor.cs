@@ -1223,14 +1223,15 @@ public class CharacterMotor : MonoBehaviour
 			m_positionStartFall = m_rigidbody.position;
 			m_rope.UpdateHoldLength();
 			if (m_rope.HoldLength == -1) DesequipRope(); // Handle error code
-			m_rsePlaySound.Call(m_ssoRopeBlocked);										 
-        }
+			m_rsePlaySound.Call(m_ssoRopeBlocked);
+			m_rseStopSound.Call(m_ssoRopeFree);
+		}
 		else
 		{
 			m_rope.IsConstrained = false;
 			m_rope.SetHoldLength(m_ssoRope.MaxLength - m_ssoRope.MaxLengthOffset - m_rope.GetFixedLength());
-
-        }
+			if (!m_isGrounded) m_rsePlaySound.Call(m_ssoRopeFree);
+		}
 	}
 
 	#endregion

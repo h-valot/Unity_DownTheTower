@@ -3,22 +3,22 @@ using UnityEngine;
 
 public class AnimatorManager : MonoBehaviour
 {
-	[Title("External references")]
-    [SerializeField] private Animator m_animator;
-    [SerializeField] private CharacterMotor m_characterMotor;
-    [SerializeField] private RSO_CharacterState m_rsoCharacterState;
-    [SerializeField] private RSE_ThrowRope m_rseThrowRope;
-    [SerializeField] private RSE_RopeAttached m_rseRopeAttached;
-    [SerializeField] private SSO_Sound m_ssoFootstepRun;
-    [SerializeField] private SSO_Sound m_ssoFootstepWalk;
-    [SerializeField] private SSO_Sound m_ssoLanding;
-    [SerializeField] private SSO_Sound m_ssoJumping;
-    [SerializeField] private SSO_Sound m_ssoSwing;
-    [SerializeField] private RSE_PlaySound m_rsePlaySound;
-    [SerializeField] private RSE_PlaySoundAt m_rsePlayAt;
-    [SerializeField] private GameObject m_footLocation;
+	[FoldoutGroup("Tweakable values")][SerializeField] private SSO_Sound m_ssoFootstepRun;
+	[FoldoutGroup("Tweakable values")][SerializeField] private SSO_Sound m_ssoFootstepWalk;
+	[FoldoutGroup("Tweakable values")][SerializeField] private SSO_Sound m_ssoLanding;
+	[FoldoutGroup("Tweakable values")][SerializeField] private SSO_Sound m_ssoJump;
+	[FoldoutGroup("Tweakable values")][SerializeField] private SSO_Sound m_ssoSwing;
 
+	[FoldoutGroup("External references")][SerializeField] private CharacterMotor m_characterMotor;
 
+	[FoldoutGroup("Internal references")][SerializeField] private GameObject m_footLocation;
+	[FoldoutGroup("Internal references")][SerializeField] private Animator m_animator;
+
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterState m_rsoCharacterState;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSE_ThrowRope m_rseThrowRope;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSE_RopeAttached m_rseRopeAttached;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSE_PlaySound m_rsePlaySound;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSE_PlaySoundAt m_rsePlaySoundAt;
 
     // ---- PRIVATE VARIABLES ----
     private int m_moveSpeedHash = Animator.StringToHash("MoveSpeed");
@@ -48,6 +48,7 @@ public class AnimatorManager : MonoBehaviour
     {
         m_moveSpeed = Mathf.Abs(m_characterMotor.Rigidbody.velocity.magnitude);
         m_horizontalSpeedFloat = Mathf.Abs(new Vector3(m_characterMotor.Rigidbody.velocity.x, 0, m_characterMotor.Rigidbody.velocity.z).magnitude);
+
         if(m_horizontalSpeedFloat < m_lastHorizontalSpeed)
         {
             m_speedSlower = true;
@@ -56,6 +57,7 @@ public class AnimatorManager : MonoBehaviour
         {
             m_speedSlower = false;
         }
+
         DetermineState();
         m_animator.SetFloat(m_moveSpeedHash, m_moveSpeed);
         m_animator.SetFloat(m_verticalSpeed, Mathf.Abs(m_characterMotor.Rigidbody.velocity.y));
@@ -67,17 +69,19 @@ public class AnimatorManager : MonoBehaviour
         m_animator.SetBool(m_isSpeedSlower, m_speedSlower);
         m_animator.SetBool(m_isClimbing, m_characterMotor.IsClimbing);
         m_animator.SetBool(m_isHolding, m_characterMotor.IsHolding);
+
         if (m_characterMotor.IsRopeValid == false)
         {
             m_ropeAttached = false;
-
         }
+
         m_lastHorizontalSpeed = m_horizontalSpeedFloat;
     }
 
     private void DetermineState()
     {
-        if (m_rsoCharacterState.value == BehaviorState.LOCOMOTION && m_rsoCharacterState.value != m_currentState)
+        if (m_rsoCharacterState.value == BehaviorState.LOCOMOTION 
+		&& m_rsoCharacterState.value != m_currentState)
         {
             m_animator.SetBool(m_locomotionState, true);
             m_animator.SetBool(m_FallState, false);
@@ -85,7 +89,9 @@ public class AnimatorManager : MonoBehaviour
             m_currentState = m_rsoCharacterState.value;
             OnResetAttach();
         }
-        else if (m_rsoCharacterState.value == BehaviorState.FALL && m_rsoCharacterState.value != m_currentState)
+
+        else if (m_rsoCharacterState.value == BehaviorState.FALL 
+		&& m_rsoCharacterState.value != m_currentState)
         {
             m_animator.SetBool(m_locomotionState, false);
             m_animator.SetBool(m_FallState, true);
@@ -93,7 +99,9 @@ public class AnimatorManager : MonoBehaviour
             m_currentState = m_rsoCharacterState.value;
             OnResetAttach();
         }
-        else if (m_rsoCharacterState.value == BehaviorState.ROPE && m_rsoCharacterState.value != m_currentState)
+
+        else if (m_rsoCharacterState.value == BehaviorState.ROPE 
+		&& m_rsoCharacterState.value != m_currentState)
         {
             m_animator.SetBool(m_locomotionState, false);
             m_animator.SetBool(m_FallState, false);
@@ -101,7 +109,6 @@ public class AnimatorManager : MonoBehaviour
             m_currentState = m_rsoCharacterState.value;
         }
     }
-
 
     private void OnEnable()
     {
@@ -114,16 +121,17 @@ public class AnimatorManager : MonoBehaviour
         m_rseRopeAttached.action -= OnRopeAttached;
         m_rseThrowRope.action -= OnRopeThrow;
     }
+
     private void OnRopeAttached()
     {
         m_ropeAttached = true;
-
     }
 
     private void OnRopeThrow(bool isThrow)
     {
         m_ropeThrow = isThrow;
     }
+
     private void OnResetAttach()
     {
         m_ropeAttached = false;
@@ -134,7 +142,7 @@ public class AnimatorManager : MonoBehaviour
         m_ropeAttached = false;
     }
 
-    #region Animations Events
+    #region ANIMATION EVENTS
 
     private void OnAnimEventFootWalk(float speed)
     {
@@ -142,31 +150,30 @@ public class AnimatorManager : MonoBehaviour
         {
             m_rsePlaySound.Call(m_ssoFootstepWalk);
         }
-
     }
 
     private void OnAnimEventFootRun(float speed)
     {
         if (m_moveSpeed > speed)
         {
-            m_rsePlayAt.Call(m_ssoFootstepRun, m_footLocation.transform.position);
+            m_rsePlaySoundAt.Call(m_ssoFootstepRun, m_footLocation.transform.position);
         }
-
     }
 
     private void OnAnimEventLanding()
     {
-        m_rsePlayAt.Call(m_ssoLanding, m_footLocation.transform.position);
+        m_rsePlaySoundAt.Call(m_ssoLanding, m_footLocation.transform.position);
     }
 
     private void OnAnimEventJumping()
     {
-        m_rsePlayAt.Call(m_ssoJumping, m_footLocation.transform.position);
+        m_rsePlaySoundAt.Call(m_ssoJump, m_footLocation.transform.position);
     }
 
     private void OnAnimEventSwing()
     {
         m_rsePlaySound.Call(m_ssoSwing);
     }
+
     #endregion
 }

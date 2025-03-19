@@ -20,6 +20,8 @@ public class UITutoToggleTorch : UITutoOnColliderEnters
 
 	private void OnToggleTorch(bool isInputPressed)
 	{
+		if (!IsActive) return;
+		
 		Complete();
 	}
 }

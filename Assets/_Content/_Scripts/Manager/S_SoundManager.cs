@@ -25,42 +25,15 @@ public class SoundManager : MonoBehaviour
     private void OnEnable()
     {
         m_rsePlaySound.action += OnPlaySound;
-        m_rsePlaySoundAt.action += PlaySfxAt;
+        m_rsePlaySoundAt.action += OnPlaySoundAt;
 		m_rseStopSound.action += OnStopSound;
     }
 
     private void OnDisable()
 	{
 		m_rsePlaySound.action -= OnPlaySound;
-		m_rsePlaySoundAt.action -= PlaySfxAt;
+		m_rsePlaySoundAt.action -= OnPlaySoundAt;
 		m_rseStopSound.action -= OnStopSound;
-	}
-
-	private void SyncSource(AudioSource audioSource, SSO_Sound sound)
-	{
-		audioSource.clip = sound.Clip;
-		audioSource.volume = sound.Volume;
-		audioSource.pitch = sound.Pitch;
-		audioSource.loop = sound.Loop;
-	}
-
-	private void PlayDelay(AudioSource audioSource, SSO_Sound sound, float delay)
-	{
-		SyncSource(audioSource, sound);
-		audioSource.PlayDelayed(delay);
-	}
-
-	private void Play(AudioSource audioSource, SSO_Sound sound, Vector3 position = new Vector3())
-	{
-		SyncSource(audioSource, sound);
-		if (position == Vector3.zero)
-		{
-			audioSource.Play();
-		}
-		else
-		{
-			AudioSource.PlayClipAtPoint(m_sfxSourceGlobal.clip, position);
-		}
 	}
 
 	private void OnPlaySound(SSO_Sound sound)
@@ -70,24 +43,33 @@ public class SoundManager : MonoBehaviour
 			case SoundType.MUSIC:
 				if (m_musicSourceA.clip != sound.Clip)
 				{
-					Play(m_musicSourceA, sound);
-					PlayDelay(m_musicSourceB, m_ambianceLoop, sound.Clip.length);
+					SyncSource(m_musicSourceA, sound);
+					m_musicSourceA.Play();
+
+					SyncSource(m_musicSourceB, m_ambianceLoop);
+					m_musicSourceB.PlayDelayed(sound.Clip.length);
 				}
 				break;
 
 			case SoundType.SFX_GLOBAL:
-				Play(m_sfxSourceGlobal, sound);
+				SyncSource(m_sfxSourceGlobal, sound);
+				m_sfxSourceGlobal.Play();
 				break;
 
 			case SoundType.SFX_ROPE:
-				// Assertions
-				if (!m_sfxSourceRope.isPlaying
-				|| m_sfxSourceRope.clip != sound.Clip)
+				if (!m_sfxSourceRope.isPlaying)
 				{
-					Play(m_sfxSourceRope, sound);
+					SyncSource(m_sfxSourceRope, sound);
+					m_sfxSourceRope.Play();
 				}
 				break;
 		}
+	}
+
+	private void OnPlaySoundAt(SSO_Sound sound, Vector3 position)
+	{
+		SyncSource(m_sfxSourceGlobal, sound);
+		AudioSource.PlayClipAtPoint(m_sfxSourceGlobal.clip, position);
 	}
 
 	private void OnStopSound(SSO_Sound sound)
@@ -117,20 +99,23 @@ public class SoundManager : MonoBehaviour
 		}
 	}
 
-	private void PlaySfxAt(SSO_Sound sound, Vector3 position)
+	private void SyncSource(AudioSource audioSource, SSO_Sound sound)
 	{
-		Play(m_sfxSourceGlobal, sound, position);
+		audioSource.clip = sound.Clip;
+		audioSource.volume = sound.Volume;
+		audioSource.pitch = sound.Pitch;
+		audioSource.loop = sound.Loop;
 	}
 
-    private IEnumerator FadeIn(AudioSource audiosource, float volume)
+	private IEnumerator FadeIn(AudioSource audioSource, float volume)
     {
         float timer = 0;
         float duration = 4;
-        float originalVolume = audiosource.volume;
+        float originalVolume = audioSource.volume;
         while (timer < duration)
         {
             timer += Time.deltaTime;
-            audiosource.volume = Mathf.Lerp(originalVolume, volume, 5f);
+            audioSource.volume = Mathf.Lerp(originalVolume, volume, 5f);
         }
        yield return null;
     }
