@@ -20,6 +20,7 @@ public class UITutoPlaceRope : UITutoOnColliderEnters
 
 	private void OnThrowRope(bool isInputPressed)
 	{
+		if (!IsActive) return;
 		if (isInputPressed) return;
 		if (m_rsoCharacterState.value != BehaviorState.LOCOMOTION) return;
 
