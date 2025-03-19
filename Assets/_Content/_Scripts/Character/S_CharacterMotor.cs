@@ -597,7 +597,6 @@ public class CharacterMotor : MonoBehaviour
                 StartCoroutine(AnimateDefaultDeath());
                 break;
 
-
             case DeathType.GAS:
                 m_rsePlaySound.Call(m_ssoDeathMushroom);
 				StartCoroutine(AnimateGasDeath());

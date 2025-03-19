@@ -3,81 +3,100 @@ using UnityEngine;
 
 public class SoundManager : MonoBehaviour
 {
-    [FoldoutGroup("Scriptable")][SerializeField] private RSE_PlaySound m_rsePlaySound;
+    [FoldoutGroup("Internal references")][SerializeField] private AudioSource m_musicSourceA;
+    [FoldoutGroup("Internal references")][SerializeField] private AudioSource m_musicSourceB;
+    [FoldoutGroup("Internal references")][SerializeField] private AudioSource m_sfxSourceGlobal;
+    [FoldoutGroup("Internal references")][SerializeField] private AudioSource m_sfxSourceRope;
+
+	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Sound m_ambianceStart;
+    [FoldoutGroup("Scriptable")][SerializeField] private SSO_Sound m_ambianceLoop;
+    [FoldoutGroup("Scriptable")][SerializeField] private SSO_Sound m_ambianceTail;
+
+	[FoldoutGroup("Scriptable")][SerializeField] private RSE_PlaySound m_rsePlaySound;
     [FoldoutGroup("Scriptable")][SerializeField] private RSE_PlayAt m_rsePlayAt;
     [FoldoutGroup("Scriptable")][SerializeField] private RSE_PlayRope m_rsePlayRope;
     [FoldoutGroup("Scriptable")][SerializeField] private RSE_PlayRopeStop m_rsePlayRopeStop;
     [FoldoutGroup("Scriptable")][SerializeField] private RSE_PlayMusic m_rsePlayMusic;
 
-    [FoldoutGroup("References")][SerializeField] private AudioSource m_musicSource_1;
-    [FoldoutGroup("References")][SerializeField] private AudioSource m_musicSource_2;
-    [FoldoutGroup("References")][SerializeField] private AudioSource m_audioSource_Once;
-    [FoldoutGroup("References")][SerializeField] private AudioSource m_audioSource_Rope;
-
-    [FoldoutGroup("Sounds")][SerializeField] private SSO_Sound m_ambianceLoop;
-    [FoldoutGroup("Sounds")][SerializeField] private SSO_Sound m_ambianceTail;
-
     private void OnEnable()
     {
-        m_rsePlayMusic.action += PlayMusic;
         m_rsePlaySound.action += PlaySound;
-        m_rsePlayAt.action += PlayAt;
+        m_rsePlayAt.action += PlaySoundAt;
+        m_rsePlayMusic.action += PlayMusic;
+
         m_rsePlayRope.action += PlayRope;
-        m_rsePlayRopeStop.action += StopPlayRope;
+        m_rsePlayRopeStop.action += StopRope;
     }
 
     private void OnDisable()
     {
-        m_rsePlayMusic.action -= PlayMusic;
         m_rsePlaySound.action -= PlaySound;
-        m_rsePlayAt.action -= PlayAt;
+        m_rsePlayAt.action -= PlaySoundAt;
+        m_rsePlayMusic.action -= PlayMusic;
+
         m_rsePlayRope.action -= PlayRope;
-        m_rsePlayRopeStop.action -= StopPlayRope;
+        m_rsePlayRopeStop.action -= StopRope;
     }
 
-    private void PlayMusic(SSO_Sound sound)
-    {
-        if (m_musicSource_1.clip != sound.Clip)
-        {
-            m_musicSource_1.clip = sound.Clip;
-            m_musicSource_1.Play();
-            m_musicSource_2.clip = m_ambianceLoop.Clip;
-            m_musicSource_2.PlayDelayed(sound.Clip.length);
-        }
+	private void SyncSource(AudioSource audioSource, SSO_Sound sound)
+	{
+		audioSource.clip = sound.Clip;
+		audioSource.volume = sound.Volume;
+		audioSource.pitch = sound.Pitch;
+		audioSource.loop = sound.Loop;
+	}
 
-    }
-    private void PlaySound(SSO_Sound sound)
-    {
-        m_audioSource_Once.clip = sound.Clip;
-        m_audioSource_Once.Play();
-    }
+	private void Play(AudioSource audioSource, SSO_Sound sound)
+	{
+		SyncSource(audioSource, sound);
+		audioSource.Play();
+	}
 
-    private void PlayAt(SSO_Sound sound, Vector3 position)
+	private void PlayDelay(AudioSource audioSource, SSO_Sound sound, float delay)
+	{
+		SyncSource(audioSource, sound);
+		audioSource.PlayDelayed(delay);
+	}
+
+	private void PlayAt(AudioSource audioSource, SSO_Sound sound, Vector3 position)
+	{
+		SyncSource(audioSource, sound);
+		AudioSource.PlayClipAtPoint(m_sfxSourceGlobal.clip, position);
+	}
+
+	private void PlaySound(SSO_Sound sound)
+	{
+		Play(m_sfxSourceGlobal, sound);
+	}
+
+	private void PlaySoundAt(SSO_Sound sound, Vector3 position)
+	{
+		PlayAt(m_sfxSourceGlobal, sound, position);
+	}
+
+	private void PlayMusic(SSO_Sound sound)
     {
-        m_audioSource_Once.clip = sound.Clip;
-        AudioSource.PlayClipAtPoint(m_audioSource_Once.clip, position);
+		// Assertion
+        if (m_musicSourceA.clip == sound.Clip) return;
+
+		Play(m_musicSourceA, sound);
+		PlayDelay(m_musicSourceB, m_ambianceLoop, sound.Clip.length);
     }
 
     private void PlayRope(SSO_Sound sound)
     {
-        if (m_audioSource_Rope.clip != sound.Clip)
-        {
-            m_audioSource_Rope.clip = sound.Clip;
-            m_audioSource_Rope.Play();
-        }
+		// Assertions
+		if (m_sfxSourceRope.isPlaying) return;
+        if (m_sfxSourceRope.clip == sound.Clip) return;
 
-        else if (m_audioSource_Rope.isPlaying == false)
-        {
-            m_audioSource_Rope.clip = sound.Clip;
-            m_audioSource_Rope.Play();
-        }
+		Play(m_sfxSourceRope, sound);
     }
 
-    private void StopPlayRope(SSO_Sound sound)
+    private void StopRope(SSO_Sound sound)
     {
-        if (m_audioSource_Rope.isPlaying == true)
-        {
-            m_audioSource_Rope.Stop();
-        }
+		// Assertion
+        if (!m_sfxSourceRope.isPlaying) return;
+
+		m_sfxSourceRope.Stop();
     }
 }
