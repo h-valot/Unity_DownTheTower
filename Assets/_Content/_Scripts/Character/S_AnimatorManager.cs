@@ -15,7 +15,7 @@ public class AnimatorManager : MonoBehaviour
     [SerializeField] private SSO_Sound m_ssoJumping;
     [SerializeField] private SSO_Sound m_ssoSwing;
     [SerializeField] private RSE_PlaySound m_rsePlaySound;
-    [SerializeField] private RSE_PlayAt m_rsePlayAt;
+    [SerializeField] private RSE_PlaySoundAt m_rsePlayAt;
     [SerializeField] private GameObject m_footLocation;
 
 

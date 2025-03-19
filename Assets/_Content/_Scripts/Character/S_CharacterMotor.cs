@@ -18,6 +18,12 @@ public class CharacterMotor : MonoBehaviour
 	[FoldoutGroup("Internal references")][SerializeField] private Transform m_harness;
 	[FoldoutGroup("Internal references")][SerializeField] private CharacterGraphics m_characterGraphics;
 
+	[FoldoutGroup("Sounds")][SerializeField] private SSO_Sound m_ssoDeathLanding;
+	[FoldoutGroup("Sounds")][SerializeField] private SSO_Sound m_ssoDeathGuardian;
+	[FoldoutGroup("Sounds")][SerializeField] private SSO_Sound m_ssoDeathMushroom;
+	[FoldoutGroup("Sounds")][SerializeField] private SSO_Sound m_ssoRopeBlocked;
+	[FoldoutGroup("Sounds")][SerializeField] private SSO_Sound m_ssoRopeFree;
+
 	[FoldoutGroup("SSO")][SerializeField] private SSO_Character m_ssoCharacter;
 	[FoldoutGroup("SSO")][SerializeField] private SSO_Torch m_ssoTorch;
 	[FoldoutGroup("SSO")][SerializeField] private SSO_Rope m_ssoRope;
@@ -36,6 +42,9 @@ public class CharacterMotor : MonoBehaviour
 	[FoldoutGroup("RSE")][SerializeField] private RSE_SetCharacterPosition m_rseSetCharacterPosition;
 	[FoldoutGroup("RSE")][SerializeField] private RSE_InitializeCamera m_rseInitializeCamera;
 	[FoldoutGroup("RSE")][SerializeField] private RSE_DisplayDeath m_rseDisplayDeath;
+	[FoldoutGroup("RSE")][SerializeField] private RSE_PlaySound m_rsePlaySound;
+	[FoldoutGroup("RSE")][SerializeField] private RSE_PlaySoundAt m_rsePlaySoundAt;
+	[FoldoutGroup("RSE")][SerializeField] private RSE_StopSound m_rseStopSound;
 
 	[FoldoutGroup("RSO")][SerializeField] private RSO_CancelConsumable m_rsoCancelConsumable;
 	[FoldoutGroup("RSO")][SerializeField] private RSO_InputsLocked m_rsoInputsLocked;
@@ -56,17 +65,6 @@ public class CharacterMotor : MonoBehaviour
 	[FoldoutGroup("RSO")][SerializeField] private RSO_TorchManager m_rsoTorchManager;
 	[FoldoutGroup("RSO")][SerializeField] private RSO_Pause m_rsoPause;
     [FoldoutGroup("RSO")][SerializeField] private RSO_CharacterElevator m_rsoCharacterElevator;
-
-    [FoldoutGroup("Sounds")][SerializeField] private RSE_PlaySound m_rsePlaySound;
-    [FoldoutGroup("Sounds")][SerializeField] private RSE_PlayAt m_rsePlayAt;
-	[FoldoutGroup("Sounds")][SerializeField] private RSE_PlayRope m_rsePlayRope;
-    [FoldoutGroup("Sounds")][SerializeField] private RSE_PlayRopeStop m_rsePlayRopeStop;
-    [FoldoutGroup("Sounds")][SerializeField] private SSO_Sound m_ssoDeathLanding;
-    [FoldoutGroup("Sounds")][SerializeField] private SSO_Sound m_ssoDeathGuardian;
-    [FoldoutGroup("Sounds")][SerializeField] private SSO_Sound m_ssoDeathMushroom;
-    [FoldoutGroup("Sounds")][SerializeField] private SSO_Sound m_ssoRopeBlocked;
-    [FoldoutGroup("Sounds")][SerializeField] private SSO_Sound m_ssoRopeFree;
-
 
 	#endregion
 
@@ -596,7 +594,6 @@ public class CharacterMotor : MonoBehaviour
                 m_rsePlaySound.Call(m_ssoDeathLanding);
                 StartCoroutine(AnimateDefaultDeath());
                 break;
-
 
             case DeathType.GAS:
                 m_rsePlaySound.Call(m_ssoDeathMushroom);
@@ -1192,7 +1189,7 @@ public class CharacterMotor : MonoBehaviour
 		if (m_isHolding)
 		{
 			isFalling = true;
-            if (!m_isGrounded) m_rsePlayRope.Call(m_ssoRopeFree);
+            if (!m_isGrounded) m_rsePlaySound.Call(m_ssoRopeFree);
         }
 		else
 		{
@@ -1212,7 +1209,7 @@ public class CharacterMotor : MonoBehaviour
 		m_rope.Detach();
 		m_rope = null;
 		m_isHolding = false;
-		m_rsePlayRopeStop.Call(m_ssoRopeFree);
+		m_rseStopSound.Call(m_ssoRopeFree);
 	}
 
 	private void ToggleRopeConstraint(bool isEnabled)
@@ -1226,7 +1223,7 @@ public class CharacterMotor : MonoBehaviour
 			m_positionStartFall = m_rigidbody.position;
 			m_rope.UpdateHoldLength();
 			if (m_rope.HoldLength == -1) DesequipRope(); // Handle error code
-            m_rsePlayRope.Call(m_ssoRopeBlocked);										 
+			m_rsePlaySound.Call(m_ssoRopeBlocked);										 
         }
 		else
 		{

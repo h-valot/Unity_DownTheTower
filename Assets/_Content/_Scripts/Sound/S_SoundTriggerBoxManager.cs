@@ -1,18 +1,17 @@
-using System.Collections;
-using System.Collections.Generic;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
-public class S_SoundTriggerBoxManager : MonoBehaviour
+public class SoundTriggerBoxManager : MonoBehaviour
 {
-    [SerializeField] private RSE_PlayMusic m_rsePlayMusic;
-    [SerializeField] private SSO_Sound m_soundToPlay;
-    public void TriggerEnter()
-    {
-        m_rsePlayMusic.Call(m_soundToPlay);
-    }
+    [SerializeField] private SSO_Sound m_sound;
 
-    public void TriggerExit()
+    [FoldoutGroup("Scriptable")][SerializeField] private RSE_PlaySound RSE_PlaySound;
+
+    public void OnTriggerEnter(Collider collider)
     {
-        print("bye");
+		if (collider.TryGetComponent<CharacterMotor>(out var character))
+		{
+			RSE_PlaySound.Call(m_sound);
+		}
     }
 }

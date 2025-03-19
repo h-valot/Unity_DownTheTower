@@ -7,6 +7,7 @@ public class SSO_Sound : ScriptableObject
 {
     public SoundType Type;
 
+	public bool Loop;
 
 	[Title("Clip")]
 	[InfoBox("If true, the returned audio clip will be a random one in the `Clips` list. Otherwise, the provided one.", InfoMessageType.None)]
@@ -39,7 +40,7 @@ public class SSO_Sound : ScriptableObject
 
 	[HideIf("m_randomizeVolume")]
 	[Range(0f, 1f)]
-	[SerializeField] private float m_volumeValue;
+	[SerializeField] private float m_volumeValue = 1f;
 
 	[ShowIf("m_randomizeVolume")]
 	[MinMaxSlider(0f, 1f, true)]
@@ -65,11 +66,11 @@ public class SSO_Sound : ScriptableObject
 	[SerializeField] private bool m_randomizePitch;
 
 	[HideIf("m_randomizePitch")]
-	[Range(0f, 2f)]
-	[SerializeField] private float m_pitchValue;
+	[Range(-3f, 3f)]
+	[SerializeField] private float m_pitchValue = 1f;
 
 	[ShowIf("m_randomizePitch")]
-	[MinMaxSlider(0f, 2f, true)]
+	[MinMaxSlider(-3f, 3f, true)]
 	[SerializeField] private Vector2 m_pitchRange = new Vector2();
 
 	public float Pitch 

@@ -5,7 +5,7 @@ using UnityEngine;
 public class Gate : Switchable
 {
     [Title("References")]
-    [SerializeField] private RSE_PlayAt m_rsePlayAt;
+    [SerializeField] private RSE_PlaySoundAt m_rsePlayAt;
     [SerializeField] private SSO_Sound m_ssoDoorOpen;
     [SerializeField] private SSO_Sound m_ssoDoorClose;
 

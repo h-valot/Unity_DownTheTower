@@ -8,7 +8,7 @@ public class Lever : Interactable
     [Title("External references")]
     [SerializeField] private List<Switchable> m_switchables = new List<Switchable>();
     [SerializeField] private RSE_PlaySound m_rsePlaySound;
-    [SerializeField] private RSE_PlayAt m_rsePlayAt;
+    [SerializeField] private RSE_PlaySoundAt m_rsePlayAt;
     [SerializeField] private SSO_Sound m_ssoLeverActivate;
     [SerializeField] private SSO_Sound m_ssoLeverDeactivate;
 
