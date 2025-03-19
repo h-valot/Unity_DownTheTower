@@ -1,4 +1,6 @@
 using Sirenix.OdinInspector;
+using System.Collections;
+using System.Threading;
 using UnityEngine;
 
 public class SoundManager : MonoBehaviour
@@ -8,14 +10,22 @@ public class SoundManager : MonoBehaviour
     [FoldoutGroup("Scriptable")][SerializeField] private RSE_PlayRope m_rsePlayRope;
     [FoldoutGroup("Scriptable")][SerializeField] private RSE_PlayRopeStop m_rsePlayRopeStop;
     [FoldoutGroup("Scriptable")][SerializeField] private RSE_PlayMusic m_rsePlayMusic;
+    [FoldoutGroup("Scriptable")][SerializeField] private RSE_PlayMusicStop m_rsePlayMusicStop;
 
     [FoldoutGroup("References")][SerializeField] private AudioSource m_musicSource_1;
     [FoldoutGroup("References")][SerializeField] private AudioSource m_musicSource_2;
     [FoldoutGroup("References")][SerializeField] private AudioSource m_audioSource_Once;
     [FoldoutGroup("References")][SerializeField] private AudioSource m_audioSource_Rope;
 
+    [FoldoutGroup("Sounds")][SerializeField] private SSO_Sound m_ambianceStart;
     [FoldoutGroup("Sounds")][SerializeField] private SSO_Sound m_ambianceLoop;
     [FoldoutGroup("Sounds")][SerializeField] private SSO_Sound m_ambianceTail;
+
+    private bool m_coroutineActive;
+    private void Start()
+    {
+        PlayMusic(m_ambianceStart);
+    }
 
     private void OnEnable()
     {
@@ -24,6 +34,7 @@ public class SoundManager : MonoBehaviour
         m_rsePlayAt.action += PlayAt;
         m_rsePlayRope.action += PlayRope;
         m_rsePlayRopeStop.action += StopPlayRope;
+        m_rsePlayMusicStop.action += StopPlayMusic;
     }
 
     private void OnDisable()
@@ -45,7 +56,18 @@ public class SoundManager : MonoBehaviour
             m_musicSource_2.PlayDelayed(sound.Clip.length);
         }
 
+        if(m_coroutineActive == false)
+        {
+
+        }
+
     }
+
+    private void StopPlayMusic(SSO_Sound sound)
+    {
+
+    }
+
     private void PlaySound(SSO_Sound sound)
     {
         m_audioSource_Once.clip = sound.Clip;
@@ -79,5 +101,23 @@ public class SoundManager : MonoBehaviour
         {
             m_audioSource_Rope.Stop();
         }
+    }
+
+    private void TuneVolume(float volume)
+    {
+        
+    }
+
+    private IEnumerator FadeIn(AudioSource audiosource,float volume)
+    {
+        float timer = 0;
+        float duration = 4;
+        float originalVolume = audiosource.volume;
+        while (timer< duration)
+        {
+            timer += Time.deltaTime;
+            audiosource.volume = Mathf.Lerp(originalVolume, volume, 5f);
+        }
+       yield return null;
     }
 }
