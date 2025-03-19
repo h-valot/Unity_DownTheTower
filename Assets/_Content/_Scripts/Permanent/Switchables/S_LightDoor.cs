@@ -7,7 +7,7 @@ using UnityEngine;
 public class LightDoor : LightReciever
 {
     [Title("References")]
-    [SerializeField] private RSE_PlayAt m_rsePlayAt;
+    [SerializeField] private RSE_PlaySoundAt m_rsePlayAt;
     [SerializeField] private SSO_Sound m_ssoDoorOpen;
     [SerializeField] private MeshRenderer m_meshRendererDoorBorder;
     [SerializeField] private MeshRenderer m_meshRendererDoorDoor;

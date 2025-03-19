@@ -1,5 +1,6 @@
 public enum SoundType
 {
 	MUSIC,
-	SFX
+	SFX_GLOBAL,
+	SFX_ROPE
 }

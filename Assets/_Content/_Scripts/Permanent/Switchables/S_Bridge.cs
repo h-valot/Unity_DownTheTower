@@ -7,7 +7,7 @@ using UnityEngine;
 public class Bridge : Switchable
 {
     [Title("References")]
-    [SerializeField] private RSE_PlayAt m_rsePlayAt;
+    [SerializeField] private RSE_PlaySoundAt m_rsePlayAt;
     [SerializeField] private SSO_Sound m_ssoBridgeActivate;
     [SerializeField] private SSO_Sound m_ssoGateOpening;
     [SerializeField] private SSO_Sound m_ssoGateClosing;

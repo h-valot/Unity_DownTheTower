@@ -61,13 +61,17 @@ public class UIGame : MonoBehaviour
 
 		if (doEnabled)
         {
-			if(m_rsoPause.value) m_rsoCurrentScheme.value = InputScheme.PAUSE ;
+			if (m_rsoPause.value) m_rsoCurrentScheme.value = InputScheme.PAUSE;
             m_rsoCancelPriority.value = CancelState.UI_PAUSE;
             Show();
 		}
 		else
         {
-            if (!m_rsoPause.value) m_rsoCurrentScheme.value = InputScheme.GAME;
+            if (!m_rsoPause.value) 
+			{
+				m_rsoCurrentScheme.value = InputScheme.GAME;
+				m_rsoCancelPriority.value = CancelState.IN_GAME;
+			}
             Hide();
 		}
 	}
@@ -92,12 +96,6 @@ public class UIGame : MonoBehaviour
 		HideSubwindows();
 	}
 
-	public void Resume()
-	{
-		m_rsoPause.value = false;
-		m_rsoCancelPriority.value = CancelState.IN_GAME;
-	}
-
 	public void CheckResume(bool isPressed)
 	{
 		if (!m_rsoGameStarted.value) return;
@@ -112,7 +110,7 @@ public class UIGame : MonoBehaviour
 			if (subwindow.IsActive) return;
         }
 
-		Resume();
+		m_rsoPause.value = false;
     }
 
 	private void HideSubwindows()

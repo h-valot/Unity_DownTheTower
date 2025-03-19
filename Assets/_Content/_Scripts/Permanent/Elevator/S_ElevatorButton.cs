@@ -11,7 +11,7 @@ public class ElevatorButton : Interactable
 
     [Title("External references")]
     [SerializeField] private Elevator m_elevator;
-    [SerializeField] private RSE_PlayAt m_rse_playAt;
+    [SerializeField] private RSE_PlaySoundAt m_rse_playAt;
     [SerializeField] private SSO_Sound m_ButtonSound;
 
     [Title("Internal references")]
