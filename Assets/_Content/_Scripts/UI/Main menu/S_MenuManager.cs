@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 public class S_MenuManager : MonoBehaviour
@@ -40,6 +41,8 @@ public class S_MenuManager : MonoBehaviour
 
     private bool m_inMainMenu;
     private float m_originPosX;
+    private bool m_consumedUpdate;
+    private bool m_preparedStartScreen;
 
     #endregion
 
@@ -50,6 +53,8 @@ public class S_MenuManager : MonoBehaviour
         m_menuTitleParent.SetActive(false);
         m_rsoGameStarted.value = false;
         m_inMainMenu = false;
+        m_consumedUpdate = false;
+        m_preparedStartScreen = false;
     }
 
     private void Start()
@@ -66,6 +71,22 @@ public class S_MenuManager : MonoBehaviour
     private void OnDisable()
     {
         m_rsoCurrentControls.OnChanged -= ChangeControls;
+    }
+
+    private void Update()
+    {
+        if (!m_inMainMenu)
+        {
+            if (m_rsoCurrentControls.value == ControlType.KEYBOARDMOUSE
+                && Keyboard.current.anyKey.wasPressedThisFrame 
+                && m_preparedStartScreen 
+                && !m_consumedUpdate)
+            {
+                m_consumedUpdate = true;
+                ShowMenu();
+            }
+        }
+            
     }
 
     #endregion
@@ -125,6 +146,7 @@ public class S_MenuManager : MonoBehaviour
         {
             m_pnlFade.gameObject.SetActive(false);
             m_rseStartAction.action += ShowMenu;
+            m_preparedStartScreen = true;
         });
     }
 

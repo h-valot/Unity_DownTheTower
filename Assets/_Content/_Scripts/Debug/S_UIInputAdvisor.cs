@@ -14,13 +14,20 @@ public class UIInputAdvisor : MonoBehaviour
 
 	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Character m_ssoCharacter;
 
-	[FoldoutGroup("Scriptable")][SerializeField] private RSO_InteractableRecyclable m_rsoInteractableRecyclable;
+    [FoldoutGroup("Scriptable")][SerializeField] private RSE_GameEnd m_rseGameEnd;
+    [FoldoutGroup("Scriptable")][SerializeField] private RSO_GameStarted m_rsoGameStarted;
+    [FoldoutGroup("Scriptable")][SerializeField] private RSO_InteractableRecyclable m_rsoInteractableRecyclable;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_InputAdviceDisplayed m_rsoInputAdviceDisplayed;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_InteractableValid m_rsoInteractableValid;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterState m_rsoCharacterState;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_Pause m_rsoPause;
 
 	private bool m_isActive = true;
+
+    private void Start()
+    {
+		Toggle(false);
+    }
 
     private void OnEnable()
     {
@@ -29,7 +36,9 @@ public class UIInputAdvisor : MonoBehaviour
 		m_rsoInteractableValid.OnChanged += ToggleInteract;
         m_rsoCharacterState.OnChanged += SwitchAdvisorInputs;
 		m_rsoPause.OnChanged += OnPaused;
-	}
+		m_rsoGameStarted.OnChanged += GameStart;
+        m_rseGameEnd.action += GameEnd;
+    }
 
     private void OnDisable()
     {
@@ -38,7 +47,9 @@ public class UIInputAdvisor : MonoBehaviour
 		m_rsoInteractableValid.OnChanged -= ToggleInteract;
         m_rsoCharacterState.OnChanged -= SwitchAdvisorInputs;
 		m_rsoPause.OnChanged -= OnPaused;
-	}
+        m_rsoGameStarted.OnChanged -= GameStart;
+        m_rseGameEnd.action -= GameEnd;
+    }
 
     private void ToggleInteract()
 	{
@@ -73,6 +84,16 @@ public class UIInputAdvisor : MonoBehaviour
 			Toggle(true);
 		}
 	}
+
+	private void GameEnd()
+	{
+		Toggle(false);
+	}
+
+	private void GameStart()
+    {
+        if(m_rsoGameStarted.value) Toggle(true);
+    }
 
 	private void Toggle(bool isEnabled)
 	{

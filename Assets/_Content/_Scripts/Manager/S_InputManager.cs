@@ -29,6 +29,7 @@ public class InputManager : MonoBehaviour
     [FoldoutGroup("Scriptable")][SerializeField] private RSE_SwitchTabRight m_rseSwitchTabRight;
     [FoldoutGroup("Scriptable")][SerializeField] private RSE_StartAction m_rseStartAction;
     [FoldoutGroup("Scriptable")][SerializeField] private RSE_Return m_rseReturn;
+    [FoldoutGroup("Scriptable")][SerializeField] private RSE_GameEnd m_rseGameEnd;
 
     [FoldoutGroup("Scriptable")][SerializeField] private RSO_Pause m_rsoPause;
     [FoldoutGroup("Scriptable")][SerializeField] private RSO_CancelConsumable m_rsoCancelConsumable;
@@ -53,6 +54,7 @@ public class InputManager : MonoBehaviour
 	private bool m_isCursorEnabled;
 	private bool m_interact;
 	private bool m_pause;
+	private bool m_gameEnded;
 
     #endregion
 
@@ -63,7 +65,8 @@ public class InputManager : MonoBehaviour
 		// Reset values
 		m_rsoCraftInputLocked.value = false;
 		m_rsoRecycleInputLocked.value = false;
-		m_rseLook.Call(Vector2.zero);
+		m_gameEnded = false;
+        m_rseLook.Call(Vector2.zero);
 		m_rsoCurrentScheme.value = InputScheme.PAUSE;
 
     }
@@ -107,12 +110,14 @@ public class InputManager : MonoBehaviour
 		m_rseToggleCursor.action += OnEnableCursor;
 		m_playerInput.onControlsChanged += OnControlsChanged;
 		m_rsoCurrentScheme.OnChanged += UpdateScheme;
+		m_rseGameEnd.action += EndGame;
     }
 
 	private void OnDisable()
 	{
 		m_rseToggleCursor.action -= OnEnableCursor;
         m_rsoCurrentScheme.OnChanged -= UpdateScheme;
+        m_rseGameEnd.action -= EndGame;
     }
 
 	# endregion
@@ -267,7 +272,7 @@ public class InputManager : MonoBehaviour
 
     public void OnPause()
 	{
-		m_rsoPause.value = !m_rsoPause.value;
+		if(!m_gameEnded) m_rsoPause.value = !m_rsoPause.value;
 
     }
 
@@ -319,6 +324,11 @@ public class InputManager : MonoBehaviour
         m_rsoCancelConsumable.value = true;
         m_rseReturn.Call(value.isPressed);
     }
+
+	private void EndGame()
+	{
+		m_gameEnded = true;
+	}
 
     #endregion
 }
