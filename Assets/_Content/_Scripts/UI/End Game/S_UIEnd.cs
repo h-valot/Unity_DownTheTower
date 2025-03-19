@@ -46,7 +46,7 @@ public class UIEnd : MonoBehaviour
 
     private void EndGame()
     {
-        if(m_txtChrono != null) m_txtTime.text = "Final Time - " + m_txtChrono.text;
+        if(m_txtChrono != null || !m_ssoGame.EnableChrono) m_txtTime.text = "Final Time - " + m_txtChrono.text;
         else m_txtTime.gameObject.SetActive(false);
         StartCoroutine(EndGameTransition());
     }
