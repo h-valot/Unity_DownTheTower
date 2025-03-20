@@ -826,7 +826,8 @@ public class CharacterMotor : MonoBehaviour
     {
         UpdateDrag();
 		ApplyFallHeight();
-	}
+        m_rseStopSound.Call(m_ssoRopeFree);
+    }
 
     private void FixedUpdateLocomotionState()
 	{
@@ -976,7 +977,9 @@ public class CharacterMotor : MonoBehaviour
 	{
 		EnterFallState();
 
-		if (!m_isClimbing
+        m_rsePlaySound.Call(m_ssoRopeFree);
+
+        if (!m_isClimbing
 		&& !m_isJumping)
 		{
 			ToggleRopeConstraint(!m_isHolding);
