@@ -74,6 +74,7 @@ public class UITutoExitRope : UITutoPanel
 
 	protected override void Complete()
 	{
+		if (!IsActive) return;
 		if (!m_wasOnRope) return;
 		if (m_rsoCharacterState.value != BehaviorState.LOCOMOTION) return;
 		if (m_rsoCurrentTutoIndex.value > m_index) return;

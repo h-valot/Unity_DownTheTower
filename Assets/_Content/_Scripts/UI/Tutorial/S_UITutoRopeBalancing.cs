@@ -14,10 +14,10 @@ public class UITutoRopeBalancing : UITutoOnColliderEnters
 	private void Update()
 	{
 		// Assertions
+		if (!IsActive) return;
 		if (!m_isMoving) return;
 		if (m_isCompleted) return;
 		if (m_rsoCharacterState.value != BehaviorState.ROPE) return;
-		if (!IsActive) return;
 
 		m_timer -= Time.deltaTime;
 		if (m_timer <= 0f)

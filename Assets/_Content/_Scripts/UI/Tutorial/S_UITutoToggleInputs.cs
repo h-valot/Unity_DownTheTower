@@ -10,8 +10,8 @@ public class UITutoToggleInputs : UITutoOnColliderEnters
 	private void Update()
 	{
 		// Assertions
-		if (m_isCompleted) return;
 		if (!IsActive) return;
+		if (m_isCompleted) return;
 
 		m_timer -= Time.deltaTime;
 		if (m_timer <= 0f)

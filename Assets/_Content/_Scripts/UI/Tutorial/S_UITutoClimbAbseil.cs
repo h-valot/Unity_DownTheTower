@@ -90,6 +90,7 @@ public class UITutoClimbAbseil : UITutoPanel
 	protected override void Complete()
 	{
 		// Assertion
+		if (!IsActive) return;
 		if (!m_hasClimp || !m_hasAbseil) return;
 		if (m_rsoCurrentTutoIndex.value > m_index) return;
 
