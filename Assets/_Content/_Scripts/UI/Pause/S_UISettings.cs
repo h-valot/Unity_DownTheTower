@@ -1,5 +1,6 @@
 using Sirenix.OdinInspector;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class UISettings : UIWindow
 {
@@ -44,7 +45,17 @@ public class UISettings : UIWindow
 
     public override void Return(bool isPressed)
     {
-        base.Return(isPressed);
+        // Assertions
+        if (!m_toggleReturn) return;
+        if (!IsActive) return;
+        if (m_rsoCancelPriority.value != m_requiredState) return;
+        if (!m_rsoCancelConsumable.value) return;
+
+        m_rsoCancelConsumable.value = false;
+        Hide();
+        if (m_previousUISelect != null && m_rsoCurrentControls.value == ControlType.GAMEPAD) EventSystem.current.SetSelectedGameObject(m_previousUISelect);
+        m_rsoCancelPriority.value = m_previousState;
+
         if (m_isMainMenu) m_mainMenu.ShowMenu();
     }
 

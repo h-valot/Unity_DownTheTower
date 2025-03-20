@@ -42,6 +42,7 @@ public class UIEnd : MonoBehaviour
 
     public void MainMenu()
     {
+        Time.timeScale = 1;
         SceneManager.LoadScene("LVL_MainScene");
     }
 

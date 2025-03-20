@@ -105,7 +105,6 @@ public class S_MenuManager : MonoBehaviour
         if (!m_inMainMenu) return;
 
         m_imgTitle.SetActive(false);
-        m_rsoCancelPriority.value = CancelState.UI_CREDITS;
         m_pnlCredits.Show();
     }
 
@@ -114,7 +113,6 @@ public class S_MenuManager : MonoBehaviour
         if (!m_inMainMenu) return;
 
         m_imgTitle.SetActive(false);
-        m_rsoCancelPriority.value = CancelState.UI_SETTINGS;
         m_pnlSettings.Show();
     }
 
@@ -129,10 +127,11 @@ public class S_MenuManager : MonoBehaviour
 
     public void ControllerSequence()
     {
+        DOTween.Kill(this);
         m_pnlFade.gameObject.SetActive(true);
         m_imgController.gameObject.SetActive(true);
         Sequence introSequence = DOTween.Sequence();
-        introSequence.Pause();
+        introSequence.Pause().SetId(this);
         introSequence.Append(m_pnlFade.DOFade(0, m_fadeLength).SetEase(Ease.InCubic));
         introSequence.AppendInterval(2);
         introSequence.Append(m_pnlFade.DOFade(1, m_fadeLength).SetEase(Ease.OutCubic));
