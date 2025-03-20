@@ -100,7 +100,7 @@ public class UIGame : MonoBehaviour
 	{
 		if (!m_rsoGameStarted.value) return;
 		if (m_rsoCancelPriority.value != CancelState.UI_PAUSE) return;
-		if (!m_rsoCancelConsumable.value) return;
+        if (!m_rsoCancelConsumable.value) return;
 		if (!isPressed) return;
 
 		m_rsoCancelConsumable.value = false;
@@ -113,7 +113,19 @@ public class UIGame : MonoBehaviour
 		m_rsoPause.value = false;
     }
 
-	private void HideSubwindows()
+    public void CancelPause()
+    {
+        m_rsoCancelConsumable.value = false;
+
+        foreach (var subwindow in m_subwindows)
+        {
+            if (subwindow.IsActive) return;
+        }
+
+        m_rsoPause.value = false;
+    }
+
+    private void HideSubwindows()
 	{
 		foreach (var subwindow in m_subwindows)
 		{
