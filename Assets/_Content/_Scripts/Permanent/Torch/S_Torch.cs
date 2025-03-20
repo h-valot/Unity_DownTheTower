@@ -21,7 +21,11 @@ public class Torch : Permanent
 	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Character m_ssoCharacter;
 	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Rope m_ssoRope;
 
-	[FoldoutGroup("Scriptable")][SerializeField] private RSO_TorchManager m_rsoTorchManager;
+    [FoldoutGroup("Scriptable")][SerializeField] private RSE_PlaySoundAt m_rsePlaySoundAt;
+    [FoldoutGroup("Scriptable")][SerializeField] private SSO_Sound m_ssoSoundHit;
+    [FoldoutGroup("Scriptable")][SerializeField] private SSO_Sound m_ssoSoundBreak;
+
+    [FoldoutGroup("Scriptable")][SerializeField] private RSO_TorchManager m_rsoTorchManager;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterPosition m_rsoCharacterPosition;
     [FoldoutGroup("Scriptable")][SerializeField] private RSO_CameraTransform m_rsoCameraTransform;
 
@@ -178,12 +182,12 @@ public class Torch : Permanent
 			m_hasPlayedHitSound = true;
 			if (m_isDeactivate)
 			{
-				Instantiate(m_ssoTorch.TorchBreakSFX, transform.position, Quaternion.identity);
+                m_rsePlaySoundAt.Call(m_ssoSoundBreak, transform.position);
 				DOTween.Sequence().AppendInterval(m_ssoTorch.DesactivatingTime).SetId(gameObject.GetInstanceID()).OnComplete(() => { m_hasPlayedHitSound = false; });
 			}
 			else
 			{
-				Instantiate(m_ssoTorch.TorchHitSFX, transform.position, Quaternion.identity);
+                m_rsePlaySoundAt.Call(m_ssoSoundHit, transform.position);
 				DOTween.Sequence().AppendInterval(m_ssoTorch.TimeBetweenHitSound).SetId(gameObject.GetInstanceID()).OnComplete(() => { m_hasPlayedHitSound = false; });
 			}
 		}

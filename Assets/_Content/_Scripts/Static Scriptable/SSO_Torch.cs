@@ -11,10 +11,6 @@ public class SSO_Torch : ScriptableObject
 	[InfoBox("Prefabs of the break torch sfx.", InfoMessageType.None)]
 	public GameObject TorchBreakSFX;
 
-	[PropertySpace(SpaceBefore = 0, SpaceAfter = 15)]
-	[InfoBox("Prefabs of the hit torch sfx.", InfoMessageType.None)]
-	public GameObject TorchHitSFX;
-
 	#region PREFABS
 
 	[FoldoutGroup("Prefabs")]
