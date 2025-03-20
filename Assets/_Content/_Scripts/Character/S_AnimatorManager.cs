@@ -148,7 +148,7 @@ public class AnimatorManager : MonoBehaviour
     {
         if (1.5 < m_moveSpeed && m_moveSpeed < speed)
         {
-            m_rsePlaySound.Call(m_ssoFootstepWalk);
+            m_rsePlaySoundAt.Call(m_ssoFootstepWalk, m_footLocation.transform.position);
         }
     }
 

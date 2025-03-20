@@ -68,8 +68,8 @@ public class SoundManager : MonoBehaviour
 
 	private void OnPlaySoundAt(SSO_Sound sound, Vector3 position)
 	{
-		SyncSource(m_sfxSourceGlobal, sound);
-		AudioSource.PlayClipAtPoint(m_sfxSourceGlobal.clip, position);
+		//SyncSource(m_sfxSourceGlobal, sound);
+		AudioSource.PlayClipAtPoint(sound.Clip, position, sound.Volume);
 	}
 
 	private void OnStopSound(SSO_Sound sound)
