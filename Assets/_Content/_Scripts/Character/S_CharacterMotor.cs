@@ -435,6 +435,21 @@ public class CharacterMotor : MonoBehaviour
 
 		m_rigidbody.AddForce(Vector3.up * m_ssoCharacter.JumpForce, ForceMode.Impulse);
 		m_hasJumped = true;
+		StartCoroutine(JumpConfirmDelay());
+	}
+
+	IEnumerator JumpConfirmDelay()
+	{
+		yield return new WaitForSeconds(0.1f);
+		JumpConfirm();
+	}
+
+	private void JumpConfirm()
+	{
+		if(m_isGrounded)
+		{
+			m_hasJumped = false;
+		}
 	}
 
 	private void JumpRope(bool isPressed)
