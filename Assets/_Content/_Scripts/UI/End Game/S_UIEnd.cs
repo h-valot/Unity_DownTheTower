@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class UIEnd : MonoBehaviour
@@ -39,9 +40,9 @@ public class UIEnd : MonoBehaviour
         m_rseGameEnd.action -= EndGame;
     }
 
-    public void QuitGame()
+    public void MainMenu()
     {
-        Application.Quit();
+        SceneManager.LoadScene("LVL_MainScene");
     }
 
     private void EndGame()

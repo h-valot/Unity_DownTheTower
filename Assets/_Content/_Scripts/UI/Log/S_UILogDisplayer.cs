@@ -17,7 +17,7 @@ public class UILogDisplayer : UIWindow
     [FoldoutGroup("Scriptable")][SerializeField] private SSO_Sound m_ssoSoundLogClose;
 
     [FoldoutGroup("Scriptable")][SerializeField] private RSO_InputsLocked m_rsoInputsLocked;
-	[FoldoutGroup("Scriptable")][SerializeField] private RSO_InputAdviceDisplayed m_rsoInputAdviceDisplayed;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_InputAdvisorDisplayed m_rsoInputAdviceDisplayed;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_Pause m_rsoPause;
     [FoldoutGroup("Scriptable")][SerializeField] private RSO_CurrentScheme m_rsoCurrentScheme;
 

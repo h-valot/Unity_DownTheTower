@@ -35,7 +35,7 @@ public class InputManager : MonoBehaviour
     [FoldoutGroup("Scriptable")][SerializeField] private RSO_CancelConsumable m_rsoCancelConsumable;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CraftInputLocked m_rsoCraftInputLocked;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_RecycleInputLocked m_rsoRecycleInputLocked;
-	[FoldoutGroup("Scriptable")][SerializeField] private RSO_InputAdviceDisplayed m_rsoInputAdviceDisplayed;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_OnScreenHintsDisplayed m_rsoOnScreenHintsDisplayed;
     [FoldoutGroup("Scriptable")][SerializeField] private RSO_CurrentControls m_rsoCurrentControls;
     [FoldoutGroup("Scriptable")][SerializeField] private RSO_CurrentScheme m_rsoCurrentScheme;
     [FoldoutGroup("Scriptable")][SerializeField] private RSO_GameStarted m_rsoGameStarted;
@@ -65,7 +65,8 @@ public class InputManager : MonoBehaviour
 		// Reset values
 		m_rsoCraftInputLocked.value = false;
 		m_rsoRecycleInputLocked.value = false;
-		m_gameEnded = false;
+		m_rsoOnScreenHintsDisplayed.value = true;
+        m_gameEnded = false;
         m_rseLook.Call(Vector2.zero);
 		m_rsoCurrentScheme.value = InputScheme.PAUSE;
 
@@ -267,7 +268,7 @@ public class InputManager : MonoBehaviour
 
 	public void OnHideUI(InputValue value)
 	{
-		m_rsoInputAdviceDisplayed.value = !m_rsoInputAdviceDisplayed.value;
+		m_rsoOnScreenHintsDisplayed.value = !m_rsoOnScreenHintsDisplayed.value;
 	}
 
     public void OnPause()

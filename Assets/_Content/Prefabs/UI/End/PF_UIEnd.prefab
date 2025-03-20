@@ -373,7 +373,7 @@ GameObject:
   - component: {fileID: 9212700262384166134}
   - component: {fileID: 7654055194290788857}
   m_Layer: 0
-  m_Name: TXT_Quit
+  m_Name: TXT_MainMenu
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -426,7 +426,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Quit
+  m_text: EXIT
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 9898b3f4034150245ac40153c2670e02, type: 2}
   m_sharedMaterial: {fileID: -2090818470547066054, guid: 9898b3f4034150245ac40153c2670e02,
@@ -509,7 +509,7 @@ GameObject:
   - component: {fileID: 4086389588411264227}
   - component: {fileID: 6777690352196406044}
   m_Layer: 0
-  m_Name: BTN_Quit
+  m_Name: BTN_MainMenu
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -533,7 +533,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}
   m_AnchoredPosition: {x: 0, y: 250}
-  m_SizeDelta: {x: 160, y: 100}
+  m_SizeDelta: {x: 226.29, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &4586569003485701934
 CanvasRenderer:
@@ -619,7 +619,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 6355500907916612296}
         m_TargetAssemblyTypeName: UIEnd, Assembly-CSharp
-        m_MethodName: QuitGame
+        m_MethodName: MainMenu
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
