@@ -172,12 +172,12 @@ public class Torch : Permanent
         // If it collide with a flat surface it increase drag to prevent the torch from rolling for eternity
         if (Vector3.Dot(collision.contacts[0].normal, new Vector3(0, 1, 0)) >= 0.8)
 		{
-			m_rigidbody.drag = 1f;
-			m_rigidbody.angularDrag = 1f;
+			m_rigidbody.linearDamping = 1f;
+			m_rigidbody.angularDamping = 1f;
 		}
 
 		if (!m_hasPlayedHitSound 
-		&& m_rigidbody.velocity.magnitude > m_ssoTorch.MinSpeedForHitSound)
+		&& m_rigidbody.linearVelocity.magnitude > m_ssoTorch.MinSpeedForHitSound)
 		{
 			m_hasPlayedHitSound = true;
 			if (m_isDeactivate)

@@ -33,7 +33,7 @@ public class CharacterRagdoll : MonoBehaviour
 		{
 			m_rigidbodies[i].position = transforms[i].position;
 			m_rigidbodies[i].rotation = transforms[i].rotation;
-			m_rigidbodies[i].velocity = characterVelocity;
+			m_rigidbodies[i].linearVelocity = characterVelocity;
 		}
 
 		// Assert: The backpack isn't equipped yet.

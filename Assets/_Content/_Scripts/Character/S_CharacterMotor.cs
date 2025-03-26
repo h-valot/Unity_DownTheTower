@@ -195,7 +195,7 @@ public class CharacterMotor : MonoBehaviour
 		if (m_rsoCharacterLastPosition.value != m_rsoCharacterPosition.value) m_rsoCharacterLastPosition.value = m_rsoCharacterPosition.value;
 		if (m_rsoCharacterPosition.value != m_rigidbody.position) m_rsoCharacterPosition.value = m_rigidbody.position;
 		m_rsoHarnessPosition.value = m_harness.position;
-		m_planarVelocity = new Vector2(m_rigidbody.velocity.x, m_rigidbody.velocity.z);
+		m_planarVelocity = new Vector2(m_rigidbody.linearVelocity.x, m_rigidbody.linearVelocity.z);
 		if (m_isGrounded && m_maxGroundedSpeed < m_planarVelocity.magnitude) m_maxGroundedSpeed = m_planarVelocity.magnitude;
 		if (m_rsoInputsLocked.value) m_moveInput = new Vector2(0f, 0f);
 	}
@@ -294,7 +294,7 @@ public class CharacterMotor : MonoBehaviour
 	public void SetCharacterPosition(Vector3 position, Quaternion rotation)
 	{
 		m_positionStartFall = position;
-		m_rigidbody.velocity = Vector3.zero;
+		m_rigidbody.linearVelocity = Vector3.zero;
 		m_rigidbody.position = position;
 		m_characterGraphics.transform.rotation = rotation;
 		m_rsoCharacterPosition.value = m_rigidbody.position;
@@ -463,7 +463,7 @@ public class CharacterMotor : MonoBehaviour
 		if (m_jumpRopeDelay < 0f)
 		{
 			m_jumpRopeDelay = m_ssoCharacter.JumpRopeDelay;
-			float force = m_ssoCharacter.JumpOffRopeModifier * m_rigidbody.velocity.magnitude;
+			float force = m_ssoCharacter.JumpOffRopeModifier * m_rigidbody.linearVelocity.magnitude;
 			Vector3 direction = (m_rsoCameraRight.value * m_moveInput.x + m_rsoCameraForward.value * m_moveInput.y).normalized;
 			direction = new Vector3(direction.x, 0, direction.z);
 			m_rigidbody.AddForce(direction * force, ForceMode.Impulse);
@@ -717,12 +717,12 @@ public class CharacterMotor : MonoBehaviour
         if (!DoMoveInputs && m_isGrounded)
         {
             m_collider.sharedMaterial.dynamicFriction = m_ssoCharacter.FrictionDeceleration;
-            m_collider.sharedMaterial.frictionCombine = PhysicMaterialCombine.Maximum;
+            m_collider.sharedMaterial.frictionCombine = PhysicsMaterialCombine.Maximum;
         }
         else
         {
             m_collider.sharedMaterial.dynamicFriction = 0;
-            m_collider.sharedMaterial.frictionCombine = PhysicMaterialCombine.Minimum;
+            m_collider.sharedMaterial.frictionCombine = PhysicsMaterialCombine.Minimum;
         }
     }
 
@@ -733,11 +733,11 @@ public class CharacterMotor : MonoBehaviour
     {
         if (m_rsoCharacterState.value == BehaviorState.LOCOMOTION)
         {
-            m_rigidbody.drag = m_ssoCharacter.DragGround;
+            m_rigidbody.linearDamping = m_ssoCharacter.DragGround;
         }
         else if (m_rsoCharacterState.value == BehaviorState.FALL || m_rsoCharacterState.value == BehaviorState.ROPE)
         {
-            m_rigidbody.drag = 0;
+            m_rigidbody.linearDamping = 0;
         }
     }
 
@@ -771,7 +771,7 @@ public class CharacterMotor : MonoBehaviour
         m_desiredForce = desiredForce;
 
 		// Apply final force to move character, auto clamp the speed by substractiong actual speed to desired speed
-		m_rigidbody.AddForce(desiredDirection * desiredForce - m_rigidbody.velocity, ForceMode.Acceleration);
+		m_rigidbody.AddForce(desiredDirection * desiredForce - m_rigidbody.linearVelocity, ForceMode.Acceleration);
     }
 
     /// <summary>
@@ -812,7 +812,7 @@ public class CharacterMotor : MonoBehaviour
 		{
 			// Check if there is really an object to step on in the speed direction, to prevent steping on end of slope
 			Vector3 start = new Vector3(m_rigidbody.position.x, m_rigidbody.position.y + m_ssoCharacter.SkinWidth, m_rigidbody.position.z);
-			Vector3 direction = m_rigidbody.velocity.normalized;
+			Vector3 direction = m_rigidbody.linearVelocity.normalized;
 			float distance = m_collider.radius * 2;
 			if (Physics.Raycast(start, direction, distance, m_ssoCharacter.GroundLayerToInclude))
 			{
@@ -906,12 +906,12 @@ public class CharacterMotor : MonoBehaviour
 
 		if (m_planarVelocity.magnitude >= m_maxGroundedSpeed * m_ssoCharacter.AirControlThreshold)
 		{
-			m_rigidbody.AddForce(-m_rigidbody.velocity, ForceMode.Acceleration);
+			m_rigidbody.AddForce(-m_rigidbody.linearVelocity, ForceMode.Acceleration);
 			return;
 		}
 
 		m_rigidbody.AddForce(
-			(desiredDirection * desiredForce - m_rigidbody.velocity) * m_airControlTimeScalar,
+			(desiredDirection * desiredForce - m_rigidbody.linearVelocity) * m_airControlTimeScalar,
 			ForceMode.Acceleration
 		);
 	}
@@ -956,10 +956,10 @@ public class CharacterMotor : MonoBehaviour
 	private void UpdateZeroDrag()
 	{
 		float modifier = 1 - Time.fixedDeltaTime * m_ssoCharacter.ZeroDragScalar;
-		Vector3 velocity = transform.InverseTransformDirection(m_rigidbody.velocity);
+		Vector3 velocity = transform.InverseTransformDirection(m_rigidbody.linearVelocity);
 		velocity.x *= modifier;
 		velocity.z *= modifier;
-		m_rigidbody.velocity = transform.TransformDirection(velocity);
+		m_rigidbody.linearVelocity = transform.TransformDirection(velocity);
 	}
 
 	/// <summary>
@@ -1070,13 +1070,13 @@ public class CharacterMotor : MonoBehaviour
 		// Assertion
 		if (m_moveInput.magnitude > m_ssoCharacter.MoveMagnitudeApplyDragThreshold) 
 		{
-			m_rigidbody.drag = 0;
+			m_rigidbody.linearDamping = 0;
 			m_ropeDragTimer = m_ssoCharacter.RopeDragDuration;
 			return;
 		}
 
 		m_ropeDragTimer -= Time.fixedDeltaTime;
-		m_rigidbody.drag = (1 - m_ropeDragTimer / m_ssoCharacter.RopeDragDuration) * m_ssoCharacter.RopeDrag;
+		m_rigidbody.linearDamping = (1 - m_ropeDragTimer / m_ssoCharacter.RopeDragDuration) * m_ssoCharacter.RopeDrag;
 
 	}
 

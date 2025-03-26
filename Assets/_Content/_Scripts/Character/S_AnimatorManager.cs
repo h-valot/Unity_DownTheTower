@@ -46,8 +46,8 @@ public class AnimatorManager : MonoBehaviour
 
     void LateUpdate()
     {
-        m_moveSpeed = Mathf.Abs(m_characterMotor.Rigidbody.velocity.magnitude);
-        m_horizontalSpeedFloat = Mathf.Abs(new Vector3(m_characterMotor.Rigidbody.velocity.x, 0, m_characterMotor.Rigidbody.velocity.z).magnitude);
+        m_moveSpeed = Mathf.Abs(m_characterMotor.Rigidbody.linearVelocity.magnitude);
+        m_horizontalSpeedFloat = Mathf.Abs(new Vector3(m_characterMotor.Rigidbody.linearVelocity.x, 0, m_characterMotor.Rigidbody.linearVelocity.z).magnitude);
 
         if(m_horizontalSpeedFloat < m_lastHorizontalSpeed)
         {
@@ -60,7 +60,7 @@ public class AnimatorManager : MonoBehaviour
 
         DetermineState();
         m_animator.SetFloat(m_moveSpeedHash, m_moveSpeed);
-        m_animator.SetFloat(m_verticalSpeed, Mathf.Abs(m_characterMotor.Rigidbody.velocity.y));
+        m_animator.SetFloat(m_verticalSpeed, Mathf.Abs(m_characterMotor.Rigidbody.linearVelocity.y));
         m_animator.SetFloat(m_horizontalSpeed, m_horizontalSpeedFloat);
         m_animator.SetBool(m_isJumpingHash, m_characterMotor.m_hasJumped);
         m_animator.SetBool(m_isGroundedHash, m_characterMotor.m_isGrounded);

@@ -17,7 +17,7 @@ public class MushroomTrigger : MonoBehaviour
     {
         if (other.TryGetComponent<Rigidbody>(out var rigidbody))
         {
-            if (rigidbody.velocity.magnitude > m_parent.m_ssoMushrooms.MinimalVelocityToTrigger)
+            if (rigidbody.linearVelocity.magnitude > m_parent.m_ssoMushrooms.MinimalVelocityToTrigger)
             {
                 if (other.TryGetComponent<CharacterMotor>(out var character))
                 {
