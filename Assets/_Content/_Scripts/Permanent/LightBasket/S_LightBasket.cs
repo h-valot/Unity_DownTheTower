@@ -39,7 +39,7 @@ public class LightBasket : MonoBehaviour
 
         foreach (Rigidbody torch in torches)
         {
-            if (torch.velocity.magnitude <= _maxVelocitySnap) ActivateBasket(torch);
+            if (torch.linearVelocity.magnitude <= _maxVelocitySnap) ActivateBasket(torch);
         }
     }
 

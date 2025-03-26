@@ -23,7 +23,7 @@ public class CharacterGraphics : MonoBehaviour
 
 		if (m_rsoCameraStyle.value == CameraStyle.BASIC)
 		{
-			Vector3 planarMovement = new Vector3(m_rigidbody.velocity.x, 0, m_rigidbody.velocity.z);
+			Vector3 planarMovement = new Vector3(m_rigidbody.linearVelocity.x, 0, m_rigidbody.linearVelocity.z);
 			if (planarMovement.magnitude >= k_MinimumThreshold)
 			{
 				transform.localRotation = Quaternion.Lerp(
