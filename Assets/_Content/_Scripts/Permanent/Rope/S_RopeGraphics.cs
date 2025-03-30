@@ -297,7 +297,15 @@ public class RopeGraphics : MonoBehaviour
 
 	private void SpawnUnfolder()
 	{
-		m_unfolder = Instantiate(m_ssoRope.PfRopeUnfolder, m_physics[^2].transform.position, Quaternion.identity, transform);
+		m_unfolder = Instantiate(
+			m_ssoRope.PfRopeUnfolder, 
+			m_physics[^2] != null 
+				? m_physics[^2].transform.position 
+				: m_physics[^1].transform.position, 
+			Quaternion.identity, 
+			transform
+		);
+
 		m_unfolder.Initialize(m_rope, this);
 	}
 
