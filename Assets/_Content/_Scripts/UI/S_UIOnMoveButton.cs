@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UIElements;
 using static UnityEngine.Rendering.DebugUI;
 
 public class UIOnMoveButton : MonoBehaviour, ISelectHandler, IDeselectHandler, IPointerEnterHandler, IPointerExitHandler
@@ -46,7 +47,6 @@ public class UIOnMoveButton : MonoBehaviour, ISelectHandler, IDeselectHandler, I
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        if (eventData.reentered) return;
         ToggleMove(false);
     }
 
