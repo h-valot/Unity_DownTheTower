@@ -2,10 +2,12 @@ using DG.Tweening;
 using Sirenix.OdinInspector;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.Controls;
 using UnityEngine.UI;
 
 public class S_MenuManager : MonoBehaviour
@@ -75,18 +77,27 @@ public class S_MenuManager : MonoBehaviour
 
     private void Update()
     {
-        if (!m_inMainMenu)
+        if (!m_inMainMenu && m_preparedStartScreen && !m_consumedUpdate)
         {
-            if (m_rsoCurrentControls.value == ControlType.KEYBOARDMOUSE
-                && Keyboard.current.anyKey.wasPressedThisFrame 
-                && m_preparedStartScreen 
-                && !m_consumedUpdate)
+            switch (m_rsoCurrentControls.value)
             {
-                m_consumedUpdate = true;
-                ShowMenu();
+                case ControlType.GAMEPAD:
+                    if (Gamepad.current.wasUpdatedThisFrame)
+                    {
+                        m_consumedUpdate = true;
+                        ShowMenu();
+                    }
+                    break;
+                case ControlType.KEYBOARDMOUSE:
+                    if (Keyboard.current.anyKey.wasPressedThisFrame)
+                    {
+                        m_consumedUpdate = true;
+                        ShowMenu();
+                    }
+                    break;
             }
         }
-            
+
     }
 
     #endregion
