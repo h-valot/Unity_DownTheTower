@@ -2,6 +2,7 @@ using DG.Tweening;
 using Sirenix.OdinInspector;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 
 public class Lever : Interactable
 {
@@ -11,6 +12,8 @@ public class Lever : Interactable
     [SerializeField] private RSE_PlaySoundAt m_rsePlayAt;
     [SerializeField] private SSO_Sound m_ssoLeverActivate;
     [SerializeField] private SSO_Sound m_ssoLeverDeactivate;
+    [SerializeField] private GameObject m_navLink1;
+    [SerializeField] private GameObject m_navLink2;
 
     [Title("Tweakable values")]
     [SerializeField] private bool m_isActivated = false;
@@ -23,6 +26,7 @@ public class Lever : Interactable
 
     private MaterialPropertyBlock m_propertyBlock;
     private float m_currentEmitStrength;
+    private bool m_Link;
 
     private void Awake()
     {
@@ -40,6 +44,21 @@ public class Lever : Interactable
     public override void InteractionTrigger()
     {
         m_isActivated = !m_isActivated;
+        if (m_navLink1 != null)
+        {
+            if (m_Link == false)
+            {
+                m_navLink1.SetActive(true);
+                m_navLink2.SetActive(true);
+                m_Link = true;
+            }
+            else
+            {
+                m_navLink1.SetActive(false);
+                m_navLink2.SetActive(false);
+                m_Link = false;
+            }
+        }
 
         foreach (var switchable in m_switchables) 
 		{
