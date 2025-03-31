@@ -40,9 +40,9 @@ public class RopeUnfolder : MonoBehaviour
 			return;
 		}
 
+		// - Spawn new physic segment -
 		m_physicInstantiatedAmount++;
 
-		// Spawn new physic segment
 		var newPhysic = Instantiate(m_ssoRope.PfRopePhysic, m_ropeGraphics.Physics[^1].transform);
 		newPhysic.transform.rotation = Quaternion.LookRotation(Vector3.down);
 		newPhysic.transform.position = m_startPosition + Vector3.down * m_distanceLimit * m_physicInstantiatedAmount;

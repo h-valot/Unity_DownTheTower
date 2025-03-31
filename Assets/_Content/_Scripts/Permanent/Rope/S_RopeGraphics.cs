@@ -299,9 +299,7 @@ public class RopeGraphics : MonoBehaviour
 	{
 		m_unfolder = Instantiate(
 			m_ssoRope.PfRopeUnfolder, 
-			m_physics[^2] != null 
-				? m_physics[^2].transform.position 
-				: m_physics[^1].transform.position, 
+			m_physics[^1].transform.position, 
 			Quaternion.identity, 
 			transform
 		);
