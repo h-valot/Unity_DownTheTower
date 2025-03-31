@@ -21,7 +21,6 @@ public class RopeUnfolder : MonoBehaviour
 		// Avoid the unfold to pass through colliders
 		if (Physics.Raycast(transform.position + Vector3.up * m_ssoRope.MaxLengthOffset, Vector3.down, out var hitInfo, m_ssoRope.MaxLengthOffset * 2f, m_ssoRope.UnfolderLayerToInclude))
 		{
-			print($"{hitInfo.collider.name} hit");
 			Destroy(gameObject);
 			return;
 		}
@@ -29,7 +28,6 @@ public class RopeUnfolder : MonoBehaviour
 		// Avoid the total length to exceed the max rope length
 		if (m_rope.GetTotalLength() + m_distanceLimit * m_physicInstantiatedAmount >= m_ssoRope.MaxLength - m_ssoRope.MaxLengthOffset)
 		{
-			print($"exceed max length");
 			Destroy(gameObject);
 			return;
 		}
