@@ -102,6 +102,7 @@ public class CharacterMotor : MonoBehaviour
 	private Vector2 m_planarVelocity;
 	private float m_maxGroundedSpeed;
 	private bool m_isJumping;
+	private bool m_jumpStartedFromGround;
 	[HideInInspector] public bool m_hasJumped;
 	private float m_desiredForce;
 	private bool m_isCrafting;
@@ -406,8 +407,14 @@ public class CharacterMotor : MonoBehaviour
         if (IsRopeValid) 
 		{
 			DesequipRope();
+
+			// Apply planar force jump boost
+			float force = m_ssoCharacter.JumpOffRopeModifier * m_rigidbody.linearVelocity.magnitude;
+			Vector3 direction = (m_rsoCameraRight.value * m_moveInput.x + m_rsoCameraForward.value * m_moveInput.y).normalized;
+			direction = new Vector3(direction.x, 0, direction.z);
+			m_rigidbody.AddForce(direction * force, ForceMode.Impulse);
 		}
-    }
+	}
 
 	private void UpdateJumpInput(bool isPressed)
 	{
@@ -435,6 +442,7 @@ public class CharacterMotor : MonoBehaviour
 
 		m_rigidbody.AddForce(Vector3.up * m_ssoCharacter.JumpForce, ForceMode.Impulse);
 		m_hasJumped = true;
+		m_jumpStartedFromGround = true;
 		StartCoroutine(JumpConfirmDelay());
 	}
 
@@ -446,7 +454,7 @@ public class CharacterMotor : MonoBehaviour
 
 	private void JumpConfirm()
 	{
-		if(m_isGrounded)
+		if (m_isGrounded)
 		{
 			m_hasJumped = false;
 		}
@@ -457,17 +465,10 @@ public class CharacterMotor : MonoBehaviour
 		// Assertions
 		if (m_rsoInputsLocked.value) return;
 		if (!IsRopeValid) return;
+		if (!m_jumpStartedFromGround) return;
 
+		m_jumpStartedFromGround = false;
 		UpdateHoldInput(isPressed);
-
-		if (m_jumpRopeDelay < 0f)
-		{
-			m_jumpRopeDelay = m_ssoCharacter.JumpRopeDelay;
-			float force = m_ssoCharacter.JumpOffRopeModifier * m_rigidbody.linearVelocity.magnitude;
-			Vector3 direction = (m_rsoCameraRight.value * m_moveInput.x + m_rsoCameraForward.value * m_moveInput.y).normalized;
-			direction = new Vector3(direction.x, 0, direction.z);
-			m_rigidbody.AddForce(direction * force, ForceMode.Impulse);
-		}
 	}
 
 	#endregion
