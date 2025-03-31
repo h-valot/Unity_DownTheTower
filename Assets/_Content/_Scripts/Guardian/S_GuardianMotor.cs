@@ -32,6 +32,7 @@ public class GuardianMotor : MonoBehaviour
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterPosition m_rsoCharacterPosition;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_TorchManager m_rsoTorchManager;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_Ropes m_rsoRopes;
+	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterDeath m_rsoCharacterDeath;
 
 	#endregion
 
@@ -41,7 +42,6 @@ public class GuardianMotor : MonoBehaviour
 	private GuardianBehaviorState m_currentState;
 
 	// Patrol
-	[SerializeField] private bool IsPatrolPathValid => m_patrolPath && m_patrolPath.Waypoints.Count > 0;
 	private int m_currentWaypoint;
 	private float m_updateWaypointTimer;
 	private float m_currentAngleSight;
@@ -99,6 +99,36 @@ public class GuardianMotor : MonoBehaviour
 		HandleSteps();
 
 		m_lastPosition = transform.position;
+	}
+
+	private void OnEnable()
+	{
+		m_rsoCharacterDeath.OnChanged += OnCharacterDeath;
+	}
+
+	private void OnDisable()
+	{
+		m_rsoCharacterDeath.OnChanged -= OnCharacterDeath;
+	}
+
+	private void OnCharacterDeath()
+	{
+		if (!m_rsoCharacterDeath.value) return;
+
+		Vector3 targetPosition;
+		if (m_usePatrolPath)
+		{
+			targetPosition = m_patrolPath.Waypoints[0].transform.position;
+			m_currentWaypoint = 0;
+		}
+		else
+		{
+			targetPosition = m_waypoint.transform.position;
+		}
+
+		m_agent.destination = targetPosition;
+		transform.position = targetPosition;
+		Physics.SyncTransforms();
 	}
 
 	private void OnTriggerEnter(Collider collider)
@@ -376,7 +406,7 @@ public class GuardianMotor : MonoBehaviour
 	private void Patrolling()
 	{
 		// Assertion
-		if (!IsPatrolPathValid) return;
+		if (!m_usePatrolPath) return;
 
 		if ((transform.position - m_patrolPath.Waypoints[m_currentWaypoint].Position).magnitude <= m_ssoGuardian.WaypointDistanceTolerance)
 		{
