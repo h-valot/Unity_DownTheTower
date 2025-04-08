@@ -1,6 +1,7 @@
 using Sirenix.OdinInspector;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Audio;
 
 public class SoundManager : MonoBehaviour
 {
@@ -13,12 +14,17 @@ public class SoundManager : MonoBehaviour
     [FoldoutGroup("Internal references")][SerializeField] private AudioSource m_sfxSourceGlobal;
     [FoldoutGroup("Internal references")][SerializeField] private AudioSource m_sfxSourceRope;
 
-	[FoldoutGroup("Scriptable")][SerializeField] private RSE_PlaySound m_rsePlaySound;
+    [FoldoutGroup("External references")][SerializeField] private AudioMixer m_audioMixer;
+
+    [FoldoutGroup("Scriptable")][SerializeField] private RSE_PlaySound m_rsePlaySound;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_PlaySoundAt m_rsePlaySoundAt;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_StopSound m_rseStopSound;
 
+    [FoldoutGroup("Scriptable")][SerializeField] private SSO_Settings m_ssoSettings;
+
     private void Start()
     {
+		InitializeVolume();
         OnPlaySound(m_ambianceStart);
     }
 
@@ -34,8 +40,14 @@ public class SoundManager : MonoBehaviour
 		m_rsePlaySound.action -= OnPlaySound;
 		m_rsePlaySoundAt.action -= OnPlaySoundAt;
 		m_rseStopSound.action -= OnStopSound;
-	}
+    }
 
+	private void InitializeVolume()
+	{
+		m_audioMixer.SetFloat("Master", m_ssoSettings.MasterVolumeDB);
+        m_audioMixer.SetFloat("Music", m_ssoSettings.MusicVolumeDB);
+        m_audioMixer.SetFloat("SFX", m_ssoSettings.SfxVolumeDB);
+    }
 	private void OnPlaySound(SSO_Sound sound)
 	{
 		switch (sound.Type)
@@ -69,7 +81,7 @@ public class SoundManager : MonoBehaviour
 	private void OnPlaySoundAt(SSO_Sound sound, Vector3 position)
 	{
 		//SyncSource(m_sfxSourceGlobal, sound);
-		AudioSource.PlayClipAtPoint(sound.Clip, position, sound.Volume);
+		PlayClipAtPoint(sound.Clip, position, sound.Volume, sound.Output);
 	}
 
 	private void OnStopSound(SSO_Sound sound)
@@ -119,4 +131,18 @@ public class SoundManager : MonoBehaviour
         }
        yield return null;
     }
+
+    public static void PlayClipAtPoint(AudioClip clip, Vector3 position, [UnityEngine.Internal.DefaultValue("1.0F")] float volume, AudioMixerGroup group)
+    {
+        GameObject gameObject = new GameObject("One shot audio");
+        gameObject.transform.position = position;
+        AudioSource audioSource = (AudioSource)gameObject.AddComponent(typeof(AudioSource));
+        audioSource.clip = clip;
+        audioSource.spatialBlend = 1f;
+        audioSource.volume = volume;
+		audioSource.outputAudioMixerGroup = group;
+        audioSource.Play();
+        Object.Destroy(gameObject, clip.length * ((Time.timeScale < 0.01f) ? 0.01f : Time.timeScale));
+    }
+
 }

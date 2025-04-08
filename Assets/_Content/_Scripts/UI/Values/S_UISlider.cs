@@ -10,7 +10,7 @@ public class UISlider : UIValue
 {
     [FoldoutGroup("Tweakable values")]
     [OnValueChanged("UpdateFlavor")]
-    [SerializeField] private float m_nbOfIncrements = 8;
+    public float NbOfIncrements = 10;
 
     [FoldoutGroup("Internal references")][SerializeField] private Slider m_slider;
 
@@ -63,6 +63,6 @@ public class UISlider : UIValue
     private void UpdateIncrements()
     {
         m_slider.minValue = 0;
-        m_slider.maxValue = Mathf.Round(m_nbOfIncrements);
+        m_slider.maxValue = Mathf.Round(NbOfIncrements);
     }
 }
