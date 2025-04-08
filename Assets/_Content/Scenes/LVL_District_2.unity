@@ -357818,6 +357818,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 1888499052}
   - {fileID: 1254227179}
   - {fileID: 2145753322}
   m_Father: {fileID: 1689652122}
@@ -406826,6 +406827,11 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 512209060}
     m_Modifications:
+    - target: {fileID: 1659857288842370839, guid: 9edc952ee099caa4a94f81b8ebfc2d04,
+        type: 3}
+      propertyPath: m_Name
+      value: PF_Moss1
+      objectReference: {fileID: 0}
     - target: {fileID: 4907307147437051322, guid: 9edc952ee099caa4a94f81b8ebfc2d04,
         type: 3}
       propertyPath: m_LocalScale.x
@@ -406890,11 +406896,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1659857288842370839, guid: 9edc952ee099caa4a94f81b8ebfc2d04,
-        type: 3}
-      propertyPath: m_Name
-      value: PF_Moss1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -409796,6 +409797,80 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4947565420068822495, guid: 1167592057f5f344b8c135a5ea66a484,
     type: 3}
   m_PrefabInstance: {fileID: 1887405024}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &1888499051
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 1602877668}
+    m_Modifications:
+    - target: {fileID: 279493880868365172, guid: 68262349b6b73ce48ab4358c8adb2632,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 21.534
+      objectReference: {fileID: 0}
+    - target: {fileID: 279493880868365172, guid: 68262349b6b73ce48ab4358c8adb2632,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 60.566
+      objectReference: {fileID: 0}
+    - target: {fileID: 279493880868365172, guid: 68262349b6b73ce48ab4358c8adb2632,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -39.938
+      objectReference: {fileID: 0}
+    - target: {fileID: 279493880868365172, guid: 68262349b6b73ce48ab4358c8adb2632,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 279493880868365172, guid: 68262349b6b73ce48ab4358c8adb2632,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 279493880868365172, guid: 68262349b6b73ce48ab4358c8adb2632,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 279493880868365172, guid: 68262349b6b73ce48ab4358c8adb2632,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 279493880868365172, guid: 68262349b6b73ce48ab4358c8adb2632,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 279493880868365172, guid: 68262349b6b73ce48ab4358c8adb2632,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 279493880868365172, guid: 68262349b6b73ce48ab4358c8adb2632,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5977536643323806026, guid: 68262349b6b73ce48ab4358c8adb2632,
+        type: 3}
+      propertyPath: m_Name
+      value: PF_SpiderNestLight
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 68262349b6b73ce48ab4358c8adb2632, type: 3}
+--- !u!4 &1888499052 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 279493880868365172, guid: 68262349b6b73ce48ab4358c8adb2632,
+    type: 3}
+  m_PrefabInstance: {fileID: 1888499051}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &1889698239
 GameObject:
