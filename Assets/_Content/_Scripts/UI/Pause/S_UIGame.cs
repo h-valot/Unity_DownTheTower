@@ -3,6 +3,7 @@ using Sirenix.OdinInspector;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
 
 public class UIGame : MonoBehaviour
 {
@@ -132,6 +133,15 @@ public class UIGame : MonoBehaviour
 			subwindow.Hide();
 		}
 	}
+
+	public void MainMenu()
+	{
+        m_pnlPause.SetActive(false);
+        m_rseToggleCursor.Call(false);
+        HideSubwindows();
+        Time.timeScale = 1;
+        SceneManager.LoadScene("LVL_MainScene");
+    }
 
 	public void Exit()
 	{
