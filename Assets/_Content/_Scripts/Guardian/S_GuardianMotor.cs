@@ -92,7 +92,9 @@ public class GuardianMotor : MonoBehaviour
 		// Assertion
 		if (!m_activator.IsActive) return;
 
-		UpdateCandidates();
+
+		OverrideNavLink();
+        UpdateCandidates();
 		SelectTarget();
         DetermineState();
         UpdateState();
@@ -511,6 +513,27 @@ public class GuardianMotor : MonoBehaviour
 		m_canSwitchState = true;
 		m_targetNotFound = true;
 	}
+
+	private void OverrideNavLink()
+	{
+        if (m_agent.isOnOffMeshLink)
+        {
+            OffMeshLinkData data = m_agent.currentOffMeshLinkData;
+            Debug.Log("jump");
+
+            //calculate the final point of the link
+            Vector3 endPos = data.endPos + Vector3.up * m_agent.baseOffset;
+
+            //Move the agent to the end point
+            m_agent.transform.position = Vector3.MoveTowards(m_agent.transform.position, endPos, m_agent.speed * Time.deltaTime);
+
+            //when the agent reach the end point you should tell it, and the agent will "exit" the link and work normally after that
+            if (m_agent.transform.position == endPos)
+            {
+                m_agent.CompleteOffMeshLink();
+            }
+        }
+    }
 
 	#endregion
 

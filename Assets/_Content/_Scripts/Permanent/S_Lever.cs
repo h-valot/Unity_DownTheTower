@@ -13,7 +13,7 @@ public class Lever : Interactable
     [SerializeField] private SSO_Sound m_ssoLeverActivate;
     [SerializeField] private SSO_Sound m_ssoLeverDeactivate;
     [SerializeField] private GameObject m_navLink1;
-    [SerializeField] private GameObject m_navLink2;
+    //[SerializeField] private GameObject m_navLink2;
 
     [Title("Tweakable values")]
     [SerializeField] private bool m_isActivated = false;
@@ -49,13 +49,13 @@ public class Lever : Interactable
             if (m_Link == false)
             {
                 m_navLink1.SetActive(true);
-                m_navLink2.SetActive(true);
+                //m_navLink2.SetActive(true);
                 m_Link = true;
             }
             else
             {
                 m_navLink1.SetActive(false);
-                m_navLink2.SetActive(false);
+                //m_navLink2.SetActive(false);
                 m_Link = false;
             }
         }
