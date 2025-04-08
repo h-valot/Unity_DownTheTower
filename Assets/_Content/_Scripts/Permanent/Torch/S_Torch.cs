@@ -88,6 +88,7 @@ public class Torch : Permanent
         if (m_ssoTorch.IsStartingLit)
         {
             IsLit = true;
+            Shader.SetGlobalFloat("_IS_TORCH_LIT", 1f);
             m_lightPercent = 1f;
             m_propertyBlock.SetFloat("_lightPercent", m_lightPercent);
             m_meshRenderer.SetPropertyBlock(m_propertyBlock);
@@ -210,6 +211,7 @@ public class Torch : Permanent
 		if (IsLit) 
 		{
             IsLit = false;
+            Shader.SetGlobalFloat("_IS_TORCH_LIT", 0f);
             DOTween.Kill(gameObject.GetInstanceID() + "light");
             DOTween.To(() => m_lightPercent, x => m_lightPercent = x, 0f, m_ssoTorch.UnlitDuration).SetEase(Ease.Linear).SetId(gameObject.GetInstanceID() + "light")
                 .OnUpdate(() =>
@@ -222,6 +224,7 @@ public class Torch : Permanent
 		else
 		{
             IsLit = true;
+            Shader.SetGlobalFloat("_IS_TORCH_LIT", 1f);
             m_light.enabled = true;
             DOTween.Kill(gameObject.GetInstanceID() + "light");
             DOTween.To(() => m_lightPercent, x => m_lightPercent = x, 1f, m_ssoTorch.UnlitDuration).SetEase(Ease.Linear).SetId(gameObject.GetInstanceID() + "light")
