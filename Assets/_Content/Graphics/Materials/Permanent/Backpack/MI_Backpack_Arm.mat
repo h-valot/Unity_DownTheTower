@@ -8,9 +8,9 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: MI_Backpack_Arm
-  m_Shader: {fileID: -6465566751694194690, guid: f19de5cd3a7afa143a255450508f6fed,
+  m_Shader: {fileID: -6465566751694194690, guid: ff30a33263b1d684291cdca655f0e173,
     type: 3}
-  m_Parent: {fileID: 2100000, guid: 91a5f39a1daefa748ad6f932b9abf561, type: 2}
+  m_Parent: {fileID: 2100000, guid: 1f0482cec9383174f82955f596b38149, type: 2}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
   m_InvalidKeywords: []
@@ -27,6 +27,10 @@ Material:
     m_TexEnvs:
     - _ColorMap:
         m_Texture: {fileID: 2800000, guid: 648c4d97ff6224a44831cc7a5d79c9eb, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _NoiseToFade:
+        m_Texture: {fileID: 2800000, guid: 159332d1c34edec44a1759412a2c0723, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _NormalMap:
