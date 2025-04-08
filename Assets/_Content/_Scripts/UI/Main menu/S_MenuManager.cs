@@ -33,6 +33,7 @@ public class S_MenuManager : MonoBehaviour
     [FoldoutGroup("External references")][SerializeField] private RSO_CancelPriority m_rsoCancelPriority;
     [FoldoutGroup("External references")][SerializeField] private RSO_CameraStyle m_rsoCameraStyle;
     [FoldoutGroup("External references")][SerializeField] private SSO_Game m_ssoGame;
+    [FoldoutGroup("External references")][SerializeField] private RSE_RestartChrono m_rseRestartChrono;
 
 
     [FoldoutGroup("Menu animation")][SerializeField] private float m_fadeLength;
@@ -108,6 +109,7 @@ public class S_MenuManager : MonoBehaviour
     {
         if (!m_inMainMenu) return;
 
+        m_rseRestartChrono.Call();
         StartCoroutine(StartGameCoroutine());
     }
 

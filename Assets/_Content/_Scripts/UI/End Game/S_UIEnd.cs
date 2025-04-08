@@ -23,6 +23,7 @@ public class UIEnd : MonoBehaviour
     [FoldoutGroup("External references")][SerializeField] private RSE_ToggleCursor m_rseToggleCursor;
     [FoldoutGroup("External references")][SerializeField] private RSO_CurrentScheme m_rsoCurrentScheme;
     [FoldoutGroup("External references")][SerializeField] private RSO_CurrentControls m_rsoCurrentControls;
+    [FoldoutGroup("External references")][SerializeField] private RSE_RestartChrono m_rseRestartChrono;
 
     private void Awake()
     {
@@ -43,6 +44,7 @@ public class UIEnd : MonoBehaviour
     public void MainMenu()
     {
         Time.timeScale = 1;
+        m_rseRestartChrono.Call();
         SceneManager.LoadScene("LVL_MainScene");
     }
 

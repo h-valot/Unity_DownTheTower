@@ -33,13 +33,17 @@ public class ChronoManager : UIWindow
 	private void OnEnable()
 	{
 		m_rseCheckpointReached.action += AddCheckpoint;
-		m_rsoPause.OnChanged += OnPaused;
+		m_rseRestartChrono.action += Reset;
+
+        m_rsoPause.OnChanged += OnPaused;
 	}
 
 	private void OnDisable()
 	{
 		m_rseCheckpointReached.action -= AddCheckpoint;
-		m_rsoPause.OnChanged -= OnPaused;
+        m_rseRestartChrono.action -= Reset;
+
+        m_rsoPause.OnChanged -= OnPaused;
 	}
 
 	private void Update()
@@ -113,7 +117,6 @@ public class ChronoManager : UIWindow
 	public void Reset()
 	{
 		Restart();
-		m_rseRestartChrono.Call();
 		UpdateGraphics();
 		if (m_rsoPause.value) m_resetOnPaused = true;
 	}

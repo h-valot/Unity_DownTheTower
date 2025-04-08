@@ -28,8 +28,9 @@ public class UIGame : MonoBehaviour
     [FoldoutGroup("Scriptable")][SerializeField] protected RSO_CurrentControls m_rsoCurrentControls;
     [FoldoutGroup("Scriptable")][SerializeField] protected RSO_CurrentScheme m_rsoCurrentScheme;
     [FoldoutGroup("Scriptable")][SerializeField] private RSO_Pause m_rsoPause;
+    [FoldoutGroup("Scriptable")][SerializeField] private RSE_RestartChrono m_rseRestartChrono;
 
-	private void Start()
+    private void Start()
 	{
 		Hide();
 	}
@@ -136,10 +137,8 @@ public class UIGame : MonoBehaviour
 
 	public void MainMenu()
 	{
-        m_pnlPause.SetActive(false);
-        m_rseToggleCursor.Call(false);
-        HideSubwindows();
         Time.timeScale = 1;
+        m_rseRestartChrono.Call();
         SceneManager.LoadScene("LVL_MainScene");
     }
 
