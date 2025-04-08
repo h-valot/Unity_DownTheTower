@@ -29,6 +29,10 @@ Material:
         m_Texture: {fileID: 2800000, guid: d7b75134fc5d0fa458e11c3b3922aeec, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _NoiseToFade:
+        m_Texture: {fileID: 2800000, guid: 159332d1c34edec44a1759412a2c0723, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _NormalMap:
         m_Texture: {fileID: 2800000, guid: 30acaf06a67272746a2c9629efe053e7, type: 3}
         m_Scale: {x: 1, y: 1}
@@ -55,6 +59,8 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
+    - _DistanceEndFade: 0.5
+    - _DistanceStartFade: 0.7
     - _QueueControl: 0
     - _QueueOffset: 0
     - _SelfGlowFactor: 0.2

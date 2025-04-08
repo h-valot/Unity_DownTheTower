@@ -7,14 +7,14 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: MI_Character
+  m_Name: MM_ColorMap+NormalMap+SelfGlow+FadeCamera
   m_Shader: {fileID: -6465566751694194690, guid: ff30a33263b1d684291cdca655f0e173,
     type: 3}
-  m_Parent: {fileID: 2100000, guid: 1f0482cec9383174f82955f596b38149, type: 2}
+  m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
   m_InvalidKeywords: []
-  m_LightmapFlags: 4
+  m_LightmapFlags: 2
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: -1
@@ -26,20 +26,43 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _ColorMap:
-        m_Texture: {fileID: 2800000, guid: 325b6c36a04687b4d855a2fd9b3484f8, type: 3}
+        m_Texture: {fileID: 2800000, guid: f3fda86b5946f734a9a3ff491f163a96, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _NoiseToFade:
+        m_Texture: {fileID: 2800000, guid: 159332d1c34edec44a1759412a2c0723, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _NormalMap:
-        m_Texture: {fileID: 2800000, guid: 5f661462827468c40aaba5360b6f6da0, type: 3}
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_Lightmaps:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_LightmapsInd:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_ShadowMasks:
+        m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _SelfGlowFactor: 0.2
+    - _DistanceEndFade: 0.5
+    - _DistanceFromCameraToFade: 0
+    - _DistanceStartFade: 0.7
+    - _QueueControl: 0
+    - _QueueOffset: 0
+    - _SelfGlowFactor: 0.3
+    - _SelfGlowIntensity: 0.3
+    - _SelfGlowSaturation: 0.5
     m_Colors: []
   m_BuildTextureStacks: []
   m_AllowLocking: 1
---- !u!114 &2040946254697999497
+--- !u!114 &2247544236412410293
 MonoBehaviour:
   m_ObjectHideFlags: 11
   m_CorrespondingSourceObject: {fileID: 0}

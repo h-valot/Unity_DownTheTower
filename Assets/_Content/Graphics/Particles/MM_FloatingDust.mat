@@ -7,10 +7,11 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: MI_Character
-  m_Shader: {fileID: -6465566751694194690, guid: ff30a33263b1d684291cdca655f0e173,
+  m_Name: MM_FloatingDust
+  m_Shader: {fileID: -6465566751694194690, guid: 49af9e85ba04933448ea9bc11594ad57,
     type: 3}
-  m_Parent: {fileID: 2100000, guid: 1f0482cec9383174f82955f596b38149, type: 2}
+  m_Parent: {fileID: -876546973899608171, guid: 49af9e85ba04933448ea9bc11594ad57,
+    type: 3}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
   m_InvalidKeywords: []
@@ -24,22 +25,14 @@ Material:
   m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
-    m_TexEnvs:
-    - _ColorMap:
-        m_Texture: {fileID: 2800000, guid: 325b6c36a04687b4d855a2fd9b3484f8, type: 3}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _NormalMap:
-        m_Texture: {fileID: 2800000, guid: 5f661462827468c40aaba5360b6f6da0, type: 3}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
+    m_TexEnvs: []
     m_Ints: []
     m_Floats:
-    - _SelfGlowFactor: 0.2
+    - _QueueControl: 0
     m_Colors: []
   m_BuildTextureStacks: []
   m_AllowLocking: 1
---- !u!114 &2040946254697999497
+--- !u!114 &1530766568778595559
 MonoBehaviour:
   m_ObjectHideFlags: 11
   m_CorrespondingSourceObject: {fileID: 0}
