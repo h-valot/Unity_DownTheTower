@@ -1,10 +1,13 @@
 using System.Collections.Generic;
 using Sirenix.OdinInspector;
 using UnityEngine;
+using UnityEngine.Audio;
 
 [CreateAssetMenu(fileName = "SSO_Sound", menuName = "Static Scriptable/Sound")]
 public class SSO_Sound : ScriptableObject
 {
+	public AudioMixerGroup Output;
+
     public SoundType Type;
 
 	public bool Loop;

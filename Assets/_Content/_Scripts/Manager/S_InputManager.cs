@@ -10,7 +10,7 @@ public class InputManager : MonoBehaviour
 
 	[FoldoutGroup("Internal references")][SerializeField] private PlayerInput m_playerInput;
 
-	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Inputs m_ssoInputs;
+	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Settings m_ssoInputs;
 
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Move m_rseMove;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_Look m_rseLook;
