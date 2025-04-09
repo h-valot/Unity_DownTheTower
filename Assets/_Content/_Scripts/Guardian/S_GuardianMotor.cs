@@ -26,19 +26,21 @@ public class GuardianMotor : MonoBehaviour
     [FoldoutGroup("Internal References")][SerializeField] private Light m_beamLight;
     [FoldoutGroup("Internal References")][SerializeField] private Transform m_frontEye;
 	[FoldoutGroup("Internal References")][SerializeField] private GuardianActivator m_activator;
+    [FoldoutGroup("Internal References")][SerializeField] private GameObject m_hand;
 
-	[FoldoutGroup("Scriptable")][SerializeField] private SSO_Game m_ssoGame;
+    [FoldoutGroup("Scriptable")][SerializeField] private SSO_Game m_ssoGame;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_GuardianFootstep m_rseGuardianFootstep;
-	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterPosition m_rsoCharacterPosition;
+    [FoldoutGroup("Scriptable")][SerializeField] private RSE_GuardianKill m_rseGuardianKill;
+    [FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterPosition m_rsoCharacterPosition;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_TorchManager m_rsoTorchManager;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_Ropes m_rsoRopes;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_CharacterDeath m_rsoCharacterDeath;
 
-	#endregion
+    #endregion
 
-	#region VARIABLES
+    #region VARIABLES
 
-	private bool m_canSwitchState = true;
+    private bool m_canSwitchState = true;
 	public GuardianBehaviorState m_currentState;
 
 	// Patrol
@@ -485,6 +487,9 @@ public class GuardianMotor : MonoBehaviour
 
 	private IEnumerator AnimateCharacterKill(CharacterMotor character)
 	{
+		m_rseGuardianKill.Call();
+		character.transform.parent = m_hand.transform;
+		character.transform.position = m_hand.transform.position;
 		m_canSwitchState = false;
 		yield return new WaitForSeconds(m_ssoGuardian.DelayKillCharacter.x);
 		character.HandleDeath(DeathType.GUARDIAN);
