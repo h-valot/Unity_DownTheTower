@@ -8,6 +8,7 @@ public class Bridge : Switchable
 {
     [Title("References")]
     [SerializeField] private RSE_PlaySoundAt m_rsePlayAt;
+    [SerializeField] private RSO_CharacterPosition m_rsoCharacterPosition;
     [SerializeField] private SSO_Sound m_ssoBridgeActivate;
     [SerializeField] private SSO_Sound m_ssoGateOpening;
     [SerializeField] private SSO_Sound m_ssoGateClosing;
@@ -62,7 +63,7 @@ public class Bridge : Switchable
             m_rsePlayAt.Call(m_ssoGateOpening, m_bridgeGateRenderer.transform.position);
         });
 
-        m_rsePlayAt.Call(m_ssoBridgeActivate, this.transform.position);
+        m_rsePlayAt.Call(m_ssoBridgeActivate, m_rsoCharacterPosition.value);
     }
 
     protected override void DeactivateMechanism()
