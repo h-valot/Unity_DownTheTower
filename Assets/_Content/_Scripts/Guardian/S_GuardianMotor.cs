@@ -21,6 +21,7 @@ public class GuardianMotor : MonoBehaviour
 
 	[FoldoutGroup("Internal References")][SerializeField] private NavMeshAgent m_agent;
 	[FoldoutGroup("Internal References")][SerializeField] private MeshRenderer m_guardianMeshRenderer;
+    [FoldoutGroup("Internal References")][SerializeField] private SkinnedMeshRenderer[] m_guardianMeshRenderers;
     [FoldoutGroup("Internal References")][SerializeField] private Transform m_beamTransform;
     [FoldoutGroup("Internal References")][SerializeField] private MeshRenderer m_beamMeshRenderer;
     [FoldoutGroup("Internal References")][SerializeField] private Light m_beamLight;
@@ -713,8 +714,12 @@ public class GuardianMotor : MonoBehaviour
 		m_beamMeshRenderer.SetPropertyBlock(m_beamPropertyBlock);
 
 		if (m_guardianPropertyBlock == null) m_guardianPropertyBlock = new MaterialPropertyBlock();
-		m_guardianPropertyBlock.SetColor("_EyesColor", newColor);
+		m_guardianPropertyBlock.SetColor("_EmitColor", newColor);
 		m_guardianMeshRenderer.SetPropertyBlock(m_guardianPropertyBlock);
+		foreach(SkinnedMeshRenderer skinnedMesh in m_guardianMeshRenderers)
+		{
+            skinnedMesh.SetPropertyBlock(m_guardianPropertyBlock);
+        }
 	}
 
 	#endregion
