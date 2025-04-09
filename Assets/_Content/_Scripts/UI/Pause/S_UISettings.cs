@@ -22,13 +22,14 @@ public class UISettings : UIWindow
     [FoldoutGroup("Sound")][SerializeField] private UISlider m_sfxVolumeSlider;
 
     // VIDEO
-
+    [FoldoutGroup("Inputs")][SerializeField] private UIToggleable m_toggleVolumetricFog;
 
     [Title("External references")]
     [SerializeField] private AudioMixer m_audioMixer;
     [FoldoutGroup("Scriptable")][SerializeField] protected RSO_GameStarted m_rsoGameStarted;
     [FoldoutGroup("Scriptable")][SerializeField] private SSO_Settings m_ssoSettings;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSO_Pause m_rsoPause;
+    [FoldoutGroup("Scriptable")][SerializeField] private RSE_ChangeVideoSetting m_rseChangeVideoSetting;
 
     protected override void OnEnable()
 	{
@@ -88,10 +89,13 @@ public class UISettings : UIWindow
         m_masterVolumeSlider.Initialize(m_ssoSettings.MinVolumeDB, m_ssoSettings.MaxVolumeDB, m_ssoSettings.MasterVolumeDB);
         m_musicVolumeSlider.Initialize(m_ssoSettings.MinVolumeDB, m_ssoSettings.MaxVolumeDB, m_ssoSettings.MusicVolumeDB);
         m_sfxVolumeSlider.Initialize(m_ssoSettings.MinVolumeDB, m_ssoSettings.MaxVolumeDB, m_ssoSettings.SfxVolumeDB);
+        m_toggleVolumetricFog.Initialize(m_ssoSettings.VolumetricFog);
     }
 
 	public void UpdateSensitivity() => m_ssoSettings.SensitivityValue = m_valueSensitivity.Value;
     public void UpdateCameraAxisY() => m_ssoSettings.InvertAxisY = m_toggleInvertCameraY.Value;
+
+
 
     public void UpdateMasterVolume(AudioMixerGroup group)
     {
@@ -107,6 +111,12 @@ public class UISettings : UIWindow
     {
         m_audioMixer.SetFloat(group.name, m_sfxVolumeSlider.Value);
         m_ssoSettings.SfxVolumeDB = m_sfxVolumeSlider.Value;
+    }
+
+    public void ToggleVolumetricFog()
+    {
+        m_ssoSettings.VolumetricFog = m_toggleVolumetricFog.Value;
+        m_rseChangeVideoSetting.Call();
     }
 
 }
