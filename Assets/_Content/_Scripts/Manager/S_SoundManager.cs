@@ -19,7 +19,7 @@ public class SoundManager : MonoBehaviour
 
     private void Start()
     {
-        //OnPlaySound(m_ambianceStart);
+        OnPlaySound(m_ambianceStart);
     }
 
     private void OnEnable()
