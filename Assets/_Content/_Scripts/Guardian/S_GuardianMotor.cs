@@ -488,8 +488,8 @@ public class GuardianMotor : MonoBehaviour
 	private IEnumerator AnimateCharacterKill(CharacterMotor character)
 	{
 		m_rseGuardianKill.Call();
-		character.transform.parent = m_hand.transform;
-		character.transform.position = m_hand.transform.position;
+		//character.transform.parent = m_hand.transform;
+		//character.transform.position = m_hand.transform.position;
 		m_canSwitchState = false;
 		yield return new WaitForSeconds(m_ssoGuardian.DelayKillCharacter.x);
 		character.HandleDeath(DeathType.GUARDIAN);
