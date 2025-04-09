@@ -69,11 +69,13 @@ public class S_MenuManager : MonoBehaviour
     private void OnEnable()
     {
         m_rsoCurrentControls.OnChanged += ChangeControls;
+        m_rseStartAction.action += HideMenus;
     }
 
     private void OnDisable()
     {
         m_rsoCurrentControls.OnChanged -= ChangeControls;
+        m_rseStartAction.action -= HideMenus;
     }
 
     private void Update()
@@ -111,6 +113,7 @@ public class S_MenuManager : MonoBehaviour
 
         m_rseRestartChrono.Call();
         StartCoroutine(StartGameCoroutine());
+        m_inMainMenu = false;
     }
 
     public void OpenCredits()
@@ -157,7 +160,6 @@ public class S_MenuManager : MonoBehaviour
         m_pnlFade.DOFade(0, m_fadeLength).SetEase(Ease.InCubic).OnComplete(() => 
         {
             m_pnlFade.gameObject.SetActive(false);
-            m_rseStartAction.action += ShowMenu;
             m_preparedStartScreen = true;
         });
     }
@@ -182,7 +184,6 @@ public class S_MenuManager : MonoBehaviour
 
         if (!m_inMainMenu)
         {
-            m_rseStartAction.action -= ShowMenu;
             PrepareMenu();
 
             m_inMainMenu = true;
@@ -221,6 +222,15 @@ public class S_MenuManager : MonoBehaviour
         }
 
         ChangeControls();
+    }
+
+    private void HideMenus()
+    {
+        if (!m_inMainMenu) return;
+
+        m_pnlSettings.Hide();
+        m_pnlCredits.Hide();
+        ShowMenu();
     }
 
     private IEnumerator StartGameCoroutine()
