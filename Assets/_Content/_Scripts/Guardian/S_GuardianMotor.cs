@@ -39,7 +39,7 @@ public class GuardianMotor : MonoBehaviour
 	#region VARIABLES
 
 	private bool m_canSwitchState = true;
-	private GuardianBehaviorState m_currentState;
+	public GuardianBehaviorState m_currentState;
 
 	// Patrol
 	private int m_currentWaypoint;

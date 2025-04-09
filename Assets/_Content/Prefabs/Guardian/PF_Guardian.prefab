@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 1982599703297393053}
   - component: {fileID: 3401074231336124181}
   - component: {fileID: 2290026609873240630}
+  - component: {fileID: 4020091310162614559}
   m_Layer: 6
   m_Name: PF_Guardian
   m_TagString: Untagged
@@ -69,6 +70,7 @@ MonoBehaviour:
   m_rsoRopes: {fileID: 11400000, guid: cfcda1b93f1aa6148bf1a6e42672dc2f, type: 2}
   m_rsoCharacterDeath: {fileID: 11400000, guid: 52795416a18d6764ab55f73b88f71b83,
     type: 2}
+  m_currentState: 0
   m_candidates: []
 --- !u!136 &1982599703297393053
 CapsuleCollider:
@@ -138,6 +140,26 @@ NavMeshAgent:
   m_BaseOffset: 0
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
+--- !u!114 &4020091310162614559
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 484332240391301456}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bab7b3e39431ea64ba36549d153b2245, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_ssoFootstepRun: {fileID: 0}
+  m_ssoFootstepWalk: {fileID: 0}
+  m_guardianMotor: {fileID: 6412754733033068052}
+  m_guardianAgent: {fileID: 2290026609873240630}
+  m_footLocation: {fileID: 7204752041457671457}
+  m_animator: {fileID: 7211403033552838686}
+  m_rsePlaySound: {fileID: 11400000, guid: 643056970dde38d49851bbf3a0fbd805, type: 2}
+  m_rsePlaySoundAt: {fileID: 11400000, guid: 7bf426822f136dc4a9779469894c6ae2, type: 2}
 --- !u!1 &4111337314595204420
 GameObject:
   m_ObjectHideFlags: 0
@@ -388,6 +410,11 @@ PrefabInstance:
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: 04fc1eb8c39e68149ba5baf253e8149f, type: 2}
+    - target: {fileID: 5866666021909216657, guid: 2ae6268b31369444d8c679cb74ea95aa,
+        type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 9100000, guid: 85c68eb501266c74bb910a136f515af1, type: 2}
     - target: {fileID: 7161733246947982550, guid: 2ae6268b31369444d8c679cb74ea95aa,
         type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
@@ -464,6 +491,18 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!1 &7204752041457671457 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6233811737008472238, guid: 2ae6268b31369444d8c679cb74ea95aa,
+    type: 3}
+  m_PrefabInstance: {fileID: 3854687037539474831}
+  m_PrefabAsset: {fileID: 0}
+--- !u!95 &7211403033552838686 stripped
+Animator:
+  m_CorrespondingSourceObject: {fileID: 5866666021909216657, guid: 2ae6268b31369444d8c679cb74ea95aa,
+    type: 3}
+  m_PrefabInstance: {fileID: 3854687037539474831}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &5508127399077258312
 PrefabInstance:
   m_ObjectHideFlags: 0
