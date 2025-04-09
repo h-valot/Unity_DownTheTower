@@ -2,6 +2,8 @@ using System.Collections.Generic;
 using DG.Tweening;
 using Sirenix.OdinInspector;
 using UnityEngine;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 
 public class GameManager : MonoBehaviour
 {
@@ -13,11 +15,13 @@ public class GameManager : MonoBehaviour
 	[SerializeField] private Light m_directionalLight;
 
 	[FoldoutGroup("External references")][SerializeField] private CameraMotor m_cameraMotor;
+    [FoldoutGroup("External references")][SerializeField] private ScriptableRendererFeature m_volumetricFogFeature;
 
-	[FoldoutGroup("SSO")][SerializeField] private SSO_Game m_ssoGame;
+    [FoldoutGroup("SSO")][SerializeField] private SSO_Game m_ssoGame;
 	[FoldoutGroup("SSO")][SerializeField] private SSO_Logs m_ssoLogs;
+    [FoldoutGroup("SSO")][SerializeField] private SSO_Settings m_ssoSettings;
 
-	[FoldoutGroup("RSO")][SerializeField] private RSO_CharacterDeath m_rsoCharacterDeath;
+    [FoldoutGroup("RSO")][SerializeField] private RSO_CharacterDeath m_rsoCharacterDeath;
 	[FoldoutGroup("RSO")][SerializeField] private RSO_InputsLocked m_rsoInputsLocked;
 	[FoldoutGroup("RSO")][SerializeField] private RSO_Pause m_rsoPause;
 	[FoldoutGroup("RSO")][SerializeField] private RSO_CancelPriority m_rsoCancelPriority;
@@ -27,19 +31,22 @@ public class GameManager : MonoBehaviour
     [FoldoutGroup("RSO")][SerializeField] private RSO_CameraStyle m_rsoCameraStyle;
 
     [FoldoutGroup("RSE")][SerializeField] private RSE_ToggleCursor m_rseToggleCursor;
+    [FoldoutGroup("RSE")][SerializeField] private RSE_ChangeVideoSetting m_rseChangeVideoSetting;
 
 
-	private void OnEnable()
+    private void OnEnable()
 	{
 		m_rsoCharacterDeath.OnChanged += HandleDeath;
 		m_rsoPause.OnChanged += Pause;
-	}
+		m_rseChangeVideoSetting.action += ToggleVolumetricFog;
+    }
 
 	private void OnDisable()
 	{
 		m_rsoCharacterDeath.OnChanged -= HandleDeath;
 		m_rsoPause.OnChanged -= Pause;
-	}
+        m_rseChangeVideoSetting.action -= ToggleVolumetricFog;
+    }
 
 	private void Awake()
 	{
@@ -56,6 +63,8 @@ public class GameManager : MonoBehaviour
 		{
 			m_directionalLight.intensity = m_ssoGame.GlobalLightIntensity;
 		}
+
+		ToggleVolumetricFog();
 
 		Restart();
         m_rsoCameraStyle.value = CameraStyle.MENU;
@@ -128,4 +137,9 @@ public class GameManager : MonoBehaviour
 			}
 		}
 	}
+
+	public void ToggleVolumetricFog()
+	{
+		m_volumetricFogFeature.SetActive(m_ssoSettings.VolumetricFog);
+    }
 }

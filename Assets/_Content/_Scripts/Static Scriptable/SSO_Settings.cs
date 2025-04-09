@@ -55,4 +55,12 @@ public class SSO_Settings : ScriptableObject
     public float MaxVolumeDB;
 
     #endregion
+
+    #region GRAPHICS
+
+    [Title("Graphics")]
+    [InfoBox("Is the volumetric fog rendered.", InfoMessageType.None)]
+    public bool VolumetricFog;
+
+    #endregion
 }
