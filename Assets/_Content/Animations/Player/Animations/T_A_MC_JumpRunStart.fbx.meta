@@ -1,11 +1,11 @@
 fileFormatVersion: 2
-guid: aa7d9984e3ad4d54f9d256debc1cecb2
+guid: 19fe6c4d9749b2d4b8acf0f806f21d84
 ModelImporter:
   serializedVersion: 22200
   internalIDToNameTable: []
   externalObjects: {}
   materials:
-    materialImportMode: 0
+    materialImportMode: 2
     materialName: 0
     materialSearch: 1
     materialLocation: 1
@@ -17,10 +17,10 @@ ModelImporter:
     removeConstantScaleCurves: 0
     motionNodeName: 
     animationImportErrors: 
-    animationImportWarnings: "\nClip 'Take 001' has import animation warnings that
-      might lower retargeting quality:\nNote: Activate translation DOF on avatar
-      to improve retargeting quality.\n\t'TwistArm_L' is inbetween humanoid transforms
-      and has rotation animation that will be discarded.\n"
+    animationImportWarnings: "\nClip 'T_A_MC_JumpRunStart' has import animation warnings
+      that might lower retargeting quality:\n\t'TwistArm_L' is inbetween humanoid
+      transforms and has rotation animation that will be discarded.\n\t'TwistArm_R'
+      is inbetween humanoid transforms and has rotation animation that will be discarded.\n"
     animationRetargetingWarnings: 
     animationDoRetargetingWarnings: 0
     importAnimatedCustomProperties: 0
@@ -34,23 +34,23 @@ ModelImporter:
     extraUserProperties: []
     clipAnimations:
     - serializedVersion: 16
-      name: T_A_MC_RunningJump
-      takeName: Take 001
-      internalID: 1827226128182048838
+      name: T_A_MC_JumpRunStart
+      takeName: T_A_MC_JumpRunStart
+      internalID: 896365919955660475
       firstFrame: 0
-      lastFrame: 27
+      lastFrame: 12
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
       cycleOffset: 0
       loop: 0
       hasAdditiveReferencePose: 0
-      loopTime: 1
+      loopTime: 0
       loopBlend: 0
       loopBlendOrientation: 1
       loopBlendPositionY: 1
       loopBlendPositionXZ: 1
-      keepOriginalOrientation: 0
+      keepOriginalOrientation: 1
       keepOriginalPositionY: 1
       keepOriginalPositionXZ: 1
       heightFromFeet: 0
@@ -1151,7 +1151,7 @@ ModelImporter:
     feetSpacing: 0
     globalScale: 1
     rootMotionBoneName: 
-    hasTranslationDoF: 0
+    hasTranslationDoF: 1
     hasExtraRoot: 0
     skeletonHasParents: 1
   lastHumanDescriptionAvatarSource: {fileID: 9000000, guid: 59d4026ad9f8de04a8ebbd6923e30d18,

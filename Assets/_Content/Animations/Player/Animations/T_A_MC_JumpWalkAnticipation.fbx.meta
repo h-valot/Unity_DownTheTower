@@ -1,11 +1,11 @@
 fileFormatVersion: 2
-guid: 436907c56b8e44847af9f2bc94f31651
+guid: 8917b3dd465b1354a8351a7cc2ec3971
 ModelImporter:
   serializedVersion: 22200
   internalIDToNameTable: []
   externalObjects: {}
   materials:
-    materialImportMode: 0
+    materialImportMode: 2
     materialName: 0
     materialSearch: 1
     materialLocation: 1
@@ -17,7 +17,9 @@ ModelImporter:
     removeConstantScaleCurves: 0
     motionNodeName: 
     animationImportErrors: 
-    animationImportWarnings: 
+    animationImportWarnings: "\nClip 'T_A_MC_JumpWalkAnticipation' has import animation
+      warnings that might lower retargeting quality:\n\t'IndexFinger_01_1' has translation
+      animation that will be discarded.\n"
     animationRetargetingWarnings: 
     animationDoRetargetingWarnings: 0
     importAnimatedCustomProperties: 0
@@ -31,46 +33,30 @@ ModelImporter:
     extraUserProperties: []
     clipAnimations:
     - serializedVersion: 16
-      name: T_A_MC_Running
-      takeName: T_A_MC_Running
-      internalID: 100588976227192092
+      name: T_A_MC_JumpWalkAnticipation
+      takeName: T_A_MC_JumpWalkAnticipation
+      internalID: -8743481957189847402
       firstFrame: 0
-      lastFrame: 19
+      lastFrame: 4
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
       cycleOffset: 0
       loop: 0
       hasAdditiveReferencePose: 0
-      loopTime: 1
+      loopTime: 0
       loopBlend: 0
       loopBlendOrientation: 1
       loopBlendPositionY: 1
       loopBlendPositionXZ: 1
-      keepOriginalOrientation: 0
+      keepOriginalOrientation: 1
       keepOriginalPositionY: 1
       keepOriginalPositionXZ: 1
       heightFromFeet: 0
       mirror: 0
       bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
       curves: []
-      events:
-      - time: 0.3601286
-        functionName: OnAnimEventFootRun
-        data: 
-        objectReferenceParameter: {fileID: 11500000, guid: 6baca9a0102013e45b55b455198fef7e,
-          type: 3}
-        floatParameter: 4.75
-        intParameter: 0
-        messageOptions: 0
-      - time: 0.90758294
-        functionName: OnAnimEventFootRun
-        data: 
-        objectReferenceParameter: {fileID: 11500000, guid: 6baca9a0102013e45b55b455198fef7e,
-          type: 3}
-        floatParameter: 4.75
-        intParameter: 0
-        messageOptions: 0
+      events: []
       transformMask: []
       maskType: 3
       maskSource: {instanceID: 0}
@@ -1164,7 +1150,7 @@ ModelImporter:
     feetSpacing: 0
     globalScale: 1
     rootMotionBoneName: 
-    hasTranslationDoF: 0
+    hasTranslationDoF: 1
     hasExtraRoot: 0
     skeletonHasParents: 1
   lastHumanDescriptionAvatarSource: {fileID: 9000000, guid: 59d4026ad9f8de04a8ebbd6923e30d18,
