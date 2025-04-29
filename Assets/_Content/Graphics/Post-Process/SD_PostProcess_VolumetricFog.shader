@@ -2,18 +2,18 @@ Shader "Hidden/VolumetricFog"
 {
     Properties
     {
-        _MaxDistance("Max Distance", float) = 100
-        _StepSize("Distance between each sample along rays", Range(0.1, 20)) = 1
-        _StepNoiseOffset("Scale random step offset", float) = 0
-        _DensityMultiplier("Fog Density", Range(0.0001, 10)) = 1
-        _FogColor("Color of the fog", Color) = (1,1,1,1)
-
-        _FogNoise("Fog noise", 3D) = "white" {}
-        _FogNoiseTiling("Fog noise tiling", float) = 1
-        _FogNoiseOffset("Fog noise offset", Vector) = (0,0,0,0)
-        _FogNoiseThreshold("Fog noise threshold", float) = 0
-        _FogDirection("Fog Direction", Vector) = (1,0,0,0)
-        _FogSpeed("Fog Speed", float) = 0.1
+        _MaxDistance("Max sample distance", float) = 100
+        _StepSize("Sample step size", Range(0.1, 20)) = 1
+        _StepOffset("Random sample offset", float) = 0
+        _BaseDensity("Fog base density", float) = 0
+        _CloudDensity("Fog cloud density", Range(0, 10)) = 1
+        _FogColor("Fog color", Color) = (1,1,1,1)
+        _FogNoise("Fog cloud noise", 3D) = "white" {}
+        _FogNoiseTiling("Noise tiling", float) = 1
+        _FogNoiseOffset("Noise offset", Vector) = (0,0,0,0)
+        _FogNoiseThreshold("Noise threshold", float) = 0
+        _FogDirection("Noise direction", Vector) = (1,0,0,0)
+        _FogSpeed("Noise speed", float) = 0.1
     }
 
     SubShader
@@ -40,9 +40,10 @@ Shader "Hidden/VolumetricFog"
 
             float _MaxDistance;
             float _StepSize;
-            float _DensityMultiplier;
+            float _BaseDensity;
+            float _CloudDensity;
             float4 _FogColor;
-            float _StepNoiseOffset;
+            float _StepOffset;
             TEXTURE3D(_FogNoise);
             float _FogNoiseTiling;
             float3 _FogNoiseOffset;
@@ -50,10 +51,10 @@ Shader "Hidden/VolumetricFog"
             float3 _FogDirection;
             float _FogSpeed;
 
-            float getDensity(float3 samplePos)
+            float getDensity(float3 samplePos, float invertNoiseThreshold)
             {
-                float noise = _FogNoise.SampleLevel(sampler_TrilinearRepeat, samplePos * _FogNoiseTiling + saturate(_FogDirection) * _FogSpeed * _Time.y, 0).x;
-                float density = _DensityMultiplier - noise * _FogNoiseThreshold;
+    float noise = _FogNoise.SampleLevel(sampler_TrilinearRepeat, samplePos * float3(_FogNoiseTiling*0.6, _FogNoiseTiling, _FogNoiseTiling*0.6) + saturate(_FogDirection) * _FogSpeed * _Time.y, 0).x;
+                float density = _BaseDensity + _CloudDensity * saturate(noise - _FogNoiseThreshold) * invertNoiseThreshold;
                 return density;
             }
             
@@ -68,13 +69,15 @@ Shader "Hidden/VolumetricFog"
 
                 float2 pixelCoords = IN.texcoord * _BlitTexture_TexelSize.zw;
                 float distLimit = min(viewLength, _MaxDistance);
-                float distTravelled = InterleavedGradientNoise(pixelCoords, (int)(_Time.y / max(HALF_EPS, unity_DeltaTime.x))) * _StepNoiseOffset;
+                float distTravelled = InterleavedGradientNoise(pixelCoords, (int)(_Time.y / max(HALF_EPS, unity_DeltaTime.x))) * _StepOffset;
                 float transmittance = 1;
+
+                float invertNoiseThreshold = rcp(1-_FogNoiseThreshold);
                 
                 while(distTravelled < distLimit)
                 {
                     float3 samplePos = _WorldSpaceCameraPos + rayDir * distTravelled;
-                    float density = getDensity(samplePos);
+                    float density = getDensity(samplePos, invertNoiseThreshold);
 
                     Light mainLight = GetMainLight(TransformWorldToShadowCoord(samplePos));
                     transmittance *= exp(-density * _StepSize);
