@@ -525,7 +525,6 @@ public class GuardianMotor : MonoBehaviour
         if (m_agent.isOnOffMeshLink)
         {
             OffMeshLinkData data = m_agent.currentOffMeshLinkData;
-            Debug.Log("jump");
 
             //calculate the final point of the link
             Vector3 endPos = data.endPos + Vector3.up * m_agent.baseOffset;
@@ -566,7 +565,12 @@ public class GuardianMotor : MonoBehaviour
 		HandleSeek();
 		HandleStuckTimeout();
 		HandleSeekTimeout();
-	}
+
+		if (m_currentTarget != null)
+		{
+            m_beamTransform.LookAt(m_currentTarget.Position);
+        }
+    }
 
 	private void ExitSeekState()
 	{

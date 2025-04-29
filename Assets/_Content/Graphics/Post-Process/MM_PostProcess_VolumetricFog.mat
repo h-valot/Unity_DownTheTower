@@ -29,14 +29,18 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _DensityMultiplier: 0.005
-    - _FogNoiseThreshold: 0.005
-    - _FogNoiseTiling: 0.005
-    - _FogSpeed: 0.1
-    - _MaxDistance: 400
-    - _StepNoiseOffset: 1
+    - _BaseDensity: 0.003
+    - _CloudDensity: 0.01
+    - _DensityMultiplier: 0.48
+    - _FogDensityBaseline: 0
+    - _FogNoiseThreshold: 0.53
+    - _FogNoiseTiling: 0.003
+    - _FogSpeed: 0.01
+    - _MaxDistance: 600
+    - _StepNoiseOffset: 3
+    - _StepOffset: 3
     - _StepOffsetRandomScale: 1
-    - _StepSize: 1
+    - _StepSize: 3
     m_Colors:
     - _FogColor: {r: 0, g: 0, b: 0, a: 1}
     - _FogDirection: {r: -1, g: 0, b: 1, a: 0}
