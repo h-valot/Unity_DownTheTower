@@ -130,6 +130,7 @@ public class CharacterMotor : MonoBehaviour
 	private Coroutine m_craftCoroutine;
 	private float m_craftTimer;
 	public bool m_startAiming;
+	public bool IsBalancing;
 	[HideInInspector] public Permanent HandObject;
 	[HideInInspector] public Permanent RobotObject;
 	[HideInInspector] public bool IsAiming;
@@ -1073,10 +1074,12 @@ public class CharacterMotor : MonoBehaviour
 		{
 			m_rigidbody.linearDamping = 0;
 			m_ropeDragTimer = m_ssoCharacter.RopeDragDuration;
-			return;
+			IsBalancing = true;
+            return;
 		}
 
-		m_ropeDragTimer -= Time.fixedDeltaTime;
+        IsBalancing = false;
+        m_ropeDragTimer -= Time.fixedDeltaTime;
 		m_rigidbody.linearDamping = (1 - m_ropeDragTimer / m_ssoCharacter.RopeDragDuration) * m_ssoCharacter.RopeDrag;
 
 	}

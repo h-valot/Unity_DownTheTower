@@ -35,6 +35,7 @@ public class AnimatorManager : MonoBehaviour
     private int m_isSpeedSlower = Animator.StringToHash("IsSpeedSlower");
     private int m_isClimbing = Animator.StringToHash("IsClimbing");
     private int m_isHolding = Animator.StringToHash("IsDescending");
+    private int m_isBalancing = Animator.StringToHash("IsBalancing");
 
     private float m_moveSpeed;
     private float m_horizontalSpeedFloat;
@@ -69,6 +70,7 @@ public class AnimatorManager : MonoBehaviour
         m_animator.SetBool(m_isSpeedSlower, m_speedSlower);
         m_animator.SetBool(m_isClimbing, m_characterMotor.IsClimbing);
         m_animator.SetBool(m_isHolding, m_characterMotor.IsHolding);
+        m_animator.SetBool(m_isBalancing, m_characterMotor.IsBalancing);
 
         if (m_characterMotor.IsRopeValid == false)
         {
