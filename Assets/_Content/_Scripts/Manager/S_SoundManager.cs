@@ -1,14 +1,16 @@
+using DG.Tweening;
 using Sirenix.OdinInspector;
 using System.Collections;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Audio;
 
 public class SoundManager : MonoBehaviour
 {
-	[FoldoutGroup("Tweakable values")][SerializeField] private SSO_Sound m_ambianceStart;
-	[FoldoutGroup("Tweakable values")][SerializeField] private SSO_Sound m_ambianceLoop;
-	[FoldoutGroup("Tweakable values")][SerializeField] private SSO_Sound m_ambianceTail;
+	[FoldoutGroup("Tweakable values")][SerializeField] private SSO_Sound m_mainTitleMusic;
+    [FoldoutGroup("Tweakable values")][SerializeField] private float m_fadeDuration = 1f;
 
-	[FoldoutGroup("Internal references")][SerializeField] private AudioSource m_musicSourceA;
+    [FoldoutGroup("Internal references")][SerializeField] private AudioSource m_musicSourceA;
     [FoldoutGroup("Internal references")][SerializeField] private AudioSource m_musicSourceB;
     [FoldoutGroup("Internal references")][SerializeField] private AudioSource m_sfxSourceGlobal;
     [FoldoutGroup("Internal references")][SerializeField] private AudioSource m_sfxSourceRope;
@@ -17,9 +19,17 @@ public class SoundManager : MonoBehaviour
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_PlaySoundAt m_rsePlaySoundAt;
 	[FoldoutGroup("Scriptable")][SerializeField] private RSE_StopSound m_rseStopSound;
 
+	private bool isMusicSourceAMain = false;
+
     private void Start()
     {
-        OnPlaySound(m_ambianceStart);
+		m_musicSourceA.volume = 0f;
+		m_musicSourceB.volume = 0f;
+        isMusicSourceAMain = true;
+        m_musicSourceA.clip = m_mainTitleMusic.Clip;
+        m_musicSourceA.pitch = m_mainTitleMusic.Pitch;
+        m_musicSourceA.loop = m_mainTitleMusic.Loop;
+        PlayAudioSourceFadeIn(m_musicSourceA, 3f, m_mainTitleMusic);
     }
 
     private void OnEnable()
@@ -34,22 +44,33 @@ public class SoundManager : MonoBehaviour
 		m_rsePlaySound.action -= OnPlaySound;
 		m_rsePlaySoundAt.action -= OnPlaySoundAt;
 		m_rseStopSound.action -= OnStopSound;
-	}
+        DOTween.Kill(this);
+    }
 
 	private void OnPlaySound(SSO_Sound sound)
 	{
 		switch (sound.Type)
 		{
 			case SoundType.MUSIC:
-				if (m_musicSourceA.clip != sound.Clip)
+				DOTween.Kill(this);
+				if (!isMusicSourceAMain)
 				{
-					SyncSource(m_musicSourceA, sound);
-					PlayAudioSource(m_musicSourceA);
-
-
-                    SyncSource(m_musicSourceB, m_ambianceLoop);
-					m_musicSourceB.PlayDelayed(sound.Clip.length);
+					isMusicSourceAMain=true;
+                    m_musicSourceA.clip = sound.Clip;
+                    m_musicSourceA.pitch = sound.Pitch;
+                    m_musicSourceA.loop = sound.Loop;
+                    PlayAudioSourceFadeIn(m_musicSourceA, m_fadeDuration, sound);
+					StopAudioSourceFadeOut(m_musicSourceB, m_fadeDuration);
 				}
+				else
+				{
+                    isMusicSourceAMain = false;
+                    m_musicSourceB.clip = sound.Clip;
+                    m_musicSourceB.pitch = sound.Pitch;
+                    m_musicSourceB.loop = sound.Loop;
+                    PlayAudioSourceFadeIn(m_musicSourceB, m_fadeDuration, sound);
+					StopAudioSourceFadeOut(m_musicSourceA, m_fadeDuration);
+                }
 				break;
 
 			case SoundType.SFX_GLOBAL:
@@ -108,21 +129,14 @@ public class SoundManager : MonoBehaviour
 		audioSource.loop = sound.Loop;
 	}
 
-	private IEnumerator FadeIn(AudioSource audioSource, float volume)
+	private void PlayAudioSourceFadeIn(AudioSource audioSource, float duration, SSO_Sound sound)
     {
-        float timer = 0;
-        float duration = 4;
-        float originalVolume = audioSource.volume;
-        while (timer < duration)
-        {
-            timer += Time.deltaTime;
-            audioSource.volume = Mathf.Lerp(originalVolume, volume, 5f);
-        }
-       yield return null;
+		audioSource.Play();
+        audioSource.DOFade(sound.Volume, duration).SetEase(Ease.Linear).SetId(this);
     }
 
-	private void PlayAudioSource(AudioSource audioSource)
+	private void StopAudioSourceFadeOut(AudioSource audioSource, float duration)
 	{
-		audioSource.Play();
-	}
+        audioSource.DOFade(0f, duration).SetEase(Ease.Linear).SetId(this).OnComplete(() => { audioSource.Stop(); });
+    }
 }
