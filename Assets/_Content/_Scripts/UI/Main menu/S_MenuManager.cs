@@ -262,7 +262,7 @@ public class S_MenuManager : MonoBehaviour
         m_rsoCurrentScheme.value = InputScheme.GAME;
         m_rsoCancelPriority.value = CancelState.IN_GAME;
         m_rsoGameStarted.value = true;
-
+        m_cameraMotor.ForceResetDirection();
     }
 
     #endregion

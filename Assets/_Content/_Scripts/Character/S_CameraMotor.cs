@@ -298,4 +298,10 @@ public class CameraMotor : MonoBehaviour
 	}
 
 	#endregion
+
+	public void ForceResetDirection()
+	{
+        m_rsoCameraForward.value = new Vector3(transform.forward.x, 0, transform.forward.z);
+        m_rsoCameraRight.value = new Vector3(transform.right.x, 0, transform.right.z);
+    }
 }
