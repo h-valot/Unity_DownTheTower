@@ -17,6 +17,10 @@ public class Elevator : MonoBehaviour
     [SerializeField] private ElevatorButton[] m_buttons;
     [SerializeField] private GameObject m_pillarPrefab;
     [SerializeField] private RSO_CharacterElevator m_rsoCharacterElevator;
+    [SerializeField] private RSE_PlaySound m_rsePlaySound;
+    [SerializeField] private RSE_StopSound m_rseStopSound;
+    [SerializeField] private SSO_Sound m_ssoElevatorStart;
+    [SerializeField] private SSO_Sound m_ssoElevatorEnd;
 
     public bool IsUp = false;
 
@@ -59,6 +63,8 @@ public class Elevator : MonoBehaviour
         m_rsoCharacterElevator.value = true;
         m_characterOffset = 0.2368546f;
 
+        m_rsePlaySound.Call(m_ssoElevatorStart);
+
         if (IsUp)
         {
             Descend();
@@ -89,6 +95,8 @@ public class Elevator : MonoBehaviour
             })
             .OnComplete(() =>
             {
+                m_rseStopSound.Call(m_ssoElevatorStart);
+                m_rsePlaySound.Call(m_ssoElevatorEnd);
                 m_interactable.SetActive(true);
                 m_rsoCharacterElevator.value = false;
             });
@@ -123,7 +131,9 @@ public class Elevator : MonoBehaviour
                 }
             })
             .OnComplete(() => 
-            { 
+            {
+                m_rseStopSound.Call(m_ssoElevatorStart);
+                m_rsePlaySound.Call(m_ssoElevatorEnd);
                 m_interactable.SetActive(true);
                 m_rsoCharacterElevator.value = false;
             });
