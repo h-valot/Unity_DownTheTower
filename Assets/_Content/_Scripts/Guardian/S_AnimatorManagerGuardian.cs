@@ -61,21 +61,17 @@ public class AnimatorManagerGuardian : MonoBehaviour
 
     #region ANIMATION EVENTS
 
-    //private void OnAnimEventFootWalk(float speed)
-    //{
-    //    if (1.5 < m_moveSpeed && m_moveSpeed < speed)
-    //    {
-    //        m_rsePlaySoundAt.Call(m_ssoFootstepWalk, m_footLocation.transform.position);
-    //    }
-    //}
-
-    //private void OnAnimEventFootRun(float speed)
-    //{
-    //    if (m_moveSpeed > speed)
-    //    {
-    //        m_rsePlaySoundAt.Call(m_ssoFootstepRun, m_footLocation.transform.position);
-    //    }
-    //}
+    private void OnAnimEventFootWalk()
+    {
+        if (!m_inPursuit)
+        {
+            m_rsePlaySoundAt.Call(m_ssoFootstepWalk, m_footLocation.transform.position);
+        }
+        else
+        {
+            m_rsePlaySoundAt.Call(m_ssoFootstepRun, m_footLocation.transform.position);
+        }
+    }
 
     #endregion
 }

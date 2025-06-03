@@ -13,7 +13,6 @@ GameObject:
   - component: {fileID: 1982599703297393053}
   - component: {fileID: 3401074231336124181}
   - component: {fileID: 2290026609873240630}
-  - component: {fileID: 4020091310162614559}
   m_Layer: 6
   m_Name: PF_Guardian
   m_TagString: Untagged
@@ -149,27 +148,6 @@ NavMeshAgent:
   m_BaseOffset: 0
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
---- !u!114 &4020091310162614559
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 484332240391301456}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bab7b3e39431ea64ba36549d153b2245, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_ssoFootstepRun: {fileID: 0}
-  m_ssoFootstepWalk: {fileID: 0}
-  m_guardianMotor: {fileID: 6412754733033068052}
-  m_guardianAgent: {fileID: 2290026609873240630}
-  m_footLocation: {fileID: 7204752041457671457}
-  m_animator: {fileID: 7211403033552838686}
-  m_rseGuardianKill: {fileID: 11400000, guid: f25c34dddb0e2ad409392f06cd200fd1, type: 2}
-  m_rsePlaySound: {fileID: 11400000, guid: 643056970dde38d49851bbf3a0fbd805, type: 2}
-  m_rsePlaySoundAt: {fileID: 11400000, guid: 7bf426822f136dc4a9779469894c6ae2, type: 2}
 --- !u!1 &4111337314595204420
 GameObject:
   m_ObjectHideFlags: 0
@@ -443,6 +421,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 7677708147943327046}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 2ae6268b31369444d8c679cb74ea95aa,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6758860085513561241}
   m_SourcePrefab: {fileID: 100100000, guid: 2ae6268b31369444d8c679cb74ea95aa, type: 3}
 --- !u!137 &1253666269050808354 stripped
 SkinnedMeshRenderer:
@@ -531,6 +513,27 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &6758860085513561241
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4161309158967795934}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bab7b3e39431ea64ba36549d153b2245, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_ssoFootstepRun: {fileID: 11400000, guid: 932e5427eb2d33843a9a37dd71bde755, type: 2}
+  m_ssoFootstepWalk: {fileID: 11400000, guid: c42dae6113a390e4fbe62c187c63b0ce, type: 2}
+  m_guardianMotor: {fileID: 6412754733033068052}
+  m_guardianAgent: {fileID: 2290026609873240630}
+  m_footLocation: {fileID: 7204752041457671457}
+  m_animator: {fileID: 7211403033552838686}
+  m_rseGuardianKill: {fileID: 11400000, guid: f25c34dddb0e2ad409392f06cd200fd1, type: 2}
+  m_rsePlaySound: {fileID: 11400000, guid: 643056970dde38d49851bbf3a0fbd805, type: 2}
+  m_rsePlaySoundAt: {fileID: 11400000, guid: 7bf426822f136dc4a9779469894c6ae2, type: 2}
 --- !u!137 &4357908792680314343 stripped
 SkinnedMeshRenderer:
   m_CorrespondingSourceObject: {fileID: 649925193608013928, guid: 2ae6268b31369444d8c679cb74ea95aa,
