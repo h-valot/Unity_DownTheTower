@@ -27,6 +27,7 @@ public class S_MenuManager : MonoBehaviour
     [FoldoutGroup("External references")][SerializeField] private CameraMotor m_cameraMotor;
     [FoldoutGroup("External references")][SerializeField] private RSE_StartAction m_rseStartAction;
     [FoldoutGroup("External references")][SerializeField] private RSE_ToggleCursor m_rseToggleCursor;
+    [FoldoutGroup("External references")][SerializeField] private RSE_PlaySound m_rsePlaySound;
     [FoldoutGroup("External references")][SerializeField] private RSO_CurrentScheme m_rsoCurrentScheme;
     [FoldoutGroup("External references")][SerializeField] private RSO_CurrentControls m_rsoCurrentControls;
     [FoldoutGroup("External references")][SerializeField] protected RSO_GameStarted m_rsoGameStarted;
@@ -34,7 +35,7 @@ public class S_MenuManager : MonoBehaviour
     [FoldoutGroup("External references")][SerializeField] private RSO_CameraStyle m_rsoCameraStyle;
     [FoldoutGroup("External references")][SerializeField] private SSO_Game m_ssoGame;
     [FoldoutGroup("External references")][SerializeField] private RSE_RestartChrono m_rseRestartChrono;
-
+    [FoldoutGroup("External references")][SerializeField] private SSO_Sound m_ssoAmbiance;
 
     [FoldoutGroup("Menu animation")][SerializeField] private float m_fadeLength;
     [FoldoutGroup("Menu animation")][SerializeField] private float m_menuStartDelay;
@@ -112,6 +113,7 @@ public class S_MenuManager : MonoBehaviour
         if (!m_inMainMenu) return;
 
         m_rseRestartChrono.Call();
+        m_rsePlaySound.Call(m_ssoAmbiance);
         StartCoroutine(StartGameCoroutine());
         m_inMainMenu = false;
     }
