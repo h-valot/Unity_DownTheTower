@@ -293,6 +293,34 @@ public class CharacterMotor : MonoBehaviour
         }
 	}
 
+	public void UnbindInput(PlayerActions action)
+	{
+		switch (action)
+		{
+			case PlayerActions.ADVISOR:
+				break;
+			case PlayerActions.CLIMB:
+				break;
+			case PlayerActions.DETACH:
+				break;
+			case PlayerActions.INTERACT:
+				break;
+			case PlayerActions.LIGHT:
+				break;
+			case PlayerActions.MOVEMENT:
+				break;
+			case PlayerActions.ROPE:
+				break;
+			case PlayerActions.TORCH:
+				break;
+		}
+	}
+
+	public void BindInput(PlayerActions action)
+	{
+
+	}
+
 	public void SetCharacterPosition(Vector3 position, Quaternion rotation)
 	{
 		m_positionStartFall = position;
